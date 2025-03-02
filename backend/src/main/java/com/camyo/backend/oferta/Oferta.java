@@ -52,5 +52,4 @@ public class Oferta {
     @DecimalMin(value = "0.0", inclusive = false, message = "El sueldo debe ser mayor a 0")
     Double sueldo;
 
-
 }
