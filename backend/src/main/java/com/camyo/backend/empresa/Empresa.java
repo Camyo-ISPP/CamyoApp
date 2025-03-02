@@ -1,9 +1,12 @@
 package com.camyo.backend.empresa;
 
+import java.util.List;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.validator.constraints.URL;
 
+import com.camyo.backend.oferta.Oferta;
 import com.camyo.backend.usuario.Usuario;
 
 import jakarta.persistence.CascadeType;
@@ -14,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -46,4 +50,7 @@ public class Empresa {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Usuario usuario;
 
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Oferta> ofertas;
+    
 }

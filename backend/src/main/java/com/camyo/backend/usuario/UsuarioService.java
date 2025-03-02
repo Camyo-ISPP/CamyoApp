@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.security.core.Authentication;
 
 import com.camyo.backend.exceptions.ResourceNotFoundException;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 
 @Service
 public class UsuarioService {
+
 
     @Autowired
 	private final PasswordEncoder encoder;
@@ -84,6 +86,17 @@ public class UsuarioService {
     }
 
     @Transactional
+    public Float obtenerValoracionMedia(Integer id){
+        List<Reseña> list = usuarioRepository.obtenerReseñas(id);
+        if (list.isEmpty()) {
+            return 0.0f;
+        }
+        Integer media = 0;
+        for (Reseña reseña : list) {
+            media += reseña.getValoracion();
+        }
+        return (float) media / list.size();     
+    }
 	public Usuario updateUser(@Valid Usuario usuario, Integer idToUpdate) {
 		Usuario toUpdate = obtenerUsuarioPorId(idToUpdate);
 		BeanUtils.copyProperties(usuario, toUpdate, "id");

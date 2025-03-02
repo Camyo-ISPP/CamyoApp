@@ -1,5 +1,7 @@
 package com.camyo.backend.usuario;
 
+
+import java.util.Set;
 import com.camyo.backend.empresa.Empresa;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,12 +27,15 @@ public class Usuario {
     private String telefono;
 
     @Column(unique = true)
-	String username;
+	  String username;
     
     @Column(unique = true)
     @Email
     private String email;
 
+    @OneToMany(mappedBy = "usuario", cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true)
+    private Set<Reseña> reseñas;
+    
     @Size(max = 200, message = "La localización no puede tener más de 200 caracteres")
     private String localizacion;
 
