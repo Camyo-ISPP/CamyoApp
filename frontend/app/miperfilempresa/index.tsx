@@ -1,150 +1,213 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Modal } from "react-native";
-import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, ScrollView, Platform, Linking, StyleSheet } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { useState } from "react";
-import routes from "../_components/routes";
+import BottomBar from "../_components/BottomBar.jsx";
+import CamyoWebNavBar from "../_components/CamyoNavBar.jsx";
+import defaultBanner from "../../assets/images/empresa.jpg";
+import defaultImage from "../../assets/images/image_perfil_empresa.jpg";
 
-export default function CompanyDetailScreen() {
-  const router = useRouter();
-  const [modalVisible, setModalVisible] = useState(false);
+import colors from '@/assets/styles/colors';
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Mi perfil</Text>
-        <TouchableOpacity style={styles.settingsButton} onPress={() => setModalVisible(true)}>
-          <FontAwesome name="cog" size={24} color="white" style={styles.settingsIcon} />
-        </TouchableOpacity>
-      </View>
 
-      <Modal
-  animationType="fade"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => setModalVisible(false)}
->
-  <TouchableOpacity 
-    style={styles.modalContainer} 
-    activeOpacity={1} 
-    onPress={() => setModalVisible(false)}
-  >
-    <View style={styles.modalContent}>
-      <TouchableOpacity style={styles.modalOption} onPress={() => setModalVisible(false)}>
-        <FontAwesome name="pencil" size={18} color="#0C4A6E" style={styles.modalIcon} />
-        <Text style={styles.modalText}>Editar mi perfil</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.modalOption} onPress={() => setModalVisible(false)}>
-        <FontAwesome name="credit-card" size={18} color="#0C4A6E" style={styles.modalIcon} />
-        <Text style={styles.modalText}>Gestionar mi plan</Text>
-      </TouchableOpacity>
-    </View>
-  </TouchableOpacity>
-</Modal>
-
-      
-      <ScrollView style={styles.content}>
-        {/* Empresa Info */}
-        <View style={styles.companyInfo}>
-          <Text style={styles.companyName}>SEUR</Text>
-          <Text style={styles.companyDescription}>SEUR es la compañía referente en transporte urgente y logística integral en España</Text>
-          <Text style={styles.companyDetails}>Transporte terrestre en camión · Sevilla · Empleados +10 mil</Text>
-          <TouchableOpacity style={styles.button} 
-            onPress={() => router.replace(routes.createOffer)}>
-            <Text style={styles.buttonText}>Publicar Nueva Oferta</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Resumen */}
-        <View style={styles.summary}>
-          <Text style={styles.summaryTitle}>Resumen</Text>
-          <Text style={styles.summaryText}>
-            SEUR, compañía pionera en el transporte urgente en España, lidera el sector con tres grandes ejes de negocio: internacional, comercio electrónico y envíos a temperatura controlada. En el último año hemos realizado más de 120 millones de envíos a nivel nacional.
-          </Text>
-        </View>
-
-        {/* Ofertas */}
-        <Text style={styles.offersTitle}>Ofertas publicadas recientemente:</Text>
-        <View style={styles.offersContainer}>
-          {[1, 2, 3, 4].map((_, index) => (
-            <View key={index} style={[styles.offerCard, index % 2 === 0 ? styles.redBorder : styles.greenBorder]}>
-              <Text style={styles.offerTitle}>Conductor C+E</Text>
-              <Text style={styles.offerDate}>hace {index + 2} días</Text>
-              <Text style={styles.offerDetails}>Sevilla · SEUR · 1200€/mes</Text>
-              <Text style={styles.offerInfo}>• Experiencia requerida: 2 años{"\n"}• Licencia requerida: C+E{"\n"}• ¿Cuándo?: Incorporación inmediata</Text>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-
-    </View>
-  );
+// Definir la interfaz para la empresa y usu
+interface Usuario {
+  id: number;
+  nombre: string;
+  telefono: string;
+  username: string;
+  email: string;
+  localizacion: string;
+  descripcion: string;
+  foto?: string | null;
 }
 
+interface Empresa {
+  id: number;
+  web: string;
+  nif: string;
+  usuario: Usuario;
+}
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+
+const EmpresaPerfil = () => {
+  const [empresa, setEmpresa] = useState<Empresa | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEmpresaData = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/empresas/202`);
+        if (!response.ok) throw new Error("Error al cargar datos de la empresa");
+        const data: Empresa = await response.json();
+        setEmpresa(data);
+      } catch (err) {
+        setError((err as Error)?.message || "Error desconocido");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEmpresaData();
+  }, []);
+
+  if (loading) return <Text style={styles.loadingText}>Cargando...</Text>;
+  if (error) return <Text style={styles.errorText}>{error}</Text>;
+
+  const isMobile = Platform.OS === "ios" || Platform.OS === "android";
+
+  return (
+    <>
+      {isMobile ? <BottomBar /> : <CamyoWebNavBar />}
+      <View style={styles.bannerContainer}>
+        <Image source={defaultBanner} style={styles.bannerImage} />
+        <View style={isMobile ? styles.profileContainer : styles.desktopProfileContainer}>
+          <Image 
+            source={empresa?.usuario?.foto ? { uri: empresa.usuario.foto } : defaultImage} 
+            style={isMobile ? styles.avatar : styles.desktopAvatar} 
+          />
+          <View style={styles.profileDetailsContainer}>
+            <Text style={isMobile ? styles.name : styles.desktopName}>{empresa?.usuario?.nombre}</Text>
+          </View>
+        </View>
+      </View>
+      <ScrollView contentContainerStyle={[isMobile ? styles.container : styles.desktopContainer, { paddingTop: isMobile ? 0 : 100, paddingLeft: 10 }]}>
+          <View style={styles.detailsOuterContainer}>
+            <View style={styles.detailsColumn}>
+              <View style={styles.detailItem}>
+                <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="globe" size={20}/>{empresa?.web}</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="building" size={20}/>{empresa?.nif || "NIF no disponible"}</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="map-marker" size={20}/>{empresa?.usuario?.localizacion || "Ubicación no especificada"}</Text>
+              </View>
+              <View style={styles.detailItem}>
+                <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="phone" size={20}/>{empresa?.usuario?.telefono || "Sin número de contacto"}</Text>
+              </View>
+            </View>
+          </View>
+      </ScrollView>
+    </>
+  );
+};
+
+
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  header: { 
-    backgroundColor: "#0C4A6E", 
-    padding: 20, 
-    flexDirection: "row", 
-    justifyContent: "center", 
-    alignItems: "center",
-    position: "relative"
+  bannerContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 200,
+  }, 
+  bannerImage: { width: "100%", height: "100%", resizeMode: "cover", position: "absolute" },
+  profileContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'flex-start',
+      marginBottom: 20,
+      marginLeft: '12.5%', 
+      position: 'relative',
+      top: 100, 
   },
-  headerText: { color: "white", fontSize: 20, fontWeight: "bold" },
-  settingsButton: {
-    position: "absolute",
-    right: 20,
+  desktopProfileContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: '45%',
+      alignSelf: 'flex-start', 
+      marginBottom: 20,
+      marginLeft: '12.5%', 
+      position: 'relative', 
+      top: 100, 
   },
-  content: { padding: 15 },
-  companyInfo: { alignItems: "center", marginBottom: 20 },
-  logo: { width: 120, height: 40, resizeMode: "contain" },
-  companyName: { fontSize: 22, fontWeight: "bold", marginTop: 10 },
-  companyDescription: { fontSize: 14, textAlign: "center", marginVertical: 5 },
-  companyDetails: { fontSize: 12, color: "gray" },
-  button: { backgroundColor: "#E74C3C", padding: 10, borderRadius: 5, marginTop: 10 },
-  buttonText: { color: "white", fontWeight: "bold" },
-  summary: { backgroundColor: "white", padding: 15, borderRadius: 5, marginBottom: 20 },
-  summaryTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 5 },
-  summaryText: { fontSize: 14, color: "gray" },
-  offersTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-  offersContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  offerCard: { width: "48%", backgroundColor: "white", padding: 10, borderRadius: 5, marginBottom: 10 },
-  redBorder: { borderLeftWidth: 4, borderColor: "red" },
-  greenBorder: { borderLeftWidth: 4, borderColor: "green" },
-  offerTitle: { fontSize: 16, fontWeight: "bold" },
-  offerDate: { fontSize: 12, color: "gray" },
-  offerDetails: { fontSize: 12, fontWeight: "bold" },
-  offerInfo: { fontSize: 12, color: "gray", marginTop: 5 },
-  bottomNav: { flexDirection: "row", justifyContent: "space-around", backgroundColor: "#0C4A6E", padding: 15 },
-  settingsIcon: { marginRight: 10 },
-  modalContainer: { 
-    flex: 1, 
-    alignItems: "flex-end", 
-    backgroundColor: "rgba(0,0,0,0.2)", 
-    paddingRight: 15, 
-    paddingTop: 150 
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 10,
+    position: 'relative',
+    left: 20, 
+    top: -60, 
   },
-  modalContent: { 
-    backgroundColor: "white", 
-    paddingVertical: 10, 
-    borderRadius: 8, 
-    width: 180, 
-    elevation: 5 
+  desktopAvatar: {
+      width: 200,
+      height: 200,
+      borderRadius: 100,
+      marginBottom: 10,
+      position: 'fixed',
+      left: 420, 
+      top: 100, 
   },
-  modalOption: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    paddingVertical: 8, 
-    paddingHorizontal: 10 
+  profileDetailsContainer: { marginLeft: 20 },
+  name: {
+    fontSize: 26,
+    fontWeight: 'bold',
   },
-  modalIcon: { 
-    marginRight: 10 
+  desktopName: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      position: 'fixed',
+      left: 700, 
+      top: 210, 
   },
-  modalText: { 
-    fontSize: 16, 
-    fontWeight: "500", 
-    color: "#333" 
+  detailsOuterContainer: {
+    alignItems: 'flex-start',
+    position: 'fixed',
+    top: 150,
+    left: 330,
+    width: '100%',
+  },  
+  detailsColumn: {
+    flexDirection: 'column', 
+    justifyContent: 'flex-start', 
+    alignItems: 'flex-start', 
+
+  },  
+  detailItem: {
+    marginBottom: 10,
+    flexDirection: 'row', 
+    width: '100%', 
   },
-  
+  detailsText: {
+    fontSize: 20,
+    color: 'black',
+    marginBottom: 10,
+    textAlign: 'left', 
+    width: '100%', 
+  },
+  icon: {
+    fontSize: 20,
+    color: colors.secondary,
+    marginRight: 10,
+    marginLeft: 10,
+    position: 'relative',
+    top: -2,
+    right: 0,
+    width: 30,
+    textAlign: 'center',
+    verticalAlign: 'bottom',
+  },
+  linkText: { color: "#007BFF", textDecorationLine: "underline" },
+  loadingText: { textAlign: "center", fontSize: 18, color: "gray", marginTop: 50 },
+  errorText: { textAlign: "center", fontSize: 18, color: "red", marginTop: 50 },
+  detailsRow: { flexDirection: "row", alignItems: "center" },
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    paddingTop: 100,
+    paddingLeft: 10,
+  }, 
+  desktopContainer: { flexGrow: 1, padding: 50 },
+  infoText: { fontSize: 16, color: "#333" },
+  desktopDetailsText: {
+    fontSize: 15,
+    color: 'black',
+    marginBottom: 15,
+    marginLeft: '5%',
+    textAlign: 'left',
+    width: '100%', 
+  },
 });
+
+export default EmpresaPerfil;
