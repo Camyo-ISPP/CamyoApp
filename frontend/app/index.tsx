@@ -1,5 +1,5 @@
 import React from 'react';
-import HomeScreen from 'frontend/app/HomeScreen';
+import HomeScreen from './HomeScreen';
 export default function Index() {
   return <HomeScreen/>;
 }
