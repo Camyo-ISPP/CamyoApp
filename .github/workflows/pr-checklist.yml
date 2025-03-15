@@ -37,9 +37,10 @@ jobs:
             const checklist = `
             ## ✅ Checklist para frontend, por favor completar :wave: (si no aplica completar igualmente :star:)
             - [ ] Comprobar funcionalidades
-            - [ ] Probar datos falsos
-            - [ ] Hacer zoom hasta +150% y la pantalla por la mitad
-            - [ ] Mirar si hay console logs
+            - [ ] Probar datos y verificar que no se pueden introducir datos erroneos 
+            - [ ] Al hacer zoom no se debe de desconfigurar la pantalla, al cambiar de dispositivo la pantalla debe adaptarse
+            - [ ] Mirar si hay console logs o código comentado sobrante
+            - [ ] Comprobar que la funcionalidad solo este disponible para el rol concreto, además de asegurar que la información privada de los usuarios no esté disponible para cualquier otro usuario
             - [ ] Comprobar la interfaz móvil
 
             ¡Ánimo con la PR! :rocket: :sparkles:
