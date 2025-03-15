@@ -3,6 +3,7 @@ name: PR Comment Example
 on: 
   pull_request:
     branches: [main]
+    types: [opened, labeled, unlabeled]
 
 permissions:
   pull-requests: write
