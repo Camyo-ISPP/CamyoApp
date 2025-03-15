@@ -1,0 +1,42 @@
+name: PR Checklist for Frontend
+on:
+  pull_request:
+    types: [opened, labeled]
+
+jobs:
+  add-checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR has "frontend" label
+        id: check-label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request || (await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.issue.number
+            })).data;
+
+            const hasFrontendLabel = pr.labels.some(label => label.name === "frontend");
+
+            if (!hasFrontendLabel) {
+              console.log("Skipping checklist: PR does not have 'frontend' label.");
+              return;
+            }
+
+            const checklist = `
+            ## ✅ PR Checklist for Frontend  
+            - [ ] Revisa Funcionalidad  
+            - [ ] Probar +150% y la pantalla en la mitad, y comprobar que se vea bien  
+            - [ ] Probar datos erróneos  
+            - [ ] Acceder url con diferentes sesiones iniciada
+            - [ ] Mira que no haya console.log en el código (quizás hay una razón)
+            `;
+            github.rest.issues.createComment({
+              issue_number: pr.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: checklist
+            });
