@@ -24,6 +24,7 @@ function RootLayout() {
         miperfil: "Mi Perfil",
         miperfilempresa: "Mi Perfil Empresa",
         miperfilcamionero: "Mi Perfil Camionero",
+        "buscar-ofertas": "Buscar Ofertas",
         "oferta/crear": "Publicar Nueva Oferta",
         empresas: "Lista de Empresas",
         "oferta/[ofertaId]": "Detalles de la Oferta",
@@ -114,7 +115,14 @@ function RootLayout() {
 
   return (
     <>
-      {!isMobile && <CamyoWebNavBar />}
+      <CamyoWebNavBar
+        onSearch={(query: string) => {
+          router.push({
+            pathname: "/buscar-ofertas",
+            params: { query }, 
+          });
+        }}
+      />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
@@ -128,6 +136,7 @@ function RootLayout() {
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
+        <Stack.Screen name="buscar-ofertas" />
         <Stack.Screen name="workinprogress" />
         <Stack.Screen name="forbidden" />
       </Stack>
