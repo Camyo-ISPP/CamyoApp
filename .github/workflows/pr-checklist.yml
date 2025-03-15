@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  issues: write
+
 jobs:
   example_comment_pr:
     runs-on: ubuntu-latest
