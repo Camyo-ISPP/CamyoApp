@@ -2,8 +2,7 @@ name: PR Comment Example
 
 on: 
   pull_request:
-    branches: [main]  # Ajusta si es necesario
-    types: [opened, reopened, labeled, synchronize]
+    branches: [main]
 
 jobs:
   example_comment_pr:
@@ -14,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Comment PR if 'frontend' label exists
+      - name: Comment PR
         uses: actions/github-script@v7
         with:
           script: |
@@ -25,17 +24,13 @@ jobs:
             }
 
             const labels = pr.labels.map(label => label.name);
-            console.log(`Labels on PR: ${labels}`);
-
             if (!labels.includes("frontend")) {
               console.log("Skipping checklist: PR does not have 'frontend' label.");
               return;
             }
 
-            console.log("Frontend label found. Adding checklist...");
-
             const checklist = `
-            ## ✅ Checklist para frontend, por favor completar :star: (si no aplica completar igualmente)
+            ## ✅ Checklist para frontend, por favor completar :wave: (si no aplica completar igualmente :star:)
             - [ ] Comprobar funcionalidades
             - [ ] Probar datos falsos
             - [ ] Hacer zoom hasta +150% y la pantalla por la mitad
@@ -45,14 +40,14 @@ jobs:
             ¡Ánimo con la PR! :rocket: :sparkles:
             `;
 
-            github.rest.issues.createComment({
-              issue_number: pr.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: checklist
-              headers: {
-                Authorization: `token ${process.env.GITHUB_TOKEN}`
-              }
-            });
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            try {
+              const response = await github.rest.issues.createComment({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: checklist,
+              });
+              console.log('Comment created successfully:', response);
+            } catch (error) {
+              console.log('Error creating comment:', error);
+            }
