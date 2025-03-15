@@ -26,15 +26,14 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         const urlParams = new URLSearchParams(window.location.search);
         const queryFromUrl = urlParams.get('query') || '';
         if (queryFromUrl) {
-          setSearchQuery(queryFromUrl); // Pre-fill the search bar
-          handleSearch(queryFromUrl); // Trigger the search with the query
+          setSearchQuery(queryFromUrl); 
+          handleSearch(queryFromUrl); 
         } else {
-          setFilteredData(data); // If no query, show all data
+          setFilteredData(data); 
         }
-      };// Initial call to handle URL changes
+      };
       handleUrlChange();
   
-      // Listen for popstate events (back/forward navigation)
       const onPopState = () => handleUrlChange();
       window.addEventListener('popstate', onPopState);
   
@@ -51,7 +50,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     try {
       const response = await axios.get(`${BACKEND_URL}/ofertas`);
       setData(response.data);
-      setFilteredData(response.data); // Initialize filteredData with all data
+      setFilteredData(response.data); 
       console.log(response.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
@@ -62,12 +61,19 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
   
 
   const handleSearch = (query = searchQuery) => {
-    const filteredResults = data.filter((item) =>
-      item.titulo?.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredData(filteredResults);
+    const filteredResults = data.filter((item) => {
+      const normalizedQuery = query.toLowerCase();
 
-    // Update the URL with the query parameter
+      return (
+        item.titulo?.toLowerCase().includes(normalizedQuery) || 
+        item.nombreEmpresa?.toLowerCase().includes(normalizedQuery) || 
+        item.notas?.toLowerCase().includes(normalizedQuery) || 
+        item.tipoOferta?.toLowerCase().includes(normalizedQuery)
+      );
+    });
+  
+    setFilteredData(filteredResults);
+  
     const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
     window.history.pushState({}, '', newUrl);
   };
@@ -75,8 +81,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
   return (
     <View style={styles.webContainer}>
       <ScrollView style={styles.scrollview}>
-        <Titulo texto="Lista de Ofertas" marginTop={30} />
-        {/* Search bar and button */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
@@ -377,6 +381,7 @@ searchContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
+    marginTop: 30,
   },
   searchButton: {
     backgroundColor: colors.primary,
