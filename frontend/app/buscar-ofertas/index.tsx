@@ -19,20 +19,33 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(externalSearchQuery);// State for the search query
+    
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    const handleUrlChange = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryFromUrl = urlParams.get('query') || '';
+        if (queryFromUrl) {
+          setSearchQuery(queryFromUrl); // Pre-fill the search bar
+          handleSearch(queryFromUrl); // Trigger the search with the query
+        } else {
+          setFilteredData(data); // If no query, show all data
+        }
+      };// Initial call to handle URL changes
+      handleUrlChange();
+  
+      // Listen for popstate events (back/forward navigation)
+      const onPopState = () => handleUrlChange();
+      window.addEventListener('popstate', onPopState);
+  
+      return () => {
+        window.removeEventListener('popstate', onPopState);
+      };
+    }, [data]);
 
-  useEffect(() => {
-    // Sync the search bar with the query parameter from the URL
-    if (externalSearchQuery) {
-      setSearchQuery(externalSearchQuery); // Pre-fill the search bar
-      handleSearch(); // Trigger the search as if the button was clicked
-    } else {
-      setFilteredData(data); // Show all data if no query is provided
-    }
-  }, [externalSearchQuery]);
+    useEffect(() => {
+        fetchData();
+      }, []);
 
   const fetchData = async () => {
     try {
@@ -48,11 +61,15 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
   };
   
 
-  const handleSearch = () => {
+  const handleSearch = (query = searchQuery) => {
     const filteredResults = data.filter((item) =>
-      item.titulo?.toLowerCase().includes(searchQuery.toLowerCase())
+      item.titulo?.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredData(filteredResults);
+
+    // Update the URL with the query parameter
+    const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
+    window.history.pushState({}, '', newUrl);
   };
 
   return (
@@ -66,9 +83,9 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             placeholder="Buscar ofertas por título..."
             value={searchQuery}
             onChangeText={(text) => setSearchQuery(text)} // Update searchQuery state
-            onSubmitEditing={handleSearch} // Trigger search on "Enter"
+            onSubmitEditing={() => handleSearch()}  // Trigger search on "Enter"
           />
-          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+          <TouchableOpacity style={styles.searchButton} onPress={() => handleSearch()}>
             <Text style={styles.searchButtonText}>Buscar</Text>
           </TouchableOpacity>
         </View>
