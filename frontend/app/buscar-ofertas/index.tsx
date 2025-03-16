@@ -1,5 +1,8 @@
 import { router } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, TouchableWithoutFeedback, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, ActivityIndicator } from "react-native";
+import Slider from "@react-native-community/slider";
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import { Picker } from '@react-native-picker/picker';
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
 import React, { useEffect, useState } from "react";
@@ -18,10 +21,9 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     const [dateFilter, setDateFilter] = useState('');
     const [minWeightFilter, setMinWeightFilter] = useState('');
     const [maxWeightFilter, setMaxWeightFilter] = useState('');
-    const [minExperienceFilter, setMinExperienceFilter] = useState('');
+    const [minExperienceFilter, setMinExperienceFilter] = useState(''); // [min, max]
     const [minSalaryFilter, setMinSalaryFilter] = useState('');
-    const [maxSalaryFilter, setMaxSalaryFilter] = useState('');
-
+   
     useEffect(() => {
         const handleUrlChange = () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -73,39 +75,39 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
         if (selectedOfertaType === 'cargas') {
             filteredResults = filteredResults.filter((item) => item.tipoOferta === 'CARGA');
-            if (dateFilter) {
-                filteredResults = filteredResults.filter((item) => item.fecha === dateFilter);
-            }
-            if (minWeightFilter) {
-                filteredResults = filteredResults.filter(
-                    (item) => item.peso >= parseFloat(minWeightFilter)
-                );
-            }
-            if (maxWeightFilter) {
-                filteredResults = filteredResults.filter(
-                    (item) => item.peso <= parseFloat(maxWeightFilter)
-                );
-            }
+
+            //AQUI PONER FILTROS
+
         } else if (selectedOfertaType === 'generales') {
             filteredResults = filteredResults.filter((item) => item.tipoOferta === 'TRABAJO');
-            if (minExperienceFilter) {
-                filteredResults = filteredResults.filter(
-                    (item) => item.experiencia >= parseFloat(minExperienceFilter)
-                );
-            }
+            filteredResults = filteredResults.filter((item) => {
+
+                if (minExperienceFilter === "") return true; // Show all if no filter is selected
+            
+                if (parseInt(minExperienceFilter) === 5) {
+                    // Show items with experience between 5 and 9
+                    return item.experiencia >= 5 && item.experiencia <= 9;
+                }
+            
+                if (parseInt(minExperienceFilter) === 10) {
+                    // Show items with 10+ experience
+                    return item.experiencia >= 10;
+                }
+            
+                // Otherwise, match exactly the experience value
+                return item.experiencia === parseInt(minExperienceFilter);
+            });
+
+            // Salary Filter
             if (minSalaryFilter) {
                 filteredResults = filteredResults.filter(
                     (item) => item.sueldo >= parseFloat(minSalaryFilter)
                 );
             }
-            if (maxSalaryFilter) {
-                filteredResults = filteredResults.filter(
-                    (item) => item.sueldo <= parseFloat(maxSalaryFilter)
-                );
-            }
         }
 
         setFilteredData(filteredResults);
+        console.log('Datos filtrados:', filteredResults);
 
         const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
         window.history.pushState({}, '', newUrl);
@@ -153,57 +155,45 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
                         {selectedOfertaType === 'cargas' && (
                             <View style={styles.filtersContainer}>
-                                <Text style={styles.filterLabel}>Fecha:</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="YYYY-MM-DD"
-                                    value={dateFilter}
-                                    onChangeText={(text) => setDateFilter(text)}
-                                />
-                                <Text style={styles.filterLabel}>Peso Mínimo:</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="Mínimo"
-                                    keyboardType="numeric"
-                                    value={minWeightFilter}
-                                    onChangeText={(text) => setMinWeightFilter(text)}
-                                />
-                                <Text style={styles.filterLabel}>Peso Máximo:</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="Máximo"
-                                    keyboardType="numeric"
-                                    value={maxWeightFilter}
-                                    onChangeText={(text) => setMaxWeightFilter(text)}
-                                />
+                                <Text style={styles.filterLabel}>EN PROCESO DE IMPLEMENTACION:</Text>
+                                {/* Aquí irían los filtros */}
                             </View>
                         )}
 
                         {selectedOfertaType === 'generales' && (
                             <View style={styles.filtersContainer}>
+
+                                {/* Minimum Experience Dropdown */}
                                 <Text style={styles.filterLabel}>Experiencia Mínima:</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="Años"
-                                    keyboardType="numeric"
-                                    value={minExperienceFilter}
-                                    onChangeText={(text) => setMinExperienceFilter(text)}
-                                />
-                                <Text style={styles.filterLabel}>Salario Mínimo:</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="Mínimo"
-                                    keyboardType="numeric"
-                                    value={minSalaryFilter}
-                                    onChangeText={(text) => setMinSalaryFilter(text)}
-                                />
-                                <Text style={styles.filterLabel}>Salario Máximo:</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="Máximo"
-                                    keyboardType="numeric"
-                                    value={maxSalaryFilter}
-                                    onChangeText={(text) => setMaxSalaryFilter(text)}
+                                <Picker
+                                    selectedValue={minExperienceFilter}
+                                    style={styles.picker}
+                                    onValueChange={(itemValue) => setMinExperienceFilter(itemValue)}
+                                >
+                                    <Picker.Item label="Cualquier experiencia" value="" />
+                                    <Picker.Item label="0 años de experiencia" value="0" />
+                                    <Picker.Item label="1 año de experiencia" value="1" />
+                                    <Picker.Item label="2 años de experiencia" value="2" />
+                                    <Picker.Item label="3 años de experiencia" value="3" />
+                                    <Picker.Item label="4 años de experiencia" value="4" />
+                                    <Picker.Item label="5 años de experiencia" value="5" />
+                                    <Picker.Item label="10 años de experiencia" value="10" />
+                                </Picker>
+
+
+                                {/* Salary Range Slider */}
+                                <Text style={styles.filterLabel}>Salario Mínimo {minSalaryFilter}€ :</Text>
+                                <Slider
+                                    style={styles.rangeSlider}
+                                    minimumValue={0}
+                                    maximumValue={10000} // Adjust based on your data
+                                    step={10}
+                                    minimumTrackTintColor={colors.primary} // Color of the filled part of the track
+                                    maximumTrackTintColor="#ccc"          // Color of the empty part of the track
+                                    thumbTintColor={colors.secondary} 
+                                    onValueChange={(value: number) => {
+                                        setMinSalaryFilter(value.toString());
+                                    }}
                                 />
                             </View>
                         )}
@@ -245,7 +235,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 const styles = StyleSheet.create({
     scrollViewContent: {
         flexGrow: 1,
-        paddingTop: '6%', // Margin top for the entire content
+        paddingTop: '6%',
         backgroundColor: colors.lightGray,
     },
     webContainer: {
@@ -254,16 +244,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     mainContent: {
-        width: '70%', // Occupies 70% of the screen width
+        width: '70%', 
         flexDirection: 'row',
     },
     filtersCard: {
-        width: '30%', // Filters take 30% of the 70% width
+        width: '30%', 
         backgroundColor: colors.white,
         borderRadius: 10,
         padding: 20,
         marginRight: 20,
-        height: 400, // Altura mínima fija para la tarjeta de filtros
+        height: 400, 
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -276,23 +266,26 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
-        marginHorizontal: 5,
+        marginBottom: '8%',
+        marginHorizontal: '2%',
     },
     searchInput: {
         flex: 1,
-        height: 40,
+        height: '100%',
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
         paddingHorizontal: 10,
         marginRight: 10,
         backgroundColor: '#fff',
+        flexShrink: 1,
     },
     searchButton: {
         backgroundColor: colors.primary,
         padding: 10,
         borderRadius: 5,
+        alignSelf: 'flex-start',
+        flexShrink: 1,
     },
     searchButtonText: {
         color: colors.white,
@@ -456,4 +449,78 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: "#696969",
     },
+    filterOptions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 10,
+    },
+    filterOptionButton: {
+        backgroundColor: '#e0e0e0',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 5,
+        margin: 5,
+    },
+    filterOptionButtonActive: {
+        backgroundColor: colors.primary,
+    },
+    filterOptionButtonText: {
+        color: '#333',
+        fontSize: 14,
+    },
+    slider: {
+        width: '100%',
+        marginBottom: 10,
+    },
+    sliderValue: {
+        textAlign: 'center',
+        fontSize: 14,
+        color: colors.secondary,
+    },
+    rangeSliderContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    rangeSliderLabel: {
+        fontSize: 14,
+        color:  colors.secondary,
+    },
+    rangeSlider: {
+        width: '100%',
+        marginBottom: 20,
+        color: colors.primary,
+    },
+    picker: {
+        height: 40,
+        borderColor:  colors.secondary,
+        borderWidth: 1,
+        borderRadius: 5,
+        marginBottom: 10,
+        backgroundColor: '#fff',
+    },
+
+    sliderContainer: {
+        marginBottom: 20,
+    },
+    customMarker: {
+        height: 30,
+        width: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    marker: {
+        height: 15,
+        width: 15,
+        borderRadius: 10,
+        backgroundColor: colors.primary,
+    },
+    sliderValueText: {
+        textAlign: 'center',
+        fontSize: 14,
+        color: '#333',
+        marginTop: 5,
+    },
+
+
 });
