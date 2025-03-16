@@ -6,6 +6,7 @@ import globalStyles from "../../assets/styles/globalStyles";
 import colors from "../../assets/styles/colors";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
+import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -104,22 +105,12 @@ const LoginScreen = () => {
         </TouchableOpacity>
 
         {/* Modal de éxito */}
-        <Modal
-            animationType="fade"
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={() => setIsModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContainer}>
-                {/* Icono del tic verde */}
-                <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
-                
-                <Text style={styles.modalText}>¡Inicio de sesión exitoso!</Text>
-                <Text style={styles.modalText}>Redirigiendo...</Text>
-              </View>
-            </View>
-          </Modal>
+        <SuccessModal
+          isVisible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          message="¡Inicio de sesión exitoso! Redirigiendo..."
+        />
+
       </View>
     </ScrollView>
   );

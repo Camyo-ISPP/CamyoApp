@@ -5,6 +5,7 @@ import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from '@expo/vector-icons';
+import SuccessModal from "../_components/SuccessModal";
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
@@ -103,8 +104,7 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                Alert.alert("Éxito", "Has solicitado correctamente.");
-                setIsModalVisible(true); // Abre el popup
+                setIsModalVisible(true);
                 setUserHasApplied(true);
                 setTimeout(() => {
                     setIsModalVisible(false); 
@@ -197,19 +197,11 @@ export default function OfertaDetalleScreen() {
                         )}
 
                         {/* Modal de éxito */}
-                        <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={isModalVisible}
-                        onRequestClose={() => setIsModalVisible(false)}
-                        >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContainer}>
-                            <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
-                            <Text style={styles.modalText}>¡Has solicitado correctamente a la carga!</Text>
-                            </View>
-                        </View>
-                        </Modal>
+                        <SuccessModal
+                            isVisible={isModalVisible}
+                            onClose={() => setIsModalVisible(false)}
+                            message="¡Has solicitado correctamente a la carga!"
+                        />
 
                         <View style={styles.separator} />
 
@@ -331,21 +323,13 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.solicitarButtonText}>Inicia sesión para solicitar</Text>
                             </TouchableOpacity>
                         )}
-                        
+
                         {/* Modal de éxito */}
-                        <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={isModalVisible}
-                        onRequestClose={() => setIsModalVisible(false)}
-                        >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContainer}>
-                            <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
-                            <Text style={styles.modalText}>¡Has solicitado correctamente a la oferta!</Text>
-                            </View>
-                        </View>
-                        </Modal>
+                        <SuccessModal
+                            isVisible={isModalVisible}
+                            onClose={() => setIsModalVisible(false)}
+                            message="¡Has solicitado correctamente a la oferta!"
+                        />
                         
 
                         <View style={styles.separator} />
