@@ -9,7 +9,7 @@ import SuccessModal from './SuccessModal';
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false); // Estado para el modal de pregunta de confirmación
-  const [isModalVisible, setIsModalVisible] = useState(false); // Estado para el modal de éxito de cierre de sesión
+  const [successModalVisible, setSuccessModalVisible] = useState(false); // Estado para el modal de éxito de cierre de sesión
 
   const router = useRouter();
   const { logout } = useAuth();
@@ -17,10 +17,11 @@ const ProfileDropdown = ({ user }) => {
   const handleLogout = () => {
     setModalVisible(false); 
 
-    setIsModalVisible(true);
+    setSuccessModalVisible(true);
     setTimeout(() => {
+      setSuccessModalVisible(false);
       logout();
-    }, 3000);
+    }, 1000);
   };
 
   return (
@@ -90,8 +91,8 @@ const ProfileDropdown = ({ user }) => {
 
       {/* Modal de éxito de cierre de sesión*/}
       <SuccessModal
-          isVisible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
+          isVisible={successModalVisible}
+          onClose={() => setSuccessModalVisible(false)}
           message={<Text>¡Hasta pronto!{'\n'}Cerrando sesión...</Text>}
       />
     </View>

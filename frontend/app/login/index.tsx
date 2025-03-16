@@ -17,7 +17,7 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -36,8 +36,9 @@ const LoginScreen = () => {
       const { token } = response.data;
       login(response.data, token);
 
-      setIsModalVisible(true);
+      setSuccessModalVisible(true);
         setTimeout(() => {
+          setSuccessModalVisible(false);
           router.replace("/");
         }, 1000);
 
@@ -106,8 +107,8 @@ const LoginScreen = () => {
 
         {/* Modal de éxito */}
         <SuccessModal
-          isVisible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
+          isVisible={successModalVisible}
+          onClose={() => setSuccessModalVisible(false)}
           message="¡Inicio de sesión exitoso! Redirigiendo..."
         />
 

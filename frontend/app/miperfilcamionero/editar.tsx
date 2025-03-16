@@ -93,6 +93,7 @@ const EditProfileScreen = () => {
 
         setSuccessModalVisible(true);
         setTimeout(() => {
+          setSuccessModalVisible(false);
           router.push("/miperfilcamionero");
         }, 1000);
       }

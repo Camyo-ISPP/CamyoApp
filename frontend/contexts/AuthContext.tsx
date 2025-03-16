@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await AsyncStorage.removeItem("user");
     await AsyncStorage.removeItem("userToken");
 
-    router.replace("/");
+    router.replace("/login");
   };
 
   const validateToken = async (token: string) => {

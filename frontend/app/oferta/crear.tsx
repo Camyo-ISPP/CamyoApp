@@ -154,6 +154,7 @@ const CrearOfertaScreen = () => {
 
         setSuccessModalVisible(true);
         setTimeout(() => {
+          setSuccessModalVisible(false);
           router.replace("/miperfilempresa");
         }, 1000);
 

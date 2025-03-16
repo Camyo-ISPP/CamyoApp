@@ -11,7 +11,7 @@ import Selector from "../../_components/Selector";
 import MultiSelector from "../../_components/MultiSelector";
 import { useRouter, useLocalSearchParams, useRootNavigationState } from "expo-router";
 import { useAuth } from "../../../contexts/AuthContext";
-
+import SuccessModal from "../../_components/SuccessModal";
 
 const EditarOfertaScreen = () => {
   const [tipoOferta, setTipoOferta] = useState("");
@@ -24,6 +24,7 @@ const EditarOfertaScreen = () => {
   const navigationState = useRootNavigationState(); // 👈 Verificar si la navegación está lista
   const [isUserLoading, setIsUserLoading] = useState(true);
   const [isAuthLoaded, setIsAuthLoaded] = useState(false); // 🔹 Indica si la autenticación ha finalizado
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   /************************************************** */
   const [formData, setFormData] = useState({
@@ -56,7 +57,6 @@ const EditarOfertaScreen = () => {
 
   const fetchOferta = async () => {
     try {
-      console.log("Obteniendo oferta general...");
       const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
       const data = await response.json();
     
@@ -112,29 +112,21 @@ const EditarOfertaScreen = () => {
   };
 
   useEffect(() => {
-
-    // 1️⃣ **Esperar a que el contexto de autenticación cargue**
     if (user === undefined) {
-      console.log("⌛ Esperando a que `user` se cargue...");
       return; 
     }
 
-    // 🔹 **Confirmar que la autenticación ha terminado de cargar**
     setIsAuthLoaded(true);
 
   }, [user]);
 
   useEffect(() => {
-    console.log("🔍 Estado de user useEffect:", user); // 👀 Verificar qué está pasando
     if (!isAuthLoaded) {
-      console.log("⌛ Esperando a que la autenticación cargue...");
       return;
     }
 
     // Esperar hasta que `user` esté disponible
     if (user === undefined) {
-      console.log("⌛ Esperando a que `user` se cargue...");
-
       return; // Espera hasta que `user` tenga un valor
     }
     setIsUserLoading(false); // Usuario cargado correctamente
@@ -146,8 +138,6 @@ const EditarOfertaScreen = () => {
     fetchOferta();
   }, [isAuthLoaded]);
 
-    
-
   if (!isAuthLoaded || loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -156,7 +146,6 @@ const EditarOfertaScreen = () => {
     );
   }
 
-  // 🔹 Si el usuario no tiene permisos, no mostrar nada
   if (!hasPermission) {
     return null;
   }
@@ -251,7 +240,6 @@ const EditarOfertaScreen = () => {
 
       if (tipoCambiado) {
         if (formData.tipoAnterior === "TRABAJO") {
-          console.log("🗑 Eliminando datos de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, 
             { method: "DELETE",
               headers: { 
@@ -261,7 +249,6 @@ const EditarOfertaScreen = () => {
             });
 
         } else if (formData.tipoAnterior === "CARGA") {
-          console.log("Eliminando datos de CARGA...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, 
             { method: "DELETE",
               headers: { 
@@ -275,7 +262,6 @@ const EditarOfertaScreen = () => {
 
       if (tipoCambiado) {
         if (tipoOferta === "TRABAJO") {
-          console.log("Creando nueva oferta de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
             method: "POST",
             headers: { "Content-Type": "application/json",
@@ -306,7 +292,6 @@ const EditarOfertaScreen = () => {
         }
       } else {
         if (tipoOferta === "TRABAJO") {
-          console.log("🔄 Actualizando oferta de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
             method: "PUT",
             headers: { "Content-Type": "application/json",
@@ -349,7 +334,11 @@ const EditarOfertaScreen = () => {
 
       await fetchOferta();
 
-      router.replace("/miperfilempresa");
+      setSuccessModalVisible(true);
+        setTimeout(() => {
+	        setSuccessModalVisible(false);
+          router.replace("/miperfilempresa");
+        }, 1000);
 
     } catch (error) {
       console.error("Error al enviar la oferta:", error);
@@ -366,7 +355,7 @@ const EditarOfertaScreen = () => {
         });
 
         if (response.ok) {
-            router.replace("/miperfilempresa"); // Redirige a /miperfil sin mostrar una alerta
+            router.replace("/miperfilempresa");
 
         } else {
             Alert.alert("Error", "No se pudo eliminar la oferta.");
@@ -514,6 +503,13 @@ const EditarOfertaScreen = () => {
           <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
             <Text style={styles.publishButtonText}>Actualizar oferta</Text>
           </TouchableOpacity>
+
+          {/* Modal de éxito */}
+          <SuccessModal
+            isVisible={successModalVisible}
+            onClose={() => setSuccessModalVisible(false)}
+            message="¡Tu oferta se actualizó correctamente!"
+          />
 
           </View>
 
