@@ -56,12 +56,12 @@ const EditarOfertaScreen = () => {
 
   const fetchOferta = async () => {
     try {
-      console.log("🔍 Obteniendo oferta general...");
+      console.log("Obteniendo oferta general...");
       const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
       const data = await response.json();
     
       if (!data || Object.keys(data).length === 0) {
-        console.error("❌ Error: La oferta no tiene datos.");
+        console.error("Error: La oferta no tiene datos.");
         return;
       }
       let licencia = data.licencia || ""; // Asegurar que no sea undefined o null
@@ -140,7 +140,7 @@ const EditarOfertaScreen = () => {
     setIsUserLoading(false); // Usuario cargado correctamente
 
     if (!ofertaid) {
-      console.error("❌ Error: ofertaid no está definido.");
+      console.error("Error: ofertaid no está definido.");
       return;
     }
     fetchOferta();
@@ -205,7 +205,6 @@ const EditarOfertaScreen = () => {
     if (!validateForm()) return;
 
     try {
-      // 🚀 Verificar si el tipo de oferta ha cambiado
       const tipoCambiado = tipoOferta !== formData.tipoAnterior;
 
       let ofertaData: {
@@ -250,7 +249,6 @@ const EditarOfertaScreen = () => {
         },
       };
 
-      // 🔥 Si el tipo de oferta cambió, primero eliminar el tipo anterior
       if (tipoCambiado) {
         if (formData.tipoAnterior === "TRABAJO") {
           console.log("🗑 Eliminando datos de TRABAJO...");
@@ -263,7 +261,7 @@ const EditarOfertaScreen = () => {
             });
 
         } else if (formData.tipoAnterior === "CARGA") {
-          console.log("🗑 Eliminando datos de CARGA...");
+          console.log("Eliminando datos de CARGA...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, 
             { method: "DELETE",
               headers: { 
@@ -275,10 +273,9 @@ const EditarOfertaScreen = () => {
         }
       }
 
-      // 🔥 2️⃣ **Crear el nuevo tipo de oferta si ha cambiado**
       if (tipoCambiado) {
         if (tipoOferta === "TRABAJO") {
-          console.log("🚀 Creando nueva oferta de TRABAJO...");
+          console.log("Creando nueva oferta de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
             method: "POST",
             headers: { "Content-Type": "application/json",
@@ -290,7 +287,6 @@ const EditarOfertaScreen = () => {
             }),
           });
         } else if (tipoOferta === "CARGA") {
-          console.log("🚀 Creando nueva oferta de CARGA...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, {
             method: "POST",
             headers: { "Content-Type": "application/json",
@@ -309,7 +305,6 @@ const EditarOfertaScreen = () => {
           });
         }
       } else {
-        // 🔥 3️⃣ **Si el tipo NO ha cambiado, solo actualizarlo**
         if (tipoOferta === "TRABAJO") {
           console.log("🔄 Actualizando oferta de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
@@ -323,7 +318,6 @@ const EditarOfertaScreen = () => {
             }),
           });
         } else if (tipoOferta === "CARGA") {
-          console.log("🔄 Actualizando oferta de CARGA...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, {
             method: "PUT",
             headers: { "Content-Type": "application/json",
@@ -343,8 +337,6 @@ const EditarOfertaScreen = () => {
         }
       }
 
-      console.log("📩 Publicando oferta:", JSON.stringify(ofertaData, null, 2));
-
       const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json",
@@ -355,13 +347,12 @@ const EditarOfertaScreen = () => {
 
       if (!response.ok) throw new Error(`Error al editar la oferta: ${response.statusText}`);
 
-      console.log("✅ Oferta editada con éxito.");
       await fetchOferta();
 
       router.replace("/miperfilempresa");
 
     } catch (error) {
-      console.error("❌ Error al enviar la oferta:", error);
+      console.error("Error al enviar la oferta:", error);
       alert("Hubo un error al editar la oferta.");
     }
   };
@@ -375,7 +366,6 @@ const EditarOfertaScreen = () => {
         });
 
         if (response.ok) {
-            console.log("Oferta eliminada correctamente");
             router.replace("/miperfilempresa"); // Redirige a /miperfil sin mostrar una alerta
 
         } else {

@@ -140,11 +140,11 @@ export default function OfertaDetalleScreen() {
     };
 
     const handleLoginRedirect = () => {
-        router.replace("/login")
+        router.push("/login")
     };    
 
     const handleEditarOferta = () => {
-        router.replace(`/oferta/editar/${ofertaid}`);
+        router.push(`/oferta/editar/${ofertaid}`);
     }
 
     const renderOfferCard = () => {
@@ -154,7 +154,7 @@ export default function OfertaDetalleScreen() {
                     <>
                         <View style={styles.header}>
                             {/* Icono de retroceso */}
-                            <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/')}>
+                            <TouchableOpacity style={styles.backIcon} onPress={() => router.push('/')}>
                                 <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
                             </TouchableOpacity>
                             <Image
@@ -283,7 +283,7 @@ export default function OfertaDetalleScreen() {
                     <>
                         <View style={styles.header}>
                             {/* Icono de retroceso */}
-                            <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/')}>
+                            <TouchableOpacity style={styles.backIcon} onPress={() => router.push('/')}>
                                 <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
                             </TouchableOpacity>
                             <Image

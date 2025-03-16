@@ -124,7 +124,6 @@ const UserProfileScreen: React.FC = () => {
 
     return (
         <>
-            {isMobile ? <BottomBar /> : <CamyoWebNavBar />}
             <ScrollView contentContainerStyle={[isMobile ? styles.container : styles.desktopContainer, { paddingTop: isMobile ? 0 : 100, paddingLeft: 10 }]}>
                 <View style={styles.bannerContainer}>
                     <Image source={defaultBanner} style={styles.bannerImage} />
@@ -136,7 +135,7 @@ const UserProfileScreen: React.FC = () => {
                         <View style={styles.profileDetailsContainer}>
                             <TouchableOpacity
                                 style={styles.editButton}
-                                onPress={() => router.replace(`/miperfilcamionero/editar`)}
+                                onPress={() => router.push(`/miperfilcamionero/editar`)}
                             >
                                 <Text style={styles.editButtonText}> Editar Perfil</Text>
                             </TouchableOpacity>
@@ -248,7 +247,7 @@ const UserProfileScreen: React.FC = () => {
                                             <Text style={styles.offerInfo}>{item.notas}</Text>
                                         </View>
                                         <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                                        <TouchableOpacity style={styles.button} onPress={() => router.replace(`/oferta/${item.id}`)}>
+                                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
                                             <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
                                             <Text style={styles.buttonText}>Ver Detalles</Text>
                                         </TouchableOpacity>
