@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, StyleSheet } from "react-native";
 import { Entypo, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import globalStyles from "../../assets/styles/globalStyles";
-import colors from "../../assets/styles/colors";
+import globalStyles from "../assets/styles/globalStyles";
+import colors from "../assets/styles/colors";
 import axios from "axios";
-import { useAuth } from "../../contexts/AuthContext";
-import SuccessModal from "../_components/SuccessModal";
+import { useAuth } from "../contexts/AuthContext";
+import SuccessModal from "./_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 

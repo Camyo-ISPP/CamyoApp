@@ -2,8 +2,8 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import colors from "../../assets/styles/colors";
-import globalStyles from "../../assets/styles/globalStyles";
+import colors from "../assets/styles/colors";
+import globalStyles from "../assets/styles/globalStyles";
 
 const AccessDeniedScreen = () => {
   const router = useRouter();

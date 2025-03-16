@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import Titulo from "../_components/Titulo";
+import Titulo from "./_components/Titulo";
 
 interface Usuario {
   id: number;
