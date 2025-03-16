@@ -1,12 +1,11 @@
-import { router, useRouter } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, TouchableWithoutFeedback, ActivityIndicator } from "react-native";
+import { router } from "expo-router";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, ScrollView, ActivityIndicator } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-const ProyectoLogo = require('frontend/assets/images/camyo.png');
 import BottomBar from './_components/BottomBar';
 import { MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "./_components/CamyoNavBar";
@@ -49,8 +48,8 @@ export default function Index() {
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
           <CamyoWebNavBar />
-          <ScrollView style={styles.scrollview}>
-          <Titulo texto="Lista de Ofertas" marginTop={30} />
+          <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false} contentContainerStyle={{ scrollbarWidth: "none" }}>
+          <Titulo texto="Lista de Ofertas" marginTop={100} />
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {data && data.map((item) => (
                 <View key={item.id} style={styles.card}>
@@ -168,7 +167,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     flex: 1,
-    backgroundColor: colors.lightGray,
   },
   card: {
     backgroundColor: colors.white,
@@ -195,12 +193,11 @@ const styles = StyleSheet.create({
   scrollview: {
     flex: 1,
     padding: 10,
-    marginVertical: 40,
-    position: 'absolute',
-    top: 20, // Adjust this value based on the height of CamyoWebNavBar
+    position: 'static',
+    top: 0,
     left: 0,
     right: 0,
-    bottom: -40,
+    bottom: 40,
   },
 
   scrollviewIndicator: {

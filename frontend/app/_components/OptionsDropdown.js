@@ -1,0 +1,80 @@
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Entypo, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import colors from "frontend/assets/styles/colors";
+import { router } from 'expo-router';
+
+const OptionsDropdown = () => {
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+
+  return (
+      <View style={styles.container}>
+        {/* 3 lines */}
+        <TouchableOpacity onPress={() => setDropdownVisible(!dropdownVisible)}>
+          <FontAwesome name="bars" size={20} color={colors.secondary}/>
+        </TouchableOpacity>
+
+        {/* Dropdown */}
+        {dropdownVisible && (
+            <View style={styles.dropdown}>
+              <TouchableOpacity onPress={() => setDropdownVisible(false)} style={styles.closeButton}>
+                <Entypo name="cross" size={20} color={colors.primary} />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => router.replace('/empresas')} style={styles.dropdownButton}>
+                <MaterialIcons name="business" size={20} style={styles.dropdownButtonIcon} />
+                <Text style={styles.dropdownButtonText}>Empresas</Text>
+              </TouchableOpacity>
+            </View>
+        )}
+      </View >
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  dropdown: {
+    position: 'absolute',
+    top: 40,
+    right: 0,
+    backgroundColor: 'white',
+    paddingVertical: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    width: 140,
+    marginTop: 15,
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 4,
+    marginTop: 15,
+  },
+  dropdownButtonText: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: colors.secondary,
+    paddingHorizontal: 4,    
+  },
+  dropdownButtonIcon: {
+    width: 24,
+    color: colors.secondary,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+  }
+});
+
+export default OptionsDropdown;
