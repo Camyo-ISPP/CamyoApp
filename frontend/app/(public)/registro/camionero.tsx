@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Modal } from "react-native";
-import globalStyles from "../../assets/styles/globalStyles";
-import colors from "../../assets/styles/colors";
-import BooleanSelector from "../_components/BooleanSelector";
-import Selector from "../_components/Selector";
-import MultiSelector from "../_components/MultiSelector";
+import globalStyles from "../../../assets/styles/globalStyles";
+import colors from "../../../assets/styles/colors";
+import BooleanSelector from "../../_components/BooleanSelector";
+import Selector from "../../_components/Selector";
+import MultiSelector from "../../_components/MultiSelector";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
-import defaultProfileImage from "../../assets/images/defaultAvatar.png";
 import axios from 'axios';
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import SuccessModal from "../_components/SuccessModal";
+import SuccessModal from "../../_components/SuccessModal";
+import defaultProfileImage from "../../../assets/images/defaultAvatar.png";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const licencias = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "D1+E", "D"];

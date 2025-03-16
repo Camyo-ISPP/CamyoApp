@@ -1,17 +1,20 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
+import AdminRoute from '../../security/AdminRoute';
 
 const WorkInProgressScreen: React.FC = () => {
     const { logout } = useAuth();
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Work In Progress...</Text>
-            <TouchableOpacity style={styles.button} onPress={() => logout()}>
-                <Text style={styles.buttonText}>Log Out</Text>
-            </TouchableOpacity>
-        </View>
+        <AdminRoute>
+            <View style={styles.container}>
+                <Text style={styles.title}>Work In Progress...</Text>
+                <TouchableOpacity style={styles.button} onPress={() => logout()}>
+                    <Text style={styles.buttonText}>Cerrar Sesión</Text>
+                </TouchableOpacity>
+            </View>
+        </AdminRoute>
     );
 };
 

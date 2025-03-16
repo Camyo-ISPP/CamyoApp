@@ -7,11 +7,6 @@ const MyProfile = () => {
     const router = useRouter();
 
     useEffect(() => {
-        /*
-        if (!userToken) {
-            router.replace('/login');
-            return;
-        }*/
 
         switch (user?.rol) {
             case 'CAMIONERO':

@@ -9,12 +9,15 @@ import withAuthProvider from './withAuthProvider'; // Importa el HOC
 function RootLayout() {
   const segments = useSegments();
   const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
+
+  /*
   const router = useRouter();
   const pathname = usePathname();
   const { user, userToken } = useAuth(); // Usa useAuth
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false); // Track if the layout is ready
-
+  */
+ 
   useEffect(() => {
     if (Platform.OS === "web") {
       const pageTitles: Record<string, string> = {
@@ -39,6 +42,7 @@ function RootLayout() {
     }
   }, [segments]);
 
+   /*
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
       const authenticated = !!userToken; // TODO: revisar si el token está expirado o no.
@@ -107,29 +111,35 @@ function RootLayout() {
     setIsReady(true);
     checkAuthAndRedirect();
   }, [user, userToken, pathname]);
+  
 
   if (isLoading || !isReady) {
     return null; // O un componente de carga
-  }
+  }*/
 
   return (
     <>
       {!isMobile && <CamyoWebNavBar />}
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="registro" />
+        <Stack.Screen name="(public)/index" />
+        <Stack.Screen name="(public)/login" />
+        <Stack.Screen name="(public)/registro" />
+        <Stack.Screen name="(public)/registro/camionero" />
+        <Stack.Screen name="(public)/registro/empresa" />
+        <Stack.Screen name="(public)/empresas" />
+
         <Stack.Screen name="miperfil" />
         <Stack.Screen name="miperfilcamionero" />
         <Stack.Screen name="miperfilempresa" />
         <Stack.Screen name="miperfilcamionero/editar" />
         <Stack.Screen name="miperfilempresa/editar" />
-        <Stack.Screen name="empresas" />
+        
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
-        <Stack.Screen name="workinprogress" />
-        <Stack.Screen name="forbidden" />
+
+        <Stack.Screen name="(admin)/workinprogress" />
+        <Stack.Screen name="(public)/forbidden" />
       </Stack>
       {isMobile && <BottomBar />}
     </>

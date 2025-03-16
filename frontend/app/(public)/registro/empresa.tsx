@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Modal } from "react-native";
-import globalStyles from "../../assets/styles/globalStyles";
-import colors from "../../assets/styles/colors";
+import globalStyles from "../../../assets/styles/globalStyles";
+import colors from "../../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import defaultProfileImage from "../../assets/images/companyDefaultAvatar.png";
-import { useAuth } from "../../contexts/AuthContext";
+import defaultProfileImage from "../../../assets/images/companyDefaultAvatar.png";
+import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import SuccessModal from "../_components/SuccessModal";
+import SuccessModal from "../../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
