@@ -1,6 +1,5 @@
 package com.camyo.backend.suscripcion;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.camyo.backend.auth.payload.response.MessageResponse;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
-import com.camyo.backend.empresa.Empresa;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/suscripciones")
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "http://localhost:8080")
 @Tag(name = "Suscripciones", description = "API para gestión de planes de suscripción (Gratis, Basic, Premium)")
 public class SuscripcionController {
 
