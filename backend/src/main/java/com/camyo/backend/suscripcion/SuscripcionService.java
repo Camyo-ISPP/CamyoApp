@@ -31,17 +31,17 @@ public class SuscripcionService {
      */
     @Transactional
     public Suscripcion asignarSuscripcion(Integer empresaId, PlanNivel nivel, Integer duracionDias) {
-        // 1. Obtener la empresa
         Empresa empresa = empresaService.obtenerEmpresaPorId(empresaId);
-
-        // 2. Desactivar suscripción previa (si existe)
-        Optional<Suscripcion> anterior = suscripcionRepository.findByEmpresaAndActivaTrue(empresa);
-        anterior.ifPresent(s -> {
-            s.setActiva(false);
-            suscripcionRepository.save(s);
-        });
-
-        // 3. Crear la nueva suscripción
+        Optional<Suscripcion> optionalSus = suscripcionRepository.findAnyByEmpresa(empresa);
+    
+        if (optionalSus.isPresent()) {
+            Suscripcion susExistente = optionalSus.get();
+            susExistente.setNivel(nivel);
+            susExistente.setFechaFin(duracionDias != null ? LocalDate.now().plusDays(duracionDias) : null);
+            susExistente.setFechaInicio(LocalDate.now()); 
+            susExistente.setActiva(true);
+            return suscripcionRepository.save(susExistente); 
+        }
         Suscripcion nueva = new Suscripcion();
         nueva.setEmpresa(empresa);
         nueva.setNivel(nivel);
@@ -50,11 +50,12 @@ public class SuscripcionService {
         if (duracionDias != null) {
             nueva.setFechaFin(LocalDate.now().plusDays(duracionDias));
         }
-
-        // 4. Guardar y retornar
+    
         return suscripcionRepository.save(nueva);
     }
-
+    
+    
+    
     /**
      * Obtiene la suscripción activa de la empresa.
      */

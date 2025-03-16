@@ -3,15 +3,15 @@ package com.camyo.backend.suscripcion;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.camyo.backend.empresa.Empresa;
 
 
 
-public interface SuscripcionRepository  extends  CrudRepository<Suscripcion, Integer>{
+public interface SuscripcionRepository  extends  JpaRepository<Suscripcion, Integer>{
 /**
      * Ejemplo de método que obtiene todas las suscripciones activas
      * de un plan específico (GRATIS, BASIC, PREMIUM).
@@ -28,4 +28,8 @@ public interface SuscripcionRepository  extends  CrudRepository<Suscripcion, Int
     
     @Query("SELECT s FROM Suscripcion s WHERE s.empresa = :empresa AND s.activa = true")
     public Optional<Suscripcion> findByEmpresaAndActivaTrue(Empresa empresa);
+
+    @Query("SELECT s FROM Suscripcion s WHERE s.empresa = :empresa")
+    Optional<Suscripcion> findAnyByEmpresa(@Param("empresa") Empresa empresa);
+
 }
