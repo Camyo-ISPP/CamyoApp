@@ -25,7 +25,7 @@ export default function OfertaDetalleScreen() {
     const { ofertaid } = useLocalSearchParams();
     const router = useRouter(); // Para navegar entre pantallas
     const { user, userToken, login, logout } = useAuth();
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     useEffect(() => {
         if (ofertaid) {
@@ -104,11 +104,11 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                setIsModalVisible(true);
+                setSuccessModalVisible(true);
                 setUserHasApplied(true);
                 setTimeout(() => {
-                    setIsModalVisible(false); 
-                }, 2000);
+                    setSuccessModalVisible(false); 
+                }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo solicitar la oferta.");
             }
@@ -196,10 +196,10 @@ export default function OfertaDetalleScreen() {
                             </TouchableOpacity>
                         )}
 
-                        {/* Modal de éxito */}
+                        {/* Modal de éxito para oferta de carga */}
                         <SuccessModal
-                            isVisible={isModalVisible}
-                            onClose={() => setIsModalVisible(false)}
+                            isVisible={successModalVisible}
+                            onClose={() => setSuccessModalVisible(false)}
                             message="¡Has solicitado correctamente a la carga!"
                         />
 
@@ -324,10 +324,10 @@ export default function OfertaDetalleScreen() {
                             </TouchableOpacity>
                         )}
 
-                        {/* Modal de éxito */}
+                        {/* Modal de éxito para oferta general */}
                         <SuccessModal
-                            isVisible={isModalVisible}
-                            onClose={() => setIsModalVisible(false)}
+                            isVisible={successModalVisible}
+                            onClose={() => setSuccessModalVisible(false)}
                             message="¡Has solicitado correctamente a la oferta!"
                         />
                         
