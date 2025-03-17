@@ -4,6 +4,7 @@ import colors from "frontend/assets/styles/colors";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 import BottomBar from "../_components/BottomBar";
 import Titulo from "../_components/Titulo";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const subscriptionTestData = {
     id: 2,
@@ -92,6 +93,18 @@ export default function SubscriptionPlans() {
     );
 }
 
+function getPlanIcon(planLevel: string) {
+    switch (planLevel) {
+        case "GRATIS":
+            return <Ionicons name="pricetag-outline" size={24} color={colors.primary} />;
+        case "BASIC":
+            return <Ionicons name="layers-outline" size={24} color={colors.primary} />;
+        case "PREMIUM":
+            return <Ionicons name="diamond-outline" size={24} color={colors.primary} />;
+        default:
+            return null;
+    }
+}
 
 function PlanCard({ title, price, description, borderColor, planLevel, currentPlan }) {
     const isCurrentPlan = planLevel === currentPlan;
@@ -101,7 +114,7 @@ function PlanCard({ title, price, description, borderColor, planLevel, currentPl
     const handleMouseEnter = () => {
         if (Platform.OS === "web") {
             Animated.timing(scaleValue, {
-                toValue: 1.05,       
+                toValue: 1.05,
                 duration: 200,
                 useNativeDriver: true,
                 easing: Easing.out(Easing.quad),
@@ -130,7 +143,10 @@ function PlanCard({ title, price, description, borderColor, planLevel, currentPl
                 ? ({ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave } as any)
                 : {})}
         >
-            <Text style={styles.planTitle}>{title}</Text>
+            <View style={styles.planTitleContainer}>
+                {getPlanIcon(planLevel)}
+                <Text style={styles.planTitle}>{title}</Text>
+            </View>            
             <Text style={styles.planPrice}>{price}</Text>
             <Text style={styles.planDescription}>{description}</Text>
             <TouchableOpacity
@@ -193,12 +209,18 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
     },
+    planTitleContainer: {
+        flexDirection: "row",     
+        alignItems: "center",     
+        justifyContent: "center",          
+        marginBottom: 5,
+      },
     planTitle: {
         fontSize: 18,
         fontWeight: "bold",
         color: colors.primary,
-        marginBottom: 5,
-    },
+        marginLeft: 8, 
+      },
     planPrice: {
         fontSize: 22,
         fontWeight: "bold",
