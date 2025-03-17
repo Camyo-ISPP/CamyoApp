@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import Titulo from "../_components/Titulo";
 
 interface Usuario {
   id: number;
@@ -46,9 +47,11 @@ const EmpresasLista = () => {
   if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   return (
-<ScrollView contentContainerStyle={{ flexGrow: 1, paddingTop: 20 }}>
+<ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+  <Titulo texto="Lista de Empresas" marginTop={100} />
+
 {empresas.map((empresa, index) => (
-        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 80 }]}>
+        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 10 }]}>
           <View style={styles.cardContent}>
             <Text style={styles.name}>{empresa.usuario.nombre}</Text>
             <DetailItem icon="globe" text={empresa.web} link />

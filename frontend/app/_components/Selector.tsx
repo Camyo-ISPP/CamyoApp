@@ -14,7 +14,7 @@ const Selector = ({ value, onChange, options, colors, globalStyles }) => {
               ? { backgroundColor: colors.lightOrange, borderRadius: 8, padding: 10 }
               : { backgroundColor: colors.lightGray, borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, padding: 10 }
           ]}
-          onPress={() => onChange(option)}
+          onPress={() => onChange(value === option ? "" : option)}  // Permite desmarcar al hacer clic en la opción seleccionada
         >
           <Text style={{ fontSize: 16, color: value === option ? colors.white : colors.secondary }}>
             {option}

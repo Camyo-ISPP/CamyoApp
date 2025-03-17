@@ -32,8 +32,15 @@ const globalStyles = StyleSheet.create({
     alignItems: "center",
     marginTop: 16,
   },
-    buttonOrange: {
+  buttonOrange: {
     backgroundColor: colors.primary,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "90%",
+  },
+  buttonBlue: {
+    backgroundColor: colors.secondary,
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -42,6 +49,11 @@ const globalStyles = StyleSheet.create({
   buttonText: {
     color: colors.white,
     fontWeight: "bold",
+  },
+  buttonTextRegister: {
+    color: colors.white,
+    fontWeight: "bold",
+    fontSize: 16,
   },
   userTypeButton: {
     flex: 1,

@@ -2,10 +2,10 @@ import { useRouter } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, TouchableWithoutFeedback } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import React, { useEffect, useState, useRef } from "react";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 const ProyectoLogo = require('frontend/assets/images/camyo.png');
 import routes from "./routes";
+import PerfilDropdown from "./ProfileDropdown";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function CamyoWebNavBar() {
@@ -15,6 +15,7 @@ export default function CamyoWebNavBar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const sidebarAnim = useRef(new Animated.Value(-Dimensions.get('window').width)).current;
+  const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
 
   useEffect(() => {
     const handleResize = () => {
@@ -58,26 +59,27 @@ export default function CamyoWebNavBar() {
           </View>
           <Animated.View style={[styles.sidebar, { transform: [{ translateX: sidebarAnim }] }]}>
             <ScrollView>
+              {/* 
               <View style={styles.searchWebZoom}>
                 <TextInput
                   style={styles.searchInputWebZoom}
-                  placeholder="Buscar "
+                  placeholder="Buscar"
                   placeholderTextColor={colors.secondary}
                 />
                 <TouchableOpacity><FontAwesome name="search" size={12} color="black" style={styles.searchIconZoom} /></TouchableOpacity>
               </View>
-              
+              */}
+
               {user ? (
-                <TouchableOpacity style={styles.shareButtonZoomed2} onPress={() => logout()}><Text style={styles.shareTextZoom1}>Cerrar Sesión</Text></TouchableOpacity>  
+                <TouchableOpacity style={styles.shareButtonZoomed2} onPress={() => logout()}><Text style={styles.shareTextZoom1}>Cerrar Sesión</Text></TouchableOpacity>
               ) : (
                 <>
-                <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.push(routes.login)}><Text style={styles.shareTextZoom1}>Iniciar Sesión</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.shareButtonZoomed2} onPress={() => router.push(routes.register)}><Text style={styles.shareTextZoom2}>Registrarse</Text></TouchableOpacity>
+                  <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.replace(routes.login)}><Text style={styles.shareTextZoom1}>Iniciar Sesión</Text></TouchableOpacity>
+    
                 </>
               )}
-              
-              <TouchableOpacity style={styles.buttonTextZoomed} onPress={() => router.push(routes.profile)}><Text style={styles.linkTextZoom}>Perfil (Cam)</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.buttonTextZoomed} onPress={() => router.push(routes.profileEmpresa)}><Text style={styles.linkTextZoom}>Perfil (Emp)</Text></TouchableOpacity>
+
+
             </ScrollView>
           </Animated.View>
         </>
@@ -90,9 +92,9 @@ export default function CamyoWebNavBar() {
               </TouchableOpacity>
             </View>
             <View style={styles.rightSection}>
-              <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.profile)}><Text style={styles.linkText}>Mi Perfil (Cam)</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.profileEmpresa)}><Text style={styles.linkText}>Mi Perfil (Emp)</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
+               <TouchableOpacity style={styles.buttonText} onPress={() => router.replace(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
+              
+              {/* 
               <View style={styles.searchWeb}>
                 <TextInput
                   style={styles.searchInputWeb}
@@ -101,17 +103,21 @@ export default function CamyoWebNavBar() {
                 />
                 <TouchableOpacity><FontAwesome name="search" size={24} color="black" style={styles.searchIcon} /></TouchableOpacity>
               </View>
+              */}
 
               {user ? (
-                <TouchableOpacity style={styles.shareButton2} onPress={() => logout()}><Text style={styles.shareTextZoom1}>Cerrar Sesión</Text></TouchableOpacity>  
+                <>
+                   <PerfilDropdown user={user}/>
+                
+                </>
               ) : (
                 <>
-                <TouchableOpacity style={styles.shareButton1} onPress={() => router.push(routes.login)}><Text style={styles.shareText}>Iniciar Sesión</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.shareButton2} onPress={() => router.push(routes.register)}><Text style={styles.shareText}>Registrarse</Text></TouchableOpacity>
+                  <TouchableOpacity style={styles.shareButton} onPress={() => router.replace(routes.login)}><Text style={styles.shareText}>Acceder</Text></TouchableOpacity>
+                
                 </>
               )}
 
-              </View>
+            </View>
           </View>
         </>
       )}
@@ -271,7 +277,7 @@ const styles = StyleSheet.create({
     height: 20,
     paddingVertical: 5,
     marginVertical: 10,
-    width: "93%", 
+    width: "93%",
   },
   searchInputWebZoom: {
     backgroundColor: "transparent",
@@ -281,16 +287,16 @@ const styles = StyleSheet.create({
     height: 10,
     fontSize: 12,
     outlineStyle: "none",
-    width: "100%", 
+    width: "100%",
   },
   searchIconZoom: {
     color: colors.primary,
     marginRight: 10,
   },
   shareButton: {
-    backgroundColor: colors.primary, 
-    borderColor: colors.primary, 
-    borderWidth: 2, 
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+    borderWidth: 2,
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -367,4 +373,17 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
   },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 60,
+
+  },
+  desktopAvatar: {
+    width: 47,
+    height: 47,
+    borderRadius: 60,
+    marginLeft: 5
+
+  }
 });

@@ -86,6 +86,14 @@ public class OfertaService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<Oferta> obtenerOfertasPorEmpresa(Integer empresaId) {
+        empresaRepository.findById(empresaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Empresa", "id", empresaId));
+        
+        return ofertaRepository.encontrarOfertasPorEmpresa(empresaId);
+    }
+
     @Transactional
     public Oferta guardarOferta(Oferta oferta) {
         return ofertaRepository.save(oferta);

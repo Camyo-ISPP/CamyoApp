@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { router } from "expo-router";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -11,6 +12,8 @@ interface AuthContextType {
   logout: () => void;
   validateToken: (token: string) => Promise<boolean>;
   getUserData: (userRole: string, userId: number) => void;
+  updateUser: (updatedUserData: any) => void;
+  isAuthenticated: () => Promise<boolean>; // Nueva función
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -20,6 +23,8 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
   validateToken: async () => false,
   getUserData: () => {},
+  updateUser: () => {},
+  isAuthenticated: async () => false, // Valor por defecto
 });
 
 interface AuthProviderProps {
@@ -32,14 +37,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const loadAuthData = async () => {
-      const storedUser = await AsyncStorage.getItem("user");
-      const storedToken = await AsyncStorage.getItem("userToken");
-
-      if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
-        setUserToken(storedToken);
+      try {
+        const storedUser = await AsyncStorage.getItem("user");
+        const storedToken = await AsyncStorage.getItem("userToken");
+  
+        if (storedUser && storedToken) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setUserToken(storedToken);
+  
+          const rol = parsedUser.roles[0] === "EMPRESA" ? "empresas" :
+            parsedUser.roles[0] === "ADMIN" ? "admin" : "camioneros";
+          getUserData(rol, parsedUser.id);
+        }
+      } catch (error) {
+        console.error("Error cargando la autentificación:", error);
       }
     };
+  
     loadAuthData();
   }, []);
 
@@ -50,16 +65,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await AsyncStorage.setItem("user", JSON.stringify(userData));
     await AsyncStorage.setItem("userToken", token);
 
-    const rol = userData.roles[0] === "EMPRESA" ? "empresas" : "camioneros";
+    const rol = userData.roles[0] === "EMPRESA" ? "empresas" : 
+            userData.roles[0] === "ADMIN" ? "admin" : 
+            "camioneros";
+
     getUserData(rol, userData.id);
   };
 
   const logout = async () => {
     setUser(null);
     setUserToken(null);
+
     await AsyncStorage.removeItem("user");
     await AsyncStorage.removeItem("userToken");
+
+    router.replace("/login");
   };
+
   const validateToken = async (token: string) => {
     try {
       const response = await axios.get(`${BACKEND_URL}/auth/validate`, {
@@ -72,6 +94,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Token validation failed:", error);
       return false;
     }
+  };
+
+  const updateUser = (updatedUserData: any) => {
+    setUser((prevUser) => ({ ...prevUser, ...updatedUserData }));
+    AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
   };
 
   const unifyUserData = (data: any) => {
@@ -110,11 +137,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       unifiedData.email = data.usuario.email;
       unifiedData.localizacion = data.usuario.localizacion;
       unifiedData.foto = data.usuario.foto;
+    } 
+
+    // Si el usuario es un ADMIN
+    else if (data.usuario.authority.authority === 'ADMIN') {
+      unifiedData.userId = data.usuario.id;
+      unifiedData.nombre = data.usuario.nombre;
+      unifiedData.telefono = data.usuario.telefono;
+      unifiedData.username = data.usuario.username;
+      unifiedData.email = data.usuario.email;
+      unifiedData.localizacion = data.usuario.localizacion;
+      unifiedData.foto = data.usuario.foto;
     }
   
     return unifiedData;
   };  
-  
 
   const getUserData = async (userRole: string, userId: number) => {
     try {
@@ -129,8 +166,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const isAuthenticated = async () => {
+    const token = await AsyncStorage.getItem("userToken");
+    if (!token) {
+      return false;
+    }
+    return await validateToken(token);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, userToken, login, logout, validateToken, getUserData }}>
+    <AuthContext.Provider value={{ user, userToken, login, logout, validateToken, getUserData, updateUser, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

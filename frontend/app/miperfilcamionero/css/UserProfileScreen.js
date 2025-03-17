@@ -589,7 +589,6 @@ const styles = StyleSheet.create({
         // Add styles for the description box and text
        // Add styles for the description box and text
 descriptionBox: {
-    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 5,
     width: '100%',
@@ -608,6 +607,23 @@ noOffersText: {
     fontSize: 20,
     color: colors.secondary
 },
+editButton: {
+    marginTop: 20,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    position: 'fixed',
+    top: 250,
+    left:1370 // Adjusted to place the button below the profile picture
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default styles;

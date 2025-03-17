@@ -51,15 +51,15 @@ public class Carga{
     @Min(value = 1, message="La distancia no puede ser negativa o cero")
     Integer distancia;
 
-    @Column(name="inicio")
+    @Column(name="inicio", columnDefinition = "DATETIME")
     @DateTimeFormat(pattern = "yyyy/MM/dd HH/mm")
     LocalDateTime inicio;
 
-    @Column(name="fin_minimo")
+    @Column(name="fin_minimo", columnDefinition = "DATETIME")
     @DateTimeFormat(pattern = "yyyy/MM/dd HH/mm")
     LocalDateTime finMinimo;
 
-    @Column(name="fin_maximo")
+    @Column(name="fin_maximo", columnDefinition = "DATETIME")
     @DateTimeFormat(pattern = "yyyy/MM/dd HH/mm")
     LocalDateTime finMaximo;
 

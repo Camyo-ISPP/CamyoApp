@@ -40,4 +40,6 @@ public interface OfertaRepository extends JpaRepository<Oferta,Integer>{
     @Query("SELECT o FROM Oferta o JOIN o.aplicados c WHERE c.id = :camId AND o.estado = :estado ORDER BY o.fechaPublicacion DESC")
     List<Oferta> encontrarAplicadasPorEstado(Integer camId, OfertaEstado estado);
 
+    @Query("SELECT o FROM Oferta o WHERE empresa.id = :empId ORDER BY o.fechaPublicacion DESC")
+    List<Oferta> encontrarOfertasPorEmpresa(Integer empId);
 }

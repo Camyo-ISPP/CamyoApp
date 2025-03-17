@@ -1,0 +1,7 @@
+runtime: java17
+instance_class: F1
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
