@@ -1,7 +1,9 @@
 package com.camyo.backend.oferta;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,8 @@ public class OfertaController {
     private CargaService cargaService;
     @Autowired
     private EmpresaService empresaService;
-
+    @Autowired
+    private OfertaPatrocinadaRepository ofertaPatrocinadaRepository;
    /**
      * GET: Listar todas las ofertas
      * 
@@ -42,44 +45,65 @@ public class OfertaController {
     @GetMapping
     public List<OfertaCompletaDTO> obtenerOfertas() {
         List<Oferta> ofertas = ofertaService.obtenerOfertas();
-        return ofertas.stream().map(oferta -> {
-            OfertaCompletaDTO dto = new OfertaCompletaDTO();
-            dto.setId(oferta.getId());
-            dto.setTitulo(oferta.getTitulo());
-            dto.setExperiencia(oferta.getExperiencia());
-            dto.setLicencia(oferta.getLicencia());
-            dto.setNotas(oferta.getNotas());
-            dto.setEstado(oferta.getEstado());
-            dto.setFechaPublicacion(oferta.getFechaPublicacion());
-            dto.setSueldo(oferta.getSueldo());
-            dto.setLocalizacion(oferta.getLocalizacion());
-            dto.setPrioridad(oferta.getPrioridad());
-            dto.setCamionero(oferta.getCamionero());
-            dto.setAplicados(oferta.getAplicados());
-            if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
-                dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
-            }
-            try {
-                Carga c = ofertaService.obtenerCarga(oferta.getId());
-                if (c != null) {
-                    dto.setTipoOferta("CARGA");
-                } else {
-                    Trabajo t = ofertaService.obtenerTrabajo(oferta.getId());
-                    if (t != null) {
-                        dto.setTipoOferta("TRABAJO");
-                    } else {
-                        dto.setTipoOferta("DESCONOCIDO");
-                    }
-                }
-            } catch (ResourceNotFoundException ex) {
-                dto.setTipoOferta("DESCONOCIDO");
-            }
-    
-            return dto;
-        }).toList();
-    }
-    
+        LocalDateTime ahora = LocalDateTime.now();
+        List<OfertaPatrocinada> patActivas = ofertaPatrocinadaRepository.findAll().stream()
+            .filter(p -> p.getStatus() == PatrocinioStatus.ACTIVO
+                      && p.getFechaFin() != null
+                      && p.getFechaFin().isAfter(ahora))
+            .toList();
 
+        Set<Integer> ofertasPatrocinadasIds = patActivas.stream()
+            .map(p -> p.getOferta().getId())
+            .collect(Collectors.toSet());
+        List<Oferta> ofertasOrdenadas = ofertas.stream()
+            .sorted((o1, o2) -> {
+                boolean o1Pat = ofertasPatrocinadasIds.contains(o1.getId());
+                boolean o2Pat = ofertasPatrocinadasIds.contains(o2.getId());
+                if (o1Pat && !o2Pat) return -1;
+                if (!o1Pat && o2Pat) return 1;
+                return o2.getFechaPublicacion()
+                         .compareTo(o1.getFechaPublicacion());
+            })
+            .toList();
+        return ofertasOrdenadas.stream()
+            .map(oferta -> {
+                OfertaCompletaDTO dto = new OfertaCompletaDTO();
+                dto.setId(oferta.getId());
+                dto.setTitulo(oferta.getTitulo());
+                dto.setExperiencia(oferta.getExperiencia());
+                dto.setLicencia(oferta.getLicencia());
+                dto.setNotas(oferta.getNotas());
+                dto.setEstado(oferta.getEstado());
+                dto.setFechaPublicacion(oferta.getFechaPublicacion());
+                dto.setSueldo(oferta.getSueldo());
+                dto.setLocalizacion(oferta.getLocalizacion());
+                dto.setPrioridad(oferta.getPrioridad());
+                dto.setCamionero(oferta.getCamionero());
+                dto.setAplicados(oferta.getAplicados());
+                if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
+                    dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
+                }
+
+                try {
+                    Carga c = ofertaService.obtenerCarga(oferta.getId());
+                    if (c != null) {
+                        dto.setTipoOferta("CARGA");
+                    } else {
+                        Trabajo t = ofertaService.obtenerTrabajo(oferta.getId());
+                        if (t != null) {
+                            dto.setTipoOferta("TRABAJO");
+                        } else {
+                            dto.setTipoOferta("DESCONOCIDO");
+                        }
+                    }
+                } catch (ResourceNotFoundException ex) {
+                    dto.setTipoOferta("DESCONOCIDO");
+                }
+
+                return dto;
+            })
+            .toList();
+    }
     /**
      * GET: Obtener oferta por ID
      * 
