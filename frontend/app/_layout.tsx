@@ -32,6 +32,7 @@ function RootLayout() {
         "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
+        suscripcion: "Planes de Suscripción",
       };
 
       const currentSegment = segments.join("/");
@@ -48,6 +49,7 @@ function RootLayout() {
         "/oferta/crear",
         "/miperfilempresa/editar",
         "/oferta/editar/",
+        "/suscripcion"
       ];
 
       const camioneroPaths = [
@@ -130,6 +132,7 @@ function RootLayout() {
         <Stack.Screen name="oferta/[ofertaId]" />
         <Stack.Screen name="workinprogress" />
         <Stack.Screen name="forbidden" />
+        <Stack.Screen name="suscripcion" />
       </Stack>
       {isMobile && <BottomBar />}
     </>
