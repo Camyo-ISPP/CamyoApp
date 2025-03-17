@@ -57,9 +57,6 @@ public class SignupRequestCamionero {
 
 	private LocalDate expiracionCAP;
 
-	@NotNull
-	private Boolean isAutonomo;
-
-	private List<Tarjetas> tarjetas;
+	private List<Tarjetas> tarjetasAutonomo;
 
 }
