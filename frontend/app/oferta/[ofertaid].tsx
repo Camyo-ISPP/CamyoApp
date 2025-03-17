@@ -154,7 +154,16 @@ export default function OfertaDetalleScreen() {
                     <>
                         <View style={styles.header}>
                             {/* Icono de retroceso */}
-                            <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/')}>
+                            <TouchableOpacity
+                                style={styles.backIcon}
+                                onPress={() => {
+                                    if (router.canGoBack()) {
+                                        router.back();
+                                    } else {
+                                        router.replace('/');
+                                    }
+                                }}
+                            >
                                 <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
                             </TouchableOpacity>
                             <Image
@@ -291,7 +300,16 @@ export default function OfertaDetalleScreen() {
                     <>
                         <View style={styles.header}>
                             {/* Icono de retroceso */}
-                            <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/')}>
+                            <TouchableOpacity
+                                style={styles.backIcon}
+                                onPress={() => {
+                                    if (router.canGoBack()) {
+                                        router.back();
+                                    } else {
+                                        router.replace('/');
+                                    }
+                                }}
+                            >
                                 <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
                             </TouchableOpacity>
                             <Image
