@@ -17,11 +17,7 @@ const ProfileDropdown = ({ user }) => {
   const handleLogout = () => {
     setModalVisible(false); 
 
-    setSuccessModalVisible(true);
-    setTimeout(() => {
-      setSuccessModalVisible(false);
-      logout();
-    }, 1000);
+    logout();
   };
 
   return (
@@ -168,7 +164,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   dropdownButton: {
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   dropdownButtonText: {
     fontSize: 14,

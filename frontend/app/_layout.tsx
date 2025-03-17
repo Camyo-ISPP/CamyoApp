@@ -3,20 +3,11 @@ import { Platform } from "react-native";
 import { useState, useEffect } from 'react';
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
-import { useAuth } from "../contexts/AuthContext"; // Importa useAuth
-import withAuthProvider from './withAuthProvider'; // Importa el HOC
+import withAuthProvider from './withAuthProvider'; 
 
 function RootLayout() {
   const segments = useSegments();
   const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
-
-  /*
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user, userToken } = useAuth(); // Usa useAuth
-  const [isLoading, setIsLoading] = useState(true);
-  const [isReady, setIsReady] = useState(false); // Track if the layout is ready
-  */
  
   useEffect(() => {
     if (Platform.OS === "web") {
@@ -41,81 +32,6 @@ function RootLayout() {
       document.title = pageTitles[currentSegment] || "Camyo";
     }
   }, [segments]);
-
-   /*
-  useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      const authenticated = !!userToken; // TODO: revisar si el token está expirado o no.
-
-      const empresaPaths = [
-        "/miperfilempresa",
-        "/oferta/crear",
-        "/miperfilempresa/editar",
-        "/oferta/editar/",
-      ];
-
-      const camioneroPaths = [
-        "/miperfilcamionero",
-        "/miperfilcamionero/editar"
-      ];
-
-      const adminPaths = [
-        "/workinprogress"
-      ];
-
-      const authGroupPaths = [...empresaPaths, ...camioneroPaths, ...adminPaths];
-      const inAuthGroup = authGroupPaths.some(path => pathname.startsWith(path));
-
-      if (inAuthGroup) {
-        if (authenticated && user) {
-          switch (user.rol) {
-            case 'EMPRESA':
-              if (!empresaPaths.some(path => pathname.startsWith(path))) {
-                if (pathname !== '/') {
-                  setTimeout(() => {
-                    router.replace('/forbidden');
-                  }, 100);
-                }
-              }
-              break;
-  
-            case 'CAMIONERO':
-              if (!camioneroPaths.some(path => pathname.startsWith(path))) {
-                if (pathname !== '/') {
-                  setTimeout(() => {
-                    router.replace('/forbidden');
-                  }, 100);
-                }
-              }
-              break;
-  
-            case 'ADMIN':
-              if (!adminPaths.some(path => pathname.startsWith(path))) {
-                if (pathname !== '/') {
-                  setTimeout(() => {
-                    router.replace('/forbidden');
-                  }, 100);
-                }
-              }
-              break;
-  
-          
-          }
-        } else {
-        }
-      }
-      setIsLoading(false);
-    };
-
-    // Asegúrate de que el layout esté listo antes de verificar la autenticación
-    setIsReady(true);
-    checkAuthAndRedirect();
-  }, [user, userToken, pathname]);
-  
-
-  if (isLoading || !isReady) {
-    return null; // O un componente de carga
-  }*/
 
   return (
     <>
