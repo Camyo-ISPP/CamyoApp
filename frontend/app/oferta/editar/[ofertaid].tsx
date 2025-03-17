@@ -242,7 +242,7 @@ const EditarOfertaScreen = () => {
           experiencia: Number(formData.experiencia),
           licencia: Array.isArray(formData.licencia) ? formData.licencia.join(", ") : formData.licencia,
           notas: formData.notas,
-          estado: formData.estado || "PENDIENTE",
+          estado: formData.estado || "ABIERTA",
           sueldo: parseFloat(formData.sueldo).toFixed(2),
           localizacion: formData.localizacion,
           fechaPublicacion: formatDate(new Date()),

@@ -21,9 +21,9 @@ public class OfertaCompletaDTO {
     private LocalDateTime fechaPublicacion;
     private Double sueldo;
     private String localizacion;
-    private OfertaPrioridad prioridad;
     private Camionero camionero;
     private Set<Camionero> aplicados;
+    private Set<Camionero> rechazados;
     private String nombreEmpresa;
     private String tipoOferta;
 }

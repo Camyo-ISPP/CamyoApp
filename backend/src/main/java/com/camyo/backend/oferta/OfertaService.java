@@ -1,5 +1,6 @@
 package com.camyo.backend.oferta;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -61,29 +62,13 @@ public class OfertaService {
     }
 
     @Transactional(readOnly = true)
-    public List<Oferta> obtenerAplicadas(Integer camioneroId) {
+    public List<List<Oferta>> obtenerOfertasPorCamionero(Integer camioneroId) {
         camioneroRepository.findById(camioneroId)
-                .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
-        return ofertaRepository.encontrarAplicadas(camioneroId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Oferta> obtenerAsignadas(Integer camioneroId) {
-        camioneroRepository.findById(camioneroId)
-                .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
-        return ofertaRepository.encontrarAsignadas(camioneroId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Oferta> obtenerAplicadasFiltradas(Integer camioneroId, OfertaEstado estado) {
-        camioneroRepository.findById(camioneroId)
-                .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
-        
-        if (estado != null) {
-            return ofertaRepository.encontrarAplicadasPorEstado(camioneroId, estado);
-        } else {
-            return ofertaRepository.encontrarAplicadasOrdenadas(camioneroId);
-        }
+            .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
+        List<Oferta> aplicadas = ofertaRepository.encontrarAplicadas(camioneroId);
+        List<Oferta> rechazadas = ofertaRepository.encontrarRechazadas(camioneroId);
+        List<Oferta> asignadas = ofertaRepository.encontrarAsignadas(camioneroId);
+        return List.of(aplicadas, rechazadas, asignadas);
     }
 
     @Transactional(readOnly = true)
@@ -205,6 +190,23 @@ public class OfertaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
 
         oferta.setCamionero(cam);
+        oferta.setEstado(OfertaEstado.CERRADA);
+        oferta.getAplicados().remove(cam);
+        oferta.getRechazados().addAll(oferta.getAplicados());
+        oferta.getAplicados().removeAll(oferta.getAplicados());
+        ofertaRepository.save(oferta);
+    }
+
+    @Transactional
+    public void rechazarOferta(Integer ofertaId, Integer camioneroId) {
+        Oferta oferta = ofertaRepository.findById(ofertaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Oferta", "id", ofertaId));
+
+        Camionero cam = camioneroRepository.findById(camioneroId)
+                .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
+
+        oferta.getAplicados().remove(cam);
+        oferta.getRechazados().add(cam);
         ofertaRepository.save(oferta);
     }
 
