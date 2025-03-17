@@ -21,13 +21,5 @@ export default function AdminRoute({ children }) {
         return null;
     }
 
-    /*
-    useEffect(() => {
-        if (user.rol !== "ADMIN") {
-            router.replace("/forbidden");
-            return null;
-        }
-    }, [user, segments]);*/
-
     return children;
 }

@@ -5,6 +5,7 @@ import { Entypo } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
 import { useRouter } from 'expo-router';
 import SuccessModal from './SuccessModal';
+import routes from './routes';
 
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -54,7 +55,7 @@ const ProfileDropdown = ({ user }) => {
           <Text style={styles.dropdownEmail}>{user.email}</Text>
           
           {user.rol !== 'ADMIN' && (
-            <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push('/miperfil')} >
+            <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push(routes.profile)} >
               <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
             </TouchableOpacity>
           )}
