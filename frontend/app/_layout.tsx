@@ -129,10 +129,7 @@ function RootLayout() {
         <Stack.Screen name="(public)/empresas" />
 
         <Stack.Screen name="miperfil" />
-        <Stack.Screen name="miperfilcamionero" />
-        <Stack.Screen name="miperfilempresa" />
-        <Stack.Screen name="miperfilcamionero/editar" />
-        <Stack.Screen name="miperfilempresa/editar" />
+        <Stack.Screen name="miperfil/editar" />
         
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/editar/[ofertaId]" />

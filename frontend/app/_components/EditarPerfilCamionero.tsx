@@ -10,11 +10,11 @@ import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const EditCompanyProfileScreen = () => {
+const EditarPerfilCamionero = () => {
   const { width } = useWindowDimensions();
+  const isWideScreen = width > 1074;
   const router = useRouter();
   const { user, userToken, updateUser } = useAuth();
-
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
@@ -27,9 +27,7 @@ const EditCompanyProfileScreen = () => {
 
   useEffect(() => {
     if (!user) return;
-
-    const fetchCompanyData = async () => {
-
+    const fetchUserData = async () => {
       setFormData({
         nombre: user.nombre || "",
         email: user.email || "",
@@ -39,7 +37,7 @@ const EditCompanyProfileScreen = () => {
       });
     };
 
-    fetchCompanyData();
+    fetchUserData();
   }, [user]);
 
   const handleInputChange = (field, value) => {
@@ -71,15 +69,15 @@ const EditCompanyProfileScreen = () => {
     }
 
     try {
-      const empresaData = {
+      const usuarioData = {
         userId: user.userId,
         nombre: updatedFormData.nombre || "",
         email: updatedFormData.email || "",
         telefono: updatedFormData.telefono || "000000000",
-        username: user.username,
+        username: user.username, // Mantener el username original
         localizacion: updatedFormData.localizacion || "",
         descripcion: updatedFormData.descripcion || "",
-        authority: user.authority || { id: 202, authority: "EMPRESA" },
+        authority: user.authority || { id: 201, authority: "CAMIONERO" },
       };
 
       const headers = {
@@ -87,16 +85,16 @@ const EditCompanyProfileScreen = () => {
         "Content-Type": "application/json",
       };
 
-      const companyResponse = await axios.put(`${BACKEND_URL}/usuarios/${user.userId}`, empresaData, { headers });
+      const userResponse = await axios.put(`${BACKEND_URL}/usuarios/${user.userId}`, usuarioData, { headers });
 
-      if (companyResponse.status === 200) {
+      if (userResponse.status === 200) {
         setErrorMessage("")
-        updateUser(empresaData);
-        
+        updateUser(usuarioData);
+
         setSuccessModalVisible(true);
         setTimeout(() => {
           setSuccessModalVisible(false);
-          router.replace("/miperfil");
+          router.push("/miperfil");
         }, 1000);
       }
     } catch (error) {
@@ -113,6 +111,9 @@ const EditCompanyProfileScreen = () => {
       }
     }
   };
+
+
+
 
   const renderInput = (label, field, icon, keyboardType = "default", multiline = false) => (
     <View style={{ width: "90%", marginBottom: 15 }}>
@@ -136,9 +137,9 @@ const EditCompanyProfileScreen = () => {
   return (
     <ScrollView style={[globalStyles.container, { paddingTop: 100 }]}>
       <View style={globalStyles.formContainerHalf}>
-        <Text style={globalStyles.title}>Editar Perfil de Empresa</Text>
+        <Text style={globalStyles.title}>Editar Perfil</Text>
 
-        {renderInput("Nombre", "nombre", <FontAwesome5 name="building" size={20} color={colors.primary} />)}
+        {renderInput("Nombre", "nombre", <FontAwesome5 name="user" size={20} color={colors.primary} />)}
         {renderInput("Email", "email", <MaterialIcons name="email" size={20} color={colors.primary} />, "email-address")}
         {renderInput("Teléfono", "telefono", <MaterialIcons name="phone" size={20} color={colors.primary} />, "phone-pad")}
         {renderInput("Localización", "localizacion", <MaterialIcons name="location-pin" size={20} color={colors.primary} />)}
@@ -160,9 +161,10 @@ const EditCompanyProfileScreen = () => {
           onClose={() => setSuccessModalVisible(false)}
           message="¡Tu perfil se actualizó correctamente!"
         />
+
       </View>
     </ScrollView>
   );
 };
 
-export default EditCompanyProfileScreen;
+export default EditarPerfilCamionero;

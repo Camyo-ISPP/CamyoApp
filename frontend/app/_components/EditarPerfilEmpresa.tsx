@@ -10,7 +10,7 @@ import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const EditCompanyProfileScreen = () => {
+const EditarPerfilEmpresa = () => {
   const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, userToken, updateUser } = useAuth();
@@ -165,4 +165,4 @@ const EditCompanyProfileScreen = () => {
   );
 };
 
-export default EditCompanyProfileScreen;
+export default EditarPerfilEmpresa;

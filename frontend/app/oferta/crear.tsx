@@ -155,7 +155,7 @@ const CrearOfertaScreen = () => {
         setSuccessModalVisible(true);
         setTimeout(() => {
           setSuccessModalVisible(false);
-          router.replace("/miperfilempresa");
+          router.replace("/miperfil");
         }, 1000);
 
       } catch (error) {

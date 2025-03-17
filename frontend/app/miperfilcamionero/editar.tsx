@@ -94,7 +94,7 @@ const EditProfileScreen = () => {
         setSuccessModalVisible(true);
         setTimeout(() => {
           setSuccessModalVisible(false);
-          router.push("/miperfilcamionero");
+          router.push("/miperfil");
         }, 1000);
       }
     } catch (error) {

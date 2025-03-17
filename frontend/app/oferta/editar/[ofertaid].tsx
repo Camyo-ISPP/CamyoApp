@@ -337,7 +337,7 @@ const EditarOfertaScreen = () => {
       setSuccessModalVisible(true);
         setTimeout(() => {
 	        setSuccessModalVisible(false);
-          router.replace("/miperfilempresa");
+          router.replace("/miperfil");
         }, 1000);
 
     } catch (error) {
@@ -355,7 +355,7 @@ const EditarOfertaScreen = () => {
         });
 
         if (response.ok) {
-            router.replace("/miperfilempresa");
+            router.replace("/miperfil");
 
         } else {
             Alert.alert("Error", "No se pudo eliminar la oferta.");

@@ -52,11 +52,17 @@ const ProfileDropdown = ({ user }) => {
             }}
             style={styles.avatarDropdown}
           />
+
+          <Text style={styles.dropdownRole}>{user.rol}</Text>
           <Text style={styles.dropdownHeader}>¡Hola, {user.nombre}!</Text>
           <Text style={styles.dropdownEmail}>{user.email}</Text>
-          <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push('/miperfil')} >
-            <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
-          </TouchableOpacity>
+          
+          {user.rol !== 'ADMIN' && (
+            <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push('/miperfil')} >
+              <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
+            </TouchableOpacity>
+          )}
+          
           <TouchableOpacity style={styles.dropdownButton} onPress={() => setModalVisible(true)}>
             <Text style={styles.dropdownButtonText2}>Cerrar sesión</Text>
           </TouchableOpacity>
@@ -150,7 +156,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#5f6368',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 5,
+  },
+  dropdownRole: {
+    fontWeight: 'bold', 
+    textTransform: 'uppercase', 
+    marginBottom: 5,
+    fontSize: 12,
+    color: colors.gray,
+    textAlign: 'center',
+    borderRadius: 15,
   },
   dropdownButton: {
     paddingVertical: 10,

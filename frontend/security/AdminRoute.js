@@ -10,7 +10,6 @@ export default function AdminRoute({ children }) {
 
     const rootNavigationState = useRootNavigationState();
     if (!rootNavigationState?.key) return null;
-    
 
     if (user == null) {
         router.replace("/login");
