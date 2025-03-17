@@ -104,8 +104,8 @@ const CamioneroScreen = () => {
       experiencia: parseInt(formData.experiencia.toString()),
       tieneCAP: formData.tieneCAP,
       expiracionCAP: formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-      tarjetasAutonomo: formData.isAutonomo,
-      tarjetas: formData.tarjetas
+      isAutonomo: formData.isAutonomo,
+      tarjetasAutonomo: formData.tarjetas
     };
 
     try {
