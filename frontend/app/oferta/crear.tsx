@@ -11,7 +11,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
 
 const CrearOfertaScreen = () => {
-  const { user } = useAuth(); // Obtener el usuario logueado desde el contexto de autenticación
+  const { user, userToken } = useAuth(); // Obtener el usuario logueado desde el contexto de autenticación
 
   const [tipoOferta, setTipoOferta] = useState("TRABAJO");
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -48,13 +48,6 @@ const CrearOfertaScreen = () => {
 
   console.log("formData", formData);
 
-  useEffect(() => {
-    if (!user || user.rol !== "EMPRESA") {
-      console.warn("⛔ Acceso denegado. Redirigiendo...");
-      alert("No tienes permisos para acceder a esta página.");
-      router.replace("/miperfilempresa"); // Redirigir a la página de perfil de empresa
-    }
-  }, [user]);
   
   // Cuando `user` cambie, actualizar `empresa.id`
   useEffect(() => {
@@ -154,10 +147,10 @@ const CrearOfertaScreen = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            'Authorization': `Bearer ${userToken}`
           },
           body: JSON.stringify(ofertaData),
         });
-
 
         if (!response.ok) {
           throw new Error(`Error al crear la oferta: ${response.statusText}`);
@@ -165,7 +158,7 @@ const CrearOfertaScreen = () => {
 
         const data = await response.json();
         console.log("Oferta creada con éxito:", data);
-        router.push("/miperfilempresa");
+        router.replace("/miperfilempresa");
 
       } catch (error) {
         console.error("Error al enviar la oferta:", error);
@@ -270,7 +263,7 @@ const CrearOfertaScreen = () => {
           {/* Campos dinámicos según el tipo de oferta */}
           {tipoOferta === "TRABAJO" ? (
             <>
-              {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "default", false, false, "YYYY-mm-dd")}
+              {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
 
               <View style={styles.inputContainer}>
                 <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
@@ -304,9 +297,9 @@ const CrearOfertaScreen = () => {
               {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
               {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
               {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
-              {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "YYYY-mm-dd")}
-              {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "YYYY-mm-dd")}
-              {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "YYYY-mm-dd")}
+              {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+              {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+              {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
             </>
           )}
 

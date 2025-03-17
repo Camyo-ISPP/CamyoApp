@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-nati
 import { useRouter } from "expo-router";
 import colors from "../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import globalStyles from "../../assets/styles/globalStyles";
 
 const IndexScreen = () => {
   const router = useRouter();
@@ -11,6 +12,7 @@ const IndexScreen = () => {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={styles.cardContainer}>
+          <Text style={globalStyles.title}>Registro</Text>
           <Text style={styles.title}>¿Qué tipo de usuario eres?</Text>
 
           <View style={styles.buttonContainer}>
@@ -31,7 +33,21 @@ const IndexScreen = () => {
               <MaterialIcons name="business" size={24} color={colors.white} style={styles.icon} />
               <Text style={styles.userTypeText}>Empresa</Text>
             </TouchableOpacity>
+
+            
           </View>
+
+          <View style={globalStyles.separatorContainer}>
+          <View style={globalStyles.separator} />
+          <Text style={globalStyles.separatorText}>¿Ya tienes cuenta?</Text>
+          <View style={globalStyles.separator} />
+        </View>
+        
+        <TouchableOpacity style={globalStyles.buttonBlue} onPress={() => router.push("/login")}>
+          <Text style={globalStyles.buttonTextRegister}>Iniciar Sesión</Text>
+        </TouchableOpacity>
+
+
         </View>
       </View>
     </ScrollView>
@@ -92,6 +108,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.white,
   },
+  separatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  
+  separator: {
+    height: 1,
+    backgroundColor: colors.mediumGray,
+    flex: 1,
+  },
+  
+  separatorText: {
+    marginHorizontal: 10,
+    fontSize: 14,
+    color: colors.secondary,
+  },
+  
+  buttonTextRegister: {
+    fontSize: 18,
+    color: colors.white,
+    textAlign: "center",
+    paddingVertical: 10,
+  },
+  
 });
 
 export default IndexScreen;

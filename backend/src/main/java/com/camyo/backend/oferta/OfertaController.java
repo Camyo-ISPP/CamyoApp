@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/ofertas")
-@CrossOrigin(origins = "http://localhost:8081")
 @Tag(name = "Ofertas", description = "API para gestión de ofertas")
 public class OfertaController {
 
@@ -524,7 +523,16 @@ public class OfertaController {
         }
     }
 
-
+    @GetMapping("/empresa/{empresaId}")
+    public ResponseEntity<List<Oferta>> obtenerOfertasPorEmpresa(
+            @PathVariable Integer empresaId) {
+        try {
+            List<Oferta> ofertas = ofertaService.obtenerOfertasPorEmpresa(empresaId);
+            return ResponseEntity.ok(ofertas);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
 }

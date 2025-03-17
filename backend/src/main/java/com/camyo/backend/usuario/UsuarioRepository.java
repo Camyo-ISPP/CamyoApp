@@ -23,5 +23,5 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Integer> {
     Boolean existsByEmail(String email);
   
     @Query("SELECT u.reseñas FROM Usuario u WHERE u.id = :userId")
-    public List<Reseña> obtenerReseñas(Integer userId);
+    public List<Resena> obtenerReseñas(Integer userId);
 }

@@ -25,7 +25,7 @@ const BottomBar = () => {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => {
             setSelectedIcon('business');
-            router.push('/registro');
+            router.replace('/registro');
             }}>
             <Ionicons
               name="business"
@@ -36,7 +36,7 @@ const BottomBar = () => {
 
           <TouchableOpacity onPress={() => {
             setSelectedIcon('user');
-            router.push('/miperfil');
+            router.replace('/miperfil');
           }}>
 
             <FontAwesome

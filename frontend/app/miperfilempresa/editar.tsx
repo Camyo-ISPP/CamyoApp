@@ -9,21 +9,12 @@ import { useRouter } from "expo-router";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const getCompanyById = async (companyId) => {
-  try {
-    const response = await axios.get(`${BACKEND_URL}/usuarios/${companyId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener la empresa:", error);
-    return null;
-  }
-};
-
 const EditCompanyProfileScreen = () => {
   const { width } = useWindowDimensions();
   const isWideScreen = width > 1074;
   const router = useRouter();
-  const { user, userToken } = useAuth();
+  const { user, userToken, updateUser } = useAuth();
+
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
@@ -31,20 +22,19 @@ const EditCompanyProfileScreen = () => {
     localizacion: "",
     descripcion: "",
   });
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (!user) return;
 
     const fetchCompanyData = async () => {
-      const empresa = await getCompanyById(user.userId);
-      if (!empresa) return;
 
       setFormData({
-        nombre: empresa.nombre || "",
-        email: empresa.email || "",
-        telefono: empresa.telefono || "",
-        localizacion: empresa.localizacion || "",
-        descripcion: empresa.descripcion || "",
+        nombre: user.nombre || "",
+        email: user.email || "",
+        telefono: user.telefono || "",
+        localizacion: user.localizacion || "",
+        descripcion: user.descripcion || "",
       });
     };
 
@@ -56,9 +46,32 @@ const EditCompanyProfileScreen = () => {
   };
 
   const handleSaveChanges = async (updatedFormData) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{9}$/;
+
+    if (!updatedFormData.nombre.trim()) {
+      setErrorMessage("El nombre no puede estar vacío.");
+      return;
+    }
+  
+    if (!updatedFormData.localizacion.trim()) {
+      setErrorMessage("La localización no puede estar vacía.");
+      return;
+    }
+  
+    if (!emailRegex.test(updatedFormData.email)) {
+      setErrorMessage("El correo electrónico no es válido.");
+      return;
+    }
+  
+    if (!phoneRegex.test(updatedFormData.telefono)) {
+      setErrorMessage("El teléfono debe contener exactamente 9 números.");
+      return;
+    }
+
     try {
       const empresaData = {
-        id: user.userId,
+        userId: user.userId,
         nombre: updatedFormData.nombre || "",
         email: updatedFormData.email || "",
         telefono: updatedFormData.telefono || "000000000",
@@ -76,11 +89,13 @@ const EditCompanyProfileScreen = () => {
       const companyResponse = await axios.put(`${BACKEND_URL}/usuarios/${user.userId}`, empresaData, { headers });
 
       if (companyResponse.status === 200) {
+        setErrorMessage("")
         console.log("✅ Perfil de empresa actualizado correctamente.");
-        alert("Perfil actualizado con éxito.");
-        router.push("/miperfilempresa");
+        updateUser(empresaData);
+        router.replace("/miperfilempresa");
       }
     } catch (error) {
+      setErrorMessage("Los datos introducidos no son correctos. Por favor, compruébalos e inténtalo de nuevo.");
       if (error.response) {
         console.error("❌ Error en la respuesta del servidor:", JSON.stringify(error.response.data, null, 2));
         alert(`Error: ${error.response.data.message || "Error desconocido"}`);
@@ -123,6 +138,12 @@ const EditCompanyProfileScreen = () => {
         {renderInput("Teléfono", "telefono", <MaterialIcons name="phone" size={20} color={colors.primary} />, "phone-pad")}
         {renderInput("Localización", "localizacion", <MaterialIcons name="location-pin" size={20} color={colors.primary} />)}
         {renderInput("Descripción", "descripcion", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", true)}
+
+        {errorMessage ? (
+            <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
+              {errorMessage}
+            </Text>
+          ) : null}
 
         <TouchableOpacity style={[globalStyles.button, { width: "100%", borderRadius: 12, elevation: 5 }]} onPress={() => handleSaveChanges(formData)}>
           <Text style={[globalStyles.buttonText, { fontSize: 30 }]}>Guardar Cambios</Text>

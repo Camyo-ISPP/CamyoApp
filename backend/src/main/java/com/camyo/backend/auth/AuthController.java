@@ -40,7 +40,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:8081")
 @Tag(name = "Autenticación", description = "API de autenticación")
 public class AuthController {
     private final AuthenticationManager authenticationManager;

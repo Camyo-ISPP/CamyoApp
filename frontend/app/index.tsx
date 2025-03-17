@@ -11,18 +11,16 @@ import BottomBar from './_components/BottomBar';
 import { MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
-import { useAuth } from "@/contexts/AuthContext";
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+import Titulo from "./_components/Titulo";
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export default function Index() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  const { user, userToken, logout } = useAuth();
+  
   useEffect(() => {
     fetchData();
-    console.log(data); // Elimina las llaves innecesarias
   }, []);
 
   const [error, setError] = useState(null);
@@ -30,7 +28,6 @@ export default function Index() {
   const fetchData = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/ofertas`);
-      console.log(response.data);
       setData(response.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
@@ -53,6 +50,7 @@ export default function Index() {
         <View style={styles.webContainer}>
           <CamyoWebNavBar />
           <ScrollView style={styles.scrollview}>
+          <Titulo texto="Lista de Ofertas" marginTop={30} />
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {data && data.map((item) => (
                 <View key={item.id} style={styles.card}>
@@ -62,24 +60,23 @@ export default function Index() {
 
                     <View style={{ display: "flex", flexDirection: "row" }}>
                       <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
-                      <Text style={styles.offerDetailsTagLicense}>{item.licencia}</Text>
+                      <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
                       <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text> 
 
                       <View style={{display:"flex",alignItems:"center",flexDirection:"row"}}>
-                      <Text style={styles.localizacion}>|</Text>
-                      <MaterialIcons name="location-on" size={20} color="#696969" />
-                      <Text style={styles.localizacion}>{item.localizacion}</Text>
-
+                        <Text style={styles.localizacion}>|</Text>
+                        <MaterialIcons name="location-on" size={20} color="#696969" />
+                        <Text style={styles.localizacion}>{item.localizacion}</Text>
                       </View>
                       
                     </View>
 
                     <Text style={styles.offerInfo}>{item.notas}</Text>
 
-                    <View />
+                    <View/>
                   </View>
                     <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                    <TouchableOpacity style={styles.button} onPress={()=>router.push(`/oferta/${item.id}`)}>
+                    <TouchableOpacity style={styles.button} onPress={()=>router.replace(`/oferta/${item.id}`)}>
                     <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
                     <Text style={styles.buttonText}>Ver Detalles</Text>
 
@@ -368,5 +365,3 @@ const styles = StyleSheet.create({
 
 
 });
-
-

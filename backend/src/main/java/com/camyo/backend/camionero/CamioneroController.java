@@ -21,7 +21,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/camioneros")
-@CrossOrigin(origins = "http://localhost:8081")
 @Tag(name = "Camioneros", description = "API para gestión de camioneros")
 public class CamioneroController {
 

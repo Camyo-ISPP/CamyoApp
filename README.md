@@ -1,3 +1,17 @@
+
+
+<div align="center">
+
+<a href="">[![Commits Syntax Checker](https://github.com/Camyo-ISPP/CamyoApp/actions/workflows/commits.yml/badge.svg?branch=main)](https://github.com/Camyo-ISPP/CamyoApp/actions/workflows/commits.yml)</a>
+
+
+<a href="">![Last Commit](https://img.shields.io/github/last-commit/Camyo-ISPP/CamyoApp)</a>
+<a href="">![Issues](https://img.shields.io/github/issues/Camyo-ISPP/CamyoApp)</a>
+<a href="">![Pull Requests](https://img.shields.io/github/issues-pr/Camyo-ISPP/CamyoApp)</a>
+
+</div>
+
+
 <p align="center">
   <img src="https://i.imgur.com/C72nY4p.png" alt="Camyo Logo" width="180">
   <img src="https://i.imgur.com/uVW3L8Y.png" alt="Camyo Text" width="350">
@@ -6,6 +20,7 @@
 <h2 align="center" style="color: #f1501b">
 Donde los camioneros y las empresas se encuentran.​
 </h2>
+
 
 **Camyo** es una plataforma diseñada para simplificar la **búsqueda de empleo en el sector del transporte**. Conectamos de manera rápida y eficiente a empresas y transportistas de toda España, centralizando todas las ofertas en un solo lugar. 
 

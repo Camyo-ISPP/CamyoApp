@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.camyo.backend.configuration.jwt.AuthEntryPointJwt;
 import com.camyo.backend.configuration.jwt.AuthTokenFilter;
+import org.springframework.http.HttpMethod;
 import com.camyo.backend.configuration.services.UserDetailsServiceImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -51,7 +52,30 @@ public class SecurityConfiguration {
 			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
 			
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+			//.requestMatchers("/resources/**", "/webjars/**", "/static/**", "/swagger-resources/**").permitAll()			
+			//.requestMatchers( "/","/auth/**","/swagger-ui.html","/swagger-ui/**").permitAll()
 			.requestMatchers("/usuarios/**").permitAll()
+			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/desaplicar/**").hasAuthority("CAMIONERO")
+			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/aplicar/**").hasAuthority("CAMIONERO")
+			.requestMatchers(HttpMethod.POST, "/ofertas/aplicadas/**").hasAuthority("CAMIONERO")
+
+			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.POST, "/ofertas").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.PUT, "/ofertas/**").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.DELETE, "/ofertas/**").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.GET, "/ofertas/{id}/camioneros").hasAnyAuthority("EMPRESA", "CAMIONERO")
+
+
+			.requestMatchers(HttpMethod.PUT, "/camioneros/**").hasAuthority("CAMIONERO")
+			.requestMatchers(HttpMethod.DELETE, "/camioneros/**").hasAuthority("CAMIONERO")
+			.requestMatchers(HttpMethod.PUT, "/empresas/**").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.DELETE, "/empresas/**").hasAuthority("EMPRESA")
+
 			.anyRequest().permitAll()
 			)
 							 

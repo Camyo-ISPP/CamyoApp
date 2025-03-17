@@ -37,7 +37,7 @@ public class Usuario {
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true)
-    private Set<Reseña> reseñas;
+    private Set<Resena> reseñas;
     
     @Size(max = 200, message = "La localización no puede tener más de 200 caracteres")
     private String localizacion;

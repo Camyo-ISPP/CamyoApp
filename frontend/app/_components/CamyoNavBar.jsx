@@ -2,7 +2,6 @@ import { useRouter } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, TouchableWithoutFeedback } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import React, { useEffect, useState, useRef } from "react";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 const ProyectoLogo = require('frontend/assets/images/camyo.png');
 import routes from "./routes";
@@ -60,6 +59,7 @@ export default function CamyoWebNavBar() {
           </View>
           <Animated.View style={[styles.sidebar, { transform: [{ translateX: sidebarAnim }] }]}>
             <ScrollView>
+              {/* 
               <View style={styles.searchWebZoom}>
                 <TextInput
                   style={styles.searchInputWebZoom}
@@ -68,12 +68,13 @@ export default function CamyoWebNavBar() {
                 />
                 <TouchableOpacity><FontAwesome name="search" size={12} color="black" style={styles.searchIconZoom} /></TouchableOpacity>
               </View>
+              */}
 
               {user ? (
                 <TouchableOpacity style={styles.shareButtonZoomed2} onPress={() => logout()}><Text style={styles.shareTextZoom1}>Cerrar Sesión</Text></TouchableOpacity>
               ) : (
                 <>
-                  <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.push(routes.login)}><Text style={styles.shareTextZoom1}>Iniciar Sesión</Text></TouchableOpacity>
+                  <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.replace(routes.login)}><Text style={styles.shareTextZoom1}>Iniciar Sesión</Text></TouchableOpacity>
     
                 </>
               )}
@@ -91,7 +92,9 @@ export default function CamyoWebNavBar() {
               </TouchableOpacity>
             </View>
             <View style={styles.rightSection}>
-               <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
+               <TouchableOpacity style={styles.buttonText} onPress={() => router.replace(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
+              
+              {/* 
               <View style={styles.searchWeb}>
                 <TextInput
                   style={styles.searchInputWeb}
@@ -100,6 +103,7 @@ export default function CamyoWebNavBar() {
                 />
                 <TouchableOpacity><FontAwesome name="search" size={24} color="black" style={styles.searchIcon} /></TouchableOpacity>
               </View>
+              */}
 
               {user ? (
                 <>
@@ -108,7 +112,7 @@ export default function CamyoWebNavBar() {
                 </>
               ) : (
                 <>
-                  <TouchableOpacity style={styles.shareButton} onPress={() => router.push(routes.login)}><Text style={styles.shareText}>Iniciar Sesión</Text></TouchableOpacity>
+                  <TouchableOpacity style={styles.shareButton} onPress={() => router.replace(routes.login)}><Text style={styles.shareText}>Acceder</Text></TouchableOpacity>
                 
                 </>
               )}

@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
-import { Entypo, MaterialIcons } from "@expo/vector-icons";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, StyleSheet } from "react-native";
+import { Entypo, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import globalStyles from "../../assets/styles/globalStyles";
 import colors from "../../assets/styles/colors";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
 const LoginScreen = () => {
-
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
   const router = useRouter();
   const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -32,11 +32,13 @@ const LoginScreen = () => {
         username,
         password,
       });
-      const { token, userData } = response.data;
+      const { token } = response.data;
       login(response.data, token);
 
-      // Redirigir al usuario a la pantalla principal de ofertas
-      router.replace("/");
+      setIsModalVisible(true);
+        setTimeout(() => {
+          router.replace("/");
+        }, 1000);
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -87,7 +89,7 @@ const LoginScreen = () => {
           </Text>
         ) : null}
 
-        <TouchableOpacity style={[globalStyles.button, { marginBottom: 10, borderRadius: 12, elevation: 5 }]} onPress={handleLogin}>
+        <TouchableOpacity style={[globalStyles.buttonBlue, { marginTop:10, marginBottom: 10, borderRadius: 12, elevation: 5 }]} onPress={handleLogin}>
           <Text style={[globalStyles.buttonText, { fontSize: 25 }]}>Ingresar</Text>
         </TouchableOpacity>
 
@@ -97,12 +99,54 @@ const LoginScreen = () => {
           <View style={globalStyles.separator} />
         </View>
         
-        <TouchableOpacity style={globalStyles.buttonOrange} onPress={() => router.push("/registro")}>
-          <Text style={globalStyles.buttonText}>Regístrate</Text>
+        <TouchableOpacity style={globalStyles.buttonOrange} onPress={() => router.replace("/registro")}>
+          <Text style={globalStyles.buttonTextRegister}>Regístrate</Text>
         </TouchableOpacity>
+
+        {/* Modal de éxito */}
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={isModalVisible}
+            onRequestClose={() => setIsModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                {/* Icono del tic verde */}
+                <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
+                
+                <Text style={styles.modalText}>¡Inicio de sesión exitoso!</Text>
+                <Text style={styles.modalText}>Redirigiendo...</Text>
+              </View>
+            </View>
+          </Modal>
       </View>
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: colors.green,
+    padding: 20,
+    borderRadius: 10,
+    width: 250,
+    alignItems: "center",
+  },
+  modalIcon: {
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 18,
+    color: "white",
+    textAlign: "center",
+  },
+});
 
 export default LoginScreen;

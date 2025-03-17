@@ -7,3 +7,4 @@ node_modules
 Thumbs.db
 
 .env
+.firebase
