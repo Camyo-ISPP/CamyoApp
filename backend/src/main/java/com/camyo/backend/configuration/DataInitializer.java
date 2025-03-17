@@ -176,16 +176,16 @@ public class DataInitializer {
 
                                 // Insert Camionero tarjetas
                                 statement.addBatch("INSERT IGNORE INTO camionero_tarjetas_autonomo (camionero_id, tarjetas_autonomo) VALUES "
-                                        + "(208, 1),"
-                                        + "(209, 2),"
-                                        + "(210, 3),"
-                                        + "(213, 4),"
-                                        + "(214, 1),"
+                                        + "(208, 0),"
+                                        + "(209, 1),"
+                                        + "(210, 2),"
+                                        + "(213, 3),"
+                                        + "(214, 0),"
                                         + "(219, 2),"
-                                        + "(220, 3),"
-                                        + "(221, 4),"
-                                        + "(224, 1),"
-                                        + "(227, 1)");
+                                        + "(220, 2),"
+                                        + "(221, 3),"
+                                        + "(224, 0),"
+                                        + "(227, 0)");
 
                                 // La base de datos toma la posición del enum en vez del valor:
                                         // AM: 0

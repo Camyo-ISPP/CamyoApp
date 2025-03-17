@@ -65,7 +65,8 @@ public class Camionero{
     private LocalDate expiracionCAP;
 
     @ElementCollection
-    private List<Tarjetas> tarjetasAutonomo;
+    // @JsonIgnore
+    private Set<Tarjetas> tarjetasAutonomo;
 
     @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST })
 	@JoinColumn(name = "usuario_id", referencedColumnName = "id")
