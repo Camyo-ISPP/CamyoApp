@@ -93,7 +93,9 @@ export default function CamyoWebNavBar() {
             </View>
             <View style={styles.rightSection}>
                <TouchableOpacity style={styles.buttonText} onPress={() => router.replace(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
-              
+               <TouchableOpacity onPress={() => router.push('/chat/list')}>
+                  <Text style={styles.linkText}>Go to Chat List</Text>
+               </TouchableOpacity>
               {/* 
               <View style={styles.searchWeb}>
                 <TextInput
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   linkText: {
-    color: colors.white,
+    color: 'white',
   },
   middleSection: {
     display: "flex",

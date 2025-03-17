@@ -32,6 +32,7 @@ function RootLayout() {
         "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
+        chat:"Chat"
       };
 
       const currentSegment = segments.join("/");
@@ -48,11 +49,15 @@ function RootLayout() {
         "/oferta/crear",
         "/miperfilempresa/editar",
         "/oferta/editar/",
+        "/chat",
+        "/chat/list"
       ];
 
       const camioneroPaths = [
         "/miperfilcamionero",
-        "/miperfilcamionero/editar"
+        "/miperfilcamionero/editar",
+        "/chat",
+        "/chat/list"
       ];
 
       const adminPaths = [
@@ -130,6 +135,8 @@ function RootLayout() {
         <Stack.Screen name="oferta/[ofertaId]" />
         <Stack.Screen name="workinprogress" />
         <Stack.Screen name="forbidden" />
+        <Stack.Screen name="chat" />
+        <Stack.Screen name="chat/list" />
       </Stack>
       {isMobile && <BottomBar />}
     </>

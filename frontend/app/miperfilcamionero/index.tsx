@@ -55,6 +55,8 @@ const UserProfileScreen: React.FC = () => {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
 
+    console.log(user.id)
+    console.log(camionero)
     useEffect(() => {
         if (!userToken || !user || user.rol !== "CAMIONERO") {
             setLoading(false);

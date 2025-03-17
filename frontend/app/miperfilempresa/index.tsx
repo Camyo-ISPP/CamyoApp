@@ -39,6 +39,7 @@ const EmpresaPerfil = () => {
   const navigation = useNavigation();
   const [offers, setOffers] = useState<any[]>([]);
   const [offerStatus, setOfferStatus] = useState<string>('ACEPTADA');
+  
 
   useEffect(() => {
     if (!userToken || !user || user.rol !== "EMPRESA") {
