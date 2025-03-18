@@ -370,6 +370,11 @@ public class DataInitializer {
                                         + "(222, 224),"
                                         + "(223, 223),"
                                         + "(223, 224)");
+                                // Insertar suscripciones
+                                statement.addBatch("INSERT IGNORE INTO suscripciones (id, empresa_id, nivel, fecha_inicio, fecha_fin, activa) VALUES "
+                                + "(1, 222, 'PREMIUM', '2025-03-16', '2025-04-16', true),"
+                                + "(2, 223, 'BASIC', '2025-03-16', '2025-04-16', true),"
+                                + "(3, 224, 'GRATIS', '2025-03-16', NULL, true)");
 
                                 // Execute batch
                                 statement.executeBatch();
