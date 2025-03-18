@@ -84,12 +84,11 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                Alert.alert("Éxito", "Has solicitado correctamente.");
                 setIsModalVisible(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setSuccessModalVisible(false); 
+                    setIsModalVisible(false); 
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo solicitar la oferta.");
@@ -111,13 +110,12 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                Alert.alert("Éxito", "Has retirado tu solicitud correctamente.");
                 setIsModalVisible(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
                     setIsModalVisible(false); 
-                }, 2000);
+                }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo retirar la solicitud.");
             }
@@ -137,13 +135,12 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                Alert.alert("Éxito", "Has asignado al camionero.");
                 setIsModalVisible2(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
                     setIsModalVisible2(false); 
-                }, 2000);
+                }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo asignar al camionero.");
             }
@@ -163,13 +160,12 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                Alert.alert("Éxito", "Has rechazado al camionero.");
                 setIsModalVisible2(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
                     setIsModalVisible2(false); 
-                }, 2000);
+                }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo rechazar al camionero.");
             }
