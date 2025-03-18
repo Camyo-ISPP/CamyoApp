@@ -5,6 +5,7 @@ import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from '@expo/vector-icons';
+import SuccessModal from "../_components/SuccessModal";
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
@@ -24,7 +25,7 @@ export default function OfertaDetalleScreen() {
     const { ofertaid } = useLocalSearchParams();
     const router = useRouter(); // Para navegar entre pantallas
     const { user, userToken, login, logout } = useAuth();
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     useEffect(() => {
         if (ofertaid) {
@@ -103,12 +104,11 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                Alert.alert("Éxito", "Has solicitado correctamente.");
-                setIsModalVisible(true); // Abre el popup
+                setSuccessModalVisible(true);
                 setUserHasApplied(true);
                 setTimeout(() => {
-                    setIsModalVisible(false); 
-                }, 2000);
+                    setSuccessModalVisible(false); 
+                }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo solicitar la oferta.");
             }
@@ -140,11 +140,11 @@ export default function OfertaDetalleScreen() {
     };
 
     const handleLoginRedirect = () => {
-        router.replace("/login")
+        router.push("/login")
     };    
 
     const handleEditarOferta = () => {
-        router.replace(`/oferta/editar/${ofertaid}`);
+        router.push(`/oferta/editar/${ofertaid}`);
     }
 
     const renderOfferCard = () => {
@@ -154,7 +154,7 @@ export default function OfertaDetalleScreen() {
                     <>
                         <View style={styles.header}>
                             {/* Icono de retroceso */}
-                            <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/')}>
+                            <TouchableOpacity style={styles.backIcon} onPress={() => router.push('/')}>
                                 <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
                             </TouchableOpacity>
                             <Image
@@ -196,20 +196,12 @@ export default function OfertaDetalleScreen() {
                             </TouchableOpacity>
                         )}
 
-                        {/* Modal de éxito */}
-                        <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={isModalVisible}
-                        onRequestClose={() => setIsModalVisible(false)}
-                        >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContainer}>
-                            <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
-                            <Text style={styles.modalText}>¡Has solicitado correctamente a la carga!</Text>
-                            </View>
-                        </View>
-                        </Modal>
+                        {/* Modal de éxito para oferta de carga */}
+                        <SuccessModal
+                            isVisible={successModalVisible}
+                            onClose={() => setSuccessModalVisible(false)}
+                            message="¡Has solicitado correctamente a la carga!"
+                        />
 
                         <View style={styles.separator} />
 
@@ -291,7 +283,7 @@ export default function OfertaDetalleScreen() {
                     <>
                         <View style={styles.header}>
                             {/* Icono de retroceso */}
-                            <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/')}>
+                            <TouchableOpacity style={styles.backIcon} onPress={() => router.push('/')}>
                                 <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
                             </TouchableOpacity>
                             <Image
@@ -331,21 +323,13 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.solicitarButtonText}>Inicia sesión para solicitar</Text>
                             </TouchableOpacity>
                         )}
-                        
-                        {/* Modal de éxito */}
-                        <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={isModalVisible}
-                        onRequestClose={() => setIsModalVisible(false)}
-                        >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContainer}>
-                            <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
-                            <Text style={styles.modalText}>¡Has solicitado correctamente a la oferta!</Text>
-                            </View>
-                        </View>
-                        </Modal>
+
+                        {/* Modal de éxito para oferta general */}
+                        <SuccessModal
+                            isVisible={successModalVisible}
+                            onClose={() => setSuccessModalVisible(false)}
+                            message="¡Has solicitado correctamente a la oferta!"
+                        />
                         
 
                         <View style={styles.separator} />

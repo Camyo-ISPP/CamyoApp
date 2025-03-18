@@ -6,12 +6,12 @@ import colors from "../../assets/styles/colors";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
+import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const EditCompanyProfileScreen = () => {
   const { width } = useWindowDimensions();
-  const isWideScreen = width > 1074;
   const router = useRouter();
   const { user, userToken, updateUser } = useAuth();
 
@@ -23,6 +23,7 @@ const EditCompanyProfileScreen = () => {
     descripcion: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -90,20 +91,24 @@ const EditCompanyProfileScreen = () => {
 
       if (companyResponse.status === 200) {
         setErrorMessage("")
-        console.log("✅ Perfil de empresa actualizado correctamente.");
         updateUser(empresaData);
-        router.replace("/miperfilempresa");
+        
+        setSuccessModalVisible(true);
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+          router.replace("/miperfilempresa");
+        }, 1000);
       }
     } catch (error) {
       setErrorMessage("Los datos introducidos no son correctos. Por favor, compruébalos e inténtalo de nuevo.");
       if (error.response) {
-        console.error("❌ Error en la respuesta del servidor:", JSON.stringify(error.response.data, null, 2));
+        console.error("Error en la respuesta del servidor:", JSON.stringify(error.response.data, null, 2));
         alert(`Error: ${error.response.data.message || "Error desconocido"}`);
       } else if (error.request) {
-        console.error("❌ No se recibió respuesta del servidor:", error.request);
+        console.error("No se recibió respuesta del servidor:", error.request);
         alert("No se recibió respuesta del servidor.");
       } else {
-        console.error("❌ Error al realizar la solicitud:", error.message);
+        console.error("Error al realizar la solicitud:", error.message);
         alert("Hubo un problema con la solicitud.");
       }
     }
@@ -148,6 +153,13 @@ const EditCompanyProfileScreen = () => {
         <TouchableOpacity style={[globalStyles.button, { width: "100%", borderRadius: 12, elevation: 5 }]} onPress={() => handleSaveChanges(formData)}>
           <Text style={[globalStyles.buttonText, { fontSize: 30 }]}>Guardar Cambios</Text>
         </TouchableOpacity>
+
+        {/* Modal de éxito */}
+        <SuccessModal
+          isVisible={successModalVisible}
+          onClose={() => setSuccessModalVisible(false)}
+          message="¡Tu perfil se actualizó correctamente!"
+        />
       </View>
     </ScrollView>
   );

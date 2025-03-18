@@ -53,7 +53,7 @@ export default function CamyoWebNavBar() {
                 <Ionicons name="menu" size={30} color="white" />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => router.replace("/")}>
+            <TouchableOpacity onPress={() => router.push("/")}>
               <Image source={ProyectoLogo} style={styles.logoZoomed} resizeMode="cover" />
             </TouchableOpacity>
           </View>
@@ -74,7 +74,7 @@ export default function CamyoWebNavBar() {
                 <TouchableOpacity style={styles.shareButtonZoomed2} onPress={() => logout()}><Text style={styles.shareTextZoom1}>Cerrar Sesión</Text></TouchableOpacity>
               ) : (
                 <>
-                  <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.replace(routes.login)}><Text style={styles.shareTextZoom1}>Iniciar Sesión</Text></TouchableOpacity>
+                  <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.push(routes.login)}><Text style={styles.shareTextZoom1}>Iniciar Sesión</Text></TouchableOpacity>
     
                 </>
               )}
@@ -87,12 +87,12 @@ export default function CamyoWebNavBar() {
         <>
           <View style={styles.headerWeb}>
             <View style={[styles.leftSection, isZoomed && styles.centerSection]}>
-              <TouchableOpacity onPress={() => router.replace("/")}>
+              <TouchableOpacity onPress={() => router.push("/")}>
                 <Image source={ProyectoLogo} style={styles.logoZoomed} resizeMode="cover" />
               </TouchableOpacity>
             </View>
             <View style={styles.rightSection}>
-               <TouchableOpacity style={styles.buttonText} onPress={() => router.replace(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
+               <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
               
               {/* 
               <View style={styles.searchWeb}>
@@ -112,7 +112,7 @@ export default function CamyoWebNavBar() {
                 </>
               ) : (
                 <>
-                  <TouchableOpacity style={styles.shareButton} onPress={() => router.replace(routes.login)}><Text style={styles.shareText}>Acceder</Text></TouchableOpacity>
+                  <TouchableOpacity style={styles.shareButton} onPress={() => router.push(routes.login)}><Text style={styles.shareText}>Acceder</Text></TouchableOpacity>
                 
                 </>
               )}
