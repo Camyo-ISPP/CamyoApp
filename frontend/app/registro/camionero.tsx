@@ -104,7 +104,7 @@ const CamioneroScreen = () => {
       tieneCAP: formData.tieneCAP,
       expiracionCAP: formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
       isAutonomo: formData.isAutonomo,
-      tarjetas: formData.tarjetas
+      tarjetasAutonomo: formData.tarjetas
     };
 
     try {

@@ -174,31 +174,18 @@ public class DataInitializer {
                                         + "(226, '5380SEF', 'Mercedes Benz Sprinter', NULL, NULL, 226),"
                                         + "(227, '8567SHI', 'Mercedes Benz Actros', NULL, NULL, 227)");
 
-                                // Insert Autónomos
-                                statement.addBatch("INSERT IGNORE INTO autonomo (id, camionero_id) VALUES "
-                                        + "(201, 208),"
-                                        + "(202, 209),"
-                                        + "(203, 210),"
-                                        + "(204, 213),"
-                                        + "(205, 214),"
-                                        + "(206, 219),"
-                                        + "(207, 220),"
-                                        + "(208, 221),"
-                                        + "(209, 224),"
-                                        + "(210, 227)");
-
-                                // Insert Autonomo tarjetas
-                                statement.addBatch("INSERT IGNORE INTO autonomo_tarjetas (autonomo_id, tarjetas) VALUES "
-                                        + "(201, 1),"
-                                        + "(202, 2),"
-                                        + "(203, 3),"
-                                        + "(204, 4),"
-                                        + "(205, 1),"
-                                        + "(206, 2),"
-                                        + "(207, 3),"
-                                        + "(208, 4),"
+                                // Insert Camionero tarjetas
+                                statement.addBatch("INSERT IGNORE INTO camionero_tarjetas_autonomo (camionero_id, tarjetas_autonomo) VALUES "
+                                        + "(208, 0),"
                                         + "(209, 1),"
-                                        + "(210, 1)");
+                                        + "(210, 2),"
+                                        + "(213, 3),"
+                                        + "(214, 0),"
+                                        + "(219, 2),"
+                                        + "(220, 2),"
+                                        + "(221, 3),"
+                                        + "(224, 0),"
+                                        + "(227, 0)");
 
                                 // La base de datos toma la posición del enum en vez del valor:
                                         // AM: 0
@@ -383,6 +370,11 @@ public class DataInitializer {
                                         + "(222, 224),"
                                         + "(223, 223),"
                                         + "(223, 224)");
+                                // Insertar suscripciones
+                                statement.addBatch("INSERT IGNORE INTO suscripciones (id, empresa_id, nivel, fecha_inicio, fecha_fin, activa) VALUES "
+                                + "(1, 222, 'PREMIUM', '2025-03-16', '2025-04-16', true),"
+                                + "(2, 223, 'BASIC', '2025-03-16', '2025-04-16', true),"
+                                + "(3, 224, 'GRATIS', '2025-03-16', NULL, true)");
 
                                 // Execute batch
                                 statement.executeBatch();
