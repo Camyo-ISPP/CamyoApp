@@ -89,8 +89,8 @@ export default function OfertaDetalleScreen() {
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setIsModalVisible(false); 
-                }, 2000);
+                    setSuccessModalVisible(false); 
+                }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo solicitar la oferta.");
             }
@@ -179,11 +179,11 @@ export default function OfertaDetalleScreen() {
     };
 
     const handleLoginRedirect = () => {
-        router.replace("/login")
+        router.push("/login")
     };    
 
     const handleEditarOferta = () => {
-        router.replace(`/oferta/editar/${ofertaid}`);
+        router.push(`/oferta/editar/${ofertaid}`);
     }
 
     const renderOfferCard = () => {
