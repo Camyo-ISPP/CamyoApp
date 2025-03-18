@@ -51,7 +51,6 @@ const CamioneroScreen: React.FC = () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/camioneros/${camioneroid}`);
             setCamionero(response.data);
-            console.log(camionero)
             setLicencias(response.data.licencias);
             setDisp(response.data.disponibilidad);
         } catch (err) {
