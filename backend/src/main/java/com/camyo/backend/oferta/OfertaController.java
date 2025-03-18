@@ -454,10 +454,10 @@ public class OfertaController {
      * @return Mensaje de éxito si la operación se completó correctamente.
      */
     @PutMapping("/{ofertaId}/aplicar/{camioneroId}")
-    public ResponseEntity<MessageResponse> aplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+    public ResponseEntity<Oferta> aplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
         try {
-            ofertaService.aplicarOferta(ofertaId, camioneroId);
-            return ResponseEntity.ok(new MessageResponse("El camionero ha aplicado a la oferta correctamente."));
+            Oferta oferta = ofertaService.aplicarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -471,30 +471,30 @@ public class OfertaController {
      * @return Mensaje de éxito si la operación fue completada correctamente.
      */
     @PutMapping("/{ofertaId}/desaplicar/{camioneroId}")
-    public ResponseEntity<MessageResponse> desaplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+    public ResponseEntity<Oferta> desaplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
         try {
-            ofertaService.desaplicarOferta(ofertaId, camioneroId);
-            return ResponseEntity.ok(new MessageResponse("El camionero ha sido eliminado de la lista de aplicados."));
+            Oferta oferta = ofertaService.desaplicarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/{ofertaId}/asignar/{camioneroId}")
-    public ResponseEntity<MessageResponse> asignarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+    public ResponseEntity<Oferta> asignarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
         try {
-            ofertaService.asignarOferta(ofertaId, camioneroId);
-            return ResponseEntity.ok(new MessageResponse("El camionero ha sido asignado a la oferta."));
+            Oferta oferta = ofertaService.asignarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/{ofertaId}/rechazar/{camioneroId}")
-    public ResponseEntity<MessageResponse> rechazarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+    public ResponseEntity<Oferta> rechazarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
         try {
-            ofertaService.rechazarOferta(ofertaId, camioneroId);
-            return ResponseEntity.ok(new MessageResponse("El camionero ha sido rechazado de la oferta."));
+            Oferta oferta = ofertaService.rechazarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }

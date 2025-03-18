@@ -158,7 +158,7 @@ public class OfertaService {
     }
 
     @Transactional
-    public void aplicarOferta(Integer ofertaId, Integer camioneroId) {
+    public Oferta aplicarOferta(Integer ofertaId, Integer camioneroId) {
         Oferta oferta = ofertaRepository.findById(ofertaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Oferta", "id", ofertaId));
 
@@ -166,11 +166,11 @@ public class OfertaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
 
         oferta.getAplicados().add(cam);
-        ofertaRepository.save(oferta);
+        return ofertaRepository.save(oferta);
     }
 
     @Transactional
-    public void desaplicarOferta(Integer ofertaId, Integer camioneroId) {
+    public Oferta desaplicarOferta(Integer ofertaId, Integer camioneroId) {
         Oferta oferta = ofertaRepository.findById(ofertaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Oferta", "id", ofertaId));
 
@@ -178,11 +178,11 @@ public class OfertaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Camionero", "id", camioneroId));
 
         oferta.getAplicados().remove(cam);
-        ofertaRepository.save(oferta);
+        return ofertaRepository.save(oferta);
     }
 
     @Transactional
-    public void asignarOferta(Integer ofertaId, Integer camioneroId) {
+    public Oferta asignarOferta(Integer ofertaId, Integer camioneroId) {
         Oferta oferta = ofertaRepository.findById(ofertaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Oferta", "id", ofertaId));
 
@@ -194,11 +194,11 @@ public class OfertaService {
         oferta.getAplicados().remove(cam);
         oferta.getRechazados().addAll(oferta.getAplicados());
         oferta.getAplicados().removeAll(oferta.getAplicados());
-        ofertaRepository.save(oferta);
+        return ofertaRepository.save(oferta);
     }
 
     @Transactional
-    public void rechazarOferta(Integer ofertaId, Integer camioneroId) {
+    public Oferta rechazarOferta(Integer ofertaId, Integer camioneroId) {
         Oferta oferta = ofertaRepository.findById(ofertaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Oferta", "id", ofertaId));
 
@@ -207,7 +207,7 @@ public class OfertaService {
 
         oferta.getAplicados().remove(cam);
         oferta.getRechazados().add(cam);
-        ofertaRepository.save(oferta);
+        return ofertaRepository.save(oferta);
     }
 
 }
