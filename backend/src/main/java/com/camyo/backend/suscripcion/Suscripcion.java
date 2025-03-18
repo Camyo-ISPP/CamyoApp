@@ -2,8 +2,8 @@ package com.camyo.backend.suscripcion;
 
 import java.time.LocalDate;
 import com.camyo.backend.empresa.Empresa;
-
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,14 +17,25 @@ public class Suscripcion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull
     @OneToOne
-    @JoinColumn(name = "empresa_id")
+    @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PlanNivel nivel;      // GRATIS, BASIC, PREMIUM
 
+    @NotNull
+    @Column(name="fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
-    private LocalDate fechaFin;   // Si tus planes caducan
-    private Boolean activa;       // Indica si la suscripción está en uso
+
+    // Solo será nula si la suscripción es GRATIS y no queremos fecha fin
+    @Column(name="fecha_fin")
+    private LocalDate fechaFin;
+
+    @NotNull
+    @Column(nullable = false)
+    private Boolean activa;
 }
