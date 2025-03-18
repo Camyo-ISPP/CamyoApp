@@ -26,30 +26,28 @@ public class SuscripcionController {
 
     /**
      * GET /suscripciones/activa/{empresaId}
-     * Obtiene la suscripción activa de una empresa.
      */
     @Operation(summary = "Obtener suscripción activa por ID de empresa",
-               description = "Devuelve la suscripción activa asociada a la empresa, si existe.")
+               description = "Devuelve la suscripción activa asociada a la empresa, si existe y no ha caducado.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Suscripción encontrada y devuelta"),
-        @ApiResponse(responseCode = "404", description = "No se encontró una suscripción activa para la empresa")
+        @ApiResponse(responseCode = "200", description = "Suscripción activa encontrada y devuelta"),
+        @ApiResponse(responseCode = "404", description = "No se encontró una suscripción activa (caducó o no existe)")
     })
     @GetMapping("/activa/{empresaId}")
     public ResponseEntity<Suscripcion> obtenerSuscripcionActiva(@PathVariable Integer empresaId) {
         try {
             Suscripcion suscripcion = suscripcionService.obtenerSuscripcionActiva(empresaId);
-            return new ResponseEntity<>(suscripcion, HttpStatus.OK);
+            return ResponseEntity.ok(suscripcion);
         } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     /**
      * POST /suscripciones/{empresaId}?nivel=PREMIUM&duracion=30
-     * Asigna o actualiza una suscripción a la empresa (por ejemplo, Plan PREMIUM durante 30 días).
      */
     @Operation(summary = "Asignar o cambiar suscripción de una empresa",
-               description = "Establece el plan (GRATIS, BASIC, PREMIUM) y la duración de la suscripción.")
+               description = "Establece el plan (GRATIS, BASIC, PREMIUM) y la duración (días). Por defecto 30 si es BASIC/PREMIUM y no se pasa.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Suscripción asignada o modificada con éxito"),
         @ApiResponse(responseCode = "404", description = "Empresa no encontrada")
@@ -71,33 +69,32 @@ public class SuscripcionController {
 
     /**
      * GET /suscripciones/nivel/{empresaId}
-     * Consulta el nivel de suscripción de la empresa (GRATIS, BASIC, PREMIUM).
      */
     @Operation(summary = "Consultar nivel de suscripción de una empresa",
-               description = "Retorna si la empresa está en plan GRATIS, BASIC o PREMIUM.")
+               description = "Retorna si la empresa está en plan GRATIS, BASIC o PREMIUM (mira la suscripción activa).")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Nivel de suscripción encontrado y devuelto"),
-        @ApiResponse(responseCode = "404", description = "Empresa no encontrada (o sin suscripción activa)")
+        @ApiResponse(responseCode = "200", description = "Nivel encontrado y devuelto"),
+        @ApiResponse(responseCode = "404", description = "Empresa no encontrada o sin suscripción activa")
     })
     @GetMapping("/nivel/{empresaId}")
     public ResponseEntity<PlanNivel> obtenerNivelSuscripcion(@PathVariable Integer empresaId) {
         try {
             PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaId);
-            return new ResponseEntity<>(nivel, HttpStatus.OK);
+            return ResponseEntity.ok(nivel);
         } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     /**
      * PUT /suscripciones/desactivar/{id}
-     * Desactiva manualmente una suscripción (ej. si quieres una opción de cancelar sin crear otra).
+     * Desactiva manualmente la suscripción
      */
     @Operation(summary = "Desactivar una suscripción",
-               description = "Cambia el estado 'activa' de la suscripción a false.")
+               description = "Establece activa=false para la suscripción con ID dado.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Suscripción desactivada con éxito"),
-        @ApiResponse(responseCode = "404", description = "Suscripción no encontrada")
+        @ApiResponse(responseCode = "404", description = "No se encontró la suscripción")
     })
     @PutMapping("/desactivar/{id}")
     public ResponseEntity<MessageResponse> desactivarSuscripcion(@PathVariable("id") Integer suscripcionId) {
@@ -105,10 +102,10 @@ public class SuscripcionController {
         if (optionalSus.isPresent()) {
             Suscripcion sus = optionalSus.get();
             sus.setActiva(false);
-            suscripcionService.guardar(sus);  // método que persiste la suscripción
-            return new ResponseEntity<>(new MessageResponse("Suscripción desactivada con éxito."), HttpStatus.OK);
+            suscripcionService.guardar(sus);
+            return ResponseEntity.ok(new MessageResponse("Suscripción desactivada con éxito."));
         } else {
-            return new ResponseEntity<>(new MessageResponse("Suscripción no encontrada."), HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse("Suscripción no encontrada."));
         }
     }
 }

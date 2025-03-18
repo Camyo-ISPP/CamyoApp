@@ -12,7 +12,7 @@ import com.camyo.backend.exceptions.ResourceNotFoundException;
 
 @Service
 public class SuscripcionService {
- 
+
     private final SuscripcionRepository suscripcionRepository;
     private final EmpresaService empresaService;
 
@@ -23,59 +23,84 @@ public class SuscripcionService {
     }
 
     /**
-     * Asigna (o cambia) la suscripción de una empresa.
-     *
-     * @param empresaId    ID de la empresa
-     * @param nivel        PlanNivel (GRATIS, BASIC, PREMIUM)
-     * @param duracionDias Cuántos días dura el plan (null si Gratis)
+     * Asigna o actualiza la suscripción de una empresa.
+     * - Si ya existe una suscripción, se modifica (nivel, fechaInicio, fechaFin, activa=true).
+     * - Si no existe, se crea una nueva.
+     * 
+     * Reglas:
+     * - Plan GRATIS => fechaFin = null.
+     * - Plan BASIC/PREMIUM => si duracionDias == null, se pone 30 por defecto.
      */
     @Transactional
     public Suscripcion asignarSuscripcion(Integer empresaId, PlanNivel nivel, Integer duracionDias) {
         Empresa empresa = empresaService.obtenerEmpresaPorId(empresaId);
+
+        // Buscar si la empresa ya tiene alguna suscripción (activa o no)
         Optional<Suscripcion> optionalSus = suscripcionRepository.findAnyByEmpresa(empresa);
-    
+
+        // Determinar fechaFin según plan
+        LocalDate fechaFin = null;
+        if (nivel == PlanNivel.GRATIS) {
+            // Suscripción Gratis: Sin fecha fin
+            fechaFin = null;
+        } else {
+            // BASIC o PREMIUM: si no se pasa duración => 30 días por defecto
+            if (duracionDias == null) {
+                duracionDias = 30;
+            }
+            fechaFin = LocalDate.now().plusDays(duracionDias);
+        }
+
         if (optionalSus.isPresent()) {
+            // Reutilizar la suscripción existente
             Suscripcion susExistente = optionalSus.get();
             susExistente.setNivel(nivel);
-            susExistente.setFechaFin(duracionDias != null ? LocalDate.now().plusDays(duracionDias) : null);
-            susExistente.setFechaInicio(LocalDate.now()); 
+            susExistente.setFechaInicio(LocalDate.now());
+            susExistente.setFechaFin(fechaFin);
             susExistente.setActiva(true);
-            return suscripcionRepository.save(susExistente); 
+            return suscripcionRepository.save(susExistente);
+        } else {
+            // Crear una nueva suscripción
+            Suscripcion nueva = new Suscripcion();
+            nueva.setEmpresa(empresa);
+            nueva.setNivel(nivel);
+            nueva.setFechaInicio(LocalDate.now());
+            nueva.setFechaFin(fechaFin);
+            nueva.setActiva(true);
+            return suscripcionRepository.save(nueva);
         }
-        Suscripcion nueva = new Suscripcion();
-        nueva.setEmpresa(empresa);
-        nueva.setNivel(nivel);
-        nueva.setFechaInicio(LocalDate.now());
-        nueva.setActiva(true);
-        if (duracionDias != null) {
-            nueva.setFechaFin(LocalDate.now().plusDays(duracionDias));
-        }
-    
-        return suscripcionRepository.save(nueva);
     }
-    
-    
-    
+
     /**
-     * Obtiene la suscripción activa de la empresa.
+     * Obtiene la suscripción activa de la empresa. 
+     * Si la suscripción ha caducado (fechaFin < hoy), la marca como inactiva y lanza ResourceNotFoundException.
      */
     @Transactional(readOnly = true)
     public Suscripcion obtenerSuscripcionActiva(Integer empresaId) {
         Empresa empresa = empresaService.obtenerEmpresaPorId(empresaId);
-        return suscripcionRepository.findByEmpresaAndActivaTrue(empresa)
+
+        Suscripcion sus = suscripcionRepository.findByEmpresaAndActivaTrue(empresa)
             .orElseThrow(() -> new ResourceNotFoundException("Suscripcion", "empresaId", empresaId));
+
+        // Verificar si ha caducado (fechaFin != null y hoy > fechaFin)
+        if (sus.getFechaFin() != null && LocalDate.now().isAfter(sus.getFechaFin())) {
+            sus.setActiva(false);
+            suscripcionRepository.save(sus);
+            throw new ResourceNotFoundException("Suscripcion", "caducada", empresaId);
+        }
+
+        return sus;
     }
 
     /**
-     * Devuelve el nivel (GRATIS, BASIC, PREMIUM) de la suscripción activa.
-     * Si no existe una suscripción, asumimos GRATIS (o lanza excepción).
+     * Devuelve el nivel de la suscripción activa, o GRATIS si no hay suscripción activa.
      */
     @Transactional(readOnly = true)
     public PlanNivel obtenerNivelSuscripcion(Integer empresaId) {
         try {
             return obtenerSuscripcionActiva(empresaId).getNivel();
         } catch (ResourceNotFoundException e) {
-            // Si la empresa no tiene suscripción activa, consideramos GRATIS
+            // Si no hay suscripción activa o caducó, se considera GRATIS
             return PlanNivel.GRATIS;
         }
     }
@@ -89,7 +114,7 @@ public class SuscripcionService {
     }
 
     /**
-     * Guarda (o actualiza) una suscripción genérica.
+     * Guarda (o actualiza) una suscripción genérica (por ejemplo, para desactivarla manualmente).
      */
     @Transactional
     public Suscripcion guardar(Suscripcion suscripcion) {

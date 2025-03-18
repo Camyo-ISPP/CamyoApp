@@ -19,7 +19,7 @@ const IndexScreen = () => {
             {/* Botón Camionero */}
             <TouchableOpacity
               style={[styles.userTypeButton, { backgroundColor: colors.primary }]}
-              onPress={() => router.replace("/registro/camionero")}
+              onPress={() => router.push("/registro/camionero")}
             >
               <FontAwesome5 name="truck" size={24} color={colors.white} style={styles.icon} />
               <Text style={styles.userTypeText}>Camionero</Text>
@@ -28,7 +28,7 @@ const IndexScreen = () => {
             {/* Botón Empresa */}
             <TouchableOpacity
               style={[styles.userTypeButton, { backgroundColor: colors.primary }]}
-              onPress={() => router.replace("/registro/empresa")}
+              onPress={() => router.push("/registro/empresa")}
             >
               <MaterialIcons name="business" size={24} color={colors.white} style={styles.icon} />
               <Text style={styles.userTypeText}>Empresa</Text>
