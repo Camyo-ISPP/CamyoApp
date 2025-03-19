@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     color:colors.white,
     paddingLeft:5,
     paddingRight:5,
-    marginLeft: "2%",
+    marginLeft: "-20%",
     marginTop:4,
     flexDirection:"row",
     flexWrap:"nowrap",
