@@ -8,6 +8,7 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^3.5.0",
     "@stripe/stripe-js": "^6.1.0",
-    "@stripe/stripe-react-native": "^0.43.0"
+    "@stripe/stripe-react-native": "^0.38.6",
+    "expo": "^52.0.39"
   }
 }

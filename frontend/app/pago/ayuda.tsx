@@ -1,6 +1,6 @@
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { Text } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function IntegratedCheckout() {
   const [publishableKey, setPublishableKey] = useState('');
