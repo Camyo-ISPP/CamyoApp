@@ -33,7 +33,7 @@ export default function ChatList() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
-    if (!user?.userId || !user) return;
+    if (!user || !user?.userId || !user) return;
 
     const fetchChats = () => {
       const chatsRef = collection(database, 'chats');
@@ -67,6 +67,7 @@ export default function ChatList() {
   }, [user?.userId]);
 
   useEffect(() => {
+    if (!user?.userId) return;
     const fetchUserDetails = async (otherUserId: string) => {
       try {
         const response = await fetch(`${BACKEND_URL}/usuarios/${otherUserId}`);
@@ -88,7 +89,7 @@ export default function ChatList() {
 
   if (!user) {
     return (
-      <View style={styles.container}>
+      <View style={styles.buttonContainer}>
         <Text style={styles.loginMessage}>Inicie sesión para acceder a la mensajería</Text>
         <TouchableOpacity style={styles.shareButton} onPress={() => router.replace(routes.login)}><Text style={styles.shareText}>Acceder</Text></TouchableOpacity>
       </View>
@@ -96,6 +97,7 @@ export default function ChatList() {
   }
 
   const renderChatItem = ({ item }: { item: Chat }) => {
+    if (!user?.userId) return;
     const otherUserId = item.participants.find(participant => participant !== user.userId.toString());
     const otherUser = otherUserId ? userDetails[otherUserId] : null;
 
@@ -106,11 +108,7 @@ export default function ChatList() {
       >
         <Text style={styles.chatText}>{otherUser ? otherUser.nombre : `Chat with User ID: ${otherUserId}`}</Text>
         <Text style={styles.lastMessage}>{item.lastMessage || 'No messages yet'}</Text>
-        {item.unreadMessagesCount > 0 && (
-          <View style={styles.unreadCount}>
-            <Text style={styles.unreadCountText}>{item.unreadMessagesCount}</Text>
-          </View>
-        )}
+        
       </TouchableOpacity>
     );
   };
@@ -130,6 +128,12 @@ export default function ChatList() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+  },
+  buttonContainer: {
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',

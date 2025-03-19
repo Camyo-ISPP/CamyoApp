@@ -15,9 +15,12 @@ import {
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSearchParams } from 'expo-router/build/hooks';
-import { Text } from 'react-native';
+import { View, Text, Button } from 'react-native';
+import { useRouter } from 'expo-router';
+
 export default function Chat({ route }: any) {
     const { user } = useAuth();
+    const router = useRouter();
     const searchParams = useSearchParams();
     const otherUserId = searchParams.get('otherUserId')?.toString();
 
@@ -88,7 +91,7 @@ export default function Chat({ route }: any) {
 
             // Marcar los mensajes como vistos cuando son cargados
             messages.forEach(message => {
-                if (message.user._id !== user.userId.toString() && !message.seen) {
+                if (user && message.user._id !== user.userId.toString() && !message.seen) {
                     markMessageAsSeen(chatId, message._id, user.userId.toString());
                 }
             });
@@ -112,7 +115,7 @@ export default function Chat({ route }: any) {
 
     useEffect(() => {
         const setupChat = async () => {
-            if (!user?.userId || !otherUserId) return;
+            if (!user || !user.userId || !otherUserId) return;
 
             const userId = user.userId.toString();
 
@@ -128,10 +131,11 @@ export default function Chat({ route }: any) {
 
     const onSend = useCallback(
         async (newMessages: Message[] = []) => {
+            if (!chatId || !user) return;
+
             setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages));
             
-            const { _id, createdAt, text, user } = newMessages[0];
-            if (!chatId) return;
+            const { _id, createdAt, text, user: messageUser } = newMessages[0];
 
             await sendMessage(chatId, text);
 
@@ -141,22 +145,26 @@ export default function Chat({ route }: any) {
                 text,
                 seen: false, // Inicialmente, el mensaje no está visto
                 user: {
-                    ...user,
-                    _id: user._id.toString(),
+                    ...messageUser,
+                    _id: messageUser._id.toString(),
                 },
             });
         },
-        [chatId]
+        [chatId, user]
     );
 
     const renderMessageText = (props: any) => {
-        const { currentMessage } = props;
-        return (
-            <>
-                <MessageText {...props} />
-            </>
-        );
+        return <MessageText {...props} />;
     };
+
+    if (!user) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 18, marginBottom: 10 }}>Inicie sesión para acceder a la mensajería</Text>
+                <Button title="Iniciar sesión" onPress={() => router.push('/login')} />
+            </View>
+        );
+    }
 
     return (
         <GiftedChat
@@ -177,9 +185,9 @@ export default function Chat({ route }: any) {
                 />
             )}
             user={{
-                _id: user?.userId.toString(),
-                name: user?.nombre,
-                avatar: user?.foto,
+                _id: user.userId.toString(),
+                name: user.nombre,
+                avatar: user.foto,
             }}
             renderMessageText={renderMessageText} 
         />
