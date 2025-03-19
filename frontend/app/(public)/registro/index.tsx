@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import colors from "../../assets/styles/colors";
+import colors from "../../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import globalStyles from "../../assets/styles/globalStyles";
+import globalStyles from "../../../assets/styles/globalStyles";
 
 const IndexScreen = () => {
   const router = useRouter();

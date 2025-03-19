@@ -9,19 +9,19 @@ const AccessDeniedScreen = () => {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <MaterialIcons name="lock" size={80} color={colors.red} style={styles.icon} />
-      <Text style={styles.title}>Acceso Denegado</Text>
-      <Text style={styles.subtitle}>
-        No tienes permisos para acceder a esta página.
-      </Text>
-      <TouchableOpacity
-        style={globalStyles.button}
-        onPress={() => router.replace("/")}
-      >
-        <Text style={globalStyles.buttonText}>Volver al Inicio</Text>
-      </TouchableOpacity>
-    </View>
+      <View style={styles.container}>
+        <MaterialIcons name="lock" size={80} color={colors.red} style={styles.icon} />
+        <Text style={styles.title}>Acceso Denegado</Text>
+        <Text style={styles.subtitle}>
+          No tienes permisos para acceder a esta página.
+        </Text>
+        <TouchableOpacity
+          style={globalStyles.button}
+          onPress={() => router.replace("/")}
+        >
+          <Text style={globalStyles.buttonText}>Volver al Inicio</Text>
+        </TouchableOpacity>
+      </View>
   );
 };
 
