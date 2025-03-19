@@ -211,6 +211,12 @@ export default function OfertaDetalleScreen() {
                             </Text>
                             <Text style={styles.empresa}>Estado: {offerData.estado} </Text>
                     </View>
+                    <View style={{ alignItems: "flex-end" }}>
+                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${offerData.empresa.id}`)}>
+                            <MaterialIcons name="business" size={15} color="white" />
+                            <Text style={styles.buttonText}> Ver Empresa</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
                         
                 {offerData.estado === 'ABIERTA' ? (
