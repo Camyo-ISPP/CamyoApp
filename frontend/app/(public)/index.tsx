@@ -7,11 +7,11 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 const ProyectoLogo = require('frontend/assets/images/camyo.png');
-import BottomBar from './_components/BottomBar';
+import BottomBar from '../_components/BottomBar';
 import { MaterialIcons } from "@expo/vector-icons";
-import CamyoWebNavBar from "./_components/CamyoNavBar";
+import CamyoWebNavBar from "../_components/CamyoNavBar";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
-import Titulo from "./_components/Titulo";
+import Titulo from "../_components/Titulo";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 

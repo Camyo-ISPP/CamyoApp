@@ -49,10 +49,10 @@ const EmpresasLista = () => {
   if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   return (
-<ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-  <Titulo texto="Lista de Empresas" marginTop={100} />
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <Titulo texto="Lista de Empresas" marginTop={100} />
 
-{empresas.map((empresa, index) => (
+      {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 10 }]}>
           <View>
             <Text style={styles.name}>{empresa.usuario.nombre}</Text>

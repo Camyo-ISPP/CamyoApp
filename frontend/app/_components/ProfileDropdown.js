@@ -5,6 +5,7 @@ import { Entypo } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
 import { useRouter } from 'expo-router';
 import SuccessModal from './SuccessModal';
+import routes from './routes';
 
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -17,11 +18,7 @@ const ProfileDropdown = ({ user }) => {
   const handleLogout = () => {
     setModalVisible(false); 
 
-    setSuccessModalVisible(true);
-    setTimeout(() => {
-      setSuccessModalVisible(false);
-      logout();
-    }, 1000);
+    logout();
   };
 
   return (
@@ -52,11 +49,17 @@ const ProfileDropdown = ({ user }) => {
             }}
             style={styles.avatarDropdown}
           />
+
+          <Text style={styles.dropdownRole}>{user.rol}</Text>
           <Text style={styles.dropdownHeader}>¡Hola, {user.nombre}!</Text>
           <Text style={styles.dropdownEmail}>{user.email}</Text>
-          <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push('/miperfil')} >
-            <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
-          </TouchableOpacity>
+          
+          {user.rol !== 'ADMIN' && (
+            <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push(routes.profile)} >
+              <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
+            </TouchableOpacity>
+          )}
+          
           <TouchableOpacity style={styles.dropdownButton} onPress={() => setModalVisible(true)}>
             <Text style={styles.dropdownButtonText2}>Cerrar sesión</Text>
           </TouchableOpacity>
@@ -150,10 +153,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#5f6368',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 5,
+  },
+  dropdownRole: {
+    fontWeight: 'bold', 
+    textTransform: 'uppercase', 
+    marginBottom: 5,
+    fontSize: 12,
+    color: colors.gray,
+    textAlign: 'center',
+    borderRadius: 15,
   },
   dropdownButton: {
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   dropdownButtonText: {
     fontSize: 14,
