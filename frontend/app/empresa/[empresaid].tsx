@@ -28,7 +28,7 @@ interface Empresa {
   usuario: Usuario;
 }
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const EmpresaScreen = () => {
   const { empresaid } = useLocalSearchParams(); 
