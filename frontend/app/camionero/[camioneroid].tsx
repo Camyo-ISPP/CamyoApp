@@ -27,7 +27,6 @@ const CamioneroScreen: React.FC = () => {
     const navigation = useNavigation();
     const router = useRouter();
     const [offers, setOffers] = useState<any[]>([]);
-    const [offerStatus, setOfferStatus] = useState(2);
     const PlaceHolderLicencias = 'No tiene licencias';
     const [licencias, setLicencias] = useState<string[]>([]);
     const [disp, setDisp] = useState<string>('');
@@ -80,19 +79,6 @@ const CamioneroScreen: React.FC = () => {
     }
 
     const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
-
-    const getNoOffersMessage = () => {
-        switch (offerStatus) {
-            case 0:
-                return 'No hay ofertas pendientes';
-            case 1:
-                return 'No hay ofertas rechazadas';
-            case 2:
-                return 'No hay ofertas aceptadas';
-            default:
-                return '';
-        }
-    };
 
     return (
         <>
@@ -187,22 +173,16 @@ const CamioneroScreen: React.FC = () => {
                 /> */}
                 <View style={styles.offersContainer}>
                     <View style={styles.offersButtonContainer}>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(2)}>
+                        <View style={styles.offersButton}>  
                             <Text style={styles.offersButtonText}>Ofertas aceptadas</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(0)}>
-                            <Text style={styles.offersButtonText}>Ofertas pendientes</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(1)}>
-                            <Text style={styles.offersButtonText}>Ofertas rechazadas</Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
                     <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
                         <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            {offers.length === 0 || offers[offerStatus].length === 0 ? (
-                                <Text style={styles.noOffersText}>{getNoOffersMessage()}</Text>
+                            {offers.length === 0 || offers[2].length === 0 ? (
+                                <Text style={styles.noOffersText}>{"No hay ofertas aceptadas"}</Text>
                             ) : (
-                                offers[offerStatus].map((item) => (
+                                offers[2].map((item) => (
                                     <View key={item.id} style={styles.card}>
                                         <Image source={defaultCompanyLogo} style={styles.companyLogo} />
                                         <View style={{ width: "30%" }}>
