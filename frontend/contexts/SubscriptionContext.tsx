@@ -2,15 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 type SubscriptionLevel = 'GRATIS' | 'BASIC' | 'PREMIUM';
 
-// Definir el tipo para el valor del contexto
 interface SubscriptionContextType {
   subscriptionLevel: SubscriptionLevel | null;
   loading: boolean;
 }
 
-// Crear el contexto con valores iniciales
 const SubscriptionContext = createContext<SubscriptionContextType>({
   subscriptionLevel: null,
   loading: true,
@@ -22,21 +21,26 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [subscriptionLevel, setSubscriptionLevel] = useState<SubscriptionLevel | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { user } = useAuth();
-  // Función para cargar el nivel de suscripción del backend
+  const { user, userToken } = useAuth();
+
   const fetchSubscriptionLevel = async (empresaId: number) => {
     try {
-      const response = await axios.get<SubscriptionLevel>(`/suscripciones/nivel/${empresaId}`);
+      const response = await axios.get(`${BACKEND_URL}/suscripciones/nivel/${empresaId}`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
       setSubscriptionLevel(response.data);
+      setLoading(false);
     } catch (error) {
       console.error('Error al obtener el nivel de suscripción:', error);
       setSubscriptionLevel('GRATIS'); // Default si hay error
+      setLoading(false);
     } finally {
       setLoading(false);
     }
   };
 
-  // Efecto para cargar la suscripción al iniciar
   useEffect(() => {
     const fetchEmpresaAndSubscription = async () => {
       if (!user?.id) {
@@ -45,7 +49,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return;
       }
       try {
-        const empresaId = user.userId;
+        const response = await axios.get(`${BACKEND_URL}/empresas/${user.id}`);
+        const empresaId = response.data.id;
         await fetchSubscriptionLevel(empresaId);
       } catch (err) {
         console.error('Error al obtener datos de la empresa o suscripción:', err);

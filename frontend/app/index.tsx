@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import Titulo from "./_components/Titulo";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -46,6 +47,7 @@ export default function Index() {
 
   return (
     <>
+      <SubscriptionProvider>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
           <CamyoWebNavBar />
@@ -106,6 +108,7 @@ export default function Index() {
         </View>
       )
       }
+      </SubscriptionProvider>
     </>
   );
 }

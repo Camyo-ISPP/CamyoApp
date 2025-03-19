@@ -3,7 +3,6 @@ import { getSubscriptionRules, SubscriptionRule } from '../utils/subscriptionRul
 
 export const useSubscriptionRules = (): { rules: SubscriptionRule; loading: boolean } => {
   const { subscriptionLevel, loading } = useSubscription();
-  console.log(subscriptionLevel)
   const rules = getSubscriptionRules(subscriptionLevel || 'GRATIS');
 
   return { rules, loading };

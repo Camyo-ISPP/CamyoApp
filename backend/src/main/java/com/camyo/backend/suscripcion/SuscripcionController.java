@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/suscripciones")
-@CrossOrigin(origins = "http://localhost:8080")
 @Tag(name = "Suscripciones", description = "API para gestión de planes de suscripción (Gratis, Basic, Premium)")
 public class SuscripcionController {
 
