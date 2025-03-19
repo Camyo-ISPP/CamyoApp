@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import Titulo from "../_components/Titulo";
+import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
+import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import colors from '@/assets/styles/colors';
+import Titulo from "../_components/Titulo";
 import { startChat } from "../chat/services";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -30,7 +30,6 @@ const EmpresasLista = () => {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const navigation = useNavigation();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -59,7 +58,7 @@ const EmpresasLista = () => {
 
       {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 10 }]}>
-          <View style={styles.cardContent}>
+          <View>
             <Text style={styles.name}>{empresa.usuario.nombre}</Text>
             <DetailItem icon="globe" text={empresa.web} link />
             <DetailItem icon="building" text={empresa.nif} />
@@ -78,6 +77,12 @@ const EmpresasLista = () => {
           >
             <Text style={styles.chatButtonText}>Iniciar Chat</Text>
           </TouchableOpacity>
+          <View>
+            <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
+                <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+                <Text style={styles.buttonText}>Ver Detalles</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ))}
     </ScrollView>
@@ -116,9 +121,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 3,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
   avatar: { width: 80, height: 80, borderRadius: 40, marginRight: 15 },
-  cardContent: { flex: 1 },
   name: { fontSize: 20, fontWeight: "bold" },
   infoText: { fontSize: 14, color: "gray" },
   detailItem: { flexDirection: "row", alignItems: "center", marginBottom: 5 },
@@ -126,6 +133,33 @@ const styles = StyleSheet.create({
   icon: { marginRight: 10, color: "#0b4f6c" },
   linkText: { color: "#007BFF", textDecorationLine: "underline" },
   errorText: { textAlign: "center", fontSize: 18, color: "red", marginTop: 50 },
+  button:{
+    backgroundColor:colors.primary,
+    color:colors.white,
+    paddingLeft:5,
+    paddingRight:5,
+    marginLeft: "-20%",
+    marginTop:4,
+    flexDirection:"row",
+    flexWrap:"nowrap",
+    height:40,
+    width: 150,
+    borderRadius:10,
+    alignItems:"center",
+    justifyContent:"center"
+  },
+  buttonText:{
+    color:colors.white,
+    fontWeight:"bold"
+  },
+  detailsIcon:{
+    color:colors.white,
+    alignSelf:"center",
+    marginLeft:3,
+    marginTop:3,
+    marginRight:5,
+
+  },
   chatButton: {
     marginTop: 10,
     backgroundColor: "#007BFF",
