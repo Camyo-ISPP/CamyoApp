@@ -24,7 +24,7 @@ const CrearOfertaScreen = () => {
     experiencia: "",
     licencia: "",
     notas: "",
-    estado: "PENDIENTE",
+    estado: "ABIERTA",
     sueldo: "",
     localizacion: "",
     fechaPublicacion: new Date().toISOString(), // Fecha actual del sistema
@@ -100,7 +100,7 @@ const CrearOfertaScreen = () => {
           experiencia: Number(formData.experiencia), // Convertir a número
           licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
           notas: formData.notas,
-          estado: formData.estado || "PENDIENTE",
+          estado: formData.estado || "ABIERTA",
           sueldo: parseFloat(formData.sueldo).toFixed(2), // Convertir a float con 2 decimal
           localizacion: formData.localizacion,
           fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales

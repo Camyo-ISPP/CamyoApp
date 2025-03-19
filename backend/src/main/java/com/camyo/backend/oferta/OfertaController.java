@@ -1,18 +1,13 @@
 package com.camyo.backend.oferta;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.camyo.backend.auth.payload.response.MessageResponse;
-import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
@@ -35,8 +30,7 @@ public class OfertaController {
     private CargaService cargaService;
     @Autowired
     private EmpresaService empresaService;
-    @Autowired
-    private OfertaPatrocinadaRepository ofertaPatrocinadaRepository;
+
    /**
      * GET: Listar todas las ofertas
      * 
@@ -45,65 +39,44 @@ public class OfertaController {
     @GetMapping
     public List<OfertaCompletaDTO> obtenerOfertas() {
         List<Oferta> ofertas = ofertaService.obtenerOfertas();
-        LocalDateTime ahora = LocalDateTime.now();
-        List<OfertaPatrocinada> patActivas = ofertaPatrocinadaRepository.findAll().stream()
-            .filter(p -> p.getStatus() == PatrocinioStatus.ACTIVO
-                      && p.getFechaFin() != null
-                      && p.getFechaFin().isAfter(ahora))
-            .toList();
-
-        Set<Integer> ofertasPatrocinadasIds = patActivas.stream()
-            .map(p -> p.getOferta().getId())
-            .collect(Collectors.toSet());
-        List<Oferta> ofertasOrdenadas = ofertas.stream()
-            .sorted((o1, o2) -> {
-                boolean o1Pat = ofertasPatrocinadasIds.contains(o1.getId());
-                boolean o2Pat = ofertasPatrocinadasIds.contains(o2.getId());
-                if (o1Pat && !o2Pat) return -1;
-                if (!o1Pat && o2Pat) return 1;
-                return o2.getFechaPublicacion()
-                         .compareTo(o1.getFechaPublicacion());
-            })
-            .toList();
-        return ofertasOrdenadas.stream()
-            .map(oferta -> {
-                OfertaCompletaDTO dto = new OfertaCompletaDTO();
-                dto.setId(oferta.getId());
-                dto.setTitulo(oferta.getTitulo());
-                dto.setExperiencia(oferta.getExperiencia());
-                dto.setLicencia(oferta.getLicencia());
-                dto.setNotas(oferta.getNotas());
-                dto.setEstado(oferta.getEstado());
-                dto.setFechaPublicacion(oferta.getFechaPublicacion());
-                dto.setSueldo(oferta.getSueldo());
-                dto.setLocalizacion(oferta.getLocalizacion());
-                dto.setPrioridad(oferta.getPrioridad());
-                dto.setCamionero(oferta.getCamionero());
-                dto.setAplicados(oferta.getAplicados());
-                if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
-                    dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
-                }
-
-                try {
-                    Carga c = ofertaService.obtenerCarga(oferta.getId());
-                    if (c != null) {
-                        dto.setTipoOferta("CARGA");
+        return ofertas.stream().map(oferta -> {
+            OfertaCompletaDTO dto = new OfertaCompletaDTO();
+            dto.setId(oferta.getId());
+            dto.setTitulo(oferta.getTitulo());
+            dto.setExperiencia(oferta.getExperiencia());
+            dto.setLicencia(oferta.getLicencia());
+            dto.setNotas(oferta.getNotas());
+            dto.setEstado(oferta.getEstado());
+            dto.setFechaPublicacion(oferta.getFechaPublicacion());
+            dto.setSueldo(oferta.getSueldo());
+            dto.setLocalizacion(oferta.getLocalizacion());
+            dto.setCamionero(oferta.getCamionero());
+            dto.setAplicados(oferta.getAplicados());
+            dto.setRechazados(oferta.getRechazados());
+            if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
+                dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
+            }
+            try {
+                Carga c = ofertaService.obtenerCarga(oferta.getId());
+                if (c != null) {
+                    dto.setTipoOferta("CARGA");
+                } else {
+                    Trabajo t = ofertaService.obtenerTrabajo(oferta.getId());
+                    if (t != null) {
+                        dto.setTipoOferta("TRABAJO");
                     } else {
-                        Trabajo t = ofertaService.obtenerTrabajo(oferta.getId());
-                        if (t != null) {
-                            dto.setTipoOferta("TRABAJO");
-                        } else {
-                            dto.setTipoOferta("DESCONOCIDO");
-                        }
+                        dto.setTipoOferta("DESCONOCIDO");
                     }
-                } catch (ResourceNotFoundException ex) {
-                    dto.setTipoOferta("DESCONOCIDO");
                 }
-
-                return dto;
-            })
-            .toList();
+            } catch (ResourceNotFoundException ex) {
+                dto.setTipoOferta("DESCONOCIDO");
+            }
+    
+            return dto;
+        }).toList();
     }
+    
+
     /**
      * GET: Obtener oferta por ID
      * 
@@ -158,7 +131,6 @@ public class OfertaController {
             );
             request.getOferta().setEmpresa(empresa);
 
-            request.getOferta().setPrioridad(request.getPrioridad());
             Oferta nuevaOferta = ofertaService.guardarOferta(request.getOferta());
     
             if ("CARGA".equalsIgnoreCase(request.getTipoOferta()) && request.getCarga() != null) {
@@ -201,9 +173,7 @@ public class OfertaController {
                 Empresa nuevaEmpresa = empresaService.obtenerEmpresaPorId(request.getOferta().getEmpresa().getId());
                 ofertaExistente.setEmpresa(nuevaEmpresa);
             }
-            if (request.getPrioridad() != null) {
-                ofertaExistente.setPrioridad(request.getPrioridad());
-            }
+
             if (request.getOferta() != null) {
                 Oferta nuevaData = request.getOferta();
                 if (nuevaData.getTitulo() != null) ofertaExistente.setTitulo(nuevaData.getTitulo());
@@ -476,71 +446,72 @@ public class OfertaController {
         }
     }
 
-
     /**
-     * POST: Aplicar un camionero a una oferta
+     * PUT: Aplicar un camionero a una oferta
      * 
      * @param ofertaId    ID de la oferta a la que se aplicará
      * @param camioneroId ID del camionero que aplicará
      * @return Mensaje de éxito si la operación se completó correctamente.
      */
-    @PostMapping("/{ofertaId}/aplicar/{camioneroId}")
-    public ResponseEntity<MessageResponse> aplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+    @PutMapping("/{ofertaId}/aplicar/{camioneroId}")
+    public ResponseEntity<Oferta> aplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
         try {
-            ofertaService.aplicarOferta(ofertaId, camioneroId);
-            return ResponseEntity.ok(new MessageResponse("El camionero ha aplicado a la oferta correctamente."));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
-     * GET: Obtener los camioneros que han aplicado a una oferta
-     * 
-     * @param ofertaId ID de la oferta a consultar
-     * @return Lista de camioneros que han aplicado a la oferta.
-     */
-    @GetMapping("/{ofertaId}/camioneros")
-    public ResponseEntity<Set<Camionero>> obtenerCamionerosAplicados(@PathVariable Integer ofertaId) {
-        try {
-            Oferta oferta = ofertaService.obtenerOfertaPorId(ofertaId);
-            return ResponseEntity.ok(oferta.getAplicados()); 
+            Oferta oferta = ofertaService.aplicarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
      /**
-     * POST: Desaplicar un camionero de una oferta
+     * PUT: Desaplicar un camionero de una oferta
      * 
      * @param ofertaId    ID de la oferta de la que se eliminará el camionero
      * @param camioneroId ID del camionero a desaplicar
      * @return Mensaje de éxito si la operación fue completada correctamente.
      */
-    @PostMapping("/{ofertaId}/desaplicar/{camioneroId}")
-    public ResponseEntity<MessageResponse> desaplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+    @PutMapping("/{ofertaId}/desaplicar/{camioneroId}")
+    public ResponseEntity<Oferta> desaplicarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
         try {
-            ofertaService.desaplicarOferta(ofertaId, camioneroId);
-            return ResponseEntity.ok(new MessageResponse("El camionero ha sido eliminado de la lista de aplicados."));
+            Oferta oferta = ofertaService.desaplicarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
+    @PutMapping("/{ofertaId}/asignar/{camioneroId}")
+    public ResponseEntity<Oferta> asignarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+        try {
+            Oferta oferta = ofertaService.asignarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{ofertaId}/rechazar/{camioneroId}")
+    public ResponseEntity<Oferta> rechazarOferta(@PathVariable Integer ofertaId, @PathVariable Integer camioneroId) {
+        try {
+            Oferta oferta = ofertaService.rechazarOferta(ofertaId, camioneroId);
+            return ResponseEntity.ok(oferta);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     /**
      * GET: Obtener las ofertas a las que ha aplicado un camionero, filtradas por estado y ordenadas por fecha de publicación.
      * 
      * @param camioneroId ID del camionero
-     * @param estado (Opcional) Estado de la oferta (ACEPTADA, RECHAZADA, PENDIENTE)
+     * @param estado (Opcional) Estado de la oferta (ABIERTA, CERRADA)
      * @return Lista de ofertas aplicadas filtradas y ordenadas.
      */
-    @GetMapping("/aplicadas/{camioneroId}")
-    public ResponseEntity<List<Oferta>> obtenerOfertasAplicadas(
-            @PathVariable Integer camioneroId,
-            @RequestParam(required = false) OfertaEstado estado) {
+    @GetMapping("/camionero/{camioneroId}")
+    public ResponseEntity<List<List<Oferta>>> obtenerOfertasPorCamionero(
+            @PathVariable Integer camioneroId) {
         try {
-            List<Oferta> ofertas = ofertaService.obtenerAplicadasFiltradas(camioneroId, estado);
+            List<List<Oferta>> ofertas = ofertaService.obtenerOfertasPorCamionero(camioneroId);
             return ResponseEntity.ok(ofertas);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
