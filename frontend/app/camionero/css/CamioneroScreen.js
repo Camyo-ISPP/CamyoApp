@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
             width: '65%',
             position: 'absolute', // Match the position of the offers container
             top: 10, // Adjust as needed to match the offers container
-            left: 210, // Adjust as needed to match the offers container
+            left: 175, // Adjust as needed to match the offers container
             right: 0, // Adjust as needed to match the offers container
             
         },
