@@ -4,5 +4,9 @@
     "frontend": "cd frontend && npx expo start",
     "android:studio": "cd frontend && npm run android",
     "postinstall": "cd frontend && npm install"
+  },
+  "dependencies": {
+    "@stripe/react-stripe-js": "^3.5.0",
+    "@stripe/stripe-js": "^6.1.0"
   }
 }
