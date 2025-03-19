@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, Platform, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
+import BottomBar from "../_components/BottomBar.jsx";
+import CamyoWebNavBar from "../_components/CamyoNavBar.jsx";
 import defaultBanner from "../../assets/images/empresa.jpg";
 import defaultImage from "../../assets/images/image_perfil_empresa.jpg";
 import colors from '@/assets/styles/colors';
-import { useAuth } from '../../contexts/AuthContext';
-import { router, useNavigation } from "expo-router";
+import { router, useNavigation, useLocalSearchParams } from "expo-router";
 import axios from "axios";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 // Definir la interfaz para la empresa y usuario
 interface Usuario {
@@ -29,30 +28,25 @@ interface Empresa {
   usuario: Usuario;
 }
 
-const PerfilEmpresa = () => {
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+const EmpresaScreen = () => {
+  const { empresaid } = useLocalSearchParams(); 
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { userToken, user } = useAuth();
   const navigation = useNavigation();
   const [offers, setOffers] = useState<any[]>([]);
-  const [offerStatus, setOfferStatus] = useState<string>('ABIERTA');
 
   useEffect(() => {
-    if (!userToken || !user || user.rol !== "EMPRESA") {
-      setLoading(false);
-      return;
-    }
-
     fetchEmpresaData();
     fetchOffers();
-
     navigation.setOptions({ headerShown: false });
-  }, [userToken, user]);
+  }, [empresaid]);
 
   const fetchEmpresaData = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/empresas/${user.id}`);
+      const response = await axios.get(`${BACKEND_URL}/empresas/${empresaid}`);
       setEmpresa(response.data);
     } catch (err) {
       setError((err as Error)?.message || "Error desconocido");
@@ -63,7 +57,7 @@ const PerfilEmpresa = () => {
 
   const fetchOffers = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${empresaid}`);
       setOffers(response.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
@@ -80,29 +74,12 @@ const PerfilEmpresa = () => {
     );
   }
 
-  if (!userToken || !user || user.rol !== "EMPRESA") {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Acceso denegado, inicia sesión con tu cuenta de empresa</Text>
-      </View>
-    );
-  }
-
   const isMobile = Platform.OS === "ios" || Platform.OS === "android";
-
-  const getNoOffersMessage = () => {
-    switch (offerStatus) {
-      case 'ABIERTA':
-        return 'No hay ofertas abiertas'
-      case 'CERRADA':
-        return 'No hay ofertas cerradas';
-      default:
-        return '';
-    }
-  };
 
   return (
     <>
+      {isMobile ? <BottomBar /> : <CamyoWebNavBar />}
+
       <ScrollView contentContainerStyle={[isMobile ? styles.container : styles.desktopContainer, { paddingTop: isMobile ? 0 : 100, paddingLeft: 10 }]}>
         <View style={styles.bannerContainer}>
           <Image source={defaultBanner} style={styles.bannerImage} />
@@ -130,35 +107,20 @@ const PerfilEmpresa = () => {
             <View style={styles.detailItem}>
               <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="phone" size={20} />{empresa?.usuario?.telefono || "Sin número de contacto"}</Text>
             </View>
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => router.push(`/miperfil/editar`)}
-            >
-              <Text style={styles.editButtonText}> Editar Perfil</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => router.push(`/oferta/crear`)}
-            >
-              <Text style={styles.editButtonText}>Publicar nueva oferta</Text>
-            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.offersContainer}>
           <View style={styles.offersButtonContainer}>
-            <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus('ABIERTA')}>
+            <View style={styles.offersButton}>
               <Text style={styles.offersButtonText}>Ofertas abiertas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus('CERRADA')}>
-              <Text style={styles.offersButtonText}>Ofertas cerradas</Text>
-            </TouchableOpacity>
+            </View>
           </View>
           <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {offers.length === 0 ? (
-                <Text style={styles.noOffersText}>{getNoOffersMessage()}</Text>
+                <Text style={styles.noOffersText}>{"No hay ofertas abiertas"}</Text>
               ) : (
-                offers.filter(o => o.estado == offerStatus).map((item) => (
+                offers.filter(o => o.estado == "ABIERTA").map((item) => (
                   <View key={item.id} style={styles.card}>
                     <Image source={defaultImage} style={styles.companyLogo} />
                     <View style={{ width: "30%" }}>
@@ -175,10 +137,6 @@ const PerfilEmpresa = () => {
                         <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
                         <Text style={styles.buttonText}>Ver Detalles</Text>
                       </TouchableOpacity>
-                      {item.estado === 'ABIERTA' && <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/editar/${item.id}`)}>
-                        <MaterialCommunityIcons name="pencil" size={15} color="white" style={styles.detailsIcon} />
-                        <Text style={styles.buttonText}>Editar Oferta</Text>
-                      </TouchableOpacity>}
                     </View>
                   </View>
                 ))
@@ -336,7 +294,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 40,
     position: 'absolute',
-    top: 20, // Adjust this value based on the height of CamyoWebNavBar
+    top: 20,
     left: 0,
     right: 0,
     bottom: -40,
@@ -353,12 +311,12 @@ const styles = StyleSheet.create({
     width: "70%",
     borderRadius: 10,
     display: "flex",
-    flexWrap: "wrap",
+    flexWrap:"wrap",
     flexDirection: "row",
     alignContent: "center",
-    alignItems: "center",
+    alignItems:"center",
     borderLeftWidth: 4,
-    borderColor: "red", // Cambia a "green" si quieres un borde verde
+    borderColor: "red",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -373,12 +331,11 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 40,
     position: 'absolute',
-    top: 20, // Adjust this value based on the height of CamyoWebNavBar
+    top: 20,
     left: 0,
     right: 0,
     bottom: -40,
   },
-
   scrollviewIndicator: {
     backgroundColor: colors.primary,
     width: 3,
@@ -387,7 +344,7 @@ const styles = StyleSheet.create({
   companyLogo: {
     height: 90,
     width: 90,
-    marginRight: 10,
+    marginRight:10,
     borderRadius: 100,
   },
   offerTitle: {
@@ -442,78 +399,69 @@ const styles = StyleSheet.create({
     marginTop: 5,
     flexWrap: "wrap",
   },
-  offerSueldo: {
-    fontSize: 25,
-    fontWeight: "bold",
-    textAlign: "right",
-    paddingLeft: 3,
-    marginRight: 20,
+  offerSueldo:{
+    fontSize:25,
+    fontWeight:"bold",
+    textAlign:"right",
+    paddingLeft:3,
+    marginRight:20,
     color: colors.secondary,
-    textAlignVertical: "center",
-    width: "35%",
-    alignSelf: "center"
-
-
+    textAlignVertical:"center",
+    width:"35%",
+    alignSelf:"center"
   },
   empresa: {
     fontSize: 20,
     color: '#0b4f6c',
     marginTop: 0,
   },
-  button: {
-    backgroundColor: colors.primary,
-    color: colors.white,
-    paddingLeft: 5,
-    paddingRight: 5,
+  button:{
+    backgroundColor:colors.primary,
+    color:colors.white,
+    paddingLeft:5,
+    paddingRight:5,
     marginLeft: "2%",
-    marginTop: 4,
-    flexDirection: "row",
-    flexWrap: "nowrap",
-    height: 40,
+    marginTop:4,
+    flexDirection:"row",
+    flexWrap:"nowrap",
+    height:40,
     width: 150,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center"
-
-
-
+    borderRadius:10,
+    alignItems:"center",
+    justifyContent:"center"
   },
-  buttonText: {
-    color: colors.white,
-    fontWeight: "bold"
+  buttonText:{
+    color:colors.white,
+    fontWeight:"bold"
   },
-  detailsIcon: {
-    color: colors.white,
-    alignSelf: "center",
-    marginLeft: 3,
-    marginTop: 3,
-    marginRight: 5,
-
+  detailsIcon:{
+    color:colors.white,
+    alignSelf:"center",
+    marginLeft:3,
+    marginTop:3,
+    marginRight:5,
   },
-
   offersContainer: {
     flex: 1,
     width: '65%',
     position: 'fixed',
-    top: 350, // Adjusted to place the offers below the header
+    top: 350,
     left: 400,
-    height: 1000,
+    height  : 1000,
     padding: 10,
-    marginLeft: 20, // Adjust as needed to position next to the details column
-    marginTop: 1, // Adjust to start at the height of the email
+    marginLeft: 20,
+    marginTop: 1,
   },
   offersButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     width: '65%',
-    position: 'absolute', // Match the position of the offers container
-    top: 10, // Adjust as needed to match the offers container
-    left: 210, // Adjust as needed to match the offers container
-    right: 0, // Adjust as needed to match the offers container
-
+    position: 'absolute',
+    top: 10,
+    left: 175,
+    right: 0,
   },
-
   offersButton: {
     flex: 1,
     backgroundColor: colors.primary,
@@ -521,25 +469,21 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 5,
     alignItems: 'center',
-  },
-
+  },        
   offersButtonText: {
     color: colors.white,
     fontWeight: 'bold',
   },
-  // Add styles for the description box and text
-  // Add styles for the description box and text
   descriptionBox: {
     padding: 10,
     borderRadius: 5,
     width: '100%',
-    minHeight: 500, // Set a minimum height
-    maxHeight: 500, // Set a maximum height
-    overflow: 'hidden', // Hide overflow text
+    minHeight: 500,
+    maxHeight: 500,
+    overflow: 'hidden',
     position: 'fixed',
-    top: 540, // Adjusted to place the description below the details
+    top:540,
   },
-
   descriptionText: {
     fontSize: 15,
     color: 'dark-gray',
@@ -550,4 +494,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PerfilEmpresa;
+export default EmpresaScreen;

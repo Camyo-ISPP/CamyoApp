@@ -18,8 +18,10 @@ function RootLayout() {
         miperfil: "Mi Perfil",
         miperfilempresa: "Mi Perfil Empresa",
         miperfilcamionero: "Mi Perfil Camionero",
+        "camionero/[camioneroId]": "Perfil Camionero",
         "oferta/crear": "Publicar Nueva Oferta",
         empresas: "Lista de Empresas",
+        "empresa/[empresaId]": "Perfil Empresa",
         "oferta/[ofertaId]": "Detalles de la Oferta",
         "miperfilcamionero/editar": "Editar Perfil Camionero",
         "miperfilempresa/editar": "Editar Perfil Empresa",
@@ -46,6 +48,10 @@ function RootLayout() {
 
         <Stack.Screen name="miperfil" />
         <Stack.Screen name="miperfil/editar" />
+        
+        <Stack.Screen name="empresas" />
+        <Stack.Screen name="empresa/[empresaId]" />
+        <Stack.Screen name="camionero/[camioneroId]" />
         
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/editar/[ofertaId]" />
