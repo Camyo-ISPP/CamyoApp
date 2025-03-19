@@ -1,0 +1,101 @@
+import {Button, TextInput, View, Text} from "react-native";
+import {useEffect, useState} from "react";
+import CartItem, {ItemData} from "../_components/CartItem";
+import TotalFooter from "../_components/TotalFooter";
+import {Products} from './datosdeprueba'
+import {Elements, PaymentElement, useElements, useStripe} from '@stripe/react-stripe-js';
+import {loadStripe, Stripe} from '@stripe/stripe-js';
+
+function IntegratedCheckout() {
+
+    const [items] = useState<ItemData[]>(Products)
+    const [transactionClientSecret, setTransactionClientSecret] = useState("")
+    const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const onCustomerNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+        setName(ev.target.value)
+    }
+
+    const onCustomerEmailChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(ev.target.value)
+    }
+
+    useEffect(() => {
+        // Make sure to call `loadStripe` outside of a component’s render to avoid
+        // recreating the `Stripe` object on every render.
+        setStripePromise(loadStripe(process.env.STRIPE_API_KEY || ""));
+
+    }, [])
+
+    const createTransactionSecret = () => {
+        fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/checkout/integrated", {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                items: items.map(elem => ({name: elem.name, id: elem.id})),
+                customerName: name,
+                customerEmail: email,
+            })
+        })
+            .then(r => r.text())
+            .then(r => {
+                setTransactionClientSecret(r)
+            })
+    }
+
+    return <>
+        <View>
+            <View>
+                <Text>Integrated Checkout Example</Text>
+                {items.map(elem => {
+                    return <CartItem data={elem} mode={'checkout'}/>
+                })}
+                <TotalFooter total={30} mode={"checkout"}/>
+
+                <TextInput placeholder='Nombre del cliente' onChangeText={setName}
+                       value={name}/>
+                <TextInput placeholder='Email del cliente' onChangeText={setEmail}
+                       value={email}/>
+                <Button onPress={createTransactionSecret} title="Iniciar pago"/>
+
+                {(transactionClientSecret === "" ?
+                    <></>
+                    : <Elements stripe={stripePromise} options={{clientSecret: transactionClientSecret}}>
+                        <CheckoutForm/>
+                    </Elements>)}
+            </View>
+        </View>
+    </>
+}
+
+const CheckoutForm = () => {
+
+    const stripe = useStripe();
+    const elements = useElements();
+    const handleSubmit = async () => {
+        if (!stripe || !elements) {
+            return;
+        }
+
+        const result = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: process.env.VITE_CLIENT_BASE_URL + "/success",
+            },
+        });
+
+        if (result.error) {
+            console.log(result.error.message);
+        }
+    };
+
+    return <>
+        <View>
+            <PaymentElement/>
+            <Button disabled={!stripe} onPress={handleSubmit} title="Pagar"/>
+        </View>
+    </>
+}
+
+export default IntegratedCheckout
