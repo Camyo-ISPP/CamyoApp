@@ -1,42 +1,59 @@
-name: PR Checklist for Frontend
-on:
+name: PR Comment Example
+
+on: 
   pull_request:
-    types: [opened, labeled]
+    branches: [main]
+    types: [opened, labeled, unlabeled]
+
+permissions:
+  pull-requests: write
+  issues: write
 
 jobs:
-  add-checklist:
+  example_comment_pr:
     runs-on: ubuntu-latest
+    name: An example job to comment a PR
+
     steps:
-      - name: Check if PR has "frontend" label
-        id: check-label
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Comment PR
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const pr = context.payload.pull_request || (await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.issue.number
-            })).data;
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log("No PR context found.");
+              return;
+            }
 
-            const hasFrontendLabel = pr.labels.some(label => label.name === "frontend");
-
-            if (!hasFrontendLabel) {
+            const labels = pr.labels.map(label => label.name);
+            if (!labels.includes("frontend")) {
               console.log("Skipping checklist: PR does not have 'frontend' label.");
               return;
             }
 
             const checklist = `
-            ## ✅ PR Checklist for Frontend  
-            - [ ] Revisa Funcionalidad  
-            - [ ] Probar +150% y la pantalla en la mitad, y comprobar que se vea bien  
-            - [ ] Probar datos erróneos  
-            - [ ] Acceder url con diferentes sesiones iniciada
-            - [ ] Mira que no haya console.log en el código (quizás hay una razón)
+            ## ✅ Checklist para frontend, por favor completar :wave: (si no aplica completar igualmente :star:)
+            - [ ] Comprobar funcionalidades
+            - [ ] Probar datos y verificar que no se pueden introducir datos erroneos 
+            - [ ] Al hacer zoom no se debe de desconfigurar la pantalla, al cambiar de dispositivo la pantalla debe adaptarse
+            - [ ] Mirar si hay console logs o código comentado sobrante
+            - [ ] Comprobar que la funcionalidad solo este disponible para el rol concreto, además de asegurar que la información privada de los usuarios no esté disponible para cualquier otro usuario
+            - [ ] Comprobar la interfaz móvil
+
+            ¡Ánimo con la PR! :rocket: :sparkles:
             `;
-            github.rest.issues.createComment({
-              issue_number: pr.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: checklist
-            });
+
+            try {
+              const response = await github.rest.issues.createComment({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: checklist,
+              });
+              console.log('Comment created successfully:', response);
+            } catch (error) {
+              console.log('Error creating comment:', error);
+            }

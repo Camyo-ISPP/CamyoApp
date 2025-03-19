@@ -9,6 +9,7 @@ import Selector from "../_components/Selector";
 import MultiSelector from "../_components/MultiSelector";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
+import SuccessModal from "../_components/SuccessModal";
 
 const CrearOfertaScreen = () => {
   const { user, userToken } = useAuth(); // Obtener el usuario logueado desde el contexto de autenticación
@@ -16,13 +17,14 @@ const CrearOfertaScreen = () => {
   const [tipoOferta, setTipoOferta] = useState("TRABAJO");
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const router = useRouter();
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
     titulo: "",
     experiencia: "",
     licencia: "",
     notas: "",
-    estado: "PENDIENTE",
+    estado: "ABIERTA",
     sueldo: "",
     localizacion: "",
     fechaPublicacion: new Date().toISOString(), // Fecha actual del sistema
@@ -42,11 +44,6 @@ const CrearOfertaScreen = () => {
     finMinimo: "",
     finMaximo: "",
   });
-  console.log("ID que se usará para empresa:", user?.id);
-
-  console.log("user", user);
-
-  console.log("formData", formData);
 
   
   // Cuando `user` cambie, actualizar `empresa.id`
@@ -103,7 +100,7 @@ const CrearOfertaScreen = () => {
           experiencia: Number(formData.experiencia), // Convertir a número
           licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
           notas: formData.notas,
-          estado: formData.estado || "PENDIENTE",
+          estado: formData.estado || "ABIERTA",
           sueldo: parseFloat(formData.sueldo).toFixed(2), // Convertir a float con 2 decimal
           localizacion: formData.localizacion,
           fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales
@@ -139,9 +136,6 @@ const CrearOfertaScreen = () => {
         return;
       }
 
-      console.log("Publicando oferta:", JSON.stringify(ofertaData, null, 2));
-
-
       try {
         const response = await fetch(`${BACKEND_URL}/ofertas`, {
           method: "POST",
@@ -157,8 +151,12 @@ const CrearOfertaScreen = () => {
         }
 
         const data = await response.json();
-        console.log("Oferta creada con éxito:", data);
-        router.replace("/miperfilempresa");
+
+        setSuccessModalVisible(true);
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+          router.replace("/miperfilempresa");
+        }, 1000);
 
       } catch (error) {
         console.error("Error al enviar la oferta:", error);
@@ -307,6 +305,13 @@ const CrearOfertaScreen = () => {
           <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
             <Text style={styles.publishButtonText}>Publicar oferta</Text>
           </TouchableOpacity>
+
+          {/* Modal de éxito */}
+          <SuccessModal
+            isVisible={successModalVisible}
+            onClose={() => setSuccessModalVisible(false)}
+            message="¡Oferta creada con éxito!"
+          />
         </View>
       </View>
     </ScrollView>

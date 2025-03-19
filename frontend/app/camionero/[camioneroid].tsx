@@ -1,31 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Platform, ScrollView, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
-import styles from './css/UserProfileScreen'; 
+import styles from './css/CamioneroScreen'; 
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import BottomBar from '../_components/BottomBar.jsx';
 import CamyoWebNavBar from "../_components/CamyoNavBar.jsx";
 import { useNavigation } from '@react-navigation/native';
-import colors from '@/assets/styles/colors';
 import defaultBanner from '../../assets/images/banner_default.jpg'; 
 import defaultCompanyLogo from '../../assets/images/defaultCompImg.png'; 
-import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
-import { router } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
-interface Camionero {
-    id: number;
-    nombre: string;
-    email: string;
-    disponibilidad: string;
-    experiencia?: number;
-    licencias?: string[];
-    vehiculo_propio?: boolean;
-    localizacion: string;
-    avatar: string;
-    telefono: string;
-    foto: string;
-    descripcion: string;
-}
 
 interface Review {
     id: number;
@@ -35,15 +19,14 @@ interface Review {
     avatar: string;
 }
 
-const UserProfileScreen: React.FC = () => {
+const CamioneroScreen: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [camionero, setCamionero] = useState<Camionero | null>(null);
+    const { camioneroid } = useLocalSearchParams(); 
+    const [camionero, setCamionero] = useState<any>(null);
     const navigation = useNavigation();
-    const { userToken, user } = useAuth();
+    const router = useRouter();
     const [offers, setOffers] = useState<any[]>([]);
-    const [offerStatus, setOfferStatus] = useState(2);
-    const placeholderAvatar = 'https://ui-avatars.com/api/?name=';
     const PlaceHolderLicencias = 'No tiene licencias';
     const [licencias, setLicencias] = useState<string[]>([]);
     const [disp, setDisp] = useState<string>('');
@@ -55,23 +38,17 @@ const UserProfileScreen: React.FC = () => {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
 
-    console.log(user.id)
-    console.log(camionero)
     useEffect(() => {
-        if (!userToken || !user || user.rol !== "CAMIONERO") {
-            setLoading(false);
-            return;
+        if (camioneroid) {
+            fetchCamioneroData();
+            fetchOffers();
+            navigation.setOptions({ headerShown: false });
         }
-
-        fetchCamioneroData();
-        fetchOffers();
-        // Hide the default header
-        navigation.setOptions({ headerShown: false });
-    }, [userToken, user]);
+    }, [camioneroid]);
 
     const fetchCamioneroData = async () => {
         try {
-            const response = await axios.get(`${BACKEND_URL}/camioneros/${user.id}`);
+            const response = await axios.get(`${BACKEND_URL}/camioneros/${camioneroid}`);
             setCamionero(response.data);
             setLicencias(response.data.licencias);
             setDisp(response.data.disponibilidad);
@@ -84,7 +61,7 @@ const UserProfileScreen: React.FC = () => {
 
     const fetchOffers = async () => {
         try {
-            const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
+            const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${camioneroid}`);
             setOffers(response.data);
         } catch (error) {
             console.error('Error al cargar los datos:', error);
@@ -101,52 +78,26 @@ const UserProfileScreen: React.FC = () => {
         );
     }
 
-    /*
-    if (!userToken || !user || user.rol !== "CAMIONERO") {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text>Acceso denegado, inicia sesión con tu cuenta de camionero</Text>
-            </View>
-        );
-    }*/
     const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
-
-    const getNoOffersMessage = () => {
-        switch (offerStatus) {
-            case 0:
-                return 'No hay ofertas pendientes';
-            case 1:
-                return 'No hay ofertas rechazadas';
-            case 2:
-                return 'No hay ofertas aceptadas';
-            default:
-                return '';
-        }
-    };
 
     return (
         <>
+            {isMobile ? <BottomBar /> : <CamyoWebNavBar />}
+            {camionero && (
             <ScrollView contentContainerStyle={[isMobile ? styles.container : styles.desktopContainer, { paddingTop: isMobile ? 0 : 100, paddingLeft: 10 }]}>
                 <View style={styles.bannerContainer}>
                     <Image source={defaultBanner} style={styles.bannerImage} />
                     <View style={isMobile ? styles.profileContainer : styles.desktopProfileContainer}>
                         <Image
-                            source={{ uri: user?.foto || 'https://ui-avatars.com/api/?name=' + user?.nombre }}
+                            source={{ uri: camionero.usuario?.foto || 'https://ui-avatars.com/api/?name=' + camionero.usuario?.nombre }}
                             style={isMobile ? styles.avatar : styles.desktopAvatar}
                         />
                         <View style={styles.profileDetailsContainer}>
-                            <TouchableOpacity
-                                style={styles.editButton}
-                                onPress={() => router.push(`/miperfilcamionero/editar`)}
-                            >
-                                <Text style={styles.editButtonText}> Editar Perfil</Text>
-                            </TouchableOpacity>
-
-                            <Text style={isMobile ? styles.name : styles.desktopName}>{user?.nombre}</Text>
+                            <Text style={isMobile ? styles.name : styles.desktopName}>{camionero.usuario?.nombre}</Text>
                             <View style={styles.detailsRow}>
                                 <Text style={styles.infoText}>Disponibilidad: {normalizeFirstLetter(disp || '')}</Text>
-                                {user?.experiencia !== undefined && (
-                                    <Text style={styles.infoText}>{user.experiencia} años de experiencia</Text>
+                                {camionero.usuario?.experiencia !== undefined && (
+                                    <Text style={styles.infoText}>{camionero.usuario.experiencia} años de experiencia</Text>
                                 )}
                             </View>
                         </View>
@@ -156,11 +107,11 @@ const UserProfileScreen: React.FC = () => {
                 {isMobile && (
                     <View style={styles.infoContainer}>
                         <View style={styles.infoButton}>
-                            <Text style={styles.infoText}>Descripción: {user?.descripcion}</Text>
+                            <Text style={styles.infoText}>Descripción: {camionero.usuario?.descripcion}</Text>
                         </View>
-                        {user?.experiencia !== undefined && (
+                        {camionero.usuario?.experiencia !== undefined && (
                             <View style={styles.infoButton2}>
-                                <Text style={styles.infoText}>{user.experiencia} años de experiencia</Text>
+                                <Text style={styles.infoText}>{camionero.usuario.experiencia} años de experiencia</Text>
                             </View>
                         )}
                     </View>
@@ -171,7 +122,7 @@ const UserProfileScreen: React.FC = () => {
                             <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}>
                                 <FontAwesome style={styles.envelopeIcon} name="envelope" size={20} />
                                 <Text style={styles.linkText}>
-                                    <Text onPress={() => Linking.openURL(`mailto:${user?.email}`)}>{user?.email}</Text>
+                                    <Text onPress={() => Linking.openURL(`mailto:${camionero.usuario?.email}`)}>{camionero.usuario?.email}</Text>
                                 </Text>
                             </Text>
                         </View>
@@ -180,19 +131,19 @@ const UserProfileScreen: React.FC = () => {
                             <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="id-card" size={20} />{licencias.join(', ') || PlaceHolderLicencias}</Text>
                         </View>
 
-                        {user?.vehiculo_propio !== undefined && (
+                        {camionero.usuario?.vehiculo_propio !== undefined && (
                             <View style={styles.detailItem}>
                                 <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.truckIcon} name="truck" size={23} />{camionero?.vehiculo_propio ? 'Vehículo propio' : 'Sin vehículo propio'}</Text>
                             </View>
                         )}
                         <View style={styles.detailItem}>
-                            <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="map" size={20} />{user?.localizacion}</Text>
+                            <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="map" size={20} />{camionero.usuario?.localizacion}</Text>
                         </View>
                         <View style={styles.detailItem}>
-                            <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="phone" size={20} />{user?.telefono}</Text>
+                            <Text style={isMobile ? styles.detailsText : styles.desktopDetailsText}><FontAwesome style={styles.icon} name="phone" size={20} />{camionero.usuario?.telefono}</Text>
                         </View>
                         <View style={styles.descriptionBox}>
-                            <Text style={styles.descriptionText}>{capitalizeFirstLetter(user?.descripcion || '')}</Text>
+                            <Text style={styles.descriptionText}>{capitalizeFirstLetter(camionero.usuario?.descripcion || '')}</Text>
                         </View>
                     </View>
                 </View>
@@ -222,22 +173,16 @@ const UserProfileScreen: React.FC = () => {
                 /> */}
                 <View style={styles.offersContainer}>
                     <View style={styles.offersButtonContainer}>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(2)}>
+                        <View style={styles.offersButton}>  
                             <Text style={styles.offersButtonText}>Ofertas aceptadas</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(0)}>
-                            <Text style={styles.offersButtonText}>Ofertas pendientes</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(1)}>
-                            <Text style={styles.offersButtonText}>Ofertas rechazadas</Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
                     <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
                         <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            {offers.length === 0 || offers[offerStatus].length === 0 ? (
-                                <Text style={styles.noOffersText}>{getNoOffersMessage()}</Text>
+                            {offers.length === 0 || offers[2].length === 0 ? (
+                                <Text style={styles.noOffersText}>{"No hay ofertas aceptadas"}</Text>
                             ) : (
-                                offers[offerStatus].map((item) => (
+                                offers[2].map((item) => (
                                     <View key={item.id} style={styles.card}>
                                         <Image source={defaultCompanyLogo} style={styles.companyLogo} />
                                         <View style={{ width: "30%" }}>
@@ -249,7 +194,7 @@ const UserProfileScreen: React.FC = () => {
                                             <Text style={styles.offerInfo}>{item.notas}</Text>
                                         </View>
                                         <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
+                                        <TouchableOpacity style={styles.button} onPress={() => router.replace(`/oferta/${item.id}`)}>
                                             <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
                                             <Text style={styles.buttonText}>Ver Detalles</Text>
                                         </TouchableOpacity>
@@ -260,8 +205,9 @@ const UserProfileScreen: React.FC = () => {
                     </ScrollView>
                 </View>
             </ScrollView>
+            )}
         </>
     );
 };
 
-export default UserProfileScreen;
+export default CamioneroScreen;

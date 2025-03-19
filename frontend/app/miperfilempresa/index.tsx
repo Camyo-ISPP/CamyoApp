@@ -38,8 +38,7 @@ const EmpresaPerfil = () => {
   const { userToken, user } = useAuth();
   const navigation = useNavigation();
   const [offers, setOffers] = useState<any[]>([]);
-  const [offerStatus, setOfferStatus] = useState<string>('ACEPTADA');
-  
+  const [offerStatus, setOfferStatus] = useState<string>('ABIERTA');
 
   useEffect(() => {
     if (!userToken || !user || user.rol !== "EMPRESA") {
@@ -49,9 +48,9 @@ const EmpresaPerfil = () => {
 
     fetchEmpresaData();
     fetchOffers();
-    // Hide the default header
+
     navigation.setOptions({ headerShown: false });
-  }, [userToken, user, offerStatus]);
+  }, [userToken, user]);
 
   const fetchEmpresaData = async () => {
     try {
@@ -67,7 +66,6 @@ const EmpresaPerfil = () => {
   const fetchOffers = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-      console.log(response.data);
       setOffers(response.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
@@ -96,12 +94,10 @@ const EmpresaPerfil = () => {
 
   const getNoOffersMessage = () => {
     switch (offerStatus) {
-      case 'ACEPTADA':
-        return 'No hay ofertas aceptadas';
-      case 'PENDIENTE':
-        return 'No hay ofertas pendientes';
-      case 'RECHAZADA':
-        return 'No hay ofertas rechazadas';
+      case 'ABIERTA':
+        return 'No hay ofertas abiertas'
+      case 'CERRADA':
+        return 'No hay ofertas cerradas';
       default:
         return '';
     }
@@ -154,16 +150,19 @@ const EmpresaPerfil = () => {
         </View>
         <View style={styles.offersContainer}>
           <View style={styles.offersButtonContainer}>
-            <View style={styles.offersButton}>
-              <Text style={styles.offersButtonText}>Tus Ofertas</Text>
-            </View>
+            <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus('ABIERTA')}>
+              <Text style={styles.offersButtonText}>Ofertas abiertas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus('CERRADA')}>
+              <Text style={styles.offersButtonText}>Ofertas cerradas</Text>
+            </TouchableOpacity>
           </View>
           <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {offers.length === 0 ? (
                 <Text style={styles.noOffersText}>{getNoOffersMessage()}</Text>
               ) : (
-                offers.map((item) => (
+                offers.filter(o => o.estado == offerStatus).map((item) => (
                   <View key={item.id} style={styles.card}>
                     <Image source={defaultImage} style={styles.companyLogo} />
                     <View style={{ width: "30%" }}>
@@ -180,10 +179,10 @@ const EmpresaPerfil = () => {
     <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
     <Text style={styles.buttonText}>Ver Detalles</Text>
   </TouchableOpacity>
-  <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/editar/${item.id}`)}>
+  {item.estado === 'ABIERTA' && <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/editar/${item.id}`)}>
     <MaterialCommunityIcons name="pencil" size={15} color="white" style={styles.detailsIcon} />
     <Text style={styles.buttonText}>Editar Oferta</Text>
-  </TouchableOpacity>
+  </TouchableOpacity>}
 </View>
                   </View>
                 ))
