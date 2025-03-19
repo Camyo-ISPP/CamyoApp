@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import { useState, useEffect } from 'react';
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
-import withAuthProvider from './withAuthProvider'; 
+import withAuthProvider from '../hoc/withAuthProvider'; 
 
 function RootLayout() {
   const segments = useSegments();

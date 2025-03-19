@@ -113,7 +113,6 @@ const EmpresaScreen = () => {
       });
 
       if (response.status === 200) {
-        console.log('Empresa registrada correctamente', response.data.message);
         setErrorMessage("")
 
         const responseLogin = await axios.post(`${BACKEND_URL}/auth/signin`, {

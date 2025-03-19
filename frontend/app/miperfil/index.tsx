@@ -4,6 +4,7 @@ import PerfilEmpresa from '../_components/PerfilEmpresa';
 import WIP from '../_components/WIP';
 import ProtectedRoute from '../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
+import withNavigationGuard from '@/hoc/withNavigationGuard';
 
 const Perfil = () => {
     const { user } = useAuth();
@@ -23,4 +24,4 @@ const Perfil = () => {
     );
 };
 
-export default Perfil;
+export default withNavigationGuard(Perfil);

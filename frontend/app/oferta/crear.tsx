@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 import EmpresaRoute from "../../security/EmpresaRoute";
+import withNavigationGuard from "@/hoc/withNavigationGuard";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -56,8 +57,6 @@ const CrearOfertaScreen = () => {
       }));
     }
   }, [user]);
-  console.log("formData2", formData);
-
 
   const handleInputChange = (field, value) => {
     let formattedValue = value;
@@ -456,4 +455,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CrearOfertaScreen;
+export default withNavigationGuard(CrearOfertaScreen);

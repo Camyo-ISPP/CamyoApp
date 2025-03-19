@@ -10,6 +10,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../../contexts/AuthContext";
 import SuccessModal from "../../_components/SuccessModal";
 import EmpresaRoute from "../../../security/EmpresaRoute";
+import withNavigationGuard from "@/hoc/withNavigationGuard";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -17,14 +18,13 @@ const EditarOfertaScreen = () => {
   const [tipoOferta, setTipoOferta] = useState("");
   const router = useRouter();
   const { ofertaid } = useLocalSearchParams();
-  const { user, userToken } = useAuth(); 
+  const { user, userToken } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [hasPermission, setHasPermission] = useState(false); 
+  const [hasPermission, setHasPermission] = useState(false);
   const [isUserLoading, setIsUserLoading] = useState(true);
   const [isAuthLoaded, setIsAuthLoaded] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
 
-  /************************************************** */
   const [formData, setFormData] = useState({
     titulo: "",
     experiencia: "",
@@ -106,11 +106,11 @@ const EditarOfertaScreen = () => {
         licencia, // Ahora es siempre un string
         tipoAnterior: tipoOfertaCargado, // Guardamos el tipo original
       }));
-      setHasPermission(true); // ✅ Ahora tiene permiso
+      setHasPermission(true);
       setLoading(false);
 
     } catch (error) {
-      console.error("❌ Error en fetchOferta:", error);
+      console.error("Error en fetchOferta:", error);
     }
   };
 
@@ -388,7 +388,7 @@ const EditarOfertaScreen = () => {
           numberOfLines={multiline ? 3 : 1}
           placeholder={placeholder}
           placeholderTextColor={colors.mediumGray}
-          value={formData[field]}  // <-- Se asigna el valor aquí
+          value={formData[field]}
           onChangeText={(value) => handleInputChange(field, value)}
         />
       </View>
@@ -448,7 +448,7 @@ const EditarOfertaScreen = () => {
                         styles.licenciaText,
                         isSelected && styles.licenciaTextSelected
                       ]}>
-                        {licencia} {/* Mostramos el valor con + en la UI */}
+                        {licencia}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
 
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between", // Distribuye los botones
+    justifyContent: "space-between",
     width: "100%",
     marginTop: 20,
   },
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
   deleteButton: {
     flex: 1,
     paddingVertical: 12,
-    marginRight: 10, // Espacio entre los botones
+    marginRight: 10,
     borderRadius: 12,
     alignItems: "center",
     backgroundColor: "#D14F45",
@@ -681,7 +681,7 @@ const styles = StyleSheet.create({
   publishButton: {
     flex: 1,
     paddingVertical: 12,
-    marginLeft: 10, // Espacio entre los botones
+    marginLeft: 10,
     borderRadius: 12,
     alignItems: "center",
     backgroundColor: "#4CAF50",
@@ -694,4 +694,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditarOfertaScreen;
+export default withNavigationGuard(EditarOfertaScreen);

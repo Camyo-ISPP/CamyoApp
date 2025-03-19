@@ -4,6 +4,7 @@ import EditarPerfilEmpresa from '../_components/EditarPerfilEmpresa';
 import WIP from '../_components/WIP';
 import ProtectedRoute from '../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
+import withNavigationGuard from '@/hoc/withNavigationGuard';
 
 const EditarPerfil = () => {
     const { user } = useAuth();
@@ -23,4 +24,4 @@ const EditarPerfil = () => {
     );
 };
 
-export default EditarPerfil;
+export default withNavigationGuard(EditarPerfil);

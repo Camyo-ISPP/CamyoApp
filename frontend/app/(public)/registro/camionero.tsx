@@ -116,7 +116,6 @@ const CamioneroScreen = () => {
       });
 
       if (response.status === 200) {
-        console.log('Camionero registrada correctamente', response.data.message);
         setErrorMessage("")
       } else {
         console.error('Error al registrar el camionero/a', response);
