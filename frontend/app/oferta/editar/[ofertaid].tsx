@@ -53,8 +53,13 @@ const EditarOfertaScreen = () => {
 
   });
 
+  useEffect(() => {
+    if (!user || !user.rol) {
+      router.replace("/login");
+    }
+  }, [user, router]);
+
   if (!user || !user.rol) {
-    router.replace("/login");
     return null;
   }
 

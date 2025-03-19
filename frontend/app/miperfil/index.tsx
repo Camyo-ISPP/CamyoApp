@@ -5,13 +5,19 @@ import WIP from '../_components/WIP';
 import ProtectedRoute from '../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
 import withNavigationGuard from '@/hoc/withNavigationGuard';
+import { useEffect } from "react";
 
 const Perfil = () => {
     const { user } = useAuth();
     const router = useRouter();
 
+    useEffect(() => {
+        if (!user || !user.rol) {
+            router.replace("/login");
+        }
+    }, [user, router]);
+
     if (!user || !user.rol) {
-        router.replace("/login");
         return null;
     }
 

@@ -1,13 +1,9 @@
 import { useRouter } from "expo-router";
 import { useAuth } from "../contexts/AuthContext";
-import { useSegments, useRootNavigationState } from "expo-router";
 
 export default function ProtectedRoute({ children }) {
     const router = useRouter();
     const { user } = useAuth();
-
-    const rootNavigationState = useRootNavigationState();
-    if (!rootNavigationState?.key) return null;
 
     if (user == null) {
         router.replace("/login");
