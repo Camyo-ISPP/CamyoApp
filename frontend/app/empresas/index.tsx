@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
+import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import colors from '@/assets/styles/colors';
 import Titulo from "../_components/Titulo";
 
 interface Usuario {
@@ -52,12 +54,18 @@ const EmpresasLista = () => {
 
 {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 10 }]}>
-          <View style={styles.cardContent}>
+          <View>
             <Text style={styles.name}>{empresa.usuario.nombre}</Text>
             <DetailItem icon="globe" text={empresa.web} link />
             <DetailItem icon="building" text={empresa.nif} />
             <DetailItem icon="map-marker" text={empresa.usuario.localizacion} />
             <DetailItem icon="phone" text={empresa.usuario.telefono} />
+          </View>
+          <View>
+            <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
+                <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+                <Text style={styles.buttonText}>Ver Detalles</Text>
+            </TouchableOpacity>
           </View>
         </View>
       ))}
@@ -95,9 +103,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 3,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
   },
   avatar: { width: 80, height: 80, borderRadius: 40, marginRight: 15 },
-  cardContent: { flex: 1 },
   name: { fontSize: 20, fontWeight: "bold" },
   infoText: { fontSize: 14, color: "gray" },
   detailItem: { flexDirection: "row", alignItems: "center", marginBottom: 5 },
@@ -105,6 +115,33 @@ const styles = StyleSheet.create({
   icon: { marginRight: 10, color: "#0b4f6c" },
   linkText: { color: "#007BFF", textDecorationLine: "underline" },
   errorText: { textAlign: "center", fontSize: 18, color: "red", marginTop: 50 },
+  button:{
+    backgroundColor:colors.primary,
+    color:colors.white,
+    paddingLeft:5,
+    paddingRight:5,
+    marginLeft: "2%",
+    marginTop:4,
+    flexDirection:"row",
+    flexWrap:"nowrap",
+    height:40,
+    width: 150,
+    borderRadius:10,
+    alignItems:"center",
+    justifyContent:"center"
+  },
+  buttonText:{
+    color:colors.white,
+    fontWeight:"bold"
+  },
+  detailsIcon:{
+    color:colors.white,
+    alignSelf:"center",
+    marginLeft:3,
+    marginTop:3,
+    marginRight:5,
+
+  },
 });
 
 export default EmpresasLista;
