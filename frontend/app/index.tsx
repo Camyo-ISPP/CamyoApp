@@ -71,7 +71,7 @@ export default function Index() {
         </View>
         <View>
           <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-          <TouchableOpacity style={styles.button} onPress={() => router.replace(`/oferta/${item.id}`)}>
+          <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
             <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
             <Text style={styles.buttonText}>Ver Detalles</Text>
           </TouchableOpacity>
@@ -91,7 +91,7 @@ export default function Index() {
             <View style={styles.heroBox}>
               <View style={styles.textContainer}>
                 <Text style={styles.heroText}>Donde los camioneros y las empresas se encuentran.</Text>
-                <TouchableOpacity style={styles.registerButton} onPress={() => router.replace("/login")}>
+                <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/login")}>
                   <Text style={styles.registerButtonText}>Accede</Text>
                   <Ionicons name="arrow-forward" size={25} color="white" style={styles.arrowIcon} />
                 </TouchableOpacity>
@@ -182,7 +182,6 @@ const styles = StyleSheet.create({
 
   listaContainer: {
     flexDirection: "row",
-    justifyContent: "center",
     alignSelf: "center",
     width: "90%",
     marginTop: 20,
@@ -275,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     padding: 25,
     marginVertical: 10,
-    width: "65%",
+    width: "75%",
     borderRadius: 12,
     flexWrap:"wrap",
     flexDirection: "row",
@@ -356,7 +355,7 @@ const styles = StyleSheet.create({
     fontWeight:"bold",
     color: colors.secondary,
     textAlignVertical:"center",
-    alignSelf:"center"
+    alignSelf:"center",
     },
   button:{
     backgroundColor:colors.primary,
