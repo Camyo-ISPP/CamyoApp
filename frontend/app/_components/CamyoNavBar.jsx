@@ -27,7 +27,7 @@ export default function CamyoWebNavBar() {
     <LinearGradient colors={["rgba(255, 255, 255, 1)", "rgba(0, 0, 0, 0)"]}  style={styles.headerWeb}>
       <View style={styles.contentContainer}>
         <View style={styles.leftSection}>
-          <TouchableOpacity onPress={() => router.replace("/")}>
+          <TouchableOpacity onPress={() => router.push("/")}>
             <Image source={ProyectoLogo} style={styles.logo} resizeMode="contain" />
           </TouchableOpacity>
           <View style={styles.separator} />
@@ -41,7 +41,7 @@ export default function CamyoWebNavBar() {
         {isCompact ? (
             <OptionsDropdown />
           ) : (
-            <TouchableOpacity style={styles.button} onPress={() => router.replace(routes.listcompanies)}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push(routes.listcompanies)}>
               <Text style={styles.buttonText}>Empresas</Text>
             </TouchableOpacity>
           )}
@@ -49,7 +49,7 @@ export default function CamyoWebNavBar() {
           {user ? (
             <PerfilDropdown user={user} />
           ) : (
-            <TouchableOpacity style={styles.button} onPress={() => router.replace(routes.login)}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push(routes.login)}>
               <Text style={styles.buttonText}>Iniciar Sesión</Text>
             </TouchableOpacity>
           )}

@@ -12,6 +12,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const licencias = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E","D1+E","D"];
@@ -22,7 +23,7 @@ const CamioneroScreen = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { login } = useAuth();
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -104,7 +105,7 @@ const CamioneroScreen = () => {
       tieneCAP: formData.tieneCAP,
       expiracionCAP: formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
       isAutonomo: formData.isAutonomo,
-      tarjetas: formData.tarjetas
+      tarjetasAutonomo: formData.tarjetas
     };
 
     try {
@@ -129,10 +130,11 @@ const CamioneroScreen = () => {
       const { token } = responseLogin.data;
       login(responseLogin.data, token);
 
-      setIsModalVisible(true);
+      setSuccessModalVisible(true);
         setTimeout(() => {
+          setSuccessModalVisible(false);
           router.replace("/");
-        }, 1500);
+        }, 1000);
       
     } catch (error) {
       console.error('Error en la solicitud', error);
@@ -191,7 +193,7 @@ const CamioneroScreen = () => {
       <View style={styles.container}>
         <View style={styles.cardContainer}>
 
-          <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/registro')}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.push('/registro')}>
               <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
           </TouchableOpacity>
 
@@ -325,22 +327,11 @@ const CamioneroScreen = () => {
           </TouchableOpacity>
 
           {/* Modal de éxito */}
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={() => setIsModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContainer}>
-                {/* Icono del tic verde */}
-                <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
-                
-                <Text style={styles.modalText}>¡Registro exitoso!</Text>
-                <Text style={styles.modalText}>Redirigiendo...</Text>
-              </View>
-            </View>
-          </Modal>
+          <SuccessModal
+            isVisible={successModalVisible}
+            onClose={() => setSuccessModalVisible(false)}
+            message="¡Registro exitoso!"
+          />
 
         </View>
       </View>

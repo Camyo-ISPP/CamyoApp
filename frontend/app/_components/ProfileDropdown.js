@@ -3,19 +3,25 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, TouchableWithou
 import { useAuth } from "../../contexts/AuthContext";
 import { Entypo } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
-import { router, useRouter } from 'expo-router';
-import axios from 'axios';
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { useRouter } from 'expo-router';
+import SuccessModal from './SuccessModal';
 
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false); // Estado para el modal
-  const { userToken, logout } = useAuth();
+  const [modalVisible, setModalVisible] = useState(false); // Estado para el modal de pregunta de confirmación
+  const [successModalVisible, setSuccessModalVisible] = useState(false); // Estado para el modal de éxito de cierre de sesión
+
+  const router = useRouter();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
     setModalVisible(false); 
-    logout();
+
+    setSuccessModalVisible(true);
+    setTimeout(() => {
+      setSuccessModalVisible(false);
+      logout();
+    }, 1000);
   };
 
   return (
@@ -48,7 +54,7 @@ const ProfileDropdown = ({ user }) => {
           />
           <Text style={styles.dropdownHeader}>¡Hola, {user.nombre}!</Text>
           <Text style={styles.dropdownEmail}>{user.email}</Text>
-          <TouchableOpacity style={styles.dropdownButton} onPress={() => router.replace('/miperfil')} >
+          <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push('/miperfil')} >
             <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.dropdownButton} onPress={() => setModalVisible(true)}>
@@ -82,6 +88,13 @@ const ProfileDropdown = ({ user }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+      {/* Modal de éxito de cierre de sesión*/}
+      <SuccessModal
+          isVisible={successModalVisible}
+          onClose={() => setSuccessModalVisible(false)}
+          message={<Text>¡Hasta pronto!{'\n'}Cerrando sesión...</Text>}
+      />
     </View>
   );
 };

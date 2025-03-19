@@ -11,7 +11,7 @@ import Selector from "../../_components/Selector";
 import MultiSelector from "../../_components/MultiSelector";
 import { useRouter, useLocalSearchParams, useRootNavigationState } from "expo-router";
 import { useAuth } from "../../../contexts/AuthContext";
-
+import SuccessModal from "../../_components/SuccessModal";
 
 const EditarOfertaScreen = () => {
   const [tipoOferta, setTipoOferta] = useState("");
@@ -24,6 +24,7 @@ const EditarOfertaScreen = () => {
   const navigationState = useRootNavigationState(); // 👈 Verificar si la navegación está lista
   const [isUserLoading, setIsUserLoading] = useState(true);
   const [isAuthLoaded, setIsAuthLoaded] = useState(false); // 🔹 Indica si la autenticación ha finalizado
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   /************************************************** */
   const [formData, setFormData] = useState({
@@ -56,12 +57,11 @@ const EditarOfertaScreen = () => {
 
   const fetchOferta = async () => {
     try {
-      console.log("🔍 Obteniendo oferta general...");
       const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
       const data = await response.json();
     
       if (!data || Object.keys(data).length === 0) {
-        console.error("❌ Error: La oferta no tiene datos.");
+        console.error("Error: La oferta no tiene datos.");
         return;
       }
       let licencia = data.licencia || ""; // Asegurar que no sea undefined o null
@@ -112,41 +112,31 @@ const EditarOfertaScreen = () => {
   };
 
   useEffect(() => {
-
-    // 1️⃣ **Esperar a que el contexto de autenticación cargue**
     if (user === undefined) {
-      console.log("⌛ Esperando a que `user` se cargue...");
       return; 
     }
 
-    // 🔹 **Confirmar que la autenticación ha terminado de cargar**
     setIsAuthLoaded(true);
 
   }, [user]);
 
   useEffect(() => {
-    console.log("🔍 Estado de user useEffect:", user); // 👀 Verificar qué está pasando
     if (!isAuthLoaded) {
-      console.log("⌛ Esperando a que la autenticación cargue...");
       return;
     }
 
     // Esperar hasta que `user` esté disponible
     if (user === undefined) {
-      console.log("⌛ Esperando a que `user` se cargue...");
-
       return; // Espera hasta que `user` tenga un valor
     }
     setIsUserLoading(false); // Usuario cargado correctamente
 
     if (!ofertaid) {
-      console.error("❌ Error: ofertaid no está definido.");
+      console.error("Error: ofertaid no está definido.");
       return;
     }
     fetchOferta();
   }, [isAuthLoaded]);
-
-    
 
   if (!isAuthLoaded || loading) {
     return (
@@ -156,7 +146,6 @@ const EditarOfertaScreen = () => {
     );
   }
 
-  // 🔹 Si el usuario no tiene permisos, no mostrar nada
   if (!hasPermission) {
     return null;
   }
@@ -205,7 +194,6 @@ const EditarOfertaScreen = () => {
     if (!validateForm()) return;
 
     try {
-      // 🚀 Verificar si el tipo de oferta ha cambiado
       const tipoCambiado = tipoOferta !== formData.tipoAnterior;
 
       let ofertaData: {
@@ -242,7 +230,7 @@ const EditarOfertaScreen = () => {
           experiencia: Number(formData.experiencia),
           licencia: Array.isArray(formData.licencia) ? formData.licencia.join(", ") : formData.licencia,
           notas: formData.notas,
-          estado: formData.estado || "PENDIENTE",
+          estado: formData.estado || "ABIERTA",
           sueldo: parseFloat(formData.sueldo).toFixed(2),
           localizacion: formData.localizacion,
           fechaPublicacion: formatDate(new Date()),
@@ -250,10 +238,8 @@ const EditarOfertaScreen = () => {
         },
       };
 
-      // 🔥 Si el tipo de oferta cambió, primero eliminar el tipo anterior
       if (tipoCambiado) {
         if (formData.tipoAnterior === "TRABAJO") {
-          console.log("🗑 Eliminando datos de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, 
             { method: "DELETE",
               headers: { 
@@ -263,7 +249,6 @@ const EditarOfertaScreen = () => {
             });
 
         } else if (formData.tipoAnterior === "CARGA") {
-          console.log("🗑 Eliminando datos de CARGA...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, 
             { method: "DELETE",
               headers: { 
@@ -275,10 +260,8 @@ const EditarOfertaScreen = () => {
         }
       }
 
-      // 🔥 2️⃣ **Crear el nuevo tipo de oferta si ha cambiado**
       if (tipoCambiado) {
         if (tipoOferta === "TRABAJO") {
-          console.log("🚀 Creando nueva oferta de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
             method: "POST",
             headers: { "Content-Type": "application/json",
@@ -290,7 +273,6 @@ const EditarOfertaScreen = () => {
             }),
           });
         } else if (tipoOferta === "CARGA") {
-          console.log("🚀 Creando nueva oferta de CARGA...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, {
             method: "POST",
             headers: { "Content-Type": "application/json",
@@ -309,9 +291,7 @@ const EditarOfertaScreen = () => {
           });
         }
       } else {
-        // 🔥 3️⃣ **Si el tipo NO ha cambiado, solo actualizarlo**
         if (tipoOferta === "TRABAJO") {
-          console.log("🔄 Actualizando oferta de TRABAJO...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
             method: "PUT",
             headers: { "Content-Type": "application/json",
@@ -323,7 +303,6 @@ const EditarOfertaScreen = () => {
             }),
           });
         } else if (tipoOferta === "CARGA") {
-          console.log("🔄 Actualizando oferta de CARGA...");
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, {
             method: "PUT",
             headers: { "Content-Type": "application/json",
@@ -343,8 +322,6 @@ const EditarOfertaScreen = () => {
         }
       }
 
-      console.log("📩 Publicando oferta:", JSON.stringify(ofertaData, null, 2));
-
       const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json",
@@ -355,13 +332,16 @@ const EditarOfertaScreen = () => {
 
       if (!response.ok) throw new Error(`Error al editar la oferta: ${response.statusText}`);
 
-      console.log("✅ Oferta editada con éxito.");
       await fetchOferta();
 
-      router.replace("/miperfilempresa");
+      setSuccessModalVisible(true);
+        setTimeout(() => {
+	        setSuccessModalVisible(false);
+          router.replace("/miperfilempresa");
+        }, 1000);
 
     } catch (error) {
-      console.error("❌ Error al enviar la oferta:", error);
+      console.error("Error al enviar la oferta:", error);
       alert("Hubo un error al editar la oferta.");
     }
   };
@@ -375,8 +355,7 @@ const EditarOfertaScreen = () => {
         });
 
         if (response.ok) {
-            console.log("Oferta eliminada correctamente");
-            router.replace("/miperfilempresa"); // Redirige a /miperfil sin mostrar una alerta
+            router.replace("/miperfilempresa");
 
         } else {
             Alert.alert("Error", "No se pudo eliminar la oferta.");
@@ -524,6 +503,13 @@ const EditarOfertaScreen = () => {
           <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
             <Text style={styles.publishButtonText}>Actualizar oferta</Text>
           </TouchableOpacity>
+
+          {/* Modal de éxito */}
+          <SuccessModal
+            isVisible={successModalVisible}
+            onClose={() => setSuccessModalVisible(false)}
+            message="¡Tu oferta se actualizó correctamente!"
+          />
 
           </View>
 
