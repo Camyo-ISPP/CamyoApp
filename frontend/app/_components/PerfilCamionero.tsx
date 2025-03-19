@@ -42,7 +42,7 @@ const PerfilCamionero: React.FC = () => {
     const navigation = useNavigation();
     const { userToken, user } = useAuth();
     const [offers, setOffers] = useState<any[]>([]);
-    const [offerStatus, setOfferStatus] = useState<string>('ACEPTADA'); // State to track selected offer status
+    const [offerStatus, setOfferStatus] = useState(2);
     const placeholderAvatar = 'https://ui-avatars.com/api/?name=';
     const PlaceHolderLicencias = 'No tiene licencias';
     const [licencias, setLicencias] = useState<string[]>([]);
@@ -64,7 +64,7 @@ const PerfilCamionero: React.FC = () => {
         fetchOffers();
         // Hide the default header
         navigation.setOptions({ headerShown: false });
-    }, [userToken, user, offerStatus]); // Add offerStatus to dependency array
+    }, [userToken, user]);
 
     const fetchCamioneroData = async () => {
         try {
@@ -81,7 +81,7 @@ const PerfilCamionero: React.FC = () => {
 
     const fetchOffers = async () => {
         try {
-            const response = await axios.get(`${BACKEND_URL}/ofertas/aplicadas/${user.id}?estado=${offerStatus}`);
+            const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
             setOffers(response.data);
         } catch (error) {
             console.error('Error al cargar los datos:', error);
@@ -110,12 +110,12 @@ const PerfilCamionero: React.FC = () => {
 
     const getNoOffersMessage = () => {
         switch (offerStatus) {
-            case 'ACEPTADA':
-                return 'No hay ofertas aceptadas';
-            case 'PENDIENTE':
+            case 0:
                 return 'No hay ofertas pendientes';
-            case 'RECHAZADA':
+            case 1:
                 return 'No hay ofertas rechazadas';
+            case 2:
+                return 'No hay ofertas aceptadas';
             default:
                 return '';
         }
@@ -219,22 +219,22 @@ const PerfilCamionero: React.FC = () => {
                 /> */}
                 <View style={styles.offersContainer}>
                     <View style={styles.offersButtonContainer}>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus('ACEPTADA')}>
+                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(2)}>
                             <Text style={styles.offersButtonText}>Ofertas aceptadas</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus('PENDIENTE')}>
+                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(0)}>
                             <Text style={styles.offersButtonText}>Ofertas pendientes</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus('RECHAZADA')}>
+                        <TouchableOpacity style={styles.offersButton} onPress={() => setOfferStatus(1)}>
                             <Text style={styles.offersButtonText}>Ofertas rechazadas</Text>
                         </TouchableOpacity>
                     </View>
                     <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
                         <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            {offers.length === 0 ? (
+                            {offers.length === 0 || offers[offerStatus].length === 0 ? (
                                 <Text style={styles.noOffersText}>{getNoOffersMessage()}</Text>
                             ) : (
-                                offers.map((item) => (
+                                offers[offerStatus].map((item) => (
                                     <View key={item.id} style={styles.card}>
                                         <Image source={defaultCompanyLogo} style={styles.companyLogo} />
                                         <View style={{ width: "30%" }}>
