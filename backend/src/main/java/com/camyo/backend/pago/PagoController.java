@@ -7,8 +7,10 @@ import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.PaymentIntent;
+import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.PaymentIntentCreateParams;
+import com.stripe.param.SubscriptionCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.stripe.param.checkout.SessionCreateParams.LineItem.PriceData;
 
@@ -69,37 +71,42 @@ public class PagoController {
 
         Stripe.apiKey = STRIPE_API_KEY;
 
-        String clientBaseURL = System.getenv().get("CLIENT_BASE_URL");
+        String clientBaseURL = "http://localhost:8081";
 
         Usuario cliente = usuarioService.obtenerUsuarioActual();
         Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
 
-        BigDecimal planPrecio = switch (PaymentRequest.getPlanNivel()){
-            case GRATIS -> BigDecimal.valueOf(0.00);
-            case BASICO -> BigDecimal.valueOf(24.99);
-            case PREMIUM -> BigDecimal.valueOf(49.99);
+        Long planPrecio = switch (PaymentRequest.getPlanNivel()) {
+            case GRATIS -> 000L;
+            case BASICO -> 2499L;
+            case PREMIUM -> 4999L;
         };
 
-        SessionCreateParams.Builder paramsBuilder =
-            SessionCreateParams.builder()
+        SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setCustomer(clienteStripe.getId())
                 .setSuccessUrl(clientBaseURL + "/success?session_id={CHECKOUT_SESSION_ID}")
                 .setCancelUrl(clientBaseURL + "/failure");
-        
+
         paramsBuilder.addLineItem(
-            SessionCreateParams.LineItem.builder()
-                .setQuantity(1L)
-                .setPriceData(
-                    PriceData.builder()
-                    .setCurrency("eur")
-                    .setUnitAmountDecimal(planPrecio)
-                    .setRecurring(PriceData.Recurring.builder().setInterval(PriceData.Recurring.Interval.MONTH).build())
-                    .build())
-                .build());
+                SessionCreateParams.LineItem.builder()
+                        .setQuantity(1L)
+                        .setPriceData(
+                                PriceData.builder()
+                                        .setProductData(
+                                                PriceData.ProductData.builder()
+                                                        .setName(PaymentRequest.getPlanNivel().toString())
+                                                        .build())
+                                        .setCurrency("eur")
+                                        .setUnitAmount(planPrecio)
+                                        .setRecurring(PriceData.Recurring.builder()
+                                                .setInterval(PriceData.Recurring.Interval.MONTH).build())
+                                        .build())
+                        .build());
 
         Session session = Session.create(paramsBuilder.build());
 
         return session.getUrl();
     }
+
 }
