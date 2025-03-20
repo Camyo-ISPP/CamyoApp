@@ -55,9 +55,9 @@ public class SecurityConfiguration {
 			//.requestMatchers("/resources/**", "/webjars/**", "/static/**", "/swagger-resources/**").permitAll()			
 			//.requestMatchers( "/","/auth/**","/swagger-ui.html","/swagger-ui/**").permitAll()
 			.requestMatchers("/usuarios/**").permitAll()
-			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/desaplicar/**").hasAuthority("CAMIONERO")
-			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/aplicar/**").hasAuthority("CAMIONERO")
-			.requestMatchers(HttpMethod.POST, "/ofertas/aplicadas/**").hasAuthority("CAMIONERO")
+			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/desaplicar/**").hasAuthority("CAMIONERO")
+			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/aplicar/**").hasAuthority("CAMIONERO")
+
 
 			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")

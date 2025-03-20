@@ -6,27 +6,27 @@ import {
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import colors from "../../../assets/styles/colors";
-import globalStyles from "../../../assets/styles/globalStyles";
-import Selector from "../../_components/Selector";
-import MultiSelector from "../../_components/MultiSelector";
-import { useRouter, useLocalSearchParams, useRootNavigationState } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "../../../contexts/AuthContext";
 import SuccessModal from "../../_components/SuccessModal";
+import EmpresaRoute from "../../../security/EmpresaRoute";
+import withNavigationGuard from "@/hoc/withNavigationGuard";
+import { useSubscriptionRules } from '../../../utils/useSubscriptionRules';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const EditarOfertaScreen = () => {
   const [tipoOferta, setTipoOferta] = useState("");
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const router = useRouter();
   const { ofertaid } = useLocalSearchParams();
-  const { user, userToken } = useAuth(); // Obtener el usuario logueado desde el contexto de autenticación
-  const [loading, setLoading] = useState(true);  // 🔹 Estado de carga
-  const [hasPermission, setHasPermission] = useState(false); // 🔹 Control de acceso
-  const navigationState = useRootNavigationState(); // 👈 Verificar si la navegación está lista
+  const { user, userToken } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [hasPermission, setHasPermission] = useState(false);
   const [isUserLoading, setIsUserLoading] = useState(true);
-  const [isAuthLoaded, setIsAuthLoaded] = useState(false); // 🔹 Indica si la autenticación ha finalizado
+  const [isAuthLoaded, setIsAuthLoaded] = useState(false);
+  const { rules, loading: subscriptionLoading } = useSubscriptionRules();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
 
-  /************************************************** */
   const [formData, setFormData] = useState({
     titulo: "",
     experiencia: "",
@@ -51,7 +51,7 @@ const EditarOfertaScreen = () => {
     inicio: "",
     finMinimo: "",
     finMaximo: "",
-    tipoAnterior: "", // Nuevo: Guarda el tipo original al cargar
+    tipoAnterior: "",
 
   });
 
@@ -59,12 +59,12 @@ const EditarOfertaScreen = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
       const data = await response.json();
-    
+
       if (!data || Object.keys(data).length === 0) {
         console.error("Error: La oferta no tiene datos.");
         return;
       }
-      let licencia = data.licencia || ""; // Asegurar que no sea undefined o null
+      let licencia = data.licencia || "";
 
       let tipoOfertaCargado = "";
       let detallesOferta = {};
@@ -103,17 +103,17 @@ const EditarOfertaScreen = () => {
         licencia, // Ahora es siempre un string
         tipoAnterior: tipoOfertaCargado, // Guardamos el tipo original
       }));
-      setHasPermission(true); // ✅ Ahora tiene permiso
+      setHasPermission(true);
       setLoading(false);
 
     } catch (error) {
-      console.error("❌ Error en fetchOferta:", error);
+      console.error("Error en fetchOferta:", error);
     }
   };
 
   useEffect(() => {
     if (user === undefined) {
-      return; 
+      return;
     }
 
     setIsAuthLoaded(true);
@@ -138,7 +138,7 @@ const EditarOfertaScreen = () => {
     fetchOferta();
   }, [isAuthLoaded]);
 
-  if (!isAuthLoaded || loading) {
+  if (!isAuthLoaded || loading || subscriptionLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -230,7 +230,7 @@ const EditarOfertaScreen = () => {
           experiencia: Number(formData.experiencia),
           licencia: Array.isArray(formData.licencia) ? formData.licencia.join(", ") : formData.licencia,
           notas: formData.notas,
-          estado: formData.estado || "PENDIENTE",
+          estado: formData.estado || "ABIERTA",
           sueldo: parseFloat(formData.sueldo).toFixed(2),
           localizacion: formData.localizacion,
           fechaPublicacion: formatDate(new Date()),
@@ -240,21 +240,23 @@ const EditarOfertaScreen = () => {
 
       if (tipoCambiado) {
         if (formData.tipoAnterior === "TRABAJO") {
-          await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, 
-            { method: "DELETE",
-              headers: { 
+          await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`,
+            {
+              method: "DELETE",
+              headers: {
                 "Content-Type": "application/json",
                 'Authorization': `Bearer ${userToken}`
-            }
+              }
             });
 
         } else if (formData.tipoAnterior === "CARGA") {
-          await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, 
-            { method: "DELETE",
-              headers: { 
+          await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`,
+            {
+              method: "DELETE",
+              headers: {
                 "Content-Type": "application/json",
                 'Authorization': `Bearer ${userToken}`
-            }
+              }
             }
           );
         }
@@ -264,9 +266,10 @@ const EditarOfertaScreen = () => {
         if (tipoOferta === "TRABAJO") {
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
             method: "POST",
-            headers: { "Content-Type": "application/json",
+            headers: {
+              "Content-Type": "application/json",
               'Authorization': `Bearer ${userToken}`
-             },
+            },
             body: JSON.stringify({
               fechaIncorporacion: formatDate(formData.fechaIncorporacion),
               jornada: formData.jornada,
@@ -275,9 +278,10 @@ const EditarOfertaScreen = () => {
         } else if (tipoOferta === "CARGA") {
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, {
             method: "POST",
-            headers: { "Content-Type": "application/json",
+            headers: {
+              "Content-Type": "application/json",
               'Authorization': `Bearer ${userToken}`
-             },
+            },
             body: JSON.stringify({
               mercancia: formData.mercancia,
               peso: Number(formData.peso),
@@ -294,9 +298,10 @@ const EditarOfertaScreen = () => {
         if (tipoOferta === "TRABAJO") {
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json",
+            headers: {
+              "Content-Type": "application/json",
               'Authorization': `Bearer ${userToken}`
-             },
+            },
             body: JSON.stringify({
               fechaIncorporacion: formatDate(formData.fechaIncorporacion),
               jornada: formData.jornada,
@@ -305,9 +310,10 @@ const EditarOfertaScreen = () => {
         } else if (tipoOferta === "CARGA") {
           await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json",
+            headers: {
+              "Content-Type": "application/json",
               'Authorization': `Bearer ${userToken}`
-             },
+            },
             body: JSON.stringify({
               mercancia: formData.mercancia,
               peso: Number(formData.peso),
@@ -324,9 +330,10 @@ const EditarOfertaScreen = () => {
 
       const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
           'Authorization': `Bearer ${userToken}`
-         },
+        },
         body: JSON.stringify(ofertaData),
       });
 
@@ -335,10 +342,10 @@ const EditarOfertaScreen = () => {
       await fetchOferta();
 
       setSuccessModalVisible(true);
-        setTimeout(() => {
-	        setSuccessModalVisible(false);
-          router.replace("/miperfilempresa");
-        }, 1000);
+      setTimeout(() => {
+        setSuccessModalVisible(false);
+        router.replace("/miperfil");
+      }, 1000);
 
     } catch (error) {
       console.error("Error al enviar la oferta:", error);
@@ -347,175 +354,174 @@ const EditarOfertaScreen = () => {
   };
   const handleDeleteOffer = async () => {
     try {
-        const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
-            method: "DELETE",
-            headers: { 
-              'Authorization': `Bearer ${userToken}`
-          }
-        });
-
-        if (response.ok) {
-            router.replace("/miperfilempresa");
-
-        } else {
-            Alert.alert("Error", "No se pudo eliminar la oferta.");
+      const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
+        method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${userToken}`
         }
+      });
+
+      if (response.ok) {
+        router.replace("/miperfil");
+
+      } else {
+        Alert.alert("Error", "No se pudo eliminar la oferta.");
+      }
     } catch (error) {
-        console.error("Error al eliminar la oferta:", error);
+      console.error("Error al eliminar la oferta:", error);
     }
-};
-  // Función para renderizar cada input del formulario
-  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "") => (
+  };
+
+  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "", disabled = false) => {
+    const iconColor = disabled ? colors.lightGray : colors.primary;
+    return (
     <View style={{ width: '90%', marginBottom: 15 }}>
       <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
-        {icon}
+      <View style={[styles.inputContainerStyle, disabled && styles.disabledInputContainer]}>
+        {React.cloneElement(icon, { color: iconColor })}
         <TextInput
           style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline: "none", textAlignVertical: multiline ? 'top' : 'center' }}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
-          placeholder={placeholder}
+          placeholder={disabled ? "Solo disponible para clientes BASIC y PREMIUM." : placeholder}
           placeholderTextColor={colors.mediumGray}
-          value={formData[field]}  // <-- Se asigna el valor aquí
-          onChangeText={(value) => handleInputChange(field, value)}
+          onChangeText={(value) => !disabled && handleInputChange(field, value)}
+          editable={!disabled}
+          value={formData[field]}
         />
       </View>
+
+      {disabled && (
+        <TouchableOpacity onPress={() => router.replace("/")}>
+          <Text style={styles.upgradeMessage}>
+            ¿Quieres más opciones? Mejora tu plan aquí.
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
-  );
-
-  const handleTipoOfertaChange = (nuevoTipo) => {
-    if (tipoOferta === nuevoTipo) return;
-
-    setTipoOferta(nuevoTipo);
-
-    // Limpiamos solo el estado local, sin afectar el backend todavía
-    setFormData((prevState) => ({
-      ...prevState,
-      fechaIncorporacion: nuevoTipo === "TRABAJO" ? "" : prevState.fechaIncorporacion,
-      jornada: nuevoTipo === "TRABAJO" ? "" : prevState.jornada,
-      mercancia: nuevoTipo === "CARGA" ? "" : prevState.mercancia,
-      peso: nuevoTipo === "CARGA" ? "" : prevState.peso,
-      origen: nuevoTipo === "CARGA" ? "" : prevState.origen,
-      destino: nuevoTipo === "CARGA" ? "" : prevState.destino,
-      distancia: nuevoTipo === "CARGA" ? "" : prevState.distancia,
-      inicio: nuevoTipo === "CARGA" ? "" : prevState.inicio,
-      finMinimo: nuevoTipo === "CARGA" ? "" : prevState.finMinimo,
-      finMaximo: nuevoTipo === "CARGA" ? "" : prevState.finMaximo,
-    }));
+    );
   };
 
-
-
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <View style={styles.cardContainer}>
-          <Text style={styles.title}>Editar oferta</Text>
+    <EmpresaRoute>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <View style={styles.cardContainer}>
+            <Text style={styles.title}>Editar Oferta</Text>
 
-          {/* Campos generales */}
-          {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
-          {renderInput("Experiencia (años)", "experiencia", <FontAwesome5 name="briefcase" size={20} color={colors.primary} />)}
-          <View style={styles.inputContainer}>
-            <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
-              Licencia:
-            </Text>
-            <View style={styles.licenciaContainer}>
-              {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
-                const storedValue = licencia.replace(/\+/g, "_");
-                const isSelected = formData.licencia === storedValue;
+            {/* Campos generales */}
+            {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
+            {renderInput(
+                "Experiencia (años)",
+                "experiencia",
+                <FontAwesome5 name="briefcase" size={20} />,
+                "numeric",
+                false,
+                false,
+                "",
+                !rules.fullFormFields
+              )}
+            <View style={styles.inputContainer}>
+              <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
+                Licencia:
+              </Text>
+              <View style={styles.licenciaContainer}>
+                {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
+                  const storedValue = licencia.replace(/\+/g, "_");
+                  const isSelected = formData.licencia === storedValue;
 
-                return (
-                  <TouchableOpacity
-                    key={licencia}
-                    style={[
-                      styles.licenciaButton,
-                      isSelected && styles.licenciaButtonSelected
-                    ]}
-                    onPress={() => handleInputChange("licencia", storedValue)}
-                  >
-                    <Text style={[
-                      styles.licenciaText,
-                      isSelected && styles.licenciaTextSelected
-                    ]}>
-                      {licencia} {/* Mostramos el valor con + en la UI */}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-
-          {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />)}
-          {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} color={colors.primary} />)}
-          {renderInput("Localización", "localizacion", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
-
-          {/* Campos dinámicos según el tipo de oferta */}
-          {tipoOferta === "TRABAJO" ? (
-            <>
-              {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
-
-              <View style={styles.inputContainer}>
-                <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
-                  Jornada:
-                </Text>
-                <View style={styles.jornadaContainer}>
-                  {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
+                  return (
                     <TouchableOpacity
-                      key={jornada}
+                      key={licencia}
                       style={[
-                        styles.jornadaButton,
-                        formData.jornada === jornada && styles.jornadaButtonSelected
+                        styles.licenciaButton,
+                        isSelected && styles.licenciaButtonSelected
                       ]}
-                      onPress={() => handleInputChange("jornada", jornada)}
+                      onPress={() => handleInputChange("licencia", storedValue)}
                     >
                       <Text style={[
-                        styles.jornadaText,
-                        formData.jornada === jornada && styles.jornadaTextSelected
+                        styles.licenciaText,
+                        isSelected && styles.licenciaTextSelected
                       ]}>
-                        {jornada}
+                        {licencia} {/* Mostramos el valor con + en la UI */}
                       </Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
+                  );
+                })}
               </View>
-            </>
-          ) : (
-            <>
-              {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} color={colors.primary} />)}
-              {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} color={colors.primary} />)}
-              {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
-              {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
-              {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
-              {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
-              {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
-              {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
-            </>
-          )}
+            </View>
 
+            {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />)}
+            {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} color={colors.primary} />)}
+            {renderInput("Localización", "localizacion", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
 
-          {/* Botón de publicación */}
-          <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteOffer}>
-            <Text style={styles.deleteButtonText}>Eliminar Oferta</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
-            <Text style={styles.publishButtonText}>Actualizar oferta</Text>
-          </TouchableOpacity>
+            {/* Campos dinámicos según el tipo de oferta */}
+            {tipoOferta === "TRABAJO" ? (
+              <>
+                {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
 
-          {/* Modal de éxito */}
-          <SuccessModal
-            isVisible={successModalVisible}
-            onClose={() => setSuccessModalVisible(false)}
-            message="¡Tu oferta se actualizó correctamente!"
-          />
+                <View style={styles.inputContainer}>
+                  <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
+                    Jornada:
+                  </Text>
+                  <View style={styles.jornadaContainer}>
+                    {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
+                      <TouchableOpacity
+                        key={jornada}
+                        style={[
+                          styles.jornadaButton,
+                          formData.jornada === jornada && styles.jornadaButtonSelected
+                        ]}
+                        onPress={() => handleInputChange("jornada", jornada)}
+                      >
+                        <Text style={[
+                          styles.jornadaText,
+                          formData.jornada === jornada && styles.jornadaTextSelected
+                        ]}>
+                          {jornada}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </>
+            ) : (
+              <>
+                {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} color={colors.primary} />)}
+                {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} color={colors.primary} />)}
+                {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
+                {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
+                {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
+                {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+                {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+                {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+              </>
+            )}
+
+            {/* Botón de publicación */}
+            <View style={styles.buttonRow}>
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteOffer}>
+                <Text style={styles.deleteButtonText}>Eliminar Oferta</Text>
+              </TouchableOpacity>
+            <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
+                <Text style={styles.publishButtonText}>Actualizar oferta</Text>
+            </TouchableOpacity>
+
+            {/* Modal de éxito */}
+            <SuccessModal
+              isVisible={successModalVisible}
+              onClose={() => setSuccessModalVisible(false)}
+                message="¡Tu oferta se actualizó correctamente!"
+            />
+
+            </View>
 
           </View>
-
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </EmpresaRoute>
   );
 };
 
@@ -552,11 +558,31 @@ const styles = StyleSheet.create({
     width: "90%",
     marginBottom: 15,
   },
+  inputContainerStyle: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.mediumGray,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: colors.white,
+  },
+  disabledInputContainer: {
+    borderColor: colors.lightGray,
+    backgroundColor: colors.white,
+  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
     maxWidth: 600,
+  },
+  upgradeMessage: {
+    color: colors.primary,
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
   userTypeButton: {
     flex: 1,
@@ -648,15 +674,15 @@ const styles = StyleSheet.create({
 
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between", // Distribuye los botones
-    width: "100%", 
+    justifyContent: "space-between",
+    width: "100%",
     marginTop: 20,
   },
 
   deleteButton: {
-    flex: 1, 
+    flex: 1,
     paddingVertical: 12,
-    marginRight: 10, // Espacio entre los botones
+    marginRight: 10,
     borderRadius: 12,
     alignItems: "center",
     backgroundColor: "#D14F45",
@@ -669,9 +695,9 @@ const styles = StyleSheet.create({
   },
 
   publishButton: {
-    flex: 1, 
+    flex: 1,
     paddingVertical: 12,
-    marginLeft: 10, // Espacio entre los botones
+    marginLeft: 10,
     borderRadius: 12,
     alignItems: "center",
     backgroundColor: "#4CAF50",
@@ -684,4 +710,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditarOfertaScreen;
+export default withNavigationGuard(EditarOfertaScreen);

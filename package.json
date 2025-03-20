@@ -6,9 +6,8 @@
     "postinstall": "cd frontend && npm install"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^3.5.0",
-    "@stripe/stripe-js": "^6.1.0",
-    "@stripe/stripe-react-native": "^0.38.6",
-    "expo": "^52.0.39"
+    "firebase": "^11.4.0",
+    "firestore": "^1.1.6",
+    "react-native-gifted-chat": "^2.8.0"
   }
 }
