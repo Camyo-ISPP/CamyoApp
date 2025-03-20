@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Modal } from "react-native";
-import globalStyles from "../../assets/styles/globalStyles";
-import colors from "../../assets/styles/colors";
+import globalStyles from "../../../assets/styles/globalStyles";
+import colors from "../../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import defaultProfileImage from "../../assets/images/companyDefaultAvatar.png";
-import { useAuth } from "../../contexts/AuthContext";
+import defaultProfileImage from "../../../assets/images/companyDefaultAvatar.png";
+import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import SuccessModal from "../_components/SuccessModal";
+import SuccessModal from "../../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -43,14 +43,14 @@ const EmpresaScreen = () => {
   const handlePickImage = async () => {
     const base64Image = await pickImageAsync();
     if (base64Image) {
-      setFormData((prevState) => ({ 
-        ...prevState, 
+      setFormData((prevState) => ({
+        ...prevState,
         foto: base64Image.base64,
         fotoUri: base64Image.uri
       }));
     }
   };
-  
+
   const pickImageAsync = async (): Promise<{ uri: string; base64: string } | null> => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -60,10 +60,10 @@ const EmpresaScreen = () => {
         quality: 1,
         base64: true,
       });
-  
+
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const image = result.assets[0]; 
-        return { uri: image.uri, base64: image.base64 }; 
+        const image = result.assets[0];
+        return { uri: image.uri, base64: image.base64 };
       } else {
         return null;
       }
@@ -72,7 +72,7 @@ const EmpresaScreen = () => {
       return null;
     }
   };
-  
+
 
   const handleRegister = async () => {
     // Validación de número de teléfono
@@ -113,7 +113,6 @@ const EmpresaScreen = () => {
       });
 
       if (response.status === 200) {
-        console.log('Empresa registrada correctamente', response.data.message);
         setErrorMessage("")
 
         const responseLogin = await axios.post(`${BACKEND_URL}/auth/signin`, {
@@ -129,8 +128,8 @@ const EmpresaScreen = () => {
           setSuccessModalVisible(false);
           router.replace("/");
         }, 1000);
-      }     
-      
+      }
+
     } catch (error) {
       console.error('Error en la solicitud', error);
       if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
@@ -143,17 +142,17 @@ const EmpresaScreen = () => {
         setErrorMessage('Error desconocido');
       }
     }
-      
+
   };
 
   // Render input function
   const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false) => (
     <View style={{ width: '90%', marginBottom: 15 }}>
       <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>      
+      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
         {icon}
         <TextInput
-          style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline:"none", textAlignVertical: multiline ? 'top' : 'center' }}
+          style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline: "none", textAlignVertical: multiline ? 'top' : 'center' }}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
           multiline={multiline}
@@ -196,9 +195,9 @@ const EmpresaScreen = () => {
 
           {/* Foto de perfil */}
           <View style={{ alignItems: "center", marginBottom: 20, marginTop: 10 }}>
-            <Image 
-              source={formData.fotoUri ? { uri: formData.fotoUri } : defaultProfileImage}  
-              style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 8, borderWidth: 1, borderColor: colors.mediumGray }} 
+            <Image
+              source={formData.fotoUri ? { uri: formData.fotoUri } : defaultProfileImage}
+              style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 8, borderWidth: 1, borderColor: colors.mediumGray }}
             />
 
             {!formData.foto ? (
@@ -212,7 +211,7 @@ const EmpresaScreen = () => {
                   <MaterialIcons name="cached" size={20} color={colors.white} style={{ marginRight: 8 }} />
                   <Text style={globalStyles.buttonText}>Cambiar</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity onPress={() => setFormData({ ...formData, fotoUri: null })} style={[globalStyles.button, { backgroundColor: colors.red, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
                   <FontAwesome5 name="trash" size={18} color={colors.white} style={{ marginRight: 8 }} />
                   <Text style={globalStyles.buttonText}>Borrar</Text>
@@ -233,7 +232,7 @@ const EmpresaScreen = () => {
           {/* Campos del formulario específicos de la empresa */}
           {renderInput("Página web", "web", <FontAwesome5 name="globe" size={20} color={colors.primary} />, "url")}
           {renderInput("Número de Identificación (A12345678)", "nif", <FontAwesome5 name="id-card" size={20} color={colors.primary} />, "default")}
-            
+
           {errorMessage ? (
             <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
               {errorMessage}

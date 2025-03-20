@@ -24,8 +24,8 @@ export default function OfertaDetalleScreen() {
     const { ofertaid } = useLocalSearchParams();
     const router = useRouter(); // Para navegar entre pantallas
     const { user, userToken, login, logout } = useAuth();
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isModalVisible2, setIsModalVisible2] = useState(false);
+    const [successModalVisibleCam, setSuccessModalVisibleCam] = useState(false);
+    const [successModalVisibleEmp, setSuccessModalVisibleEmp] = useState(false);
 
     useEffect(() => {
         if (ofertaid) {
@@ -84,11 +84,11 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                setIsModalVisible(true);
+                setSuccessModalVisibleCam(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setIsModalVisible(false); 
+                    setSuccessModalVisibleCam(false); 
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo solicitar la oferta.");
@@ -110,11 +110,11 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                setIsModalVisible(true);
+                setSuccessModalVisibleCam(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setIsModalVisible(false); 
+                    setSuccessModalVisibleCam(false); 
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo retirar la solicitud.");
@@ -135,11 +135,11 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                setIsModalVisible2(true);
+                setSuccessModalVisibleEmp(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setIsModalVisible2(false); 
+                    setSuccessModalVisibleEmp(false); 
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo asignar al camionero.");
@@ -160,11 +160,11 @@ export default function OfertaDetalleScreen() {
             });
 
             if (response.ok) {
-                setIsModalVisible2(true);
+                setSuccessModalVisibleEmp(true);
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setIsModalVisible2(false); 
+                    setSuccessModalVisibleEmp(false); 
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo rechazar al camionero.");
@@ -211,6 +211,12 @@ export default function OfertaDetalleScreen() {
                             </Text>
                             <Text style={styles.empresa}>Estado: {offerData.estado} </Text>
                     </View>
+                    <View style={{ alignItems: "flex-end" }}>
+                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${offerData.empresa.id}`)}>
+                            <MaterialIcons name="business" size={15} color="white" />
+                            <Text style={styles.buttonText}> Ver Empresa</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
                         
                 {offerData.estado === 'ABIERTA' ? (
@@ -242,8 +248,8 @@ export default function OfertaDetalleScreen() {
                 <Modal
                     animationType="fade"
                     transparent={true}
-                    visible={isModalVisible}
-                    onRequestClose={() => setIsModalVisible(false)}
+                    visible={successModalVisibleCam}
+                    onRequestClose={() => setSuccessModalVisibleCam(false)}
                 >
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContainer}>
@@ -259,8 +265,8 @@ export default function OfertaDetalleScreen() {
                 <Modal
                     animationType="fade"
                     transparent={true}
-                    visible={isModalVisible2}
-                    onRequestClose={() => setIsModalVisible2(false)}
+                    visible={successModalVisibleEmp}
+                    onRequestClose={() => setSuccessModalVisibleEmp(false)}
                 >
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContainer}>
@@ -398,7 +404,7 @@ export default function OfertaDetalleScreen() {
                                                 <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
                                             </View>
                                             <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
-                                                <TouchableOpacity style={styles.button} onPress={() => router.replace(`/camionero/${item.id}`)}>
+                                                <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
                                                     <MaterialCommunityIcons name="details" size={15} color="white" />
                                                     <Text style={styles.buttonText}>Ver Detalles</Text>
                                                 </TouchableOpacity>
@@ -426,7 +432,7 @@ export default function OfertaDetalleScreen() {
                                             <Text style={styles.camTitle}>{offerData.camionero.usuario.nombre}</Text>
                                         </View>
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
-                                            <TouchableOpacity style={styles.button} onPress={() => router.replace(`/camionero/${offerData.camionero.id}`)}>
+                                            <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${offerData.camionero.id}`)}>
                                                 <MaterialCommunityIcons name="details" size={15} color="white" />
                                                 <Text style={styles.buttonText}>Ver Detalles</Text>
                                             </TouchableOpacity>
