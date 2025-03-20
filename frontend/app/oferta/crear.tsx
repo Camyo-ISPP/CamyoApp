@@ -9,6 +9,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 import EmpresaRoute from "../../security/EmpresaRoute";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
+import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -45,7 +46,7 @@ const CrearOfertaScreen = () => {
 
   useEffect(() => {
     if (!user || !user.rol) {
-        router.replace("/login");
+      router.replace("/login");
     }
   }, [user, router]);
 
@@ -197,6 +198,7 @@ const CrearOfertaScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.cardContainer}>
+            <BackButtonAbsolute />
             <Text style={styles.title}>Crear nueva oferta</Text>
 
             {/* Campos generales */}
@@ -344,6 +346,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 5,
     alignItems: "center",
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
   title: {
     fontSize: 28,

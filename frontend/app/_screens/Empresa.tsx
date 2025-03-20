@@ -8,6 +8,7 @@ import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 const { unifyUserData } = require("../../utils");
 import defaultImage from "../../assets/images/empresa.jpg";
 import { useAuth } from "../../contexts/AuthContext";
+import BackButton from "../_components/BackButton";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -59,6 +60,8 @@ const Empresa = ({ userId }) => {
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.rowContainer}>
+            <BackButton />
+            
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
               <Image

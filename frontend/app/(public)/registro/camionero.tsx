@@ -363,6 +363,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
   title: {
     fontSize: 28,

@@ -7,6 +7,7 @@ import defaultImage from "../../assets/images/camionero.png";
 import { useState, useEffect } from "react";
 import axios from "axios";
 const { unifyUserData } = require("../../utils");
+import BackButton from "../_components/BackButton";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -41,6 +42,7 @@ const Camionero = ({ userId }) => {
         <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.rowContainer}>
+                <BackButton />
                     {/* Imagen de perfil */}
                     <View style={styles.profileContainer}>
                         <Image

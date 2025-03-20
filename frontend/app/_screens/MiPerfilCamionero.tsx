@@ -4,6 +4,7 @@ import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
+import BackButton from "../_components/BackButton";
 
 const MiPerfilCamionero = () => {
     const { user } = useAuth();
@@ -13,6 +14,7 @@ const MiPerfilCamionero = () => {
         <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.rowContainer}>
+                <BackButton />
                     {/* Imagen de perfil */}
                     <View style={styles.profileContainer}>
                         <Image

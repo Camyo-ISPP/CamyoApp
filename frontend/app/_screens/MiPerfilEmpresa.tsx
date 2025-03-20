@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
+import BackButton from "../_components/BackButton";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -37,6 +38,8 @@ const MiPerfilEmpresa = () => {
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.rowContainer}>
+            <BackButton />
+            
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
               <Image

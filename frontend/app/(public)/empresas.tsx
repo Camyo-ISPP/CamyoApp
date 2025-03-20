@@ -3,6 +3,7 @@ import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator, 
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
+import BackButton from "../_components/BackButton";
 
 interface Usuario {
   id: number;
@@ -49,9 +50,9 @@ const EmpresasLista = () => {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-
+      
       {empresas.map((empresa, index) => (
-        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 10 }]}>
+        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
           <View>
             <Text style={styles.name}>{empresa.usuario.nombre}</Text>
             <DetailItem icon="globe" text={empresa.web} link />
@@ -84,10 +85,10 @@ const DetailItem = ({ icon, text, link = false }: { icon: keyof typeof FontAweso
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 20, // Asegurar que haya espacio arriba
-    paddingBottom: 20, // Espaciado al final
+    paddingTop: 20,
+    paddingBottom: 20,
     paddingHorizontal: 10,
-    backgroundColor: colors.white, // Color de fondo para diferenciar las tarjetas
+    backgroundColor: colors.white,
   },
   card: {
     backgroundColor: "white",
