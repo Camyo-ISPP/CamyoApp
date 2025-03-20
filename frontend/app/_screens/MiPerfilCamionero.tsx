@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 
-const PerfilCamionero = () => {
+const MiPerfilCamionero = () => {
     const { user } = useAuth();
     const router = useRouter();
 
@@ -165,4 +165,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default PerfilCamionero;
+export default MiPerfilCamionero;

@@ -10,7 +10,7 @@ import defaultImage from "../../assets/images/empresa.jpg";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const PerfilEmpresa = () => {
+const MiPerfilEmpresa = () => {
   const { user } = useAuth();
   const router = useRouter();
 
@@ -48,6 +48,7 @@ const PerfilEmpresa = () => {
                 <Feather name="edit-3" size={22} color={colors.white} />
               </TouchableOpacity>
             </View>
+
             {/* Información de la empresa */}
             <View style={styles.infoContainer}>
               <Text style={styles.name}>{user.nombre}</Text>
@@ -57,7 +58,19 @@ const PerfilEmpresa = () => {
               <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
               <Text style={styles.description}>{user.descripcion}</Text>
             </View>
+
+            {/* Botón de publicar nueva oferta */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.publishButton}
+                onPress={() => router.push(`/oferta/crear`)}
+              >
+                <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
+                <Text style={styles.publishButtonText}>Crear Nueva Oferta</Text>
+              </TouchableOpacity>
+            </View>
           </View>
+
           {/* Separador */}
           <View style={styles.separator} />
 
@@ -71,7 +84,7 @@ const PerfilEmpresa = () => {
           <View style={styles.separator} />
 
           <View style={styles.offersContainer}>
-            <Text style={styles.sectionTitle}>Ofertas Abiertas</Text>
+            <Text style={styles.sectionTitle}>Mis Ofertas Abiertas</Text>
             {offers.length === 0 ? (
               <Text style={styles.info}>No hay ofertas abiertas</Text>
             ) : (
@@ -146,6 +159,7 @@ const styles = StyleSheet.create({
   profileContainer: {
     position: "relative",
     marginRight: 40,
+    alignItems: "center",
   },
   profileImage: {
     width: 150,
@@ -167,6 +181,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
+  },
+  buttonContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+  },
+  publishButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  plusIcon: {
+    marginRight: 6, 
+  },
+  publishButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   infoContainer: {
     flex: 1,
@@ -352,4 +393,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PerfilEmpresa;
+export default MiPerfilEmpresa;
