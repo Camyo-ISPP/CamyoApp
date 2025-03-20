@@ -112,6 +112,10 @@ function Chat({ route }: any) {
     };
 
     useEffect(() => {
+        if (!otherUserId) {
+            router.replace("/chat/list");
+            return;
+        }
         const setupChat = async () => {
             if (!user || !user.userId || !otherUserId) return;
 
