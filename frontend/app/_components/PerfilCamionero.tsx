@@ -36,7 +36,7 @@ const PerfilCamionero = () => {
                 <View style={styles.downContainer}>
                 {/* Información profesional */}
                     <Text style={styles.sectionTitle}>Información Profesional</Text>
-                    <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} />  DNI: {user.dni}</Text>
+                    <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> DNI: {user.dni}</Text>
                     <Text style={styles.info}>
                         <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                         {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}

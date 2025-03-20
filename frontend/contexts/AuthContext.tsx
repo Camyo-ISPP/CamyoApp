@@ -107,6 +107,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       id: data.id, // el id es el del rol (camioneroId o empresaId)
       rol: data.usuario.authority.authority,  // El rol de usuario (CAMIONERO o EMPRESA)
     };
+
+    unifiedData.userId = data.usuario.id;
+    unifiedData.nombre = data.usuario.nombre;
+    unifiedData.telefono = data.usuario.telefono;
+    unifiedData.username = data.usuario.username;
+    unifiedData.email = data.usuario.email;
+    unifiedData.localizacion = data.usuario.localizacion;
+    unifiedData.descripcion = data.usuario.descripcion;
+    unifiedData.foto = data.usuario.foto;
   
     // Si el usuario es un CAMIONERO
     if (data.usuario.authority.authority === 'CAMIONERO') {
@@ -116,15 +125,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       unifiedData.disponibilidad = data.disponibilidad;
       unifiedData.tieneCAP = data.tieneCAP;
       unifiedData.expiracionCAP = data.expiracionCAP;
-      unifiedData.userId = data.usuario.id;
-      unifiedData.nombre = data.usuario.nombre;
-      unifiedData.telefono = data.usuario.telefono;
-      unifiedData.username = data.usuario.username;
-      unifiedData.email = data.usuario.email;
-      unifiedData.localizacion = data.usuario.localizacion;
-      unifiedData.descripcion = data.usuario.descripcion;
-      unifiedData.foto = data.usuario.foto;
-
+      
       unifiedData.isAutonomo = data.tarjetasAutonomo.length !== 0;
       unifiedData.tarjetas = data.tarjetasAutonomo;
     } 
@@ -132,15 +133,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Si el usuario es una EMPRESA
     else if (data.usuario.authority.authority === 'EMPRESA') {
       unifiedData.nif = data.nif;
-      unifiedData.descripcion = data.descripcion;
       unifiedData.web = data.web;
-      unifiedData.userId = data.usuario.id;
-      unifiedData.nombre = data.usuario.nombre;
-      unifiedData.telefono = data.usuario.telefono;
-      unifiedData.username = data.usuario.username;
-      unifiedData.email = data.usuario.email;
-      unifiedData.localizacion = data.usuario.localizacion;
-      unifiedData.foto = data.usuario.foto;
     }
   
     return unifiedData;
