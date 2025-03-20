@@ -149,7 +149,7 @@ const PerfilEmpresa = () => {
                 if (canCreateNewOffer()) {
                   router.push(`/oferta/crear`);
                 } else {
-                  alert(`Has alcanzado el límite de ofertas activas (${rules.maxActiveOffers}).`);
+                  alert(`Has alcanzado el límite de ofertas abiertas (${rules.maxActiveOffers}).`);
                 }
               }}
               disabled={!canCreateNewOffer()}
@@ -161,7 +161,7 @@ const PerfilEmpresa = () => {
 
             {!canCreateNewOffer() && (
               <Text style={styles.limitMessage}>
-                Has alcanzado el límite de ofertas activas ({rules.maxActiveOffers}).
+                Has alcanzado el límite de ofertas abiertas ({rules.maxActiveOffers}).
               </Text>
             )}
           </View>
