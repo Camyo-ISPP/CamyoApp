@@ -44,14 +44,6 @@ const CrearOfertaScreen = () => {
     finMaximo: "",
   });
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
   // Cuando `user` cambie, actualizar `empresa.id`
   useEffect(() => {
     if (user?.id) {
@@ -202,6 +194,14 @@ const CrearOfertaScreen = () => {
     </View>
     );
   };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }  
 
   return (
     <EmpresaRoute>
