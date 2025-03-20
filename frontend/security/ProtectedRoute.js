@@ -1,25 +1,25 @@
 import { useRouter } from "expo-router";
 import { useAuth } from "../contexts/AuthContext";
+import { useEffect, useState } from "react";
 
 export default function ProtectedRoute({ children }) {
     const router = useRouter();
     const { user } = useAuth();
+    const [checking, setChecking] = useState(true);
 
-    if (user == null) {
-        router.replace("/login");
-        return null;
+    useEffect(() => {
+        if (user == null) {
+            router.replace("/login");
+        } else if (user.rol === "ADMIN") {
+            router.replace("/workinprogress");
+        } else {
+            setChecking(false); 
+        }
+    }, [user, router]);
+
+    if (checking) {
+        return null; 
     }
-
-    if (user.rol == "ADMIN") {
-        router.replace("/workinprogress");
-        return null;
-    }
-
-    /*
-    if (!user) {
-        router.replace("/forbidden");
-        return null;
-    }*/
 
     return children;
 }

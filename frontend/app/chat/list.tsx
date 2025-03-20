@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import colors from '@/assets/styles/colors';
 import routes from '../_components/routes';
 import ProtectedRoute from '../../security/ProtectedRoute';
+import withNavigationGuard from '@/hoc/withNavigationGuard';
 
 interface Chat {
   id: string;
@@ -26,7 +27,7 @@ interface Usuario {
   foto?: string | null;
 }
 
-export default function ChatList() {
+ function ChatList() {
   const { user } = useAuth();
   const [chats, setChats] = useState<Chat[]>([]);
   const [userDetails, setUserDetails] = useState<{ [key: string]: Usuario }>({});
@@ -121,6 +122,8 @@ export default function ChatList() {
     </ProtectedRoute>
   );
 }
+
+export default withNavigationGuard(ChatList);
 
 const styles = StyleSheet.create({
   container: {

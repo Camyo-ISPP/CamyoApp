@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
@@ -30,7 +30,7 @@ const EmpresasLista = () => {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user } = useAuth(); // Obtiene el usuario autenticado
 
   useEffect(() => {
     const fetchEmpresasData = async () => {
@@ -39,7 +39,7 @@ const EmpresasLista = () => {
         if (!response.ok) throw new Error("Error al cargar empresas");
         const data: Empresa[] = await response.json();
         setEmpresas(data);
-        console.log(data)
+        console.log(data);
       } catch (err) {
         setError((err as Error)?.message || "Error desconocido");
       } finally {
@@ -65,23 +65,28 @@ const EmpresasLista = () => {
             <DetailItem icon="map-marker" text={empresa.usuario.localizacion} />
             <DetailItem icon="phone" text={empresa.usuario.telefono} />
           </View>
-          {/* Add Chat Button */}
-          <TouchableOpacity
-            style={styles.chatButton}
-            onPress={async () => {
-              const chatId = await startChat(user.id, empresa.usuario.id); // Replace 'currentUserId' with the logged-in user's ID
-              if (chatId) {
-                router.replace(`/chat?otherUserId=${empresa.usuario.id}`);
-              }
-            }}
-          >
-            <Text style={styles.chatButtonText}>Iniciar Chat</Text>
-          </TouchableOpacity>
+
           <View>
+            {/* Botón "Ver Detalles" */}
             <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
-                <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
-                <Text style={styles.buttonText}>Ver Detalles</Text>
+              <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+              <Text style={styles.buttonText}>Ver Detalles</Text>
             </TouchableOpacity>
+
+            {/* Botón "Iniciar Chat" solo si hay usuario autenticado */}
+            {user && (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
+                  const chatId = await startChat(user.id, empresa.usuario.id);
+                  if (chatId) {
+                    router.replace(`/chat?otherUserId=${empresa.usuario.id}`);
+                  }
+                }}
+              >
+                <Text style={styles.chatButtonText}>Iniciar Chat</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       ))}
@@ -104,18 +109,18 @@ const DetailItem = ({ icon, text, link = false }: { icon: keyof typeof FontAweso
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 20, // Asegurar que haya espacio arriba
-    paddingBottom: 20, // Espaciado al final
+    paddingTop: 20,
+    paddingBottom: 20,
     paddingHorizontal: 10,
-    backgroundColor: "#f5f5f5", // Color de fondo para diferenciar las tarjetas
+    backgroundColor: "#f5f5f5",
   },
   card: {
     backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
-    width: "60%", // 🔹 Reduce el tamaño del recuadro al 60% de la pantalla
-    alignSelf: "center", // 🔹 Asegura que el recuadro esté en el centro
+    width: "60%",
+    alignSelf: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -123,51 +128,37 @@ const styles = StyleSheet.create({
     elevation: 3,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
   },
-  avatar: { width: 80, height: 80, borderRadius: 40, marginRight: 15 },
   name: { fontSize: 20, fontWeight: "bold" },
-  infoText: { fontSize: 14, color: "gray" },
   detailItem: { flexDirection: "row", alignItems: "center", marginBottom: 5 },
   detailsText: { fontSize: 14, color: "#333" },
   icon: { marginRight: 10, color: "#0b4f6c" },
   linkText: { color: "#007BFF", textDecorationLine: "underline" },
   errorText: { textAlign: "center", fontSize: 18, color: "red", marginTop: 50 },
-  button:{
-    backgroundColor:colors.primary,
-    color:colors.white,
-    paddingLeft:5,
-    paddingRight:5,
+  button: {
+    backgroundColor: colors.primary,
+    paddingLeft: 5,
+    paddingRight: 5,
     marginLeft: "-20%",
-    marginTop:4,
-    flexDirection:"row",
-    flexWrap:"nowrap",
-    height:40,
+    marginTop: 4,
+    flexDirection: "row",
+    height: 40,
     width: 150,
-    borderRadius:10,
-    alignItems:"center",
-    justifyContent:"center"
-  },
-  buttonText:{
-    color:colors.white,
-    fontWeight:"bold"
-  },
-  detailsIcon:{
-    color:colors.white,
-    alignSelf:"center",
-    marginLeft:3,
-    marginTop:3,
-    marginRight:5,
-
-  },
-  chatButton: {
-    marginTop: 10,
-    backgroundColor: "#007BFF",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: "center",
-    alignSelf: "flex-start",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: colors.white,
+    fontWeight: "bold",
+  },
+  detailsIcon: {
+    color: colors.white,
+    alignSelf: "center",
+    marginLeft: 3,
+    marginTop: 3,
+    marginRight: 5,
   },
   chatButtonText: {
     color: "#fff",
