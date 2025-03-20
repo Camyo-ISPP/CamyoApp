@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
+import { unifyUserData } from "../utils"
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -100,44 +101,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser((prevUser) => ({ ...prevUser, ...updatedUserData }));
     AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
   };
-
-  // Función para unificar los datos de usuario si es camionero o empresa (si fuera admin, no hace falta)
-  const unifyUserData = (data: any) => {
-    const unifiedData: any = {
-      id: data.id, // el id es el del rol (camioneroId o empresaId)
-      rol: data.usuario.authority.authority,  // El rol de usuario (CAMIONERO o EMPRESA)
-    };
-
-    unifiedData.userId = data.usuario.id;
-    unifiedData.nombre = data.usuario.nombre;
-    unifiedData.telefono = data.usuario.telefono;
-    unifiedData.username = data.usuario.username;
-    unifiedData.email = data.usuario.email;
-    unifiedData.localizacion = data.usuario.localizacion;
-    unifiedData.descripcion = data.usuario.descripcion;
-    unifiedData.foto = data.usuario.foto;
-  
-    // Si el usuario es un CAMIONERO
-    if (data.usuario.authority.authority === 'CAMIONERO') {
-      unifiedData.experiencia = data.experiencia;
-      unifiedData.dni = data.dni;
-      unifiedData.licencias = data.licencias;
-      unifiedData.disponibilidad = data.disponibilidad;
-      unifiedData.tieneCAP = data.tieneCAP;
-      unifiedData.expiracionCAP = data.expiracionCAP;
-      
-      unifiedData.isAutonomo = data.tarjetasAutonomo.length !== 0;
-      unifiedData.tarjetas = data.tarjetasAutonomo;
-    } 
-  
-    // Si el usuario es una EMPRESA
-    else if (data.usuario.authority.authority === 'EMPRESA') {
-      unifiedData.nif = data.nif;
-      unifiedData.web = data.web;
-    }
-  
-    return unifiedData;
-  };  
 
   const getUserData = async (userRole: string, userId: number) => {
     try {

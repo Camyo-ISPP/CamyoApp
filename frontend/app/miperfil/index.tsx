@@ -1,6 +1,6 @@
 import { useAuth } from '../../contexts/AuthContext';
-import PerfilCamionero from '../_components/PerfilCamionero';
-import PerfilEmpresa from '../_components/PerfilEmpresa';
+import PerfilCamionero from '../_screens/PerfilCamionero';
+import PerfilEmpresa from '../_screens/PerfilEmpresa';
 import WIP from '../_components/WIP';
 import ProtectedRoute from '../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
