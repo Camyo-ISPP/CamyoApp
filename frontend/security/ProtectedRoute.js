@@ -8,13 +8,17 @@ export default function ProtectedRoute({ children }) {
     const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        if (user == null) {
-            router.replace("/login");
-        } else if (user.rol === "ADMIN") {
-            router.replace("/workinprogress");
-        } else {
-            setChecking(false); 
-        }
+        const timeout = setTimeout(() => {
+            if (user == null) {
+                router.replace("/login");
+            } else if (user.rol === "ADMIN") {
+                router.replace("/workinprogress");
+            } else {
+                setChecking(false);
+            }
+        }, 25); 
+
+        return () => clearTimeout(timeout); 
     }, [user, router]);
 
     if (checking) {
