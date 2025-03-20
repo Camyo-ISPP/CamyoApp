@@ -44,7 +44,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   useEffect(() => {
     const fetchEmpresaAndSubscription = async () => {
       if (!user?.id) {
-        console.error('Usuario no autenticado');
+        setSubscriptionLevel('GRATIS');
         setLoading(false);
         return;
       }
