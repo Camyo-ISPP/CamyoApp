@@ -13,6 +13,10 @@ import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.suscripcion.PlanNivel;
+import com.camyo.backend.suscripcion.Suscripcion;
+import com.camyo.backend.suscripcion.SuscripcionRepository;
+import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesService;
 import com.camyo.backend.usuario.Usuario;
@@ -29,14 +33,18 @@ public class AuthService {
 	private final UsuarioService usuarioService;
 	private final CamioneroService camioneroService;
 	private final EmpresaService empresaService;
+	private final SuscripcionService suscripcionService;
 
 	@Autowired
-	public AuthService(PasswordEncoder encoder, AuthoritiesService authoritiesService, UsuarioService usuarioService, CamioneroService camioneroService, EmpresaService empresaService) {
+	public AuthService(PasswordEncoder encoder, AuthoritiesService authoritiesService, 
+					   UsuarioService usuarioService, CamioneroService camioneroService, 
+					   EmpresaService empresaService, SuscripcionService suscripcionService) {
 		this.encoder = encoder;
 		this.authoritiesService = authoritiesService;
 		this.usuarioService = usuarioService;
 		this.camioneroService = camioneroService;
 		this.empresaService = empresaService;
+		this.suscripcionService = suscripcionService;
 	}
 
 	@Transactional
@@ -97,6 +105,7 @@ public class AuthService {
 			empresa.setWeb(request.getWeb());
 		}
 		empresaService.guardarEmpresa(empresa);
+		suscripcionService.asignarSuscripcion(empresa.getId(), PlanNivel.GRATIS, null);
 	}
     
 }
