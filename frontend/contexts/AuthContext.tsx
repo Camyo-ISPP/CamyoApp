@@ -101,6 +101,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
   };
 
+  // Función para unificar los datos de usuario si es camionero o empresa (si fuera admin, no hace falta)
   const unifyUserData = (data: any) => {
     const unifiedData: any = {
       id: data.id, // el id es el del rol (camioneroId o empresaId)
@@ -137,17 +138,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       unifiedData.email = data.usuario.email;
       unifiedData.localizacion = data.usuario.localizacion;
       unifiedData.foto = data.usuario.foto;
-    } 
-
-    // Si el usuario es un ADMIN
-    else if (data.usuario.authority.authority === 'ADMIN') {
-      unifiedData.userId = data.usuario.id;
-      unifiedData.nombre = data.usuario.nombre;
-      unifiedData.telefono = data.usuario.telefono;
-      unifiedData.username = data.usuario.username;
-      unifiedData.email = data.usuario.email;
-      unifiedData.localizacion = data.usuario.localizacion;
-      unifiedData.foto = data.usuario.foto;
     }
   
     return unifiedData;
@@ -155,9 +145,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const getUserData = async (userRole: string, userId: number) => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/${userRole}/por_usuario/${userId}`);
+      const response = await axios.get(
+        userRole === "admin" 
+            ? `${BACKEND_URL}/usuarios/${userId}` 
+            : `${BACKEND_URL}/${userRole}/por_usuario/${userId}`
+      );
 
-      const unifiedUser = unifyUserData(response.data);
+      const unifiedUser = userRole === "admin" 
+          ? { ...response.data, rol: response.data.authority.authority } 
+          : unifyUserData(response.data);
+      
       setUser(unifiedUser);
       await AsyncStorage.setItem("user", JSON.stringify(unifiedUser));
 
