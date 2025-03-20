@@ -4,14 +4,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.camyo.backend.configuration.services.UserDetailsImpl;
 import com.camyo.backend.empresa.Empresa;
+import com.camyo.backend.empresa.EmpresaRepository;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
+import com.camyo.backend.usuario.Usuario;
+import com.camyo.backend.usuario.UsuarioRepository;
 
 @Service
 public class OfertaPatrocinadaService {
@@ -20,27 +26,37 @@ public class OfertaPatrocinadaService {
     private final OfertaService ofertaService;
     private final EmpresaService empresaService;
     private final SuscripcionService suscripcionService;
+    private final EmpresaRepository empresaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public OfertaPatrocinadaService(
         OfertaPatrocinadaRepository ofertaPatrocinadaRepository,
         OfertaService ofertaService,
         EmpresaService empresaService,
-        SuscripcionService suscripcionService
+        SuscripcionService suscripcionService,
+        EmpresaRepository empresaRepository,
+        UsuarioRepository usuarioRepository
     ) {
         this.ofertaPatrocinadaRepository = ofertaPatrocinadaRepository;
         this.ofertaService = ofertaService;
         this.empresaService = empresaService;
         this.suscripcionService = suscripcionService;
+        this.empresaRepository = empresaRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
-
     @Transactional
-    public OfertaPatrocinada patrocinarOferta(Integer ofertaId, Integer empresaId, int duracionDias) {
-        Oferta oferta = ofertaService.obtenerOfertaPorId(ofertaId);
-        Empresa empresa = empresaService.obtenerEmpresaPorId(empresaId);
+    public OfertaPatrocinada patrocinarOferta(Integer ofertaId, int duracionDias) {
+        // 1) Obtener la empresa del token
+        Integer empresaIdAuth = getEmpresaIdFromToken();
+        Empresa empresa = empresaService.obtenerEmpresaPorId(empresaIdAuth);
 
-        PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaId); 
-        long patrociniosActivos = ofertaPatrocinadaRepository.countActiveByEmpresa(empresaId);
+        // 2) Verificar la oferta
+        Oferta oferta = ofertaService.obtenerOfertaPorId(ofertaId);
+
+        // 3) Verificar plan de suscripción y patrocinios activos
+        PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaIdAuth);
+        long patrociniosActivos = ofertaPatrocinadaRepository.countActiveByEmpresa(empresaIdAuth);
 
         switch (nivel) {
             case GRATIS:
@@ -49,21 +65,22 @@ public class OfertaPatrocinadaService {
                 }
                 break;
             case BASIC:
-                if (patrociniosActivos >= 5) { 
+                if (patrociniosActivos >= 5) {
                     throw new RuntimeException("El plan BASIC solo permite patrocinar 5 ofertas a la vez.");
                 }
                 break;
             case PREMIUM:
-                break;
-            default:
+                // Sin límite
                 break;
         }
 
+        // 4) Revisar si ya existe un patrocinio activo para esa oferta
         var existente = ofertaPatrocinadaRepository.findActiveByOferta(ofertaId);
         if (existente.isPresent()) {
             throw new RuntimeException("Esta oferta ya está patrocinada actualmente.");
         }
 
+        // 5) Guardar patrocinio
         OfertaPatrocinada patrocinio = new OfertaPatrocinada();
         patrocinio.setOferta(oferta);
         patrocinio.setEmpresa(empresa);
@@ -76,13 +93,21 @@ public class OfertaPatrocinadaService {
 
     @Transactional
     public void desactivarPatrocinio(Integer ofertaId) {
+        // EXACTAMENTE igual que antes.
         OfertaPatrocinada patrocinada = ofertaPatrocinadaRepository
             .findActiveByOferta(ofertaId)
             .orElseThrow(() -> new ResourceNotFoundException("OfertaPatrocinada", "ofertaId", ofertaId));
 
+        Integer empresaIdAuth = getEmpresaIdFromToken();
+
+        if (!patrocinada.getEmpresa().getId().equals(empresaIdAuth)) {
+            throw new RuntimeException("No tienes permiso para desactivar esta oferta patrocinada");
+        }
+
         patrocinada.setStatus(PatrocinioStatus.CANCELADO);
         ofertaPatrocinadaRepository.save(patrocinada);
     }
+    
 
     @Transactional(readOnly = true)
     public List<OfertaPatrocinada> listarPatrociniosActivosDeEmpresa(Integer empresaId) {
@@ -99,5 +124,33 @@ public class OfertaPatrocinadaService {
             p.setStatus(PatrocinioStatus.EXPIRADO);
         }
         ofertaPatrocinadaRepository.saveAll(vencidos);
+    }
+
+
+    private Integer getEmpresaIdFromToken() {
+        // 1) Revisar si hay usuario autenticado
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No hay usuario autenticado");
+        }
+
+        // 2) Obtener nuestro UserDetailsImpl
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        // 3) Buscar el Usuario en BD
+        Usuario usuario = usuarioRepository.findById(userDetails.getId())
+            .orElseThrow(() -> new RuntimeException(
+                "No existe el usuario con id = " + userDetails.getId()));
+
+        // 4) Verificar si su rol es "EMPRESA"
+        if (!usuario.hasAuthority("EMPRESA")) {
+            throw new RuntimeException("El usuario autenticado no es una empresa");
+        }
+
+        // 5) Recuperar la empresa
+        Empresa empresa = empresaRepository.obtenerPorUsuario(usuario.getId())
+            .orElseThrow(() -> new RuntimeException("No hay registro de empresa vinculado al usuario " + usuario.getId()));
+
+        return empresa.getId(); 
     }
 }

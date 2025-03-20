@@ -7,10 +7,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "ofertas_patrocinadas")
+@Getter
+@Setter
 public class OfertaPatrocinada {
 
     @Id
@@ -24,7 +24,6 @@ public class OfertaPatrocinada {
     @ManyToOne
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
-
 
     @Column(name = "fecha_inicio")
     private LocalDateTime fechaInicio;

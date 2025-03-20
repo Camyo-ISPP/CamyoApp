@@ -19,6 +19,7 @@ public interface OfertaPatrocinadaRepository extends JpaRepository<OfertaPatroci
            "WHERE p.empresa.id = :empresaId " +
            "AND p.status = 'ACTIVO'")
     long countActiveByEmpresa(Integer empresaId);
+
     @Query("SELECT p FROM OfertaPatrocinada p " +
            "WHERE p.oferta.id = :ofertaId " +
            "AND p.status = 'ACTIVO'")
@@ -29,3 +30,4 @@ public interface OfertaPatrocinadaRepository extends JpaRepository<OfertaPatroci
            "AND p.fechaFin < :ahora")
     List<OfertaPatrocinada> findExpiredButActive(LocalDateTime ahora);
 }
+
