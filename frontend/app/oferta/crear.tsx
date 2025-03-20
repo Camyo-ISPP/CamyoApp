@@ -236,60 +236,30 @@ const CrearOfertaScreen = () => {
               <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
                 Licencia:
               </Text>
-              {rules.fullFormFields ? (
-              <View style={styles.inputContainer}>
-                <View style={styles.licenciaContainer}>
-                  {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
-                    const storedValue = licencia.replace(/\+/g, "_");
-                    const isSelected = formData.licencia === storedValue;
+              <View style={styles.licenciaContainer}>
+                {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
+                  const storedValue = licencia.replace(/\+/g, "_");
+                  const isSelected = formData.licencia === storedValue;
 
-                    return (
-                      <TouchableOpacity
-                        key={licencia}
-                        style={[
-                          styles.licenciaButton,
-                          isSelected && styles.licenciaButtonSelected,
-                        ]}
-                        onPress={() => handleInputChange("licencia", storedValue)}
-                      >
-                        <Text
-                          style={[
-                            styles.licenciaText,
-                            isSelected && styles.licenciaTextSelected,
-                          ]}
-                        >
-                          {licencia}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
-            ) : (
-              <View style={styles.inputContainer}>
-                <View style={styles.licenciaContainer}>
-                  {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => (
-                    <View
+                  return (
+                    <TouchableOpacity
                       key={licencia}
                       style={[
                         styles.licenciaButton,
-                        styles.disabledButton, // Aplicar estilo deshabilitado
+                        isSelected && styles.licenciaButtonSelected
                       ]}
+                      onPress={() => handleInputChange("licencia", storedValue)}
                     >
-                      <Text style={[styles.licenciaText, styles.disabledButtonText]}>
-                        {licencia}
+                      <Text style={[
+                        styles.licenciaText,
+                        isSelected && styles.licenciaTextSelected
+                      ]}>
+                        {licencia} {/* Mostramos el valor con + en la UI */}
                       </Text>
-                    </View>
-                  ))}
-                </View>
-                {/* Mensaje informativo */}
-                <TouchableOpacity onPress={() => router.push("/")}>
-                  <Text style={styles.upgradeMessage}>
-                    ¿Quieres más opciones? Mejora tu plan aquí.
-                  </Text>
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-            )}
             </View>
 
             {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />)}
@@ -352,50 +322,14 @@ const CrearOfertaScreen = () => {
               </>
             ) : (
               <>
-                {renderInput(
-                  "Experiencia (años)",
-                  "experiencia",
-                  <FontAwesome5 name="briefcase" size={20} />,
-                  "default",
-                  false,
-                  false,
-                  "Ingresa años de experiencia",
-                  !rules.fullFormFields
-                )}
-                {renderInput(
-                  "Peso (kg)",
-                  "peso",
-                  <FontAwesome5 name="weight" size={20} />,
-                  "numeric",
-                  false,
-                  false,
-                  "Ingresa el peso en kg",
-                  !rules.fullFormFields
-                )}
+                {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} color={colors.primary} />)}
+                {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} color={colors.primary} />)}
                 {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
                 {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
                 {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
                 {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
-                {renderInput(
-                    "Fin mínimo",
-                    "finMinimo",
-                    <FontAwesome5 name="calendar-minus" size={20}/>,
-                    "default",
-                    false,
-                    false,
-                    "AAAA-mm-dd",
-                    !rules.fullFormFields
-                )}
-                {renderInput(
-                    "Fin máximo",
-                    "finMaximo",
-                    <FontAwesome5 name="calendar-plus" size={20}/>,
-                    "default",
-                    false,
-                    false,
-                    "AAAA-mm-dd",
-                    !rules.fullFormFields
-                  )}
+                {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+                {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
               </>
             )}
 
@@ -538,25 +472,12 @@ const styles = StyleSheet.create({
     borderColor: colors.secondary,
     backgroundColor: "transparent",
   },
-  disabledButton: {
-    width: "30%",
-    paddingVertical: 10,
-    alignItems: "center",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.mediumGray,
-    backgroundColor: colors.lightGray,
-  },
   licenciaButtonSelected: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   licenciaText: {
     color: colors.secondary,
-    fontSize: 16,
-  },
-  disabledButtonText: {
-    color: colors.mediumGray,
     fontSize: 16,
   },
   licenciaTextSelected: {
