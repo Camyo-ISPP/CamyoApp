@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import colors from '@/assets/styles/colors';
 import routes from '../_components/routes';
+import ProtectedRoute from '../../security/ProtectedRoute';
 
 interface Chat {
   id: string;
@@ -87,14 +88,7 @@ export default function ChatList() {
     });
   }, [chats, user?.userId, userDetails]);
 
-  if (!user) {
-    return (
-      <View style={styles.buttonContainer}>
-        <Text style={styles.loginMessage}>Inicie sesión para acceder a la mensajería</Text>
-        <TouchableOpacity style={styles.shareButton} onPress={() => router.replace(routes.login)}><Text style={styles.shareText}>Acceder</Text></TouchableOpacity>
-      </View>
-    );
-  }
+
 
   const renderChatItem = ({ item }: { item: Chat }) => {
     if (!user?.userId) return;
@@ -114,6 +108,7 @@ export default function ChatList() {
   };
 
   return (
+    <ProtectedRoute>
     <View style={styles.container}>
       <Text style={styles.title}>Your Chats</Text>
       <FlatList
@@ -123,6 +118,7 @@ export default function ChatList() {
         ListEmptyComponent={<Text style={styles.emptyText}>No chats available</Text>}
       />
     </View>
+    </ProtectedRoute>
   );
 }
 

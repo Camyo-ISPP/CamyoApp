@@ -15,26 +15,27 @@ import {
 import { database } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSearchParams } from 'expo-router/build/hooks';
-import { View, Text, Button } from 'react-native';
 import { useRouter } from 'expo-router';
+import withNavigationGuard from '@/hoc/withNavigationGuard';
+import ProtectedRoute from '../../security/ProtectedRoute';
 
-export default function Chat({ route }: any) {
+interface Message {
+    _id: string;
+    createdAt: Date;
+    text: string;
+    seen: boolean;
+    user: {
+        _id: string;
+        name?: string;
+        avatar?: string;
+    };
+}
+
+function Chat({ route }: any) {
     const { user } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const otherUserId = searchParams.get('otherUserId')?.toString();
-
-    interface Message {
-        _id: string;
-        createdAt: Date;
-        text: string;
-        seen: boolean;
-        user: {
-            _id: string;
-            name?: string;
-            avatar?: string;
-        };
-    }
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [chatId, setChatId] = useState<string | null>(null);
@@ -106,10 +107,7 @@ export default function Chat({ route }: any) {
         const messageData = messageSnapshot.data();
 
         if (messageData && !messageData.seen && messageData.user._id !== userId) {
-            // Solo marca como visto si no se ha visto ya y el mensaje no lo envió el usuario actual
-            await updateDoc(messageRef, {
-                seen: true,
-            });
+            await updateDoc(messageRef, { seen: true });
         }
     };
 
@@ -153,20 +151,8 @@ export default function Chat({ route }: any) {
         [chatId, user]
     );
 
-    const renderMessageText = (props: any) => {
-        return <MessageText {...props} />;
-    };
-
-    if (!user) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 18, marginBottom: 10 }}>Inicie sesión para acceder a la mensajería</Text>
-                <Button title="Iniciar sesión" onPress={() => router.push('/login')} />
-            </View>
-        );
-    }
-
     return (
+        <ProtectedRoute>
         <GiftedChat
             messages={messages}
             showAvatarForEveryMessage={false}
@@ -185,11 +171,15 @@ export default function Chat({ route }: any) {
                 />
             )}
             user={{
-                _id: user.userId.toString(),
-                name: user.nombre,
-                avatar: user.foto,
+                _id: user?.userId.toString(),
+                name: user?.nombre,
+                avatar: user?.foto,
             }}
-            renderMessageText={renderMessageText} 
+            renderMessageText={(props) => <MessageText {...props} />}
         />
+        </ProtectedRoute>
     );
 }
+
+// Exportamos el componente envuelto con el HOC `withNavigationGuard`
+export default withNavigationGuard(Chat);
