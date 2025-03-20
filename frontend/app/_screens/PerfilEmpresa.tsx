@@ -6,6 +6,7 @@ import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@e
 import { useState, useEffect } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
+import defaultImage from "../../assets/images/empresa.jpg";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -38,7 +39,10 @@ const PerfilEmpresa = () => {
           <View style={styles.rowContainer}>
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
-              <Image source={{ uri: user.foto || "https://via.placeholder.com/150" }} style={styles.profileImage} />
+              <Image
+                source={user.foto ? { uri: user.foto } : defaultImage}
+                style={styles.profileImage}
+              />
               {/* Botón de edición */}
               <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
                 <Feather name="edit-3" size={22} color={colors.white} />
@@ -214,7 +218,7 @@ const styles = StyleSheet.create({
   companyLogo: {
     height: 90,
     width: 90,
-    marginRight:10,
+    marginRight: 10,
   },
   offerTitle: {
     fontSize: 16,
@@ -284,45 +288,45 @@ const styles = StyleSheet.create({
     marginTop: 5,
     flexWrap: "wrap",
   },
-  offerSueldo:{
-    fontSize:25,
-    fontWeight:"bold",
-    textAlign:"right",
-    paddingLeft:3,
+  offerSueldo: {
+    fontSize: 25,
+    fontWeight: "bold",
+    textAlign: "right",
+    paddingLeft: 3,
     color: colors.secondary,
-    textAlignVertical:"center",
-    width:"35%",
-    alignSelf:"center"
+    textAlignVertical: "center",
+    width: "35%",
+    alignSelf: "center"
   },
   localizacion: {
     fontSize: 15,
     color: "#696969",
   },
-  button:{
-    backgroundColor:colors.primary,
-    color:colors.white,
-    paddingLeft:5,
-    paddingRight:5,
+  button: {
+    backgroundColor: colors.primary,
+    color: colors.white,
+    paddingLeft: 5,
+    paddingRight: 5,
     marginLeft: "2%",
-    marginTop:4,
-    flexDirection:"row",
-    flexWrap:"nowrap",
-    height:40,
+    marginTop: 4,
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    height: 40,
     width: 150,
-    borderRadius:10,
-    alignItems:"center",
-    justifyContent:"center"
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
   },
-  buttonText:{
-    color:colors.white,
-    fontWeight:"bold"
+  buttonText: {
+    color: colors.white,
+    fontWeight: "bold"
   },
-  detailsIcon:{
-    color:colors.white,
-    alignSelf:"center",
-    marginLeft:3,
-    marginTop:3,
-    marginRight:5,
+  detailsIcon: {
+    color: colors.white,
+    alignSelf: "center",
+    marginLeft: 3,
+    marginTop: 3,
+    marginRight: 5,
   },
   card2: {
     backgroundColor: colors.white,
@@ -331,10 +335,10 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 10,
     display: "flex",
-    flexWrap:"wrap",
+    flexWrap: "wrap",
     flexDirection: "row",
     alignContent: "center",
-    alignItems:"center",
+    alignItems: "center",
     borderLeftWidth: 4,
     borderColor: "red",
     shadowColor: "#000",

@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 const { unifyUserData } = require("../../utils");
-
+import defaultImage from "../../assets/images/empresa.jpg";
 import { useAuth } from "../../contexts/AuthContext";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -14,11 +14,22 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const Empresa = ({ userId }) => {
   const router = useRouter();
 
-  const [user, setUser] = useState(null);
+  // user2 es la empresa
+  const [user2, setUser2] = useState(null);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // usuario autenticado
+  const { user } = useAuth();
+
   useEffect(() => {
+    // Si el usuario autenticado es la empresa, redirigir a su perfil
+    if (user?.id == userId) {
+      console.log("Redirigiendo a miperfil");
+      router.push("/miperfil");
+      return;
+    }
+
     const fetchOffers = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${userId}`);
@@ -34,7 +45,7 @@ const Empresa = ({ userId }) => {
       try {
         const response = await axios.get(`${BACKEND_URL}/empresas/${userId}`);
         const unifiedData = unifyUserData(response.data)
-        setUser(unifiedData);
+        setUser2(unifiedData);
       } catch (error) {
         console.error("Error al cargar los datos de la empresa:", error);
       }
@@ -51,17 +62,19 @@ const Empresa = ({ userId }) => {
           <View style={styles.rowContainer}>
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
-              <Image source={{ uri: user?.foto || "https://via.placeholder.com/150" }} style={styles.profileImage} />
-
+              <Image
+                source={user.foto ? { uri: user.foto } : defaultImage}
+                style={styles.profileImage}
+              />
             </View>
             {/* Información de la empresa */}
             <View style={styles.infoContainer}>
-              <Text style={styles.name}>{user?.nombre}</Text>
-              <Text style={styles.username}>@{user?.username}</Text>
-              <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user?.email}</Text>
-              <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user?.telefono}</Text>
-              <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user?.localizacion}</Text>
-              <Text style={styles.description}>{user?.descripcion}</Text>
+              <Text style={styles.name}>{user2?.nombre}</Text>
+              <Text style={styles.username}>@{user2?.username}</Text>
+              <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user2?.email}</Text>
+              <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user2?.telefono}</Text>
+              <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
+              <Text style={styles.description}>{user2?.descripcion}</Text>
             </View>
           </View>
           {/* Separador */}
@@ -70,8 +83,8 @@ const Empresa = ({ userId }) => {
           <View style={styles.downContainer}>
             {/* Información empresarial */}
             <Text style={styles.sectionTitle}>Información Empresarial</Text>
-            <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> NIF: {user?.nif}</Text>
-            <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {user?.web}</Text>
+            <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> NIF: {user2?.nif}</Text>
+            <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {user2?.web}</Text>
           </View>
 
           <View style={styles.separator} />
@@ -224,7 +237,7 @@ const styles = StyleSheet.create({
   companyLogo: {
     height: 90,
     width: 90,
-    marginRight:10,
+    marginRight: 10,
   },
   offerTitle: {
     fontSize: 16,
@@ -294,45 +307,45 @@ const styles = StyleSheet.create({
     marginTop: 5,
     flexWrap: "wrap",
   },
-  offerSueldo:{
-    fontSize:25,
-    fontWeight:"bold",
-    textAlign:"right",
-    paddingLeft:3,
+  offerSueldo: {
+    fontSize: 25,
+    fontWeight: "bold",
+    textAlign: "right",
+    paddingLeft: 3,
     color: colors.secondary,
-    textAlignVertical:"center",
-    width:"35%",
-    alignSelf:"center"
+    textAlignVertical: "center",
+    width: "35%",
+    alignSelf: "center"
   },
   localizacion: {
     fontSize: 15,
     color: "#696969",
   },
-  button:{
-    backgroundColor:colors.primary,
-    color:colors.white,
-    paddingLeft:5,
-    paddingRight:5,
+  button: {
+    backgroundColor: colors.primary,
+    color: colors.white,
+    paddingLeft: 5,
+    paddingRight: 5,
     marginLeft: "2%",
-    marginTop:4,
-    flexDirection:"row",
-    flexWrap:"nowrap",
-    height:40,
+    marginTop: 4,
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    height: 40,
     width: 150,
-    borderRadius:10,
-    alignItems:"center",
-    justifyContent:"center"
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
   },
-  buttonText:{
-    color:colors.white,
-    fontWeight:"bold"
+  buttonText: {
+    color: colors.white,
+    fontWeight: "bold"
   },
-  detailsIcon:{
-    color:colors.white,
-    alignSelf:"center",
-    marginLeft:3,
-    marginTop:3,
-    marginRight:5,
+  detailsIcon: {
+    color: colors.white,
+    alignSelf: "center",
+    marginLeft: 3,
+    marginTop: 3,
+    marginRight: 5,
   },
   card2: {
     backgroundColor: colors.white,
@@ -341,10 +354,10 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 10,
     display: "flex",
-    flexWrap:"wrap",
+    flexWrap: "wrap",
     flexDirection: "row",
     alignContent: "center",
-    alignItems:"center",
+    alignItems: "center",
     borderLeftWidth: 4,
     borderColor: "red",
     shadowColor: "#000",
