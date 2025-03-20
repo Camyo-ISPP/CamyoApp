@@ -8,7 +8,8 @@ const routes = {
   listcompanies: "/empresas",
   createOffer: "/oferta/crear",
   editProfile: "/miperfil/editar",
-  editProfileEmpresa: "/miperfil/editar"
+  editProfileEmpresa: "/miperfil/editar",
+  chat:"/chat"
 };
 
 export default routes;
