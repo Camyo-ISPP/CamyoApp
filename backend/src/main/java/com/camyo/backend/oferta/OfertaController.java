@@ -76,6 +76,60 @@ public class OfertaController {
         }).toList();
     }
     
+    /**
+     * GET: Listar todas las ofertas
+     * 
+     * @return Lista de todas las ofertas disponibles.
+     */
+    @GetMapping("/info")
+    public List<OfertaConTodaInformacionDTO> obtenerOfertasConInformacion() {
+        List<Oferta> ofertas = ofertaService.obtenerOfertas();
+        return ofertas.stream().map(oferta -> {
+            OfertaConTodaInformacionDTO dto = new OfertaConTodaInformacionDTO();
+            dto.setId(oferta.getId());
+            dto.setTitulo(oferta.getTitulo());
+            dto.setExperiencia(oferta.getExperiencia());
+            dto.setLicencia(oferta.getLicencia());
+            dto.setNotas(oferta.getNotas());
+            dto.setEstado(oferta.getEstado());
+            dto.setFechaPublicacion(oferta.getFechaPublicacion());
+            dto.setSueldo(oferta.getSueldo());
+            dto.setLocalizacion(oferta.getLocalizacion());
+            dto.setCamionero(oferta.getCamionero());
+            dto.setAplicados(oferta.getAplicados());
+            dto.setRechazados(oferta.getRechazados());
+            if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
+                dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
+            }
+            try {
+                Carga c = ofertaService.obtenerCarga(oferta.getId());
+                if (c != null) {
+                    dto.setTipoOferta("CARGA");
+                    dto.setMercancia(c.getMercancia());
+                    dto.setPeso(c.getPeso());
+                    dto.setOrigen(c.getOrigen());
+                    dto.setDestino(c.getDestino());
+                    dto.setDistancia(c.getDistancia());
+                    dto.setInicio(c.getInicio());
+                    dto.setFinMinimo(c.getFinMinimo());
+                    dto.setFinMaximo(c.getFinMaximo());
+                } else {
+                    Trabajo t = ofertaService.obtenerTrabajo(oferta.getId());
+                    if (t != null) {
+                        dto.setTipoOferta("TRABAJO");
+                        dto.setFechaIncorporacion(t.getFechaIncorporacion());
+                        dto.setJornada(t.getJornada());
+                    } else {
+                        dto.setTipoOferta("DESCONOCIDO");
+                    }
+                }
+            } catch (ResourceNotFoundException ex) {
+                dto.setTipoOferta("DESCONOCIDO");
+            }
+    
+            return dto;
+        }).toList();
+    }
 
     /**
      * GET: Obtener oferta por ID
