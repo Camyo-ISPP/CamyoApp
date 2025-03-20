@@ -25,7 +25,6 @@ const Empresa = ({ userId }) => {
   useEffect(() => {
     // Si el usuario autenticado es la empresa, redirigir a su perfil
     if (user?.id == userId) {
-      console.log("Redirigiendo a miperfil");
       router.push("/miperfil");
       return;
     }

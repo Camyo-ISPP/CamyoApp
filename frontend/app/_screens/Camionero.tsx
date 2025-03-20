@@ -2,12 +2,40 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
+import { useState, useEffect } from "react";
+import axios from "axios";
+const { unifyUserData } = require("../../utils");
 
-const PerfilCamionero = () => {
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+const Camionero = ({ userId }) => {
     const { user } = useAuth();
     const router = useRouter();
+
+    // user2 es el usuario que se está visualizando
+    const [user2, setUser2] = useState(null);
+
+    useEffect(() => {
+        // Si el usuario autenticado es el mismo usuario, redirigir a su perfil
+        if (user?.id == userId) {
+          router.push("/miperfil");
+          return;
+        }
+    
+        const fetchUser = async () => {
+          try {
+            const response = await axios.get(`${BACKEND_URL}/camioneros/${userId}`);
+            const unifiedData = unifyUserData(response.data)
+            setUser2(unifiedData);
+          } catch (error) {
+            console.error("Error al cargar los datos de la empresa:", error);
+          }
+        };
+    
+        fetchUser();
+      }, [userId]);
 
     return (
         <View style={styles.container}>
@@ -16,22 +44,18 @@ const PerfilCamionero = () => {
                     {/* Imagen de perfil */}
                     <View style={styles.profileContainer}>
                         <Image
-                            source={user?.foto ? { uri: user.foto } : defaultImage}
+                            source={user2?.foto ? { uri: user2?.foto } : defaultImage}
                             style={styles.profileImage}
                         />
-                        {/* Botón de edición */}
-                        <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
-                            <Feather name="edit-3" size={22} color={colors.white} />
-                        </TouchableOpacity>
                     </View>
                     {/* Información del usuario */}
                     <View style={styles.infoContainer}>
-                        <Text style={styles.name}>{user.nombre}</Text>
-                        <Text style={styles.username}>@{user.username}</Text>
-                        <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user.email}</Text>
-                        <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user.telefono}</Text>
-                        <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
-                        <Text style={styles.description}>{user.descripcion}</Text>
+                        <Text style={styles.name}>{user2?.nombre}</Text>
+                        <Text style={styles.username}>@{user2?.username}</Text>
+                        <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user2?.email}</Text>
+                        <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user2?.telefono}</Text>
+                        <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
+                        <Text style={styles.description}>{user2?.descripcion}</Text>
                     </View>
                 </View>
                 {/* Separador */}
@@ -40,15 +64,15 @@ const PerfilCamionero = () => {
                 <View style={styles.downContainer}>
                     {/* Información profesional */}
                     <Text style={styles.sectionTitle}>Información Profesional</Text>
-                    <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> DNI: {user.dni}</Text>
+                    <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> DNI: {user2?.dni}</Text>
                     <Text style={styles.info}>
                         <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
-                        {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                        {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
                     </Text>
-                    <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user.disponibilidad}</Text>
-                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
-                    {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
-                    {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+                    <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user2?.disponibilidad}</Text>
+                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
+                    {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
+                    {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
                 </View>
             </View>
         </View>
@@ -165,4 +189,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default PerfilCamionero;
+export default Camionero;

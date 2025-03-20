@@ -18,7 +18,7 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const licencias = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "D1+E", "D"];
 const licencias_backend = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1_E", "C_E", "D1", "D_E", "D1_E", "D"];
 
-const CamioneroScreen = () => {
+const CamioneroRegisterScreen = () => {
   const router = useRouter();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -443,4 +443,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CamioneroScreen;
+export default CamioneroRegisterScreen;

@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 
 import Empresa from "../../_screens/Empresa";
@@ -10,6 +9,5 @@ const EmpresaScreen = () => {
     <Empresa userId={empresaid}></Empresa>
   );
 };
-
 
 export default EmpresaScreen;

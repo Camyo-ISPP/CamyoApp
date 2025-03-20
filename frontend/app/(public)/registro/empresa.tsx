@@ -13,7 +13,7 @@ import SuccessModal from "../../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const EmpresaScreen = () => {
+const EmpresaRegisterScreen = () => {
   const router = useRouter();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -364,4 +364,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EmpresaScreen;
+export default EmpresaRegisterScreen;
