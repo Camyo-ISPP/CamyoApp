@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     width: "80%",
     alignSelf: "center",
     borderWidth: 1,
-    borderColor: colors.lightGray,
+    borderColor: colors.white,
   },
   rowContainer: {
     flexDirection: "row",

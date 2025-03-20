@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignContent: "center",
         alignItems: "center",
-        backgroundColor: colors.mediumGray,
+        backgroundColor: colors.white,
       },
       searchIcon: {
         color: colors.primary,
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white,
         flex: 1,
         borderRadius: 25,
         paddingHorizontal: 10,
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignContent: "center",
         flex: 1,
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white,
       },
       card: {
         backgroundColor: colors.white,

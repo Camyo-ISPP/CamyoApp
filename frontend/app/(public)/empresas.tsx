@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     paddingTop: 20, // Asegurar que haya espacio arriba
     paddingBottom: 20, // Espaciado al final
     paddingHorizontal: 10,
-    backgroundColor: "#f5f5f5", // Color de fondo para diferenciar las tarjetas
+    backgroundColor: colors.white, // Color de fondo para diferenciar las tarjetas
   },
   card: {
     backgroundColor: "white",

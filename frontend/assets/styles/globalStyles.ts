@@ -5,7 +5,7 @@ import typography from "./typography";
 const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     paddingHorizontal: 24,
     paddingVertical: 16,
   },

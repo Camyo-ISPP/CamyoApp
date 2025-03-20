@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
         maxWidth: 600,
         alignSelf: "center",
         borderWidth: 1,
-        borderColor: colors.lightGray,
+        borderColor: colors.white,
     },
     rowContainer: {
         flexDirection: "row",

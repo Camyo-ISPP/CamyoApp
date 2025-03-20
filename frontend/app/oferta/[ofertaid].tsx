@@ -471,7 +471,7 @@ const styles = StyleSheet.create    ({
     },
     scrollContainer: {
         flex: 1,
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white,
         paddingHorizontal: 0,
         paddingVertical: 0,
     },
