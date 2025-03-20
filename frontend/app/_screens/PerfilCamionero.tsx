@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
+import defaultImage from "../../assets/images/camionero.png";
 
 const PerfilCamionero = () => {
     const { user } = useAuth();
@@ -14,7 +15,10 @@ const PerfilCamionero = () => {
                 <View style={styles.rowContainer}>
                     {/* Imagen de perfil */}
                     <View style={styles.profileContainer}>
-                        <Image source={{ uri: user.foto || "https://via.placeholder.com/150" }} style={styles.profileImage} />
+                        <Image
+                            source={user?.foto ? { uri: user.foto } : defaultImage}
+                            style={styles.profileImage}
+                        />
                         {/* Botón de edición */}
                         <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
                             <Feather name="edit-3" size={22} color={colors.white} />
@@ -34,7 +38,7 @@ const PerfilCamionero = () => {
                 <View style={styles.separator} />
 
                 <View style={styles.downContainer}>
-                {/* Información profesional */}
+                    {/* Información profesional */}
                     <Text style={styles.sectionTitle}>Información Profesional</Text>
                     <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> DNI: {user.dni}</Text>
                     <Text style={styles.info}>

@@ -63,7 +63,7 @@ const Empresa = ({ userId }) => {
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
               <Image
-                source={user.foto ? { uri: user.foto } : defaultImage}
+                source={user?.foto ? { uri: user.foto } : defaultImage}
                 style={styles.profileImage}
               />
             </View>

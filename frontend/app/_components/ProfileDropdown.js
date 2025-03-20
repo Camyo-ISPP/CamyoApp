@@ -6,7 +6,8 @@ import colors from "frontend/assets/styles/colors";
 import { useRouter } from 'expo-router';
 import SuccessModal from './SuccessModal';
 import routes from './routes';
-import defaultImage from "../../assets/images/empresa.jpg";
+import defaultImageEmpresa from "../../assets/images/empresa.jpg";
+import defaultImageCamionero from "../../assets/images/camionero.png";
 
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -15,6 +16,8 @@ const ProfileDropdown = ({ user }) => {
 
   const router = useRouter();
   const { logout } = useAuth();
+
+  const defaultImage = user.rol === 'EMPRESA' ? defaultImageEmpresa : defaultImageCamionero;
 
   const handleLogout = () => {
     setModalVisible(false);
