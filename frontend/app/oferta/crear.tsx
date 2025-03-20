@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet
+  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet,
+  ActivityIndicator
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import colors from "../../assets/styles/colors";
@@ -9,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 import EmpresaRoute from "../../security/EmpresaRoute";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -17,6 +19,7 @@ const CrearOfertaScreen = () => {
   const [tipoOferta, setTipoOferta] = useState("TRABAJO");
   const router = useRouter();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const { rules, loading } = useSubscriptionRules();
   const [formData, setFormData] = useState({
     titulo: "",
     experiencia: "",
@@ -27,11 +30,9 @@ const CrearOfertaScreen = () => {
     localizacion: "",
     fechaPublicacion: new Date().toISOString(), // Fecha actual del sistema
     empresa: { id: user?.id ?? null },
-
     // Trabajo
     fechaIncorporacion: "",
     jornada: "",
-
     // Carga
     mercancia: "",
     peso: "",
@@ -42,16 +43,6 @@ const CrearOfertaScreen = () => {
     finMinimo: "",
     finMaximo: "",
   });
-
-  useEffect(() => {
-    if (!user || !user.rol) {
-        router.replace("/login");
-    }
-  }, [user, router]);
-
-  if (!user || !user.rol) {
-    return null;
-  }
 
   // Cuando `user` cambie, actualizar `empresa.id`
   useEffect(() => {
@@ -171,26 +162,46 @@ const CrearOfertaScreen = () => {
 
   };
 
-
   // Función para renderizar cada input del formulario
-  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "") => (
+  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "", disabled = false) => {
+    const iconColor = disabled ? colors.lightGray : colors.primary;
+    return (
     <View style={{ width: '90%', marginBottom: 15 }}>
       <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
-        {icon}
+      <View style={[styles.inputContainerStyle, disabled && styles.disabledInputContainer]}>
+        {React.cloneElement(icon, { color: iconColor })}
         <TextInput
           style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline: "none", textAlignVertical: multiline ? 'top' : 'center' }}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
-          placeholder={placeholder}
+          placeholder={disabled ? "Solo disponible para clientes BASIC y PREMIUM." : placeholder}
           placeholderTextColor={colors.mediumGray}
-          onChangeText={(value) => handleInputChange(field, value)}
+          onChangeText={(value) => !disabled && handleInputChange(field, value)}
+          editable={!disabled}
+          value={formData[field]}
         />
       </View>
+
+      {disabled && (
+        <TouchableOpacity onPress={() => router.replace("/")}>
+          <Text style={styles.upgradeMessage}>
+            ¿Quieres más opciones? Mejora tu plan aquí.
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
-  );
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }  
 
   return (
     <EmpresaRoute>
@@ -201,7 +212,16 @@ const CrearOfertaScreen = () => {
 
             {/* Campos generales */}
             {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
-            {renderInput("Experiencia (años)", "experiencia", <FontAwesome5 name="briefcase" size={20} color={colors.primary} />)}
+            {renderInput(
+                "Experiencia (años)",
+                "experiencia",
+                <FontAwesome5 name="briefcase" size={20} />,
+                "numeric",
+                false,
+                false,
+                "",
+                !rules.fullFormFields // Bloquear si no tiene acceso completo
+              )}
             <View style={styles.inputContainer}>
               <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
                 Licencia:
@@ -230,8 +250,6 @@ const CrearOfertaScreen = () => {
                   );
                 })}
               </View>
-
-
             </View>
 
             {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />)}
@@ -345,6 +363,11 @@ const styles = StyleSheet.create({
     elevation: 5,
     alignItems: "center",
   },
+  blockedField: {
+    color: colors.mediumGray,
+    fontSize: 16,
+    marginBottom: 10,
+  },
   title: {
     fontSize: 28,
     fontWeight: "bold",
@@ -368,6 +391,26 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: "90%",
     marginBottom: 15,
+  },
+  disabledInputContainer: {
+    borderColor: colors.lightGray,
+    backgroundColor: colors.white,
+  },
+  inputContainerStyle: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.mediumGray,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: colors.white,
+  },
+  upgradeMessage: {
+    color: colors.primary,
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
   buttonContainer: {
     flexDirection: "row",

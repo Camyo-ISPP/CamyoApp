@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
 function RootLayout() {
   const segments = useSegments();
@@ -37,6 +38,7 @@ function RootLayout() {
 
   return (
     <>
+      <SubscriptionProvider>
       {!isMobile && <CamyoWebNavBar />}
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(public)/index" />
@@ -61,7 +63,9 @@ function RootLayout() {
         <Stack.Screen name="(public)/forbidden" />
       </Stack>
       {isMobile && <BottomBar />}
+      </SubscriptionProvider>
     </>
+
   );
 }
 

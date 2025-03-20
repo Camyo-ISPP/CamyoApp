@@ -5,6 +5,7 @@ import defaultBanner from "../../assets/images/empresa.jpg";
 import defaultImage from "../../assets/images/image_perfil_empresa.jpg";
 import colors from '@/assets/styles/colors';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { router, useNavigation } from "expo-router";
 import axios from "axios";
 
@@ -37,6 +38,7 @@ const PerfilEmpresa = () => {
   const navigation = useNavigation();
   const [offers, setOffers] = useState<any[]>([]);
   const [offerStatus, setOfferStatus] = useState<string>('ABIERTA');
+  const { rules, loading: subscriptionLoading } = useSubscriptionRules();
 
   useEffect(() => {
     if (!userToken || !user || user.rol !== "EMPRESA") {
@@ -72,7 +74,12 @@ const PerfilEmpresa = () => {
     }
   };
 
-  if (loading) {
+  const canCreateNewOffer = () => {
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+    return activeOffersCount < rules.maxActiveOffers;
+  };
+
+  if (loading || subscriptionLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#0000ff" />
@@ -137,11 +144,36 @@ const PerfilEmpresa = () => {
               <Text style={styles.editButtonText}> Editar Perfil</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => router.push(`/oferta/crear`)}
+              style={[styles.editButton, !canCreateNewOffer() && styles.disabledButton]}
+              onPress={() => {
+                if (canCreateNewOffer()) {
+                  router.push(`/oferta/crear`);
+                } else {
+                  alert(`Has alcanzado el límite de ofertas abiertas (${rules.maxActiveOffers}).`);
+                }
+              }}
+              disabled={!canCreateNewOffer()}
             >
-              <Text style={styles.editButtonText}>Publicar nueva oferta</Text>
+              <Text style={styles.editButtonText}>
+                {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
+              </Text>
             </TouchableOpacity>
+
+            {!canCreateNewOffer() && (
+            <>
+              <Text style={styles.limitMessage}>
+                Has alcanzado tu límite de{'\n'}
+                ofertas abiertas ({rules.maxActiveOffers}).{'\n'}
+                ¿Quieres más opciones? {'\n'} 
+                
+              </Text>
+              <TouchableOpacity onPress={() => router.replace("/")}>
+                <Text style={styles.upgradeMessage}>
+                Mejora tu plan aquí.
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
           </View>
         </View>
         <View style={styles.offersContainer}>
@@ -330,6 +362,20 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+  limitMessage: {
+    color: '#919191',
+    textAlign: 'left',
+    marginTop: 10,
+  },
+  upgradeMessage: {
+    color: colors.primary,
+    marginTop: 1,
+    textAlign: "left",
+    textDecorationLine: "underline",
   },
   scrollview: {
     flex: 1,
