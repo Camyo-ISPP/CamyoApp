@@ -52,16 +52,6 @@ const CrearOfertaScreen = () => {
     );
   }
 
-  useEffect(() => {
-    if (!user || !user.rol) {
-        router.replace("/login");
-    }
-  }, [user, router]);
-
-  if (!user || !user.rol) {
-    return null;
-  }
-
   // Cuando `user` cambie, actualizar `empresa.id`
   useEffect(() => {
     if (user?.id) {

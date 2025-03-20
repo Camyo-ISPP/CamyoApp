@@ -155,15 +155,25 @@ const PerfilEmpresa = () => {
               disabled={!canCreateNewOffer()}
             >
               <Text style={styles.editButtonText}>
-                {canCreateNewOffer() ? 'Publicar nueva oferta' : 'Límite de ofertas alcanzado'}
+                {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
               </Text>
             </TouchableOpacity>
 
             {!canCreateNewOffer() && (
+            <>
               <Text style={styles.limitMessage}>
-                Has alcanzado el límite de ofertas abiertas ({rules.maxActiveOffers}).
+                Has alcanzado tu límite de{'\n'}
+                ofertas abiertas ({rules.maxActiveOffers}).{'\n'}
+                ¿Quieres más opciones? {'\n'} 
+                
               </Text>
-            )}
+              <TouchableOpacity onPress={() => router.replace("/")}>
+                <Text style={styles.upgradeMessage}>
+                Mejora tu plan aquí.
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
           </View>
         </View>
         <View style={styles.offersContainer}>
@@ -357,9 +367,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
   },
   limitMessage: {
-    color: 'red',
-    textAlign: 'center',
+    color: '#919191',
+    textAlign: 'left',
     marginTop: 10,
+  },
+  upgradeMessage: {
+    color: colors.primary,
+    marginTop: 1,
+    textAlign: "left",
+    textDecorationLine: "underline",
   },
   scrollview: {
     flex: 1,
