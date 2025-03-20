@@ -3,7 +3,6 @@ import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator, 
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
-import Titulo from "../_components/Titulo";
 
 interface Usuario {
   id: number;
@@ -50,7 +49,6 @@ const EmpresasLista = () => {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <Titulo texto="Lista de Empresas" marginTop={100} />
 
       {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 10 }]}>

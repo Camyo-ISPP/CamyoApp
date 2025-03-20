@@ -124,6 +124,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       unifiedData.localizacion = data.usuario.localizacion;
       unifiedData.descripcion = data.usuario.descripcion;
       unifiedData.foto = data.usuario.foto;
+
+      unifiedData.isAutonomo = data.tarjetasAutonomo.length !== 0;
+      unifiedData.tarjetas = data.tarjetasAutonomo;
     } 
   
     // Si el usuario es una EMPRESA

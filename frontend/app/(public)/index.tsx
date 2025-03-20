@@ -11,7 +11,6 @@ import BottomBar from '../_components/BottomBar';
 import { MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
-import Titulo from "../_components/Titulo";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -50,7 +49,6 @@ export default function Index() {
         <View style={styles.webContainer}>
           <CamyoWebNavBar />
           <ScrollView style={styles.scrollview}>
-          <Titulo texto="Lista de Ofertas" marginTop={30} />
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {data && data.map((item) => (
                 <View key={item.id} style={styles.card}>
