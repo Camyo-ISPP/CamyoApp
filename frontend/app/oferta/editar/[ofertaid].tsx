@@ -409,7 +409,7 @@ const EditarOfertaScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.cardContainer}>
-            <Text style={styles.title}>Crear nueva oferta</Text>
+            <Text style={styles.title}>Editar Oferta</Text>
 
             {/* Campos generales */}
             {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
