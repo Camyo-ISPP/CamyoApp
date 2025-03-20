@@ -47,14 +47,10 @@ public class OfertaPatrocinadaService {
 
     @Transactional
     public OfertaPatrocinada patrocinarOferta(Integer ofertaId, int duracionDias) {
-        // 1) Obtener la empresa del token
         Integer empresaIdAuth = getEmpresaIdFromToken();
         Empresa empresa = empresaService.obtenerEmpresaPorId(empresaIdAuth);
-
-        // 2) Verificar la oferta
         Oferta oferta = ofertaService.obtenerOfertaPorId(ofertaId);
 
-        // 3) Verificar plan de suscripción y patrocinios activos
         PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaIdAuth);
         long patrociniosActivos = ofertaPatrocinadaRepository.countActiveByEmpresa(empresaIdAuth);
 
@@ -70,17 +66,14 @@ public class OfertaPatrocinadaService {
                 }
                 break;
             case PREMIUM:
-                // Sin límite
                 break;
         }
 
-        // 4) Revisar si ya existe un patrocinio activo para esa oferta
         var existente = ofertaPatrocinadaRepository.findActiveByOferta(ofertaId);
         if (existente.isPresent()) {
             throw new RuntimeException("Esta oferta ya está patrocinada actualmente.");
         }
 
-        // 5) Guardar patrocinio
         OfertaPatrocinada patrocinio = new OfertaPatrocinada();
         patrocinio.setOferta(oferta);
         patrocinio.setEmpresa(empresa);
@@ -93,7 +86,6 @@ public class OfertaPatrocinadaService {
 
     @Transactional
     public void desactivarPatrocinio(Integer ofertaId) {
-        // EXACTAMENTE igual que antes.
         OfertaPatrocinada patrocinada = ofertaPatrocinadaRepository
             .findActiveByOferta(ofertaId)
             .orElseThrow(() -> new ResourceNotFoundException("OfertaPatrocinada", "ofertaId", ofertaId));
@@ -128,26 +120,19 @@ public class OfertaPatrocinadaService {
 
 
     private Integer getEmpresaIdFromToken() {
-        // 1) Revisar si hay usuario autenticado
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("No hay usuario autenticado");
         }
 
-        // 2) Obtener nuestro UserDetailsImpl
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        // 3) Buscar el Usuario en BD
         Usuario usuario = usuarioRepository.findById(userDetails.getId())
             .orElseThrow(() -> new RuntimeException(
                 "No existe el usuario con id = " + userDetails.getId()));
-
-        // 4) Verificar si su rol es "EMPRESA"
         if (!usuario.hasAuthority("EMPRESA")) {
             throw new RuntimeException("El usuario autenticado no es una empresa");
         }
-
-        // 5) Recuperar la empresa
         Empresa empresa = empresaRepository.obtenerPorUsuario(usuario.getId())
             .orElseThrow(() -> new RuntimeException("No hay registro de empresa vinculado al usuario " + usuario.getId()));
 

@@ -15,19 +15,13 @@ public class OfertaPatrocinadaController {
     public OfertaPatrocinadaController(OfertaPatrocinadaService ofertaPatrocinadaService) {
         this.ofertaPatrocinadaService = ofertaPatrocinadaService;
     }
-
-    /**
-     * Patrocinar Oferta
-     * POST /ofertas/patrocinadas?ofertaId=123&dias=30
-     * Ya no pedimos empresaId, porque se extrae del token
-     */
     @PostMapping
     public ResponseEntity<?> patrocinarOferta(
             @RequestParam("ofertaId") Integer ofertaId,
             @RequestParam("dias") int dias
     ) {
         try {
-            // La empresa se obtiene internamente del token
+
             OfertaPatrocinada nuevoPatrocinio = ofertaPatrocinadaService.patrocinarOferta(ofertaId, dias);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPatrocinio);
         } catch (Exception e) {
@@ -35,10 +29,6 @@ public class OfertaPatrocinadaController {
         }
     }
 
-    /**
-     * Desactivar Patrocinio
-     * PUT /ofertas/patrocinadas/desactivar/123
-     */
     @PutMapping("/desactivar/{ofertaId}")
     public ResponseEntity<?> desactivarPatrocinio(@PathVariable("ofertaId") Integer ofertaId) {
         try {
@@ -49,7 +39,6 @@ public class OfertaPatrocinadaController {
         }
     }
 
-    // GET /ofertas/patrocinadas/activos/empresa/226
     @GetMapping("/activos/empresa/{empresaId}")
     public ResponseEntity<?> listarPatrociniosActivosDeEmpresa(@PathVariable("empresaId") Integer empresaId) {
         try {
@@ -61,7 +50,6 @@ public class OfertaPatrocinadaController {
         }
     }
 
-    // PUT /ofertas/patrocinadas/expirar
     @PutMapping("/expirar")
     public ResponseEntity<?> expirarPatrocinios() {
         try {
