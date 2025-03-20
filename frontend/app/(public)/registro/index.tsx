@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import colors from "../../assets/styles/colors";
+import colors from "../../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import globalStyles from "../../assets/styles/globalStyles";
+import globalStyles from "../../../assets/styles/globalStyles";
 
 const IndexScreen = () => {
   const router = useRouter();
@@ -19,7 +19,7 @@ const IndexScreen = () => {
             {/* Botón Camionero */}
             <TouchableOpacity
               style={[styles.userTypeButton, { backgroundColor: colors.primary }]}
-              onPress={() => router.replace("/registro/camionero")}
+              onPress={() => router.push("/registro/camionero")}
             >
               <FontAwesome5 name="truck" size={24} color={colors.white} style={styles.icon} />
               <Text style={styles.userTypeText}>Camionero</Text>
@@ -28,7 +28,7 @@ const IndexScreen = () => {
             {/* Botón Empresa */}
             <TouchableOpacity
               style={[styles.userTypeButton, { backgroundColor: colors.primary }]}
-              onPress={() => router.replace("/registro/empresa")}
+              onPress={() => router.push("/registro/empresa")}
             >
               <MaterialIcons name="business" size={24} color={colors.white} style={styles.icon} />
               <Text style={styles.userTypeText}>Empresa</Text>

@@ -1,13 +1,13 @@
 import { useAuth } from '../../contexts/AuthContext';
-import PerfilCamionero from '../_components/PerfilCamionero';
-import PerfilEmpresa from '../_components/PerfilEmpresa';
+import EditarPerfilCamionero from '../_components/EditarPerfilCamionero';
+import EditarPerfilEmpresa from '../_components/EditarPerfilEmpresa';
 import WIP from '../_components/WIP';
 import ProtectedRoute from '../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
 import withNavigationGuard from '@/hoc/withNavigationGuard';
 import { useEffect } from "react";
 
-const Perfil = () => {
+const EditarPerfil = () => {
     const { user } = useAuth();
     const router = useRouter();
 
@@ -23,11 +23,11 @@ const Perfil = () => {
 
     return (
         <ProtectedRoute>
-            {user.rol === "CAMIONERO" && <PerfilCamionero />}
-            {user.rol === "EMPRESA" && <PerfilEmpresa />}
+            {user.rol === "CAMIONERO" && <EditarPerfilCamionero />}
+            {user.rol === "EMPRESA" && <EditarPerfilEmpresa />}
             {user.rol === "ADMIN" && <WIP />}
         </ProtectedRoute>
     );
 };
 
-export default withNavigationGuard(Perfil);
+export default withNavigationGuard(EditarPerfil);
