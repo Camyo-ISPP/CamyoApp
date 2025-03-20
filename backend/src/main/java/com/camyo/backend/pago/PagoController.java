@@ -17,6 +17,8 @@ import com.stripe.param.checkout.SessionCreateParams.LineItem.PriceData;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -69,7 +71,7 @@ public class PagoController {
     @PostMapping("/subscripcion")
     String newSubscription(@RequestBody PaymentRequest PaymentRequest) throws StripeException {
 
-        Stripe.apiKey = STRIPE_API_KEY;
+        Stripe.apiKey = "sk_test_51R1s9PC8z1doGFyHVkAVpklNq7R3Hl7qQ4PF51Tf3Ci3uRKRFPMuiNX4PTiQg5ulqZvYoFURX56amdZh1oGNt6v900CuUmVp8G";
 
         String clientBaseURL = "http://localhost:8081";
 
@@ -85,8 +87,8 @@ public class PagoController {
         SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setCustomer(clienteStripe.getId())
-                .setSuccessUrl(clientBaseURL + "/success?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl(clientBaseURL + "/failure");
+                .setUiMode(SessionCreateParams.UiMode.EMBEDDED)
+                .setReturnUrl(clientBaseURL+ "/compra?session_id={CHECKOUT_SESSION_ID}");
 
         paramsBuilder.addLineItem(
                 SessionCreateParams.LineItem.builder()
@@ -106,7 +108,7 @@ public class PagoController {
 
         Session session = Session.create(paramsBuilder.build());
 
-        return session.getUrl();
+      return session.toJson();
     }
 
 }
