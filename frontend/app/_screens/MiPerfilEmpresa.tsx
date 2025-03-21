@@ -8,6 +8,7 @@ import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -17,6 +18,7 @@ const MiPerfilEmpresa = () => {
 
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { rules, loading: subscriptionLoading } = useSubscriptionRules();
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -33,13 +35,22 @@ const MiPerfilEmpresa = () => {
     fetchOffers();
   }, []);
 
+  const canCreateNewOffer = () => {
+    console.log("rules", rules);
+    console.log("offers", offers);
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+    console.log("activeOffersCount", activeOffersCount);
+    return activeOffersCount < rules.maxActiveOffers;
+  };
+
+
   return (
     <ScrollView>
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.rowContainer}>
             <BackButton />
-            
+
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
               <Image
@@ -63,22 +74,46 @@ const MiPerfilEmpresa = () => {
             </View>
 
             <View style={styles.buttonsWrapper}>
+
               {/* Botón de publicar nueva oferta */}
               <View>
                 <TouchableOpacity
-                  style={styles.publishButton}
-                  onPress={() => router.push(`/oferta/crear`)}
+                  style={[styles.publishButton, !canCreateNewOffer() && styles.disabledButton]}
+                  onPress={() => {
+                    if (canCreateNewOffer()) {
+                      router.push(`/oferta/crear`);
+                    } else {
+                      alert(`Has alcanzado el límite de ofertas abiertas (${rules.maxActiveOffers}).`);
+                    }
+                  }}
+                  disabled={!canCreateNewOffer()}
                 >
-                  <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
-                  <Text style={styles.publishButtonText}>Crear Nueva Oferta</Text>
+                  {canCreateNewOffer() && 
+                    <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
+                  }
+                  
+                  <Text style={styles.publishButtonText}>
+                    {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
+
               {/* Botón de mejorar plan */}
               <View>
+                {!canCreateNewOffer() && (
+                  <>
+                    <Text style={styles.limitMessage}>
+                      Has alcanzado tu límite de{'\n'}
+                      ofertas abiertas ({rules.maxActiveOffers}).{'\n'}
+                      ¿Quieres más opciones? {'\n'}
+                    </Text>
+                  </>
+                )}
+
                 <TouchableOpacity
                   style={styles.mejorarPlanButton}
-                  onPress={() => router.push(`/`)} 
+                  onPress={() => router.push(`/`)}
                 >
                   {/** TODO: Add route to upgrade plan */}
                   <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
@@ -143,7 +178,7 @@ const MiPerfilEmpresa = () => {
 
         </View>
       </View>
-    </ScrollView>
+    </ScrollView >
   );
 };
 
@@ -228,7 +263,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   plusIcon: {
-    marginRight: 6, 
+    marginRight: 6,
   },
   publishButtonText: {
     color: "#fff",
@@ -422,6 +457,28 @@ const styles = StyleSheet.create({
     marginTop: 1,
     textAlign: "left",
     textDecorationLine: "underline",
+  },
+  editButton: {
+    marginTop: 20,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+  limitMessage: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 
