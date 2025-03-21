@@ -123,28 +123,4 @@ const LoginScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    backgroundColor: colors.green,
-    padding: 20,
-    borderRadius: 10,
-    width: 250,
-    alignItems: "center",
-  },
-  modalIcon: {
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 18,
-    color: "white",
-    textAlign: "center",
-  },
-});
-
 export default LoginScreen;

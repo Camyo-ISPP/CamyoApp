@@ -1,6 +1,6 @@
 import { useAuth } from '../../contexts/AuthContext';
-import PerfilCamionero from '../_components/PerfilCamionero';
-import PerfilEmpresa from '../_components/PerfilEmpresa';
+import MiPerfilCamionero from '../_screens/MiPerfilCamionero';
+import MiPerfilEmpresa from '../_screens/MiPerfilEmpresa';
 import WIP from '../_components/WIP';
 import ProtectedRoute from '../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
@@ -23,8 +23,8 @@ const Perfil = () => {
 
     return (
         <ProtectedRoute>
-            {user.rol === "CAMIONERO" && <PerfilCamionero />}
-            {user.rol === "EMPRESA" && <PerfilEmpresa />}
+            {user.rol === "CAMIONERO" && <MiPerfilCamionero />}
+            {user.rol === "EMPRESA" && <MiPerfilEmpresa />}
             {user.rol === "ADMIN" && <WIP />}
         </ProtectedRoute>
     );

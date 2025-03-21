@@ -29,7 +29,7 @@ function RootLayout() {
         "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
-        chat:"Chat"
+        chat:"Mis Mensajes"
       };
 
       const currentSegment = segments.join("/");
