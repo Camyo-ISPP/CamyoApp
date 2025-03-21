@@ -62,15 +62,29 @@ const MiPerfilEmpresa = () => {
               <Text style={styles.description}>{user.descripcion}</Text>
             </View>
 
-            {/* Botón de publicar nueva oferta */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.publishButton}
-                onPress={() => router.push(`/oferta/crear`)}
-              >
-                <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
-                <Text style={styles.publishButtonText}>Crear Nueva Oferta</Text>
-              </TouchableOpacity>
+            <View style={styles.buttonsWrapper}>
+              {/* Botón de publicar nueva oferta */}
+              <View>
+                <TouchableOpacity
+                  style={styles.publishButton}
+                  onPress={() => router.push(`/oferta/crear`)}
+                >
+                  <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
+                  <Text style={styles.publishButtonText}>Crear Nueva Oferta</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Botón de mejorar plan */}
+              <View>
+                <TouchableOpacity
+                  style={styles.mejorarPlanButton}
+                  onPress={() => router.push(`/`)} 
+                >
+                  {/** TODO: Add route to upgrade plan */}
+                  <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
+                  <Text style={styles.publishButtonText}>Mejora tu plan aquí</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
@@ -90,7 +104,7 @@ const MiPerfilEmpresa = () => {
             {offers.length === 0 ? (
               <Text style={styles.info}>No hay ofertas abiertas</Text>
             ) : (
-              <ScrollView style={styles.scrollview}>
+              <ScrollView>
                 <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   {offers && offers.map((item) => (
                     <View key={item.id} style={styles.card2}>
@@ -184,10 +198,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  buttonContainer: {
-    position: "absolute",
+  buttonsWrapper: {
+    position: 'absolute',
     top: 10,
     right: 10,
+    flexDirection: 'column',
+    gap: 15,
   },
   publishButton: {
     flexDirection: "row",
@@ -202,6 +218,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
+  },
+  mejorarPlanButton: {
+    backgroundColor: '#0993A8FF',
+    padding: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   plusIcon: {
     marginRight: 6, 
@@ -392,6 +416,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  upgradeMessage: {
+    color: colors.primary,
+    marginTop: 1,
+    textAlign: "left",
+    textDecorationLine: "underline",
   },
 });
 

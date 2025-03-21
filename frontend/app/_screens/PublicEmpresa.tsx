@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
@@ -9,6 +9,7 @@ const { unifyUserData } = require("../../utils");
 import defaultImage from "../../assets/images/empresa.jpg";
 import { useAuth } from "../../contexts/AuthContext";
 import BackButton from "../_components/BackButton";
+import { startChat } from "../chat/services";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -61,7 +62,7 @@ const PublicEmpresa = ({ userId }) => {
         <View style={styles.card}>
           <View style={styles.rowContainer}>
             <BackButton />
-            
+
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
               <Image
@@ -78,6 +79,27 @@ const PublicEmpresa = ({ userId }) => {
               <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
               <Text style={styles.description}>{user2?.descripcion}</Text>
             </View>
+
+            <View style={styles.buttonsWrapper}>
+              {/* Botón de contactar a la empresa solo si el user autenticado es camionero */}
+              {user && user.rol == "CAMIONERO" && (
+                <View>
+                  <TouchableOpacity
+                    style={styles.publishButton}
+                    onPress={async () => {
+                      const chatId = await startChat(user.id, user2?.userId);
+                      if (chatId) {
+                        router.replace(`/chat?otherUserId=${user2?.userId}`);
+                      }
+                    }}
+                  >
+                    <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
+                    <Text style={styles.publishButtonText}>Contactar</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+            </View>
           </View>
           {/* Separador */}
           <View style={styles.separator} />
@@ -90,6 +112,7 @@ const PublicEmpresa = ({ userId }) => {
 
           <View style={styles.separator} />
 
+          {/* Lista de ofertas de la empresa */}
           <View style={styles.offersContainer}>
             <Text style={styles.sectionTitle}>Ofertas Abiertas</Text>
             {offers.length === 0 ? (
@@ -157,6 +180,35 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderWidth: 1,
     borderColor: colors.lightGray,
+  },
+  buttonsWrapper: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'column',
+    gap: 15,
+  },
+  publishButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  plusIcon: {
+    marginRight: 6, 
+  },
+  publishButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   rowContainer: {
     flexDirection: "row",

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
-import BackButton from "../_components/BackButton";
+import { startChat } from "../chat/services";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Usuario {
   id: number;
@@ -28,6 +29,7 @@ const EmpresasLista = () => {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth(); // Obtiene el usuario autenticado
 
   useEffect(() => {
     const fetchEmpresasData = async () => {
@@ -50,7 +52,7 @@ const EmpresasLista = () => {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      
+
       {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
           <View>
@@ -60,11 +62,30 @@ const EmpresasLista = () => {
             <DetailItem icon="map-marker" text={empresa.usuario.localizacion} />
             <DetailItem icon="phone" text={empresa.usuario.telefono} />
           </View>
+
           <View>
+            {/* Botón "Ver Detalles" */}
             <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
-                <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
-                <Text style={styles.buttonText}>Ver Detalles</Text>
+              <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
+              <Text style={styles.buttonText}>Ver Detalles</Text>
             </TouchableOpacity>
+
+            {/* Botón "Contactar" solo si hay usuario autenticado */}
+            {user && user.rol == "CAMIONERO" && (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={async () => {
+                  const chatId = await startChat(user.id, empresa.usuario.id);
+                  if (chatId) {
+                    router.replace(`/chat?otherUserId=${empresa.usuario.id}`);
+                  }
+                }}
+              >
+                <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                <Text style={styles.chatButtonText}>Contactar</Text>
+              </TouchableOpacity>
+            )}
+
           </View>
         </View>
       ))}
@@ -76,7 +97,9 @@ const DetailItem = ({ icon, text, link = false }: { icon: keyof typeof FontAweso
   <View style={styles.detailItem}>
     <FontAwesome style={styles.icon} name={icon} size={20} />
     {link ? (
-      <Text style={styles.linkText} onPress={() => text && Linking.openURL(text)}>{text || "No disponible"}</Text>
+      <Text style={styles.linkText} onPress={() => text && Linking.openURL(text)}>
+        {text || "No disponible"}
+      </Text>
     ) : (
       <Text style={styles.detailsText}>{text}</Text>
     )}
@@ -95,8 +118,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
-    width: "60%", // 🔹 Reduce el tamaño del recuadro al 60% de la pantalla
-    alignSelf: "center", // 🔹 Asegura que el recuadro esté en el centro
+    width: "60%",
+    alignSelf: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -104,42 +127,46 @@ const styles = StyleSheet.create({
     elevation: 3,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
   },
-  avatar: { width: 80, height: 80, borderRadius: 40, marginRight: 15 },
   name: { fontSize: 20, fontWeight: "bold" },
-  infoText: { fontSize: 14, color: "gray" },
   detailItem: { flexDirection: "row", alignItems: "center", marginBottom: 5 },
   detailsText: { fontSize: 14, color: "#333" },
   icon: { marginRight: 10, color: "#0b4f6c" },
   linkText: { color: "#007BFF", textDecorationLine: "underline" },
   errorText: { textAlign: "center", fontSize: 18, color: "red", marginTop: 50 },
-  button:{
-    backgroundColor:colors.primary,
-    color:colors.white,
-    paddingLeft:5,
-    paddingRight:5,
+  button: {
+    backgroundColor: colors.primary,
+    paddingLeft: 5,
+    paddingRight: 5,
     marginLeft: "-20%",
-    marginTop:4,
-    flexDirection:"row",
-    flexWrap:"nowrap",
-    height:40,
+    marginTop: 4,
+    flexDirection: "row",
+    height: 40,
     width: 150,
-    borderRadius:10,
-    alignItems:"center",
-    justifyContent:"center"
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 5,
   },
-  buttonText:{
-    color:colors.white,
-    fontWeight:"bold"
+  buttonText: {
+    color: colors.white,
+    fontWeight: "bold",
   },
-  detailsIcon:{
-    color:colors.white,
-    alignSelf:"center",
-    marginLeft:3,
-    marginTop:3,
-    marginRight:5,
-
+  detailsIcon: {
+    color: colors.white,
+    alignSelf: "center",
+    marginLeft: 3,
+    marginTop: 3,
+    marginRight: 5,
+  },
+  chatButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  chatIcon: {
+    marginRight: 8,
   },
 });
 

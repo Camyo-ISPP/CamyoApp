@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
 function RootLayout() {
   const segments = useSegments();
@@ -28,6 +29,7 @@ function RootLayout() {
         "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
+        chat:"Mis Mensajes"
       };
 
       const currentSegment = segments.join("/");
@@ -37,6 +39,7 @@ function RootLayout() {
 
   return (
     <>
+      <SubscriptionProvider>
       {!isMobile && <CamyoWebNavBar />}
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(public)/index" />
@@ -56,12 +59,16 @@ function RootLayout() {
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
+        <Stack.Screen name="chat" />
+        <Stack.Screen name="chat/list" />
 
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />
       </Stack>
       {isMobile && <BottomBar />}
+      </SubscriptionProvider>
     </>
+
   );
 }
 
