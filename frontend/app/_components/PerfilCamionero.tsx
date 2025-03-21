@@ -10,8 +10,6 @@ import axios from 'axios';
 import { router } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 interface Camionero {
     id: number;
     nombre: string;
@@ -36,6 +34,8 @@ interface Review {
 }
 
 const PerfilCamionero: React.FC = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [camionero, setCamionero] = useState<Camionero | null>(null);

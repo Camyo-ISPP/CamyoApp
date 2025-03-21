@@ -20,6 +20,8 @@ interface Review {
 }
 
 const CamioneroScreen: React.FC = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+    
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { camioneroid } = useLocalSearchParams();
@@ -30,7 +32,6 @@ const CamioneroScreen: React.FC = () => {
     const PlaceHolderLicencias = 'No tiene licencias';
     const [licencias, setLicencias] = useState<string[]>([]);
     const [disp, setDisp] = useState<string>('');
-    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
     const capitalizeFirstLetter = (string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
     };

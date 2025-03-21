@@ -24,9 +24,8 @@ interface Empresa {
   usuario: Usuario;
 }
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EmpresasLista = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
