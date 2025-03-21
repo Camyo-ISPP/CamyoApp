@@ -8,9 +8,9 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import SuccessModal from "../_components/SuccessModal";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EditarPerfilCamionero = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const { width } = useWindowDimensions();
   const isWideScreen = width > 1074;
   const router = useRouter();

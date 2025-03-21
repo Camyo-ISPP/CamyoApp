@@ -9,8 +9,6 @@ import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { router, useNavigation } from "expo-router";
 import axios from "axios";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 // Definir la interfaz para la empresa y usuario
 interface Usuario {
   id: number;
@@ -31,6 +29,8 @@ interface Empresa {
 }
 
 const PerfilEmpresa = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

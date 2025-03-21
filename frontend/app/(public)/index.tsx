@@ -13,9 +13,9 @@ import CamyoWebNavBar from "../_components/CamyoNavBar";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import Titulo from "../_components/Titulo";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 export default function Index() {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
