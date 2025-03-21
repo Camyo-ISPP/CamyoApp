@@ -1,12 +1,12 @@
 import { useLocalSearchParams } from "expo-router";
 
-import Camionero from "../../_screens/Camionero";
+import PublicCamionero from "../../_screens/PublicCamionero";
 
 const CamioneroScreen = () => {
   const { camioneroid } = useLocalSearchParams();
 
   return (
-    <Camionero userId={camioneroid}></Camionero>
+    <PublicCamionero userId={camioneroid}></PublicCamionero>
   );
 };
 

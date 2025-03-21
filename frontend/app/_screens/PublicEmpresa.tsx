@@ -12,7 +12,7 @@ import BackButton from "../_components/BackButton";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const Empresa = ({ userId }) => {
+const PublicEmpresa = ({ userId }) => {
   const router = useRouter();
 
   // user2 es la empresa
@@ -85,7 +85,6 @@ const Empresa = ({ userId }) => {
           <View style={styles.downContainer}>
             {/* Información empresarial */}
             <Text style={styles.sectionTitle}>Información Empresarial</Text>
-            <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> NIF: {user2?.nif}</Text>
             <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {user2?.web}</Text>
           </View>
 
@@ -373,8 +372,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Empresa;
-function unifyData(data: any): any {
-  throw new Error("Function not implemented.");
-}
-
+export default PublicEmpresa;

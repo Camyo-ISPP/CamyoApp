@@ -80,7 +80,6 @@ const MiPerfilEmpresa = () => {
           <View style={styles.downContainer}>
             {/* Información empresarial */}
             <Text style={styles.sectionTitle}>Información Empresarial</Text>
-            <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> NIF: {user.nif}</Text>
             <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {user.web}</Text>
           </View>
 

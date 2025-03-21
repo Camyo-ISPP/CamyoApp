@@ -11,7 +11,7 @@ import BackButton from "../_components/BackButton";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const Camionero = ({ userId }) => {
+const PublicCamionero = ({ userId }) => {
     const { user } = useAuth();
     const router = useRouter();
 
@@ -54,8 +54,6 @@ const Camionero = ({ userId }) => {
                     <View style={styles.infoContainer}>
                         <Text style={styles.name}>{user2?.nombre}</Text>
                         <Text style={styles.username}>@{user2?.username}</Text>
-                        <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user2?.email}</Text>
-                        <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user2?.telefono}</Text>
                         <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
                         <Text style={styles.description}>{user2?.descripcion}</Text>
                     </View>
@@ -66,7 +64,6 @@ const Camionero = ({ userId }) => {
                 <View style={styles.downContainer}>
                     {/* Información profesional */}
                     <Text style={styles.sectionTitle}>Información Profesional</Text>
-                    <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> DNI: {user2?.dni}</Text>
                     <Text style={styles.info}>
                         <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                         {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
@@ -191,4 +188,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default Camionero;
+export default PublicCamionero;

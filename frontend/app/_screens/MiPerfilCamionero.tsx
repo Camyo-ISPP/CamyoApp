@@ -30,8 +30,6 @@ const MiPerfilCamionero = () => {
                     <View style={styles.infoContainer}>
                         <Text style={styles.name}>{user.nombre}</Text>
                         <Text style={styles.username}>@{user.username}</Text>
-                        <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user.email}</Text>
-                        <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user.telefono}</Text>
                         <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
                         <Text style={styles.description}>{user.descripcion}</Text>
                     </View>
@@ -42,7 +40,6 @@ const MiPerfilCamionero = () => {
                 <View style={styles.downContainer}>
                     {/* Información profesional */}
                     <Text style={styles.sectionTitle}>Información Profesional</Text>
-                    <Text style={styles.info}><FontAwesome5 name="id-card" size={18} color={colors.primary} /> DNI: {user.dni}</Text>
                     <Text style={styles.info}>
                         <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                         {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}

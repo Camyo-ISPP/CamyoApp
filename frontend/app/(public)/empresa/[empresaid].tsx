@@ -1,12 +1,12 @@
 import { useLocalSearchParams } from "expo-router";
 
-import Empresa from "../../_screens/Empresa";
+import PublicEmpresa from "../../_screens/PublicEmpresa";
 
 const EmpresaScreen = () => {
   const { empresaid } = useLocalSearchParams();
 
   return (
-    <Empresa userId={empresaid}></Empresa>
+    <PublicEmpresa userId={empresaid}></PublicEmpresa>
   );
 };
 
