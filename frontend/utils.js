@@ -28,6 +28,7 @@ const unifyUserData = (data) => {
         tieneCAP: data.tieneCAP,
         expiracionCAP: data.expiracionCAP,
         isAutonomo: Array.isArray(data.tarjetasAutonomo) && data.tarjetasAutonomo.length > 0,
+        isAutonomo: data.tarjetasAutonomo && Array.isArray(data.tarjetasAutonomo) && data.tarjetasAutonomo.length > 0,
         tarjetas: data.tarjetasAutonomo || [],
       });
     } 

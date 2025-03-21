@@ -10,9 +10,14 @@ const BackButtonAbsolute = ({ color = "#0b4f6c", size = 30 }) => {
     const router = useRouter();
 
     const handlePress = () => {
-        if (router.canGoBack()) {
-            router.back();
-        } else {
+        try {
+            if (router.canGoBack()) {
+                router.back();
+            } else {
+                router.replace('/');
+            }
+        } catch (error) {
+            console.error("Navigation error:", error);
             router.replace('/');
         }
     };
