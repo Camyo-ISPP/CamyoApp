@@ -165,7 +165,7 @@ const MiPerfilEmpresa = () => {
                       </View>
                       <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
                       <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
-                        <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+                        <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
                         <Text style={styles.buttonText}>Ver Detalles</Text>
 
                       </TouchableOpacity>
