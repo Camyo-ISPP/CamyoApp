@@ -78,32 +78,43 @@ const SubscriptionPlans = () => {
         if (!user || !user.id || !userToken) return;
       
         try {
-          setLoadingPlan(true);
-      
-          const response = await axios.post(
-            `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${userToken}`,
-              },
+            setLoadingPlan(true);
+        
+            const response = await axios.post(
+                `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
+                {},
+                {
+                headers: {
+                    Authorization: `Bearer ${userToken}`,
+                },
+                }
+            );
+        
+            if (response.status === 201) {
+                setCurrentPlan(planLevel); 
+                alert(`¡Tu plan ha sido cambiado a ${formatPlanLevel(planLevel)}!`);
+            } else {
+                alert("No se pudo cambiar el plan.");
             }
-          );
-      
-          if (response.status === 201) {
-            setCurrentPlan(planLevel); 
-            alert(`¡Tu plan ha sido cambiado a ${planLevel}!`);
-          } else {
-            alert("No se pudo cambiar el plan.");
-          }
         } catch (error) {
-          console.error("Error al cambiar el plan:", error);
-          alert("Ocurrió un error al cambiar el plan.");
+            alert("Ocurrió un error al cambiar el plan.");
         } finally {
-          setLoadingPlan(false);
+           setLoadingPlan(false);
         }
     };
-      
+
+    const formatPlanLevel = (plan: string): string => {
+        switch (plan.toUpperCase()) {
+          case "GRATIS":
+            return "GRATIS";
+          case "BASIC":
+            return "BÁSICO";
+          case "PREMIUM":
+            return "PREMIUM";
+          default:
+            return plan;
+        }
+      };
 
     const getPlanIcon = (planLevel: string) => {
         switch (planLevel) {

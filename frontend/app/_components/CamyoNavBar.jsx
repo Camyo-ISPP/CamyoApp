@@ -92,7 +92,14 @@ export default function CamyoWebNavBar() {
               </TouchableOpacity>
             </View>
             <View style={styles.rightSection}>
-               
+                {user?.rol === "EMPRESA" && (
+                  <TouchableOpacity
+                    style={styles.buttonText}
+                    onPress={() => router.push("/suscripcion")}
+                  >
+                    <Text style={styles.linkText}>Suscripción</Text>
+                  </TouchableOpacity>
+                )}
                <TouchableOpacity onPress={() => router.replace('/chat/list')}>
                   <Text style={styles.linkText}>Go to Chat List</Text>
                </TouchableOpacity>
