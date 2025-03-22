@@ -1,26 +1,136 @@
-import React, { useRef } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform, Animated, Easing } from "react-native";
+import React, { useRef, useState } from "react";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform, Animated, Easing, ActivityIndicator } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 import BottomBar from "../_components/BottomBar";
 import Titulo from "../_components/Titulo";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import withNavigationGuard from "@/hoc/withNavigationGuard";
+import EmpresaRoute from "@/security/EmpresaRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
 
-const subscriptionTestData = {
-    id: 2,
-    empresa_id: 218,
-    nivel: "BASIC",
-    fecha_inicio: "2025-03-16",
-    fecha_fin: "2025-04-16",
-    activa: true
-};
 
-export default function SubscriptionPlans() {
+const SubscriptionPlans = () => {
+
+    const { user } = useAuth(); 
+    const router = useRouter();
+    const [isAuthLoaded, setIsAuthLoaded] = useState(false);
+    const [isUserLoading, setIsUserLoading] = useState(true);
+
+    useEffect(() => {
+        if (user === undefined) {
+          return;
+        }
+    
+        setIsAuthLoaded(true);
+    
+    }, [user]);
+    
+    useEffect(() => {
+        if (!isAuthLoaded) {
+          return;
+        }
+    
+        if (user === undefined) {
+          return; 
+        }
+        setIsUserLoading(false); 
+    }, [isAuthLoaded]);
+    
+
+    if (!isAuthLoaded) {
+        return (
+          <View>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        );
+    }
+
+    //Cargamos la suscripción actual
+    const subscriptionTestData = {
+        id: 2,
+        empresa_id: 218,
+        nivel: "BASIC",
+        fecha_inicio: "2025-03-16",
+        fecha_fin: "2025-04-16",
+        activa: true
+    };
 
     const currentPlan = subscriptionTestData.nivel;
 
+    const getPlanIcon = (planLevel: string) => {
+        switch (planLevel) {
+            case "GRATIS":
+                return <Ionicons name="pricetag-outline" size={24} color={colors.primary} />;
+            case "BASIC":
+                return <Ionicons name="layers-outline" size={24} color={colors.primary} />;
+            case "PREMIUM":
+                return <Ionicons name="diamond-outline" size={24} color={colors.primary} />;
+            default:
+                return null;
+        }
+    };
+
+    const PlanCard: React.FC<{ title: string, price: string, description: string, borderColor: string, planLevel: string, currentPlan: string }> = ({ title, price, description, borderColor, planLevel, currentPlan }) => {
+        const isCurrentPlan = planLevel === currentPlan;
+        const buttonText = isCurrentPlan ? "Plan actual" : "Cambiar a este plan";
+        const scaleValue = useRef(new Animated.Value(1)).current;
+    
+        const handleMouseEnter = () => {
+            if (Platform.OS === "web") {
+                Animated.timing(scaleValue, {
+                    toValue: 1.05,
+                    duration: 200,
+                    useNativeDriver: true,
+                    easing: Easing.out(Easing.quad),
+                }).start();
+            }
+        };
+    
+        const handleMouseLeave = () => {
+            if (Platform.OS === "web") {
+                Animated.timing(scaleValue, {
+                    toValue: 1,
+                    duration: 200,
+                    useNativeDriver: true,
+                    easing: Easing.out(Easing.quad),
+                }).start();
+            }
+        };
+    
+        return (
+            <Animated.View
+                style={[
+                    styles.card,
+                    { borderLeftColor: borderColor, transform: [{ scale: scaleValue }] },
+                ]}
+                {...(Platform.OS === "web"
+                    ? ({ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave } as any)
+                    : {})}
+            >
+                <View style={styles.planTitleContainer}>
+                    {getPlanIcon(planLevel)}
+                    <Text style={styles.planTitle}>{title}</Text>
+                </View>            
+                <Text style={styles.planPrice}>{price}</Text>
+                <Text style={styles.planDescription}>{description}</Text>
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        isCurrentPlan ? styles.disabledButton : styles.button
+                    ]}
+                    disabled={isCurrentPlan}
+                >
+                    <Text style={styles.buttonText}>{buttonText}</Text>
+                </TouchableOpacity>
+            </Animated.View>
+        );
+    };
+
     return (
-        <>
+        <EmpresaRoute>
             {Platform.OS === 'web' ? (
                 <View style={styles.webContainer}>
                     <CamyoWebNavBar />
@@ -89,78 +199,9 @@ export default function SubscriptionPlans() {
                     <BottomBar />
                 </View>
             )}
-        </>
+        </EmpresaRoute>
     );
-}
-
-function getPlanIcon(planLevel: string) {
-    switch (planLevel) {
-        case "GRATIS":
-            return <Ionicons name="pricetag-outline" size={24} color={colors.primary} />;
-        case "BASIC":
-            return <Ionicons name="layers-outline" size={24} color={colors.primary} />;
-        case "PREMIUM":
-            return <Ionicons name="diamond-outline" size={24} color={colors.primary} />;
-        default:
-            return null;
-    }
-}
-
-function PlanCard({ title, price, description, borderColor, planLevel, currentPlan }) {
-    const isCurrentPlan = planLevel === currentPlan;
-    const buttonText = isCurrentPlan ? "Plan actual" : "Cambiar a este plan";
-    const scaleValue = useRef(new Animated.Value(1)).current;
-
-    const handleMouseEnter = () => {
-        if (Platform.OS === "web") {
-            Animated.timing(scaleValue, {
-                toValue: 1.05,
-                duration: 200,
-                useNativeDriver: true,
-                easing: Easing.out(Easing.quad),
-            }).start();
-        }
-    };
-
-    const handleMouseLeave = () => {
-        if (Platform.OS === "web") {
-            Animated.timing(scaleValue, {
-                toValue: 1,
-                duration: 200,
-                useNativeDriver: true,
-                easing: Easing.out(Easing.quad),
-            }).start();
-        }
-    };
-
-    return (
-        <Animated.View
-            style={[
-                styles.card,
-                { borderLeftColor: borderColor, transform: [{ scale: scaleValue }] },
-            ]}
-            {...(Platform.OS === "web"
-                ? ({ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave } as any)
-                : {})}
-        >
-            <View style={styles.planTitleContainer}>
-                {getPlanIcon(planLevel)}
-                <Text style={styles.planTitle}>{title}</Text>
-            </View>            
-            <Text style={styles.planPrice}>{price}</Text>
-            <Text style={styles.planDescription}>{description}</Text>
-            <TouchableOpacity
-                style={[
-                    styles.button,
-                    isCurrentPlan ? styles.disabledButton : styles.button
-                ]}
-                disabled={isCurrentPlan}
-            >
-                <Text style={styles.buttonText}>{buttonText}</Text>
-            </TouchableOpacity>
-        </Animated.View>
-    );
-}
+};
 
 const styles = StyleSheet.create({
     webContainer: {
@@ -247,3 +288,5 @@ const styles = StyleSheet.create({
         backgroundColor: "gray",
     },
 });
+
+export default withNavigationGuard(SubscriptionPlans);

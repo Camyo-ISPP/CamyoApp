@@ -167,7 +167,7 @@ const PerfilEmpresa = () => {
                 ¿Quieres más opciones? {'\n'} 
                 
               </Text>
-              <TouchableOpacity onPress={() => router.replace("/")}>
+              <TouchableOpacity onPress={() => router.replace("/suscripcion")}>
                 <Text style={styles.upgradeMessage}>
                 Mejora tu plan aquí.
                 </Text>
