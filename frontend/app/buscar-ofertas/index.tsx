@@ -16,7 +16,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(externalSearchQuery);
-    const [selectedOfertaType, setSelectedOfertaType] = useState<'cargas' | 'generales' | null>(null);
+    const [selectedOfertaType, setSelectedOfertaType] = useState<'cargas' | 'trabajos' | null>(null);
     const [origenFilter, setOrigenFilter] = useState('');
     const [destinoFilter, setDestinoFilter] = useState('');
     const [minPesoFilter, setMinPesoFilter] = useState('');
@@ -49,6 +49,10 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         fetchData();
     }, [selectedOfertaType]);
 
+    useEffect(() => {
+        console.log("selectedOfertaType cambió a:", selectedOfertaType);
+    }, [selectedOfertaType]);
+
     const fetchData = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/ofertas/info`);
@@ -63,6 +67,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     };
 
     const handleSearch = (query = searchQuery) => {
+        console.log("Ejecutando handleSearch")
         const normalizedQuery = query.toLowerCase();
         let filteredResults = data.filter((item) => {
             return (
@@ -102,190 +107,188 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                 filteredResults = filteredResults.filter(
                     (item) => item.peso <= parseFloat(maxPesoFilter)
                 );
-
-            } else if (selectedOfertaType === 'generales') {
-                filteredResults = filteredResults.filter((item) => item.tipoOferta === 'TRABAJO');
-                filteredResults = filteredResults.filter((item) => {
-
-                    //Experience Filter
-                    if (minExperienceFilter === "") return true;
-                    if (parseInt(minExperienceFilter) === 5) {
-                        return item.experiencia >= 5 && item.experiencia <= 9;
-                    }
-                    if (parseInt(minExperienceFilter) === 10) {
-                        return item.experiencia >= 10;
-                    }
-                    return item.experiencia === parseInt(minExperienceFilter);
-                });
-
-                // Salary Filter
-                if (minSalaryFilter) {
-                    filteredResults = filteredResults.filter(
-                        (item) => item.sueldo >= parseFloat(minSalaryFilter)
-                    );
+            }
+        } else if (selectedOfertaType === 'trabajos') {
+            filteredResults = filteredResults.filter((item) => item.tipoOferta.trim().toUpperCase() === 'TRABAJO');
+            console.log("Ofertas tras filtrar por trabajos:", filteredResults);
+            if (minExperienceFilter !== "") {
+                if (parseInt(minExperienceFilter) === 5) {
+                    filteredResults = filteredResults.filter((item) => item.experiencia >= 5 && item.experiencia <= 9);
+                } else if (parseInt(minExperienceFilter) === 10) {
+                    filteredResults = filteredResults.filter((item) => item.experiencia >= 10);
+                } else {
+                    filteredResults = filteredResults.filter((item) => item.experiencia === parseInt(minExperienceFilter));
                 }
             }
 
-            setFilteredData(filteredResults);
-            console.log('Datos filtrados:', filteredResults);
+            // Salary Filter
+            if (minSalaryFilter) {
+                filteredResults = filteredResults.filter(
+                    (item) => item.sueldo >= parseFloat(minSalaryFilter)
+                );
+            }
+        }
 
-            const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
-            window.history.pushState({}, '', newUrl);
-        };
-    }
+        setFilteredData(filteredResults);
+        console.log('Datos filtrados:', filteredResults);
 
-    return (
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            <View style={styles.webContainer}>
-                <View style={styles.mainContent}>
-                    {/* Filters and Search Bar Card */}
-                    <View style={styles.filtersCard}>
-                        <View style={styles.searchContainer}>
+        const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
+        window.history.pushState({}, '', newUrl);
+    };
+
+
+return (
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.webContainer}>
+            <View style={styles.mainContent}>
+                {/* Filters and Search Bar Card */}
+                <View style={styles.filtersCard}>
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Buscar ofertas por título..."
+                            value={searchQuery}
+                            onChangeText={(text) => setSearchQuery(text)}
+                            onSubmitEditing={() => handleSearch()}
+                        />
+                        <TouchableOpacity style={styles.searchButton} onPress={() => handleSearch()}>
+                            <Text style={styles.searchButtonText}>Buscar</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.ofertaTypeContainer}>
+                        <TouchableOpacity
+                            style={[
+                                styles.ofertaTypeButton,
+                                selectedOfertaType === 'trabajos' && styles.ofertaTypeButtonActive,
+                            ]}
+                            onPress={() => setSelectedOfertaType('trabajos')}
+                        >
+                            <Text style={styles.ofertaTypeButtonText}>Generales</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.ofertaTypeButton,
+                                selectedOfertaType === 'cargas' && styles.ofertaTypeButtonActive,
+                            ]}
+                            onPress={() => setSelectedOfertaType('cargas')}
+                        >
+                            <Text style={styles.ofertaTypeButtonText}>Cargas</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {selectedOfertaType === 'cargas' && (
+                        <View style={styles.filtersContainer}>
+                            {/* Origen Filter */}
+                            <Text style={styles.filterLabel}>Origen:</Text>
                             <TextInput
-                                style={styles.searchInput}
-                                placeholder="Buscar ofertas por título..."
-                                value={searchQuery}
-                                onChangeText={(text) => setSearchQuery(text)}
-                                onSubmitEditing={() => handleSearch()}
+                                style={styles.filterInput}
+                                placeholder="Ciudad o región"
+                                value={origenFilter}
+                                onChangeText={setOrigenFilter}
                             />
-                            <TouchableOpacity style={styles.searchButton} onPress={() => handleSearch()}>
-                                <Text style={styles.searchButtonText}>Buscar</Text>
-                            </TouchableOpacity>
+
+                            {/* Destino Filter */}
+                            <Text style={styles.filterLabel}>Destino:</Text>
+                            <TextInput
+                                style={styles.filterInput}
+                                placeholder="Ciudad o región"
+                                value={destinoFilter}
+                                onChangeText={setDestinoFilter}
+                            />
+
+                            {/* Peso Mínimo Filter */}
+                            <Text style={styles.filterLabel}>Peso Mínimo (kg):</Text>
+                            <TextInput
+                                style={styles.filterInput}
+                                placeholder="Ej: 100"
+                                value={minPesoFilter}
+                                onChangeText={setMinPesoFilter}
+                                keyboardType="numeric"
+                            />
+
+                            {/* Peso Máximo Filter */}
+                            <Text style={styles.filterLabel}>Peso Máximo (kg):</Text>
+                            <TextInput
+                                style={styles.filterInput}
+                                placeholder="Ej: 1000"
+                                value={maxPesoFilter}
+                                onChangeText={setMaxPesoFilter}
+                                keyboardType="numeric"
+                            />
                         </View>
+                    )}
 
-                        <View style={styles.ofertaTypeContainer}>
-                            <TouchableOpacity
-                                style={[
-                                    styles.ofertaTypeButton,
-                                    selectedOfertaType === 'generales' && styles.ofertaTypeButtonActive,
-                                ]}
-                                onPress={() => setSelectedOfertaType('generales')}
+                    {selectedOfertaType === 'trabajos' && (
+                        <View style={styles.filtersContainer}>
+
+                            {/* Minimum Experience Dropdown */}
+                            <Text style={styles.filterLabel}>Experiencia Mínima:</Text>
+                            <Picker
+                                selectedValue={minExperienceFilter}
+                                style={styles.picker}
+                                onValueChange={(itemValue) => setMinExperienceFilter(itemValue)}
                             >
-                                <Text style={styles.ofertaTypeButtonText}>Generales</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[
-                                    styles.ofertaTypeButton,
-                                    selectedOfertaType === 'cargas' && styles.ofertaTypeButtonActive,
-                                ]}
-                                onPress={() => setSelectedOfertaType('cargas')}
-                            >
-                                <Text style={styles.ofertaTypeButtonText}>Cargas</Text>
-                            </TouchableOpacity>
+                                <Picker.Item label="Cualquier experiencia" value="" />
+                                <Picker.Item label="0 años de experiencia" value="0" />
+                                <Picker.Item label="1 año de experiencia" value="1" />
+                                <Picker.Item label="2 años de experiencia" value="2" />
+                                <Picker.Item label="3 años de experiencia" value="3" />
+                                <Picker.Item label="4 años de experiencia" value="4" />
+                                <Picker.Item label="5 años de experiencia" value="5" />
+                                <Picker.Item label="10 años de experiencia" value="10" />
+                            </Picker>
+
+
+                            {/* Salary Range Slider */}
+                            <Text style={styles.filterLabel}>Salario Mínimo {minSalaryFilter}€ :</Text>
+                            <Slider
+                                style={styles.rangeSlider}
+                                minimumValue={0}
+                                maximumValue={10000} // Adjust based on your data
+                                step={10}
+                                minimumTrackTintColor={colors.primary} // Color of the filled part of the track
+                                maximumTrackTintColor="#ccc"          // Color of the empty part of the track
+                                thumbTintColor={colors.secondary}
+                                onValueChange={(value: number) => {
+                                    setMinSalaryFilter(value.toString());
+                                }}
+                            />
                         </View>
+                    )}
+                </View>
 
-                        {selectedOfertaType === 'cargas' && (
-                            <View style={styles.filtersContainer}>
-                                {/* Origen Filter */}
-                                <Text style={styles.filterLabel}>Origen:</Text>
-                                    <TextInput
-                                        style={styles.filterInput}
-                                        placeholder="Ciudad o región"
-                                        value={origenFilter}
-                                        onChangeText={setOrigenFilter}
-                                    />
-
-                                {/* Destino Filter */}
-                                <Text style={styles.filterLabel}>Destino:</Text>
-                                    <TextInput
-                                        style={styles.filterInput}
-                                        placeholder="Ciudad o región"
-                                        value={destinoFilter}
-                                        onChangeText={setDestinoFilter}
-                                    />
-
-                                {/* Peso Mínimo Filter */}
-                                <Text style={styles.filterLabel}>Peso Mínimo (kg):</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="Ej: 100"
-                                    value={minPesoFilter}
-                                    onChangeText={setMinPesoFilter}
-                                    keyboardType="numeric"
-                                />
-
-                                {/* Peso Máximo Filter */}
-                                <Text style={styles.filterLabel}>Peso Máximo (kg):</Text>
-                                <TextInput
-                                    style={styles.filterInput}
-                                    placeholder="Ej: 1000"
-                                    value={maxPesoFilter}
-                                    onChangeText={setMaxPesoFilter}
-                                    keyboardType="numeric"
-                                />
-                            </View>
-                        )}
-
-                        {selectedOfertaType === 'generales' && (
-                            <View style={styles.filtersContainer}>
-
-                                {/* Minimum Experience Dropdown */}
-                                <Text style={styles.filterLabel}>Experiencia Mínima:</Text>
-                                <Picker
-                                    selectedValue={minExperienceFilter}
-                                    style={styles.picker}
-                                    onValueChange={(itemValue) => setMinExperienceFilter(itemValue)}
-                                >
-                                    <Picker.Item label="Cualquier experiencia" value="" />
-                                    <Picker.Item label="0 años de experiencia" value="0" />
-                                    <Picker.Item label="1 año de experiencia" value="1" />
-                                    <Picker.Item label="2 años de experiencia" value="2" />
-                                    <Picker.Item label="3 años de experiencia" value="3" />
-                                    <Picker.Item label="4 años de experiencia" value="4" />
-                                    <Picker.Item label="5 años de experiencia" value="5" />
-                                    <Picker.Item label="10 años de experiencia" value="10" />
-                                </Picker>
-
-
-                                {/* Salary Range Slider */}
-                                <Text style={styles.filterLabel}>Salario Mínimo {minSalaryFilter}€ :</Text>
-                                <Slider
-                                    style={styles.rangeSlider}
-                                    minimumValue={0}
-                                    maximumValue={10000} // Adjust based on your data
-                                    step={10}
-                                    minimumTrackTintColor={colors.primary} // Color of the filled part of the track
-                                    maximumTrackTintColor="#ccc"          // Color of the empty part of the track
-                                    thumbTintColor={colors.secondary}
-                                    onValueChange={(value: number) => {
-                                        setMinSalaryFilter(value.toString());
-                                    }}
-                                />
-                            </View>
-                        )}
-                    </View>
-
-                    {/* Offer Cards Section */}
-                    <View style={styles.offersSection}>
-                        {filteredData.map((item) => (
-                            <View key={item.id} style={styles.card}>
-                                <Image source={CompanyLogo} style={styles.companyLogo} />
-                                <View style={{ width: "30%" }}>
-                                    <Text style={styles.offerTitle}>{item.titulo}</Text>
-                                    <View style={{ flexDirection: "row" }}>
-                                        <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
-                                        <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-                                        <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Text style={styles.localizacion}>|</Text>
-                                            <MaterialIcons name="location-on" size={20} color="#696969" />
-                                            <Text style={styles.localizacion}>{item.localizacion}</Text>
-                                        </View>
+                {/* Offer Cards Section */}
+                <View style={styles.offersSection}>
+                    {filteredData.map((item) => (
+                        <View key={item.id} style={styles.card}>
+                            <Image source={CompanyLogo} style={styles.companyLogo} />
+                            <View style={{ width: "30%" }}>
+                                <Text style={styles.offerTitle}>{item.titulo}</Text>
+                                <View style={{ flexDirection: "row" }}>
+                                    <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
+                                    <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
+                                    <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
+                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                        <Text style={styles.localizacion}>|</Text>
+                                        <MaterialIcons name="location-on" size={20} color="#696969" />
+                                        <Text style={styles.localizacion}>{item.localizacion}</Text>
                                     </View>
-                                    <Text style={styles.offerInfo}>{item.notas}</Text>
                                 </View>
-                                <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                                <TouchableOpacity style={styles.button} onPress={() => router.replace(`/oferta/${item.id}`)}>
-                                    <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
-                                    <Text style={styles.buttonText}>Ver Detalles</Text>
-                                </TouchableOpacity>
+                                <Text style={styles.offerInfo}>{item.notas}</Text>
                             </View>
-                        ))}
-                    </View>
+                            <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
+                            <TouchableOpacity style={styles.button} onPress={() => router.replace(`/oferta/${item.id}`)}>
+                                <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+                                <Text style={styles.buttonText}>Ver Detalles</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))}
                 </View>
             </View>
-        </ScrollView>
-    );
+        </View>
+    </ScrollView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -309,7 +312,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 20,
         marginRight: 20,
-        height: 400,
+        height: 450,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -585,7 +588,7 @@ const styles = StyleSheet.create({
         marginHorizontal: '0%',
         width: '100%',
     },
-    
+
     filterIcon: {
         marginLeft: 10,
         marginRight: 5,

@@ -42,10 +42,7 @@ function RootLayout() {
     <>
       <CamyoWebNavBar
         onSearch={(query: string) => {
-          router.push({
-            pathname: "/buscar-ofertas",
-            params: { query }, 
-          });
+          router.push(`/buscar-ofertas?query=${query}`);
         }}
       />
       <SubscriptionProvider>
