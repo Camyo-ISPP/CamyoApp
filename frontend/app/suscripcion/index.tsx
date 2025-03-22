@@ -10,14 +10,18 @@ import EmpresaRoute from "@/security/EmpresaRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
+import axios from "axios";
 
 
 const SubscriptionPlans = () => {
 
-    const { user } = useAuth(); 
+    const { user, userToken } = useAuth();
     const router = useRouter();
     const [isAuthLoaded, setIsAuthLoaded] = useState(false);
     const [isUserLoading, setIsUserLoading] = useState(true);
+    const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+    const [loadingPlan, setLoadingPlan] = useState<boolean>(true);
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
     useEffect(() => {
         if (user === undefined) {
@@ -39,7 +43,29 @@ const SubscriptionPlans = () => {
         setIsUserLoading(false); 
     }, [isAuthLoaded]);
     
-
+    useEffect(() => {
+        const fetchPlan = async () => {
+          if (!user?.id || !userToken) return;
+      
+          try {
+            const response = await axios.get(`${BACKEND_URL}/suscripciones/nivel/${user.id}`, {
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+              },
+            });
+      
+            setCurrentPlan(response.data);
+          } catch (error) {
+            console.error("Error al obtener el plan de suscripción:", error);
+            setCurrentPlan("GRATIS");
+          } finally {
+            setLoadingPlan(false);
+          }
+        };
+      
+        fetchPlan();
+    }, [user?.id, userToken]);
+      
     if (!isAuthLoaded) {
         return (
           <View>
@@ -47,18 +73,6 @@ const SubscriptionPlans = () => {
           </View>
         );
     }
-
-    //Cargamos la suscripción actual
-    const subscriptionTestData = {
-        id: 2,
-        empresa_id: 218,
-        nivel: "BASIC",
-        fecha_inicio: "2025-03-16",
-        fecha_fin: "2025-04-16",
-        activa: true
-    };
-
-    const currentPlan = subscriptionTestData.nivel;
 
     const getPlanIcon = (planLevel: string) => {
         switch (planLevel) {
