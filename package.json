@@ -6,7 +6,6 @@
     "postinstall": "cd frontend && npm install"
   },
   "dependencies": {
-    "expo": "^52.0.39",
     "firebase": "^11.4.0",
     "firestore": "^1.1.6",
     "react-native-gifted-chat": "^2.8.0"

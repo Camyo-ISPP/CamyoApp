@@ -40,11 +40,13 @@ function RootLayout() {
 
   return (
     <>
+    {!isMobile && 
       <CamyoWebNavBar
         onSearch={(query: string) => {
           router.push(`/buscar-ofertas?query=${query}`);
         }}
-      />
+      />}
+      
       <SubscriptionProvider>
       
       <Stack screenOptions={{ headerShown: false }}>
