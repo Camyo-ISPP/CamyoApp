@@ -48,7 +48,7 @@ export default function Index() {
     <>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
-          <CamyoWebNavBar />
+          {/* <CamyoWebNavBar onSearch={undefined} /> */}
           <ScrollView style={styles.scrollview}>
           <Titulo texto="Lista de Ofertas" marginTop={30} />
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
