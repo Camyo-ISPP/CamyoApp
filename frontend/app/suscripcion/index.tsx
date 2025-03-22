@@ -74,6 +74,37 @@ const SubscriptionPlans = () => {
         );
     }
 
+    const handleChangePlan = async (planLevel: string) => {
+        if (!user || !user.id || !userToken) return;
+      
+        try {
+          setLoadingPlan(true);
+      
+          const response = await axios.post(
+            `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+              },
+            }
+          );
+      
+          if (response.status === 201) {
+            setCurrentPlan(planLevel); 
+            alert(`¡Tu plan ha sido cambiado a ${planLevel}!`);
+          } else {
+            alert("No se pudo cambiar el plan.");
+          }
+        } catch (error) {
+          console.error("Error al cambiar el plan:", error);
+          alert("Ocurrió un error al cambiar el plan.");
+        } finally {
+          setLoadingPlan(false);
+        }
+    };
+      
+
     const getPlanIcon = (planLevel: string) => {
         switch (planLevel) {
             case "GRATIS":
@@ -87,11 +118,20 @@ const SubscriptionPlans = () => {
         }
     };
 
-    const PlanCard: React.FC<{ title: string, price: string, description: string, borderColor: string, planLevel: string, currentPlan: string }> = ({ title, price, description, borderColor, planLevel, currentPlan }) => {
+    const PlanCard: React.FC<{
+        title: string;
+        price: string;
+        description: string;
+        borderColor: string;
+        planLevel: string;
+        currentPlan: string;
+        onChangePlan: (planLevel: string) => void;
+        }> = ({ title, price, description, borderColor, planLevel, currentPlan, onChangePlan }) => {
+    
         const isCurrentPlan = planLevel === currentPlan;
         const buttonText = isCurrentPlan ? "Plan actual" : "Cambiar a este plan";
         const scaleValue = useRef(new Animated.Value(1)).current;
-    
+
         const handleMouseEnter = () => {
             if (Platform.OS === "web") {
                 Animated.timing(scaleValue, {
@@ -136,6 +176,7 @@ const SubscriptionPlans = () => {
                         isCurrentPlan ? styles.disabledButton : styles.button
                     ]}
                     disabled={isCurrentPlan}
+                    onPress={() => onChangePlan(planLevel)}
                 >
                     <Text style={styles.buttonText}>{buttonText}</Text>
                 </TouchableOpacity>
@@ -158,6 +199,7 @@ const SubscriptionPlans = () => {
                                 borderColor={colors.primary}
                                 planLevel="GRATIS"
                                 currentPlan={currentPlan}
+                                onChangePlan={handleChangePlan}
                             />
                             <PlanCard
                                 title="BÁSICO"
@@ -166,6 +208,7 @@ const SubscriptionPlans = () => {
                                 borderColor={colors.primary}
                                 planLevel="BASIC"
                                 currentPlan={currentPlan}
+                                onChangePlan={handleChangePlan}
                             />
                             <PlanCard
                                 title="PREMIUM"
@@ -174,6 +217,7 @@ const SubscriptionPlans = () => {
                                 borderColor={colors.primary}
                                 planLevel="PREMIUM"
                                 currentPlan={currentPlan}
+                                onChangePlan={handleChangePlan}
                             />
                         </View>
                     </ScrollView>
@@ -191,6 +235,7 @@ const SubscriptionPlans = () => {
                                 borderColor={colors.primary}
                                 planLevel="GRATIS"
                                 currentPlan={currentPlan}
+                                onChangePlan={handleChangePlan}
                             />
                             <PlanCard
                                 title="BÁSICO"
@@ -199,6 +244,7 @@ const SubscriptionPlans = () => {
                                 borderColor={colors.primary}
                                 planLevel="BASIC"
                                 currentPlan={currentPlan}
+                                onChangePlan={handleChangePlan}
                             />
                             <PlanCard
                                 title="PREMIUM"
@@ -207,6 +253,7 @@ const SubscriptionPlans = () => {
                                 borderColor={colors.primary}
                                 planLevel="PREMIUM"
                                 currentPlan={currentPlan}
+                                onChangePlan={handleChangePlan}
                             />
                         </View>
                     </ScrollView>
