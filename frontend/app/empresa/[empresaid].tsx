@@ -28,9 +28,9 @@ interface Empresa {
   usuario: Usuario;
 }
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EmpresaScreen = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const { empresaid } = useLocalSearchParams(); 
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [loading, setLoading] = useState(true);

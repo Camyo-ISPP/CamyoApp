@@ -8,9 +8,9 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import SuccessModal from "../_components/SuccessModal";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EditarPerfilEmpresa = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, userToken, updateUser } = useAuth();

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 type SubscriptionLevel = 'GRATIS' | 'BASIC' | 'PREMIUM';
 
 interface SubscriptionContextType {
@@ -18,6 +17,8 @@ const SubscriptionContext = createContext<SubscriptionContextType>({
 export const useSubscription = () => useContext(SubscriptionContext);
 
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const [subscriptionLevel, setSubscriptionLevel] = useState<SubscriptionLevel | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 

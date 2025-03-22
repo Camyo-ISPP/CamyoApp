@@ -8,9 +8,9 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const LoginScreen = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const router = useRouter();
   const { login, user } = useAuth();
   const [username, setUsername] = useState("");

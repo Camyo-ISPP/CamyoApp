@@ -30,6 +30,7 @@ function RootLayout() {
         "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
+        chat:"Chat"
       };
 
       const currentSegment = segments.join("/");
@@ -68,8 +69,11 @@ function RootLayout() {
         <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
         <Stack.Screen name="buscar-ofertas" />
-        <Stack.Screen name="workinprogress" />
-        <Stack.Screen name="forbidden" />
+        <Stack.Screen name="chat" />
+        <Stack.Screen name="chat/list" />
+
+        <Stack.Screen name="(admin)/workinprogress" />
+        <Stack.Screen name="(public)/forbidden" />
       </Stack>
       {isMobile && <BottomBar />}
       </SubscriptionProvider>
