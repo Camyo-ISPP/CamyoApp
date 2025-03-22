@@ -6,9 +6,6 @@
     "postinstall": "cd frontend && npm install"
   },
   "dependencies": {
-    "@react-native-community/checkbox": "^0.5.17",
-    "@react-native-community/slider": "^4.5.6",
-    "@react-native-picker/picker": "^2.11.0",
     "expo": "^52.0.39",
     "react-native-range-slider": "^0.1.2"
     "firebase": "^11.4.0",
