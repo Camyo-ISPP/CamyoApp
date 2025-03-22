@@ -7,9 +7,11 @@ import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.PaymentIntent;
+import com.stripe.model.Price;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.PaymentIntentCreateParams;
+import com.stripe.param.PriceCreateParams;
 import com.stripe.param.SubscriptionCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.stripe.param.checkout.SessionCreateParams.LineItem.PriceData;
@@ -41,18 +43,25 @@ public class PagoController {
     @PostMapping("/integrated")
     String integratedCheckout(@RequestBody Pago pago) throws StripeException {
 
-        Stripe.apiKey = STRIPE_API_KEY;
+        Stripe.apiKey = "<PUT KEY HERE>";
 
         String clientBaseURL = "http://localhost:8081";
 
         // Start by finding an existing customer record from Stripe or creating a new
         // one if needed
-        Usuario cliente = usuarioService.obtenerUsuarioActual();
-        Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
+        // Usuario cliente = usuarioService.obtenerUsuarioActual();
+        // Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
+        Customer clienteStripe = CustomerUtil.findOrCreateCustomer("emp.piloto1@example.com", "Empresa Piloto");
+
+        Long planPrecio = switch (pago.getCompra()) {
+                case BASICO -> 2499L;
+                case PREMIUM -> 4999L;
+                default -> 200L;
+        };
 
         // Create a PaymentIntent and send its client secret to the client
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                .setAmount(1L)
+                .setAmount(planPrecio)
                 .setCurrency("eur")
                 .setCustomer(clienteStripe.getId())
                 .setAutomaticPaymentMethods(
@@ -68,10 +77,80 @@ public class PagoController {
         return paymentIntent.getClientSecret();
     }
 
+    @PostMapping("/create-checkout-session")
+    String hostedCheckout() throws StripeException {
+
+        Stripe.apiKey = "<PUT KEY HERE>";
+        String clientBaseURL = System.getenv().get("CLIENT_BASE_URL");
+
+        // Usuario cliente = usuarioService.obtenerUsuarioActual();
+        Customer clienteStripe = CustomerUtil.findOrCreateCustomer("test@example.com", "Dane Joe");
+
+        // Next, create a checkout session by adding the details of the checkout
+        SessionCreateParams.Builder paramsBuilder =
+                SessionCreateParams.builder()
+                        .setMode(SessionCreateParams.Mode.PAYMENT)
+                        .setCustomer(clienteStripe.getId())
+                        .setSuccessUrl(clientBaseURL + "/success?session_id={CHECKOUT_SESSION_ID}")
+                        .setCancelUrl(clientBaseURL + "/failure");
+
+        // Create a PaymentIntent and send its client secret to the client
+        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+                .setAmount(1000L)
+                .setCurrency("eur")
+                .setCustomer(clienteStripe.getId())
+                .setAutomaticPaymentMethods(
+                        PaymentIntentCreateParams.AutomaticPaymentMethods
+                                .builder()
+                                .setEnabled(true)
+                                .build())
+                .build();
+
+        PaymentIntent paymentIntent = PaymentIntent.create(params);
+        PriceCreateParams pcparams = PriceCreateParams.builder()
+                .setCurrency("eur")
+                .setUnitAmount(1000L)
+                .setRecurring(
+                PriceCreateParams.Recurring.builder()
+                .setInterval(PriceCreateParams.Recurring.Interval.MONTH)
+                .build()
+                )
+                .setProductData(
+                PriceCreateParams.ProductData.builder().setName("Plan").build()
+                )
+                .build();
+
+        Price price = Price.create(pcparams);
+
+        // Send the client secret from the payment intent to the client
+        // return paymentIntent.getClientSecret();
+
+        SessionCreateParams scparams =
+        SessionCreateParams.builder()
+          .setUiMode(SessionCreateParams.UiMode.EMBEDDED)
+          .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
+          .setReturnUrl("https://example.com")
+          .addLineItem(
+            SessionCreateParams.LineItem.builder()
+              .setQuantity(1L)
+              // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+              .setPrice(price.getId())
+              .build())
+          .build();
+
+        Session session = Session.create(scparams);
+        // getRawJsonObject().getAsJsonPrimitive("client_secret").getAsString()
+        Map<String, String> map = new HashMap();
+        map.put("clientSecret", session.toJson());
+
+        return session.toJson();
+    }
+
+
     @PostMapping("/subscripcion")
     String newSubscription(@RequestBody PaymentRequest PaymentRequest) throws StripeException {
 
-        Stripe.apiKey = "sk_test_51R1s9PC8z1doGFyHVkAVpklNq7R3Hl7qQ4PF51Tf3Ci3uRKRFPMuiNX4PTiQg5ulqZvYoFURX56amdZh1oGNt6v900CuUmVp8G";
+        Stripe.apiKey = "<PUT KEY HERE>";
 
         String clientBaseURL = "http://localhost:8081";
 
