@@ -1,42 +1,33 @@
-import React, { useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import PerfilCamionero from '../_components/PerfilCamionero';
+import PerfilEmpresa from '../_components/PerfilEmpresa';
+import WIP from '../_components/WIP';
+import ProtectedRoute from '../../security/ProtectedRoute';
+import { useRouter } from "expo-router";
+import withNavigationGuard from '@/hoc/withNavigationGuard';
+import { useEffect } from "react";
 
-const MyProfile = () => {
-    const { userToken, user } = useAuth();
+const Perfil = () => {
+    const { user } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        /*
-        if (!userToken) {
-            router.replace('/login');
-            return;
-        }*/
-
-        switch (user?.rol) {
-            case 'CAMIONERO':
-                setTimeout(() => {
-                    router.replace('/miperfilcamionero');
-                  }, 100);
-                break;
-            case 'EMPRESA':
-                setTimeout(() => {
-                    router.replace('/miperfilempresa');
-                  }, 100);
-                break;
-            case 'ADMIN':
-                setTimeout(() => {
-                    router.replace('/workinprogress');
-                  }, 100);
-                break;
-            default:
-                setTimeout(() => {
-                    router.replace('/login');
-                  }, 100);
+        if (!user || !user.rol) {
+            router.replace("/login");
         }
-    }, [userToken, user]);
+    }, [user, router]);
 
-    return null;
+    if (!user || !user.rol) {
+        return null;
+    }
+
+    return (
+        <ProtectedRoute>
+            {user.rol === "CAMIONERO" && <PerfilCamionero />}
+            {user.rol === "EMPRESA" && <PerfilEmpresa />}
+            {user.rol === "ADMIN" && <WIP />}
+        </ProtectedRoute>
+    );
 };
 
-export default MyProfile;
+export default withNavigationGuard(Perfil);

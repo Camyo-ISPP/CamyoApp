@@ -9,12 +9,14 @@ import org.springframework.stereotype.Service;
 
 import com.camyo.backend.auth.payload.request.SignupRequestCamionero;
 import com.camyo.backend.auth.payload.request.SignupRequestEmpresa;
-import com.camyo.backend.camionero.Autonomo;
-import com.camyo.backend.camionero.AutonomoService;
 import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.suscripcion.PlanNivel;
+import com.camyo.backend.suscripcion.Suscripcion;
+import com.camyo.backend.suscripcion.SuscripcionRepository;
+import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesService;
 import com.camyo.backend.usuario.Usuario;
@@ -31,16 +33,18 @@ public class AuthService {
 	private final UsuarioService usuarioService;
 	private final CamioneroService camioneroService;
 	private final EmpresaService empresaService;
-	private final AutonomoService autonomoService;
+	private final SuscripcionService suscripcionService;
 
 	@Autowired
-	public AuthService(PasswordEncoder encoder, AuthoritiesService authoritiesService, UsuarioService usuarioService, CamioneroService camioneroService, EmpresaService empresaService, AutonomoService autonomoService) {
+	public AuthService(PasswordEncoder encoder, AuthoritiesService authoritiesService, 
+					   UsuarioService usuarioService, CamioneroService camioneroService, 
+					   EmpresaService empresaService, SuscripcionService suscripcionService) {
 		this.encoder = encoder;
 		this.authoritiesService = authoritiesService;
 		this.usuarioService = usuarioService;
 		this.camioneroService = camioneroService;
 		this.empresaService = empresaService;
-		this.autonomoService = autonomoService;
+		this.suscripcionService = suscripcionService;
 	}
 
 	@Transactional
@@ -70,14 +74,11 @@ public class AuthService {
 			camionero.setExpiracionCAP(request.getExpiracionCAP());
 		}
 		camioneroService.guardarCamionero(camionero);
-		if (request.getIsAutonomo() == true) {
-			Autonomo autonomo = new Autonomo();
-			if (request.getTarjetas() != null) {
-				autonomo.setTarjetas(request.getTarjetas());
-			}
-			autonomo.setCamionero(camionero);
-			autonomoService.guardarAutonomo(autonomo);
+		if (request.getTarjetasAutonomo() != null) {
+			camionero.setTarjetasAutonomo(request.getTarjetasAutonomo());
 		}
+
+		
 
 	}
 
@@ -104,6 +105,7 @@ public class AuthService {
 			empresa.setWeb(request.getWeb());
 		}
 		empresaService.guardarEmpresa(empresa);
+		suscripcionService.asignarSuscripcion(empresa.getId(), PlanNivel.GRATIS, null);
 	}
     
 }

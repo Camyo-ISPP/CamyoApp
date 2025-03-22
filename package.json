@@ -4,5 +4,10 @@
     "frontend": "cd frontend && npx expo start",
     "android:studio": "cd frontend && npm run android",
     "postinstall": "cd frontend && npm install"
+  },
+  "dependencies": {
+    "firebase": "^11.4.0",
+    "firestore": "^1.1.6",
+    "react-native-gifted-chat": "^2.8.0"
   }
 }

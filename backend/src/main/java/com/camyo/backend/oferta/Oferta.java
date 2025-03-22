@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.empresa.Empresa;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.camyo.backend.camionero.Licencia;
 
 import jakarta.persistence.Column;
@@ -78,14 +79,12 @@ public class Oferta {
     @JoinTable(name = "aplicados", joinColumns = @JoinColumn(name = "oferta_id"), inverseJoinColumns = @JoinColumn(name = "camionero_id"))
     private Set<Camionero> aplicados;
 
+    @ManyToMany
+    @JoinTable(name = "rechazados", joinColumns = @JoinColumn(name = "oferta_id"), inverseJoinColumns = @JoinColumn(name = "camionero_id"))
+    private Set<Camionero> rechazados;
+
     @ManyToOne
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name="prioridad")
-    private OfertaPrioridad prioridad;
-
-    
 
 }
