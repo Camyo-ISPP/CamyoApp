@@ -8,7 +8,7 @@ import {loadStripe, Stripe} from '@stripe/stripe-js';
 
 function IntegratedCheckout() {
 
-    const [items] = useState<ItemData[]>(Products)
+    const [item] = useState<ItemData>(Products)
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
     const [name, setName] = useState("")
@@ -24,18 +24,16 @@ function IntegratedCheckout() {
     useEffect(() => {
         // Make sure to call `loadStripe` outside of a component’s render to avoid
         // recreating the `Stripe` object on every render.
-        setStripePromise(loadStripe(process.env.STRIPE_API_KEY || ""));
+        setStripePromise(loadStripe(process.env.STRIPE_API_KEY || "pk_test_51R1s9PC8z1doGFyHZ51UNEI7OrBTwMv1qCYeJp8WTdeTsroq1ARp16l16jc3eYBKCo9F0e0RECGQrV7dLDlvedST00xEdKOpRl"));
 
     }, [])
 
     const createTransactionSecret = () => {
-        fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/checkout/integrated", {
+        fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/pago/integrated", {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                items: items.map(elem => ({name: elem.name, id: elem.id})),
-                customerName: name,
-                customerEmail: email,
+                compra: item.id,
             })
         })
             .then(r => r.text())
@@ -48,9 +46,7 @@ function IntegratedCheckout() {
         <View>
             <View>
                 <Text>Integrated Checkout Example</Text>
-                {items.map(elem => {
-                    return <CartItem data={elem} mode={'checkout'}/>
-                })}
+                <CartItem data={item} mode={'checkout'}/>
                 <TotalFooter total={30} mode={"checkout"}/>
 
                 <TextInput placeholder='Nombre del cliente' onChangeText={setName}
@@ -81,7 +77,7 @@ const CheckoutForm = () => {
         const result = await stripe.confirmPayment({
             elements,
             confirmParams: {
-                return_url: process.env.VITE_CLIENT_BASE_URL + "/success",
+                return_url: "https://example.com",
             },
         });
 
