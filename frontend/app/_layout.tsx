@@ -48,7 +48,7 @@ function RootLayout() {
         }}
       />
       <SubscriptionProvider>
-      {!isMobile && <CamyoWebNavBar onSearch={undefined} />}
+      
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(public)/index" />
         <Stack.Screen name="(public)/login" />

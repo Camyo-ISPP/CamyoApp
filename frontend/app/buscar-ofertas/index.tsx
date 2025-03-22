@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, ActivityIndicator } from "react-native";
 import Slider from "@react-native-community/slider";
-import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Picker } from '@react-native-picker/picker';
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
@@ -18,12 +17,13 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState(externalSearchQuery);
     const [selectedOfertaType, setSelectedOfertaType] = useState<'cargas' | 'generales' | null>(null);
-    const [dateFilter, setDateFilter] = useState('');
-    const [minWeightFilter, setMinWeightFilter] = useState('');
-    const [maxWeightFilter, setMaxWeightFilter] = useState('');
+    const [origenFilter, setOrigenFilter] = useState('');
+    const [destinoFilter, setDestinoFilter] = useState('');
+    const [minPesoFilter, setMinPesoFilter] = useState('');
+    const [maxPesoFilter, setMaxPesoFilter] = useState('');
     const [minExperienceFilter, setMinExperienceFilter] = useState(''); // [min, max]
     const [minSalaryFilter, setMinSalaryFilter] = useState('');
-   
+
     useEffect(() => {
         const handleUrlChange = () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -51,7 +51,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${BACKEND_URL}/ofertas`);
+            const response = await axios.get(`${BACKEND_URL}/ofertas/info`);
             setData(response.data);
             setFilteredData(response.data);
             console.log('Datos cargados:', response.data);
@@ -76,42 +76,63 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         if (selectedOfertaType === 'cargas') {
             filteredResults = filteredResults.filter((item) => item.tipoOferta === 'CARGA');
 
-            //AQUI PONER FILTROS
-
-        } else if (selectedOfertaType === 'generales') {
-            filteredResults = filteredResults.filter((item) => item.tipoOferta === 'TRABAJO');
-            filteredResults = filteredResults.filter((item) => {
-
-                if (minExperienceFilter === "") return true; // Show all if no filter is selected
-            
-                if (parseInt(minExperienceFilter) === 5) {
-                    // Show items with experience between 5 and 9
-                    return item.experiencia >= 5 && item.experiencia <= 9;
-                }
-            
-                if (parseInt(minExperienceFilter) === 10) {
-                    // Show items with 10+ experience
-                    return item.experiencia >= 10;
-                }
-            
-                // Otherwise, match exactly the experience value
-                return item.experiencia === parseInt(minExperienceFilter);
-            });
-
-            // Salary Filter
-            if (minSalaryFilter) {
-                filteredResults = filteredResults.filter(
-                    (item) => item.sueldo >= parseFloat(minSalaryFilter)
+            // Origen Filter
+            if (origenFilter) {
+                filteredResults = filteredResults.filter((item) =>
+                    item.origen?.toLowerCase().includes(origenFilter.toLowerCase())
                 );
             }
-        }
 
-        setFilteredData(filteredResults);
-        console.log('Datos filtrados:', filteredResults);
+            // Destino Filter
+            if (destinoFilter) {
+                filteredResults = filteredResults.filter((item) =>
+                    item.destino?.toLowerCase().includes(destinoFilter.toLowerCase())
+                );
+            }
 
-        const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
-        window.history.pushState({}, '', newUrl);
-    };
+            // Peso Mínimo Filter
+            if (minPesoFilter) {
+                filteredResults = filteredResults.filter(
+                    (item) => item.peso >= parseFloat(minPesoFilter)
+                );
+            }
+
+            // Peso Máximo Filter
+            if (maxPesoFilter) {
+                filteredResults = filteredResults.filter(
+                    (item) => item.peso <= parseFloat(maxPesoFilter)
+                );
+
+            } else if (selectedOfertaType === 'generales') {
+                filteredResults = filteredResults.filter((item) => item.tipoOferta === 'TRABAJO');
+                filteredResults = filteredResults.filter((item) => {
+
+                    //Experience Filter
+                    if (minExperienceFilter === "") return true;
+                    if (parseInt(minExperienceFilter) === 5) {
+                        return item.experiencia >= 5 && item.experiencia <= 9;
+                    }
+                    if (parseInt(minExperienceFilter) === 10) {
+                        return item.experiencia >= 10;
+                    }
+                    return item.experiencia === parseInt(minExperienceFilter);
+                });
+
+                // Salary Filter
+                if (minSalaryFilter) {
+                    filteredResults = filteredResults.filter(
+                        (item) => item.sueldo >= parseFloat(minSalaryFilter)
+                    );
+                }
+            }
+
+            setFilteredData(filteredResults);
+            console.log('Datos filtrados:', filteredResults);
+
+            const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
+            window.history.pushState({}, '', newUrl);
+        };
+    }
 
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -155,8 +176,43 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
                         {selectedOfertaType === 'cargas' && (
                             <View style={styles.filtersContainer}>
-                                <Text style={styles.filterLabel}>EN PROCESO DE IMPLEMENTACION:</Text>
-                                {/* Aquí irían los filtros */}
+                                {/* Origen Filter */}
+                                <Text style={styles.filterLabel}>Origen:</Text>
+                                    <TextInput
+                                        style={styles.filterInput}
+                                        placeholder="Ciudad o región"
+                                        value={origenFilter}
+                                        onChangeText={setOrigenFilter}
+                                    />
+
+                                {/* Destino Filter */}
+                                <Text style={styles.filterLabel}>Destino:</Text>
+                                    <TextInput
+                                        style={styles.filterInput}
+                                        placeholder="Ciudad o región"
+                                        value={destinoFilter}
+                                        onChangeText={setDestinoFilter}
+                                    />
+
+                                {/* Peso Mínimo Filter */}
+                                <Text style={styles.filterLabel}>Peso Mínimo (kg):</Text>
+                                <TextInput
+                                    style={styles.filterInput}
+                                    placeholder="Ej: 100"
+                                    value={minPesoFilter}
+                                    onChangeText={setMinPesoFilter}
+                                    keyboardType="numeric"
+                                />
+
+                                {/* Peso Máximo Filter */}
+                                <Text style={styles.filterLabel}>Peso Máximo (kg):</Text>
+                                <TextInput
+                                    style={styles.filterInput}
+                                    placeholder="Ej: 1000"
+                                    value={maxPesoFilter}
+                                    onChangeText={setMaxPesoFilter}
+                                    keyboardType="numeric"
+                                />
                             </View>
                         )}
 
@@ -190,7 +246,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                     step={10}
                                     minimumTrackTintColor={colors.primary} // Color of the filled part of the track
                                     maximumTrackTintColor="#ccc"          // Color of the empty part of the track
-                                    thumbTintColor={colors.secondary} 
+                                    thumbTintColor={colors.secondary}
                                     onValueChange={(value: number) => {
                                         setMinSalaryFilter(value.toString());
                                     }}
@@ -244,16 +300,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     mainContent: {
-        width: '70%', 
+        width: '70%',
         flexDirection: 'row',
     },
     filtersCard: {
-        width: '30%', 
+        width: '30%',
         backgroundColor: colors.white,
         borderRadius: 10,
         padding: 20,
         marginRight: 20,
-        height: 400, 
+        height: 400,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -484,7 +540,7 @@ const styles = StyleSheet.create({
     },
     rangeSliderLabel: {
         fontSize: 14,
-        color:  colors.secondary,
+        color: colors.secondary,
     },
     rangeSlider: {
         width: '100%',
@@ -493,7 +549,7 @@ const styles = StyleSheet.create({
     },
     picker: {
         height: 40,
-        borderColor:  colors.secondary,
+        borderColor: colors.secondary,
         borderWidth: 1,
         borderRadius: 5,
         marginBottom: 10,
@@ -521,6 +577,19 @@ const styles = StyleSheet.create({
         color: '#333',
         marginTop: 5,
     },
-
+    filterInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 40, // Altura fija para el contenedor
+        marginBottom: '8%',
+        marginHorizontal: '0%',
+        width: '100%',
+    },
+    
+    filterIcon: {
+        marginLeft: 10,
+        marginRight: 5,
+        marginBottom: 3,
+    },
 
 });
