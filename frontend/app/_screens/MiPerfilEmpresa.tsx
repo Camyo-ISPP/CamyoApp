@@ -213,8 +213,6 @@ const MiPerfilEmpresa = () => {
               ))
             )}
           </View>
-
-
         </View>
       </View>
     </ScrollView >
