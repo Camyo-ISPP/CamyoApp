@@ -11,7 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from "../../_components/SuccessModal";
 
-const EmpresaScreen = () => {
+const EmpresaRegisterScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const router = useRouter();
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     paddingVertical: 20,
     paddingTop: 80,
   },
@@ -284,6 +284,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
   title: {
     fontSize: 28,
@@ -364,4 +366,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EmpresaScreen;
+export default EmpresaRegisterScreen;
