@@ -70,6 +70,7 @@ public class SecurityConfiguration {
 			.requestMatchers(HttpMethod.DELETE, "/ofertas/**").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.GET, "/ofertas/{id}/camioneros").hasAnyAuthority("EMPRESA", "CAMIONERO")
 
+			.requestMatchers(HttpMethod.GET, "/resenas").hasAnyAuthority("EMPRESA", "CAMIONERO")
 
 			.requestMatchers(HttpMethod.PUT, "/camioneros/**").hasAuthority("CAMIONERO")
 			.requestMatchers(HttpMethod.DELETE, "/camioneros/**").hasAuthority("CAMIONERO")

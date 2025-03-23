@@ -31,6 +31,12 @@ public class UsuarioController {
 		this.authService = authService;
 	}
 
+    @GetMapping("/{id}/valoracion")
+    public ResponseEntity<Float> obtenerValoracionMedia(@PathVariable Integer id) {
+        Float valoracionMedia = usuarioService.obtenerValoracionMedia(id);
+        return ResponseEntity.ok(valoracionMedia);
+    }
+
     @Operation(summary = "Obtener todos los usuarios", description = "Obtiene la lista de todos los usuarios registrados.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Usuarios encontrados y devueltos")

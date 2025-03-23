@@ -258,13 +258,13 @@ public class DataInitializer {
                                         + "(227, 8)");
 
                                 // Insert Reseñas
-                                statement.addBatch("INSERT IGNORE INTO reseñas (id, comentarios, valoracion, user_id) VALUES "
-                                        + "(201,'Excelente trabajo', 5,222),"
-                                        + "(202,'Muy bueno, aunque la carga sufrió problemas', 4,223),"
-                                        + "(203,'No volvería a contratar', 1,224),"
-                                        + "(204,'Horrible, no cumplió los plazos establecidos en ninguna de nuestras ofertas que le asignamos', 1,225),"
-                                        + "(205,'Mal', 2,225),"
-                                        + "(206,'Bien', 4,226)");
+                                statement.addBatch("INSERT IGNORE INTO reseñas (id, comentarios, valoracion, comentador_id, comentado_id) VALUES "
+                                        + "(201,'Excelente trabajo', 5, 201, 222),"
+                                        + "(202,'Muy bueno, aunque la carga sufrió problemas', 4, 201, 223),"
+                                        + "(203,'No volvería a contratar', 1, 202, 224),"
+                                        + "(204,'Horrible, no cumplió los plazos establecidos en ninguna de nuestras ofertas que le asignamos', 1, 201, 225),"
+                                        + "(205,'Mal', 2, 223, 202),"
+                                        + "(206,'Bien', 4, 223, 201)");
 
                                 // Insert Ofertas
                                 statement.addBatch(
