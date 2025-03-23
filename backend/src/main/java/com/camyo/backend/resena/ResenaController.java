@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.camyo.backend.usuario.UsuarioService;
+
 import java.util.List;
 
 @RestController
@@ -13,6 +15,8 @@ public class ResenaController {
 
     @Autowired
     private ResenaService resenaService;
+    @Autowired
+    private UsuarioService usuarioService;
 
     @GetMapping("/comentado/{userId}")
     public ResponseEntity<List<Resena>> obtenerTodasResenasComentado(@PathVariable Integer userId) {
@@ -39,14 +43,21 @@ public class ResenaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Resena> actualizarResena(@PathVariable Integer id, @RequestBody Resena resenaDetalles) {
+    public ResponseEntity<?> actualizarResena(@PathVariable Integer id, @RequestBody Resena resenaDetalles) {
+        if (!usuarioService.obtenerUsuarioActual().getId().equals(resenaDetalles.getComentador().getId())) {
+            return new ResponseEntity<>("No tienes permiso para actualizar esta reseña.", HttpStatus.FORBIDDEN);
+        }
         Resena resenaActualizada = resenaService.actualizarResena(id, resenaDetalles);
         return new ResponseEntity<>(resenaActualizada, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarResena(@PathVariable Integer id) {
+    public ResponseEntity<?> eliminarResena(@PathVariable Integer id) {
+        if (!usuarioService.obtenerUsuarioActual().getId().equals(resenaService.obtenerResena(id).getComentador().getId())) {
+            return new ResponseEntity<>("No tienes permiso para borrar esta reseña.", HttpStatus.FORBIDDEN);
+        }
         resenaService.eliminarResena(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }
