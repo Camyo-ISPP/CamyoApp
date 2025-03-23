@@ -3,7 +3,6 @@ import { View, Text, ScrollView, Linking, StyleSheet, ActivityIndicator, Touchab
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
-import Titulo from "../_components/Titulo";
 import { startChat } from "../chat/services";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -24,9 +23,8 @@ interface Empresa {
   usuario: Usuario;
 }
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EmpresasLista = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +37,6 @@ const EmpresasLista = () => {
         if (!response.ok) throw new Error("Error al cargar empresas");
         const data: Empresa[] = await response.json();
         setEmpresas(data);
-        console.log(data);
       } catch (err) {
         setError((err as Error)?.message || "Error desconocido");
       } finally {
@@ -54,10 +51,9 @@ const EmpresasLista = () => {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <Titulo texto="Lista de Empresas" marginTop={100} />
 
       {empresas.map((empresa, index) => (
-        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 10 }]}>
+        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
           <View>
             <Text style={styles.name}>{empresa.usuario.nombre}</Text>
             <DetailItem icon="globe" text={empresa.web} link />
@@ -69,12 +65,12 @@ const EmpresasLista = () => {
           <View>
             {/* Botón "Ver Detalles" */}
             <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
-              <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+              <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
               <Text style={styles.buttonText}>Ver Detalles</Text>
             </TouchableOpacity>
 
-            {/* Botón "Iniciar Chat" solo si hay usuario autenticado */}
-            {user && (
+            {/* Botón "Contactar" solo si hay usuario autenticado */}
+            {user && user.rol == "CAMIONERO" && (
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
@@ -84,9 +80,11 @@ const EmpresasLista = () => {
                   }
                 }}
               >
-                <Text style={styles.chatButtonText}>Iniciar Chat</Text>
+                <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                <Text style={styles.chatButtonText}>Contactar</Text>
               </TouchableOpacity>
             )}
+
           </View>
         </View>
       ))}
@@ -112,7 +110,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     paddingHorizontal: 10,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.white,
   },
   card: {
     backgroundColor: "white",
@@ -148,6 +146,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 5,
   },
   buttonText: {
     color: colors.white,
@@ -164,6 +163,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  chatIcon: {
+    marginRight: 8,
   },
 });
 

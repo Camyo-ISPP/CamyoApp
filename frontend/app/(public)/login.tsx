@@ -8,9 +8,9 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const LoginScreen = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const router = useRouter();
   const { login, user } = useAuth();
   const [username, setUsername] = useState("");
@@ -122,29 +122,5 @@ const LoginScreen = () => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    backgroundColor: colors.green,
-    padding: 20,
-    borderRadius: 10,
-    width: 250,
-    alignItems: "center",
-  },
-  modalIcon: {
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 18,
-    color: "white",
-    textAlign: "center",
-  },
-});
 
 export default LoginScreen;

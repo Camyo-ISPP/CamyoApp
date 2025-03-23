@@ -7,10 +7,11 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import SuccessModal from "../_components/SuccessModal";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 
 const EditarPerfilEmpresa = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, userToken, updateUser } = useAuth();
@@ -136,6 +137,7 @@ const EditarPerfilEmpresa = () => {
   return (
     <ScrollView style={[globalStyles.container, { paddingTop: 100 }]}>
       <View style={globalStyles.formContainerHalf}>
+        <BackButtonAbsolute />
         <Text style={globalStyles.title}>Editar Perfil de Empresa</Text>
 
         {renderInput("Nombre", "nombre", <FontAwesome5 name="building" size={20} color={colors.primary} />)}
