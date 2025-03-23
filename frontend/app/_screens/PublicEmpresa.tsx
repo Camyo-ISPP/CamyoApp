@@ -71,9 +71,9 @@ const PublicEmpresa = ({ userId }) => {
       console.error("Error al cargar las reseñas:", error);
     }
   };
-  
+
   useEffect(() => {
-    if (user2?.id) {
+    if (user2?.userId) {
       fetchResenas();
     }
   }, [user2]);
@@ -182,7 +182,7 @@ const PublicEmpresa = ({ userId }) => {
                     const payload = {
                       valoracion: resenaForm.valoracion,
                       comentarios: resenaForm.comentarios,
-                      comentador: { id: user.id },
+                      comentador: { id: user.userId },
                       comentado: { id: user2?.userId },
                     };
 
