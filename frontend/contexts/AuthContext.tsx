@@ -4,8 +4,6 @@ import axios from "axios";
 import { router } from "expo-router";
 import { unifyUserData } from "../utils"
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 interface AuthContextType {
   user: any | null;
   userToken: string | null;
@@ -33,6 +31,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const [user, setUser] = useState<any | null>(null);
   const [userToken, setUserToken] = useState<string | null>(null);
 

@@ -14,9 +14,9 @@ import withNavigationGuard from "@/hoc/withNavigationGuard";
 import BackButtonAbsolute from "@/app/_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../../utils/useSubscriptionRules';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EditarOfertaScreen = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const [tipoOferta, setTipoOferta] = useState("");
   const router = useRouter();
   const { ofertaid } = useLocalSearchParams();

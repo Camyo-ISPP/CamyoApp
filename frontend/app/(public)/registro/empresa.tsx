@@ -11,9 +11,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from "../../_components/SuccessModal";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EmpresaRegisterScreen = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const router = useRouter();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");

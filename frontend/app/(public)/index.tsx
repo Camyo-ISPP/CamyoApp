@@ -12,9 +12,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 export default function Index() {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -47,7 +47,7 @@ export default function Index() {
     <>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
-          <CamyoWebNavBar />
+          {/* <CamyoWebNavBar onSearch={undefined} /> */}
           <ScrollView style={styles.scrollview}>
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {data && data.map((item) => (

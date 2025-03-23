@@ -15,9 +15,9 @@ const formatDate = (fecha: string) => {
     return new Date(fecha).toLocaleDateString("es-ES", opciones);
 };
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 export default function OfertaDetalleScreen() {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const [offerData, setOfferData] = useState<any>(null);
     const [offerTrabajoData, setOfferTrabajoData] = useState<any>(null);
     const [offerCargaData, setOfferCargaData] = useState<any>(null);

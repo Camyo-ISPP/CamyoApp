@@ -9,9 +9,9 @@ import { useRouter } from "expo-router";
 import SuccessModal from "../_components/SuccessModal";
 import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const EditarPerfilEmpresa = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const { width } = useWindowDimensions();
   const router = useRouter();
   const { user, userToken, updateUser } = useAuth();

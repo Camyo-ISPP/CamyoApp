@@ -13,9 +13,9 @@ import withNavigationGuard from "@/hoc/withNavigationGuard";
 import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const CrearOfertaScreen = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const { user, userToken } = useAuth();
   const [tipoOferta, setTipoOferta] = useState("TRABAJO");
   const router = useRouter();
