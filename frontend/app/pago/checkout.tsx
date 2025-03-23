@@ -5,9 +5,11 @@ import TotalFooter from "../_components/TotalFooter";
 import {Products} from './datosdeprueba'
 import {Elements, PaymentElement, useElements, useStripe} from '@stripe/react-stripe-js';
 import {loadStripe, Stripe} from '@stripe/stripe-js';
+import { useLocalSearchParams } from "expo-router";
 
 function IntegratedCheckout() {
 
+    const params = useLocalSearchParams();
     const [item] = useState<ItemData>(Products)
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
@@ -33,7 +35,7 @@ function IntegratedCheckout() {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                compra: item.id,
+                compra: params.plan,
             })
         })
             .then(r => r.text())
@@ -43,25 +45,30 @@ function IntegratedCheckout() {
     }
 
     return <>
-        <View>
+        {params.plan === 'BASICO' || params.plan === 'PREMIUM' ?
             <View>
-                <Text>Integrated Checkout Example</Text>
-                <CartItem data={item} mode={'checkout'}/>
-                <TotalFooter total={30} mode={"checkout"}/>
+                <View>
+                    <Text>Integrated Checkout Example</Text>
+                    <CartItem data={item} mode={'checkout'}/>
+                    <TotalFooter total={30} mode={"checkout"}/>
+                    <Button onPress={createTransactionSecret} title="Iniciar pago"/>
 
-                <TextInput placeholder='Nombre del cliente' onChangeText={setName}
-                       value={name}/>
-                <TextInput placeholder='Email del cliente' onChangeText={setEmail}
-                       value={email}/>
-                <Button onPress={createTransactionSecret} title="Iniciar pago"/>
-
-                {(transactionClientSecret === "" ?
-                    <></>
-                    : <Elements stripe={stripePromise} options={{clientSecret: transactionClientSecret}}>
-                        <CheckoutForm/>
-                    </Elements>)}
+                    {(transactionClientSecret === "" ?
+                        <></>
+                        : <Elements stripe={stripePromise} options={{clientSecret: transactionClientSecret}}>
+                            <CheckoutForm/>
+                        </Elements>)}
+                </View>
             </View>
-        </View>
+
+            :
+
+            <View>
+                <Text>Plan no válido</Text>
+                <Text>Se ha producido un error intentando realizar la compra.</Text>
+            </View>
+        }
+        
     </>
 }
 
