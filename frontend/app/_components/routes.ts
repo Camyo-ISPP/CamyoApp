@@ -4,11 +4,12 @@ const routes = {
   login: "/login",
   register: "/registro",
   profile: "/miperfil",
-  profileEmpresa: "/miperfilempresa",
+  profileEmpresa: "/miperfil",
   listcompanies: "/empresas",
   createOffer: "/oferta/crear",
   editProfile: "/miperfil/editar",
-  editProfileEmpresa: "/miperfilempresa/editar"
+  editProfileEmpresa: "/miperfil/editar",
+  chat:"/chat"
 };
 
 export default routes;
