@@ -5,7 +5,7 @@ function TotalFooter(props: TotalFooterProps) {
         <View>
             <Text>Total</Text>
             <Text>
-                {"$" + props.total}
+                {"€" + props.total}
             </Text>
         </View>
         {props.mode === "subscription" &&

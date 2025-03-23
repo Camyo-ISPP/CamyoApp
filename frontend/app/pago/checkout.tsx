@@ -47,10 +47,9 @@ function IntegratedCheckout() {
     return <>
         {params.plan === 'BASICO' || params.plan === 'PREMIUM' ?
             <View>
-                <View>
+                <View style={{ marginTop: '100px' }}>
                     <Text>Integrated Checkout Example</Text>
-                    <CartItem data={item} mode={'checkout'}/>
-                    <TotalFooter total={30} mode={"checkout"}/>
+                    <TotalFooter total={params.plan === 'BASICO' ? 24.99 : 49.99} mode={"subscription"}/>
                     <Button onPress={createTransactionSecret} title="Iniciar pago"/>
 
                     {(transactionClientSecret === "" ?
