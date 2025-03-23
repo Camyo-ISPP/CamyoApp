@@ -60,7 +60,6 @@ function RootLayout() {
         <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
         <Stack.Screen name="chat" />
-        <Stack.Screen name="chat/list" />
 
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />

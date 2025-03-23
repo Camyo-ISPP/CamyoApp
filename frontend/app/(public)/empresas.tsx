@@ -72,19 +72,20 @@ const EmpresasLista = () => {
               <Text style={styles.buttonText}>Ver Detalles</Text>
             </TouchableOpacity>
 
-            {/* Botón "Iniciar Chat" solo si hay usuario autenticado */}
             {user && (
               <TouchableOpacity
-                style={styles.button}
-                onPress={async () => {
-                  const chatId = await startChat(user.id, empresa.usuario.id);
-                  if (chatId) {
-                    router.replace(`/chat?otherUserId=${empresa.usuario.id}`);
-                  }
-                }}
-              >
-                <Text style={styles.chatButtonText}>Iniciar Chat</Text>
-              </TouchableOpacity>
+              style={styles.button}
+              onPress={async () => {
+                const chatId = await startChat(user.userId, empresa.usuario.id);
+                if (chatId) {
+                  await new Promise((resolve) => setTimeout(resolve, 500)); // Espera 500ms para dar tiempo a Firestore
+                  router.replace(`/chat`);
+                }
+              }}
+            >
+              <Text style={styles.chatButtonText}>Iniciar Chat</Text>
+            </TouchableOpacity>
+            
             )}
           </View>
         </View>
