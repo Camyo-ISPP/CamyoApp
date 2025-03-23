@@ -10,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 import EmpresaRoute from "../../security/EmpresaRoute";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
+import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
 const CrearOfertaScreen = () => {
@@ -43,6 +44,16 @@ const CrearOfertaScreen = () => {
     finMinimo: "",
     finMaximo: "",
   });
+
+  useEffect(() => {
+    if (!user || !user.rol) {
+      router.replace("/login");
+    }
+  }, [user, router]);
+
+  if (!user || !user.rol) {
+    return null;
+  }
 
   // Cuando `user` cambie, actualizar `empresa.id`
   useEffect(() => {
@@ -208,6 +219,7 @@ const CrearOfertaScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.cardContainer}>
+            <BackButtonAbsolute />
             <Text style={styles.title}>Crear nueva oferta</Text>
 
             {/* Campos generales */}
@@ -346,7 +358,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     paddingVertical: 20,
     paddingTop: 80,
   },
@@ -362,6 +374,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 5,
     alignItems: "center",
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
   blockedField: {
     color: colors.mediumGray,
