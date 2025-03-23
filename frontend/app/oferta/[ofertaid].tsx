@@ -35,7 +35,7 @@ export default function OfertaDetalleScreen() {
                     const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
                     const data = await response.json();
                     setOfferData(data);
-                    
+
                     const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
                     const trabajoText = await trabajoResponse.text();
                     const trabajoData = trabajoText ? JSON.parse(trabajoText) : null;
@@ -64,7 +64,7 @@ export default function OfertaDetalleScreen() {
             </View>
         );
     };
-    
+
     if (!offerData) {
         return (
             <View style={styles.container}>
@@ -72,13 +72,13 @@ export default function OfertaDetalleScreen() {
             </View>
         );
     };
-    
+
     const handleSolicitarOferta = async () => {
-        
+
         try {
             const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/aplicar/${user.id}`, {
                 method: "PUT",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     'Authorization': `Bearer ${userToken}`
                 }
@@ -89,7 +89,7 @@ export default function OfertaDetalleScreen() {
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setSuccessModalVisibleCam(false); 
+                    setSuccessModalVisibleCam(false);
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo solicitar la oferta.");
@@ -100,11 +100,11 @@ export default function OfertaDetalleScreen() {
     };
 
     const handleDesaplicarOferta = async () => {
-        
+
         try {
             const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/desaplicar/${user.id}`, {
                 method: "PUT",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     'Authorization': `Bearer ${userToken}`
                 }
@@ -115,7 +115,7 @@ export default function OfertaDetalleScreen() {
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setSuccessModalVisibleCam(false); 
+                    setSuccessModalVisibleCam(false);
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo retirar la solicitud.");
@@ -129,7 +129,7 @@ export default function OfertaDetalleScreen() {
         try {
             const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/asignar/${item.id}`, {
                 method: "PUT",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     'Authorization': `Bearer ${userToken}`
                 }
@@ -140,7 +140,7 @@ export default function OfertaDetalleScreen() {
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setSuccessModalVisibleEmp(false); 
+                    setSuccessModalVisibleEmp(false);
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo asignar al camionero.");
@@ -154,7 +154,7 @@ export default function OfertaDetalleScreen() {
         try {
             const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/rechazar/${item.id}`, {
                 method: "PUT",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     'Authorization': `Bearer ${userToken}`
                 }
@@ -165,7 +165,7 @@ export default function OfertaDetalleScreen() {
                 const text = await response.text();
                 setOfferData(text ? JSON.parse(text) : {})
                 setTimeout(() => {
-                    setSuccessModalVisibleEmp(false); 
+                    setSuccessModalVisibleEmp(false);
                 }, 1500);
             } else {
                 Alert.alert("Error", "No se pudo rechazar al camionero.");
@@ -177,7 +177,7 @@ export default function OfertaDetalleScreen() {
 
     const handleLoginRedirect = () => {
         router.push("/login")
-    };    
+    };
 
     const handleEditarOferta = () => {
         router.push(`/oferta/editar/${ofertaid}`);
@@ -189,26 +189,38 @@ export default function OfertaDetalleScreen() {
                 <View style={styles.header}>
                     <BackButton />
                     <Image
-                        source={defaultCompanyLogo} 
+                        source={defaultCompanyLogo}
                         style={styles.logo}
                     />
                     <View style={styles.headerText}>
                         <Text style={styles.title}>{offerData.titulo}</Text>
-                            <Text style={styles.empresa}>
-                                {offerData.empresa.usuario.nombre.toUpperCase()} |
-                                <MaterialIcons name="location-on" size={18} color="#0b4f6c" />
-                                <Text style={styles.empresa}> {offerData.localizacion}</Text>
-                            </Text>
-                            <Text style={styles.empresa}>Estado: {offerData.estado} </Text>
+                        <Text style={styles.empresa}>
+                            {offerData.empresa.usuario.nombre.toUpperCase()} |
+                            <MaterialIcons name="location-on" size={18} color="#0b4f6c" />
+                            <Text style={styles.empresa}> {offerData.localizacion}</Text>
+                        </Text>
+                        <Text style={styles.empresa}>Estado: {offerData.estado} </Text>
                     </View>
+
                     <View style={{ alignItems: "flex-end" }}>
-                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${offerData.empresa.id}`)}>
-                            <MaterialIcons name="business" size={15} color="white" />
-                            <Text style={styles.buttonText}> Ver Empresa</Text>
-                        </TouchableOpacity>
+                        {offerData.empresa.id === user.id ? (
+                            <View style={styles.ownOfferBadgeAlt}>
+                                <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
+                                <Text style={styles.ownOfferTextAlt}>Tu Oferta</Text>
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => router.push(`/empresa/${offerData.empresa.id}`)}
+                            >
+                                <MaterialIcons name="business" size={15} color="white" />
+                                <Text style={styles.buttonText}> Ver Empresa</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
+
                 </View>
-                        
+
                 {offerData.estado === 'ABIERTA' ? (
                     user ? (
                         user.rol === 'CAMIONERO' ? (
@@ -224,9 +236,9 @@ export default function OfertaDetalleScreen() {
                                 )
                             ) : <></>
                         ) : user.rol === 'EMPRESA' && user.id === offerData.empresa.id ? (
-                                <TouchableOpacity style={styles.solicitarButton} onPress={handleEditarOferta}>
-                                    <Text style={styles.solicitarButtonText}>Editar Oferta</Text>
-                                </TouchableOpacity>
+                            <TouchableOpacity style={styles.solicitarButton} onPress={handleEditarOferta}>
+                                <Text style={styles.solicitarButtonText}>Editar Oferta</Text>
+                            </TouchableOpacity>
                         ) : <></>
                     ) : (
                         <TouchableOpacity style={styles.solicitarButton} onPress={handleLoginRedirect}>
@@ -244,7 +256,7 @@ export default function OfertaDetalleScreen() {
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContainer}>
                             <FontAwesome5 name="check-circle" size={50} color="white" style={styles.modalIcon} />
-                            {(user ? offerData.aplicados.some((camionero: { id: string }) => camionero.id === user.id) : false)  ?
+                            {(user ? offerData.aplicados.some((camionero: { id: string }) => camionero.id === user.id) : false) ?
                                 <Text style={styles.modalText}>¡Has solicitado la oferta correctamente!</Text>
                                 :
                                 <Text style={styles.modalText}>¡Has retirado tu solicitud correctamente!</Text>
@@ -272,168 +284,168 @@ export default function OfertaDetalleScreen() {
 
                 <View style={styles.separator} />
 
-                    <Text style={styles.subTitulo}>
-                        Detalles de la Oferta
+                <Text style={styles.subTitulo}>
+                    Detalles de la Oferta
+                </Text>
+
+                <View style={styles.detailRow}>
+                    <MaterialIcons name="attach-money" size={20} color="#0b4f6c" />
+                    <Text style={styles.detalles}>
+                        <Text style={styles.detallesLabel}>Presupuesto:</Text> {offerData.sueldo}
                     </Text>
+                </View>
 
-                    <View style={styles.detailRow}>
-                        <MaterialIcons name="attach-money" size={20} color="#0b4f6c" />
-                        <Text style={styles.detalles}>
-                            <Text style={styles.detallesLabel}>Presupuesto:</Text> {offerData.sueldo}
-                        </Text>
-                    </View>
+                <View style={styles.detailRow}>
+                    <FontAwesome5 name="id-card" size={18} color="#0b4f6c" />
+                    <Text style={styles.detalles}>
+                        <Text style={styles.detallesLabel}>Licencia Requerida:</Text> {offerData.licencia}
+                    </Text>
+                </View>
 
-                    <View style={styles.detailRow}>
-                        <FontAwesome5 name="id-card" size={18} color="#0b4f6c" />
+                <View style={styles.detailRow}>
+                    <FontAwesome5 name="briefcase" size={18} color="#0b4f6c" />
+                    <Text style={styles.detalles}>
+                        <Text style={styles.detallesLabel}>Experiencia Mínima:</Text> {offerData.experiencia}
+                    </Text>
+                </View>
+
+                {offerCargaData !== null ? (
+                    <>
+                        <View style={styles.detailRow}>
+                            <MaterialIcons name="location-on" size={20} color="#0b4f6c" />
                             <Text style={styles.detalles}>
-                            <Text style={styles.detallesLabel}>Licencia Requerida:</Text> {offerData.licencia}
-                        </Text>
-                    </View>
+                                <Text style={styles.detallesLabel}>Origen (Localización):</Text> {offerCargaData.origen}
+                            </Text>
+                        </View>
 
-                    <View style={styles.detailRow}>
-                        <FontAwesome5 name="briefcase" size={18} color="#0b4f6c" />
-                        <Text style={styles.detalles}>
-                            <Text style={styles.detallesLabel}>Experiencia Mínima:</Text> {offerData.experiencia}
-                        </Text>
-                    </View>
+                        <View style={styles.detailRow}>
+                            <MaterialIcons name="location-on" size={20} color="#0b4f6c" />
+                            <Text style={styles.detalles}>
+                                <Text style={styles.detallesLabel}>Destino (Localización):</Text> {offerCargaData.destino}
+                            </Text>
+                        </View>
 
-                    {offerCargaData !== null ? (
+                        <View style={styles.detailRow}>
+                            <FontAwesome5 name="road" size={18} color="#0b4f6c" />
+                            <Text style={styles.detalles}>
+                                <Text style={styles.detallesLabel}>Distancia:</Text> {offerCargaData.distancia} km
+                            </Text>
+                        </View>
+
+                        <View style={styles.detailRow}>
+                            <FontAwesome5 name="box" size={18} color="#0b4f6c" />
+                            <Text style={styles.detalles}>
+                                <Text style={styles.detallesLabel}>Mercancía:</Text> {offerCargaData.mercancia} kg
+                            </Text>
+                        </View>
+
+                        <View style={styles.detailRow}>
+                            <FontAwesome5 name="weight" size={18} color="#0b4f6c" />
+                            <Text style={styles.detalles}>
+                                <Text style={styles.detallesLabel}>Peso:</Text> {offerCargaData.peso} kg
+                            </Text>
+                        </View>
+
+                        <View style={styles.detailRow}>
+                            <FontAwesome5 name="clock" size={20} color="#0b4f6c" />
+                            <Text style={styles.detalles}>
+                                <Text style={styles.detallesLabel}>Inicio:</Text> {formatDate(offerCargaData.inicio)}
+                            </Text>
+                        </View>
+
+                        <View style={styles.detailRow}>
+                            <FontAwesome5 name="calendar-minus" size={20} color="#0b4f6c" />
+                            <Text style={styles.detalles}>
+                                <Text style={styles.detallesLabel}>Fin mínimo:</Text> {formatDate(offerCargaData.finMinimo)}
+                            </Text>
+                        </View>
+
+                        <View style={styles.detailRow}>
+                            <FontAwesome5 name="calendar-plus" size={20} color="#0b4f6c" />
+                            <Text style={styles.detalles}>
+                                <Text style={styles.detallesLabel}>Fin máximo:</Text> {formatDate(offerCargaData.finMaximo)}
+                            </Text>
+                        </View>
+                    </>
+                ) : (
+                    offerTrabajoData !== null ? (
                         <>
                             <View style={styles.detailRow}>
-                                <MaterialIcons name="location-on" size={20} color="#0b4f6c" />
+                                <Entypo name="clock" size={20} color="#0b4f6c" />
                                 <Text style={styles.detalles}>
-                                    <Text style={styles.detallesLabel}>Origen (Localización):</Text> {offerCargaData.origen}
-                                </Text>
-                            </View>
-                        
-                            <View style={styles.detailRow}>
-                                <MaterialIcons name="location-on" size={20} color="#0b4f6c" />
-                                    <Text style={styles.detalles}>
-                                        <Text style={styles.detallesLabel}>Destino (Localización):</Text> {offerCargaData.destino}
-                                    </Text>
-                            </View>
-                        
-                            <View style={styles.detailRow}>
-                                <FontAwesome5 name="road" size={18} color="#0b4f6c" />
-                                <Text style={styles.detalles}>
-                                    <Text style={styles.detallesLabel}>Distancia:</Text> {offerCargaData.distancia} km
-                                </Text>
-                            </View>
-                        
-                            <View style={styles.detailRow}>
-                                <FontAwesome5 name="box" size={18} color="#0b4f6c" />
-                                <Text style={styles.detalles}>
-                                    <Text style={styles.detallesLabel}>Mercancía:</Text> {offerCargaData.mercancia} kg
+                                    <Text style={styles.detallesLabel}>Jornada:</Text> {offerTrabajoData.jornada}
                                 </Text>
                             </View>
 
                             <View style={styles.detailRow}>
-                                <FontAwesome5 name="weight" size={18} color="#0b4f6c" />
+                                <MaterialIcons name="event" size={20} color="#0b4f6c" />
                                 <Text style={styles.detalles}>
-                                    <Text style={styles.detallesLabel}>Peso:</Text> {offerCargaData.peso} kg
-                                </Text>
-                            </View>
-
-                            <View style={styles.detailRow}>
-                                <FontAwesome5 name="clock" size={20} color="#0b4f6c" />
-                                <Text style={styles.detalles}>
-                                    <Text style={styles.detallesLabel}>Inicio:</Text> {formatDate(offerCargaData.inicio)}
-                                </Text>
-                            </View>
-
-                            <View style={styles.detailRow}>
-                                <FontAwesome5 name="calendar-minus" size={20} color="#0b4f6c" />
-                                <Text style={styles.detalles}>
-                                    <Text style={styles.detallesLabel}>Fin mínimo:</Text> {formatDate(offerCargaData.finMinimo)}
-                                </Text>
-                            </View>
-
-                            <View style={styles.detailRow}>
-                                <FontAwesome5 name="calendar-plus" size={20} color="#0b4f6c" />
-                                <Text style={styles.detalles}>
-                                    <Text style={styles.detallesLabel}>Fin máximo:</Text> {formatDate(offerCargaData.finMaximo)}
+                                    <Text style={styles.detallesLabel}>Fecha Incorporación:</Text> {formatDate(offerTrabajoData.fechaIncorporacion)}
                                 </Text>
                             </View>
                         </>
-                    ):(
-                        offerTrabajoData !== null ? (
-                            <>
-                                <View style={styles.detailRow}>
-                                    <Entypo name="clock" size={20} color="#0b4f6c" />
-                                    <Text style={styles.detalles}>
-                                        <Text style={styles.detallesLabel}>Jornada:</Text> {offerTrabajoData.jornada}
-                                    </Text>
-                                </View>
+                    ) : (
+                        <></>
+                    )
+                )}
 
-                                <View style={styles.detailRow}>
-                                    <MaterialIcons name="event" size={20} color="#0b4f6c" />
-                                    <Text style={styles.detalles}>
-                                        <Text style={styles.detallesLabel}>Fecha Incorporación:</Text> {formatDate(offerTrabajoData.fechaIncorporacion)}
-                                    </Text>
-                                </View>
-                            </>
-                        ):(
-                            <></>
-                        )
-                    )}
+                <View style={styles.separator} />
+                <Text style={styles.subTitulo}>Descripción Completa</Text>
+                <Text style={styles.description}>{offerData.notas} </Text>
 
-                    <View style={styles.separator}/>
-                    <Text style={styles.subTitulo}>Descripción Completa</Text>
-                    <Text style={styles.description}>{offerData.notas} </Text>
-
-                    { (user ? (user.rol === 'EMPRESA' && user.id === offerData.empresa.id) : false) ? (
-                        offerData.estado === 'ABIERTA' ? (
-                            <>
-                                <View style={styles.separator}/>
-                                <Text style={styles.subTitulo}>Camioneros solicitantes</Text>
-                                <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                                    {offerData && offerData.aplicados.map((item) => (
-                                        <View key={item.id} style={styles.camCard}>
-                                            <Image source={defaultCamImage} style={styles.logo} />
-                                            <View style={{ flex: 1 }}>  
-                                                <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
-                                            </View>
-                                            <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
-                                                <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
-                                                    <MaterialCommunityIcons name="eye" size={15} color="white" />
-                                                    <Text style={styles.buttonText}>Ver Detalles</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={[styles.button, { backgroundColor: "green" }]} onPress={() => handleAsignarCamionero(item)}>
-                                                    <MaterialCommunityIcons name="thumb-up" size={15} color="white" />
-                                                    <Text style={styles.buttonText}> Asignar</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={[styles.button, { backgroundColor: "red" }]} onPress={() => handleRechazarCamionero(item)}>
-                                                    <MaterialCommunityIcons name="thumb-down" size={15} color="white" />
-                                                    <Text style={styles.buttonText}> Rechazar</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    ))}
-                                </View>
-                            </>
-                        ) : (
-                            <>
-                                <View style={styles.separator}/>
-                                <Text style={styles.subTitulo}>Camionero asignado</Text>
-                                <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                                    <View key={offerData.camionero.id} style={styles.camCard}>
+                {(user ? (user.rol === 'EMPRESA' && user.id === offerData.empresa.id) : false) ? (
+                    offerData.estado === 'ABIERTA' ? (
+                        <>
+                            <View style={styles.separator} />
+                            <Text style={styles.subTitulo}>Camioneros solicitantes</Text>
+                            <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                                {offerData && offerData.aplicados.map((item) => (
+                                    <View key={item.id} style={styles.camCard}>
                                         <Image source={defaultCamImage} style={styles.logo} />
-                                        <View style={{ flex: 1 }}>  
-                                            <Text style={styles.camTitle}>{offerData.camionero.usuario.nombre}</Text>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
                                         </View>
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
-                                            <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${offerData.camionero.id}`)}>
+                                            <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
                                                 <MaterialCommunityIcons name="eye" size={15} color="white" />
                                                 <Text style={styles.buttonText}>Ver Detalles</Text>
                                             </TouchableOpacity>
+                                            <TouchableOpacity style={[styles.button, { backgroundColor: "green" }]} onPress={() => handleAsignarCamionero(item)}>
+                                                <MaterialCommunityIcons name="thumb-up" size={15} color="white" />
+                                                <Text style={styles.buttonText}> Asignar</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={[styles.button, { backgroundColor: "red" }]} onPress={() => handleRechazarCamionero(item)}>
+                                                <MaterialCommunityIcons name="thumb-down" size={15} color="white" />
+                                                <Text style={styles.buttonText}> Rechazar</Text>
+                                            </TouchableOpacity>
                                         </View>
                                     </View>
+                                ))}
+                            </View>
+                        </>
+                    ) : (
+                        <>
+                            <View style={styles.separator} />
+                            <Text style={styles.subTitulo}>Camionero asignado</Text>
+                            <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                                <View key={offerData.camionero.id} style={styles.camCard}>
+                                    <Image source={defaultCamImage} style={styles.logo} />
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.camTitle}>{offerData.camionero.usuario.nombre}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
+                                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${offerData.camionero.id}`)}>
+                                            <MaterialCommunityIcons name="eye" size={15} color="white" />
+                                            <Text style={styles.buttonText}>Ver Detalles</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
-                            </>
-                        )
-                    ):(<></>)
-                    }
-                
+                            </View>
+                        </>
+                    )
+                ) : (<></>)
+                }
+
             </View>
         );
     };
@@ -449,7 +461,7 @@ export default function OfertaDetalleScreen() {
 }
 
 
-const styles = StyleSheet.create    ({
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         //justifyContent: 'center',
@@ -504,19 +516,19 @@ const styles = StyleSheet.create    ({
         marginTop: 0,
     },
     solicitarButton: {
-        width: '40%', 
-        paddingVertical: 10, 
-        borderRadius: 20, 
-        alignSelf: 'center', 
-        backgroundColor: colors.primary, 
+        width: '40%',
+        paddingVertical: 10,
+        borderRadius: 20,
+        alignSelf: 'center',
+        backgroundColor: colors.primary,
         marginVertical: 15,
     },
     solicitarButton2: {
-        width: '40%', 
-        paddingVertical: 10, 
-        borderRadius: 20, 
-        alignSelf: 'center', 
-        backgroundColor: '#FBC02D', 
+        width: '40%',
+        paddingVertical: 10,
+        borderRadius: 20,
+        alignSelf: 'center',
+        backgroundColor: '#FBC02D',
         marginVertical: 15,
     },
     solicitarButtonText: {
@@ -528,9 +540,9 @@ const styles = StyleSheet.create    ({
     separator: {
         height: 1,
         backgroundColor: '#ccc',
-        opacity: 0.6, 
+        opacity: 0.6,
         marginVertical: 12,
-        width: '100%',  
+        width: '100%',
         alignSelf: 'center',
     },
 
@@ -541,19 +553,19 @@ const styles = StyleSheet.create    ({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 10,
-        marginLeft: '0%', 
+        marginLeft: '0%',
     },
 
     detailRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginVertical: 5,
-        marginLeft: '2%', 
+        marginLeft: '2%',
     },
 
     detalles: {
         fontSize: 16,
-        marginLeft: 8, 
+        marginLeft: 8,
         color: '#333',
     },
 
@@ -567,21 +579,21 @@ const styles = StyleSheet.create    ({
         width: "70%",
         borderRadius: 10,
         display: "flex",
-        flexWrap:"wrap",
+        flexWrap: "wrap",
         flexDirection: "row",
         alignContent: "center",
-        alignItems:"center",
+        alignItems: "center",
         borderLeftWidth: 4,
-        borderColor: "red", // Cambia a "green" si quieres un borde verde
+        borderColor: "red",
         shadowColor: "#000",
         shadowOffset: {
-          width: 0,
-          height: 2,
+            width: 0,
+            height: 2,
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-      },
+    },
     camTitle: {
         fontSize: 16,
         fontWeight: "bold",
@@ -589,24 +601,24 @@ const styles = StyleSheet.create    ({
         marginBottom: 2,
         color: colors.secondary
     },
-    button:{
-        backgroundColor:colors.primary,
-        color:colors.white,
-        paddingLeft:5,
-        paddingRight:5,
+    button: {
+        backgroundColor: colors.primary,
+        color: colors.white,
+        paddingLeft: 5,
+        paddingRight: 5,
         marginLeft: "2%",
-        marginTop:4,
-        flexDirection:"row",
-        flexWrap:"nowrap",
-        height:40,
+        marginTop: 4,
+        flexDirection: "row",
+        flexWrap: "nowrap",
+        height: 40,
         width: 150,
-        borderRadius:10,
-        alignItems:"center",
-        justifyContent:"center"
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center"
     },
-    buttonText:{
-        color:colors.white,
-        fontWeight:"bold"
+    buttonText: {
+        color: colors.white,
+        fontWeight: "bold"
     },
     description: {
         fontSize: 16,
@@ -636,7 +648,7 @@ const styles = StyleSheet.create    ({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "rgba(0, 0, 0, 0.5)",
-      },
+    },
     modalContainer: {
         backgroundColor: colors.green,
         padding: 20,
@@ -655,5 +667,20 @@ const styles = StyleSheet.create    ({
     backIcon: {
         marginLeft: 10,
         marginTop: Platform.OS === 'ios' ? 30 : 10,
+    },
+    ownOfferBadgeAlt: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#4A6572",
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 20,
+        marginRight: 30,
+    },
+    ownOfferTextAlt: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 14,
+        marginLeft: 5
     },
 });

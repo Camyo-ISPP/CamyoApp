@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
-import { unifyUserData } from "../utils"
+import { unifyUserData } from "../utils/unifyData"
 
 interface AuthContextType {
   user: any | null;

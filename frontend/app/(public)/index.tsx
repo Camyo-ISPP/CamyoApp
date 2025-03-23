@@ -1,28 +1,21 @@
-import { router, useRouter } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, TouchableWithoutFeedback, ActivityIndicator } from "react-native";
+import { View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, ScrollView, ActivityIndicator } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-const ProyectoLogo = require('frontend/assets/images/camyo.png');
 import BottomBar from '../_components/BottomBar';
-import { MaterialIcons } from "@expo/vector-icons";
-import CamyoWebNavBar from "../_components/CamyoNavBar";
-import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
+import ListadoOfertas from "../_components/ListadoOfertas";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     fetchData();
   }, []);
-
-  const [error, setError] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -49,39 +42,7 @@ export default function Index() {
         <View style={styles.webContainer}>
           {/* <CamyoWebNavBar onSearch={undefined} /> */}
           <ScrollView style={styles.scrollview}>
-            <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              {data && data.map((item) => (
-                <View key={item.id} style={styles.card}>
-                  <Image source={defaultCompanyLogo} style={styles.companyLogo} />
-                  <View style={{width:"30%"}}>
-                    <Text style={styles.offerTitle}>{item.titulo}</Text>
-
-                    <View style={{ display: "flex", flexDirection: "row" }}>
-                      <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
-                      <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-                      <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text> 
-
-                      <View style={{display:"flex",alignItems:"center",flexDirection:"row"}}>
-                        <Text style={styles.localizacion}>|</Text>
-                        <MaterialIcons name="location-on" size={20} color="#696969" />
-                        <Text style={styles.localizacion}>{item.localizacion}</Text>
-                      </View>
-                      
-                    </View>
-
-                    <Text style={styles.offerInfo}>{item.notas}</Text>
-
-                    <View/>
-                  </View>
-                    <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                    <TouchableOpacity style={styles.button} onPress={()=>router.push(`/oferta/${item.id}`)}>
-                    <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
-                    <Text style={styles.buttonText}>Ver Detalles</Text>
-
-                    </TouchableOpacity>
-                </View>
-              ))}
-            </View >
+            <ListadoOfertas data={data} />
           </ScrollView >
         </View >
       ) : (
@@ -175,10 +136,10 @@ const styles = StyleSheet.create({
     width: "70%",
     borderRadius: 10,
     display: "flex",
-    flexWrap:"wrap",
+    flexWrap: "wrap",
     flexDirection: "row",
     alignContent: "center",
-    alignItems:"center",
+    alignItems: "center",
     borderLeftWidth: 4,
     borderColor: "red", // Cambia a "green" si quieres un borde verde
     shadowColor: "#000",
@@ -209,7 +170,7 @@ const styles = StyleSheet.create({
   companyLogo: {
     height: 90,
     width: 90,
-    marginRight:10,
+    marginRight: 10,
   },
   offerTitle: {
     fontSize: 16,
@@ -242,7 +203,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     flexWrap: "wrap",
   },
-  
+
   offerDetailsTagExperience: {
     fontSize: 9,
     borderColor: colors.primary,
@@ -280,51 +241,51 @@ const styles = StyleSheet.create({
     marginTop: 5,
     flexWrap: "wrap",
   },
-  offerSueldo:{
-    fontSize:25,
-    fontWeight:"bold",
-    textAlign:"right",
-    paddingLeft:3,
+  offerSueldo: {
+    fontSize: 25,
+    fontWeight: "bold",
+    textAlign: "right",
+    paddingLeft: 3,
     color: colors.secondary,
-    textAlignVertical:"center",
-    width:"35%",
-    alignSelf:"center"
-  
+    textAlignVertical: "center",
+    width: "35%",
+    alignSelf: "center"
+
 
   },
   empresa: {
     fontSize: 20,
     color: '#0b4f6c',
     marginTop: 0,
-},
-  button:{
-    backgroundColor:colors.primary,
-    color:colors.white,
-    paddingLeft:5,
-    paddingRight:5,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    color: colors.white,
+    paddingLeft: 5,
+    paddingRight: 5,
     marginLeft: "2%",
-    marginTop:4,
-    flexDirection:"row",
-    flexWrap:"nowrap",
-    height:40,
+    marginTop: 4,
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    height: 40,
     width: 150,
-    borderRadius:10,
-    alignItems:"center",
-    justifyContent:"center"
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
 
 
 
   },
-  buttonText:{
-    color:colors.white,
-    fontWeight:"bold"
+  buttonText: {
+    color: colors.white,
+    fontWeight: "bold"
   },
-  detailsIcon:{
-    color:colors.white,
-    alignSelf:"center",
-    marginLeft:3,
-    marginTop:3,
-    marginRight:5,
+  detailsIcon: {
+    color: colors.white,
+    alignSelf: "center",
+    marginLeft: 3,
+    marginTop: 3,
+    marginRight: 5,
 
   },// Estilos para el perfil
   profileContainer: {
@@ -359,7 +320,7 @@ const styles = StyleSheet.create({
   localizacion: {
     fontSize: 15,
     color: "#696969",
-},
+  },
 
 
 });

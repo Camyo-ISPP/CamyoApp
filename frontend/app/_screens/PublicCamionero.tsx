@@ -6,7 +6,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import { useState, useEffect } from "react";
 import axios from "axios";
-const { unifyUserData } = require("../../utils");
+const { unifyUserData } = require("../../utils/unifyData");
 import BackButton from "../_components/BackButton";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;

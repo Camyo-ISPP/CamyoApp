@@ -9,6 +9,7 @@ import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import MisOfertasEmpresa from "./MisOfertasEmpresa";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -36,13 +37,9 @@ const MiPerfilEmpresa = () => {
   }, []);
 
   const canCreateNewOffer = () => {
-    console.log("rules", rules);
-    console.log("offers", offers);
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
-    console.log("activeOffersCount", activeOffersCount);
     return activeOffersCount < rules.maxActiveOffers;
   };
-
 
   return (
     <ScrollView>

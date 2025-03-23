@@ -73,6 +73,8 @@ function RootLayout() {
 
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />
+
+        <Stack.Screen name="misofertas" />
       </Stack>
       {isMobile && <BottomBar />}
       </SubscriptionProvider>

@@ -5,7 +5,7 @@ import { FontAwesome, FontAwesome5, MaterialIcons, Feather, MaterialCommunityIco
 import { useState, useEffect } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
-const { unifyUserData } = require("../../utils");
+const { unifyUserData } = require("../../utils/unifyData");
 import defaultImage from "../../assets/images/empresa.jpg";
 import { useAuth } from "../../contexts/AuthContext";
 import BackButton from "../_components/BackButton";
