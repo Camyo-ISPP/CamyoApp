@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.Authentication;
 
 import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.resena.Resena;
 
 import jakarta.validation.Valid;
 
