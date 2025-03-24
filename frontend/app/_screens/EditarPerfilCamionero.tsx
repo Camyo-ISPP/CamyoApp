@@ -7,12 +7,12 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import SuccessModal from "../_components/SuccessModal";
+import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 
 const EditarPerfilCamionero = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const { width } = useWindowDimensions();
-  const isWideScreen = width > 1074;
   const router = useRouter();
   const { user, userToken, updateUser } = useAuth();
   const [formData, setFormData] = useState({
@@ -112,9 +112,6 @@ const EditarPerfilCamionero = () => {
     }
   };
 
-
-
-
   const renderInput = (label, field, icon, keyboardType = "default", multiline = false) => (
     <View style={{ width: "90%", marginBottom: 15 }}>
       <Text style={{ fontSize: 12, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: "flex-start", paddingHorizontal: 5, zIndex: 1 }}>
@@ -137,6 +134,7 @@ const EditarPerfilCamionero = () => {
   return (
     <ScrollView style={[globalStyles.container, { paddingTop: 100 }]}>
       <View style={globalStyles.formContainerHalf}>
+        <BackButtonAbsolute />
         <Text style={globalStyles.title}>Editar Perfil</Text>
 
         {renderInput("Nombre", "nombre", <FontAwesome5 name="user" size={20} color={colors.primary} />)}

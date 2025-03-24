@@ -11,7 +11,6 @@ import BottomBar from '../_components/BottomBar';
 import { MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
-import Titulo from "../_components/Titulo";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -48,9 +47,8 @@ export default function Index() {
     <>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
-          <CamyoWebNavBar />
+          {/* <CamyoWebNavBar onSearch={undefined} /> */}
           <ScrollView style={styles.scrollview}>
-          <Titulo texto="Lista de Ofertas" marginTop={30} />
             <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               {data && data.map((item) => (
                 <View key={item.id} style={styles.card}>
@@ -77,7 +75,7 @@ export default function Index() {
                   </View>
                     <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
                     <TouchableOpacity style={styles.button} onPress={()=>router.push(`/oferta/${item.id}`)}>
-                    <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+                    <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
                     <Text style={styles.buttonText}>Ver Detalles</Text>
 
                     </TouchableOpacity>
@@ -117,7 +115,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignContent: "center",
     alignItems: "center",
-    backgroundColor: colors.mediumGray,
+    backgroundColor: colors.white,
   },
   searchIcon: {
     color: colors.primary,
@@ -140,7 +138,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     flex: 1,
     borderRadius: 25,
     paddingHorizontal: 10,
@@ -168,7 +166,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     flex: 1,
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
   },
   card: {
     backgroundColor: colors.white,

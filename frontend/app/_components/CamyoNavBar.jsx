@@ -3,17 +3,20 @@ import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platfor
 import colors from "frontend/assets/styles/colors";
 import React, { useEffect, useState, useRef } from "react";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 const ProyectoLogo = require('frontend/assets/images/camyo.png');
 import routes from "./routes";
 import PerfilDropdown from "./ProfileDropdown";
 import { useAuth } from "../../contexts/AuthContext";
 
-export default function CamyoWebNavBar() {
+
+export default function CamyoWebNavBar({ onSearch }) {
   const { user, userToken, logout } = useAuth();
   const router = useRouter();
   const [isSidebar, setIsSidebar] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const sidebarAnim = useRef(new Animated.Value(-Dimensions.get('window').width)).current;
   const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
 
@@ -38,6 +41,10 @@ export default function CamyoWebNavBar() {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  const handleSearch = () => {
+    onSearch(searchQuery); 
+  };
+
   return (
     <>
       {isSidebar ? (
@@ -59,7 +66,7 @@ export default function CamyoWebNavBar() {
           </View>
           <Animated.View style={[styles.sidebar, { transform: [{ translateX: sidebarAnim }] }]}>
             <ScrollView>
-              {/* 
+              
               <View style={styles.searchWebZoom}>
                 <TextInput
                   style={styles.searchInputWebZoom}
@@ -68,7 +75,7 @@ export default function CamyoWebNavBar() {
                 />
                 <TouchableOpacity><FontAwesome name="search" size={12} color="black" style={styles.searchIconZoom} /></TouchableOpacity>
               </View>
-              */}
+              
 
               {user ? (
                 <TouchableOpacity style={styles.shareButtonZoomed2} onPress={() => logout()}><Text style={styles.shareTextZoom1}>Cerrar Sesión</Text></TouchableOpacity>
@@ -101,20 +108,24 @@ export default function CamyoWebNavBar() {
                   </TouchableOpacity>
                 )}
                <TouchableOpacity onPress={() => router.replace('/chat/list')}>
-                  <Text style={styles.linkText}>Go to Chat List</Text>
+                  <Text style={styles.linkText}>Mis Mensajes</Text>
                </TouchableOpacity>
                <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
               
-              {/* 
+              
               <View style={styles.searchWeb}>
-                <TextInput
-                  style={styles.searchInputWeb}
-                  placeholder="Buscar Ofertas"
-                  placeholderTextColor={colors.secondary}
-                />
-                <TouchableOpacity><FontAwesome name="search" size={24} color="black" style={styles.searchIcon} /></TouchableOpacity>
-              </View>
-              */}
+              <TextInput
+                style={styles.searchInputWeb}
+                placeholder="Buscar Ofertas"
+                value={searchQuery}
+                onChangeText={setSearchQuery} // Solo actualiza el estado, sin activar la búsqueda
+                onSubmitEditing={handleSearch} // Activa la búsqueda cuando se presiona Enter
+              />
+              <TouchableOpacity onPress={handleSearch}>
+                <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
+              </TouchableOpacity>
+            </View>
+              
 
               {user ? (
                 <>

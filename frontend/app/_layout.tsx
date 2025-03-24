@@ -1,4 +1,4 @@
-import { Stack, useSegments, useRouter, usePathname } from "expo-router";
+import { Stack, useSegments, useRouter, usePathname, router } from "expo-router";
 import { Platform } from "react-native";
 import { useState, useEffect } from 'react';
 import CamyoWebNavBar from "./_components/CamyoNavBar";
@@ -19,6 +19,7 @@ function RootLayout() {
         miperfil: "Mi Perfil",
         miperfilempresa: "Mi Perfil Empresa",
         miperfilcamionero: "Mi Perfil Camionero",
+        "buscar-ofertas": "Buscar Ofertas",
         "camionero/[camioneroId]": "Perfil Camionero",
         "oferta/crear": "Publicar Nueva Oferta",
         empresas: "Lista de Empresas",
@@ -30,7 +31,7 @@ function RootLayout() {
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
         suscripcion: "Planes de Suscripción",
-        chat:"Chat"
+        chat:"Mis Mensajes"
       };
 
       const currentSegment = segments.join("/");
@@ -40,8 +41,15 @@ function RootLayout() {
 
   return (
     <>
+    {!isMobile && 
+      <CamyoWebNavBar
+        onSearch={(query: string) => {
+          router.push(`/buscar-ofertas?query=${query}`);
+        }}
+      />}
+      
       <SubscriptionProvider>
-      {!isMobile && <CamyoWebNavBar />}
+      
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(public)/index" />
         <Stack.Screen name="(public)/login" />
@@ -60,6 +68,7 @@ function RootLayout() {
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
+        <Stack.Screen name="buscar-ofertas" />
         <Stack.Screen name="chat" />
         <Stack.Screen name="chat/list" />
         

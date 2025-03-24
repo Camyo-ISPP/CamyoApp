@@ -11,6 +11,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import SuccessModal from "../../_components/SuccessModal";
 import EmpresaRoute from "../../../security/EmpresaRoute";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
+import BackButtonAbsolute from "@/app/_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../../utils/useSubscriptionRules';
 
 const EditarOfertaScreen = () => {
@@ -409,7 +410,8 @@ const EditarOfertaScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.cardContainer}>
-            <Text style={styles.title}>Editar Oferta</Text>
+            <BackButtonAbsolute />
+            <Text style={styles.title}>Editar oferta</Text>
 
             {/* Campos generales */}
             {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
@@ -530,7 +532,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     paddingVertical: 20,
     paddingTop: 80,
   },
@@ -546,6 +548,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 5,
     alignItems: "center",
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
   title: {
     fontSize: 28,
