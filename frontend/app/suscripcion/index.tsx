@@ -201,7 +201,7 @@ const SubscriptionPlans = () => {
                 <View style={styles.webContainer}>
                     <CamyoWebNavBar />
                     <ScrollView contentContainerStyle={styles.scrollview}>
-                        <Titulo texto="Planes de Suscripción" marginTop={30} />
+                        <Text style={styles.sectionTitle}>Planes de suscripción</Text>
                         <View style={styles.cardsContainer}>
                             <PlanCard
                                 title="GRATIS"
@@ -358,6 +358,14 @@ const styles = StyleSheet.create({
     },
     disabledButton: {
         backgroundColor: "gray",
+    },
+    sectionTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+        color: colors.secondary,
+        marginBottom: 15,
+        marginTop: 15,
+        textAlign: "center",
     },
 });
 

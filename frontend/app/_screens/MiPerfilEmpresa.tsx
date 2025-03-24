@@ -113,7 +113,7 @@ const MiPerfilEmpresa = () => {
 
                 <TouchableOpacity
                   style={styles.mejorarPlanButton}
-                  onPress={() => router.push(`/`)}
+                  onPress={() => router.push(`/suscripcion`)}
                 >
                   {/** TODO: Add route to upgrade plan */}
                   <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
