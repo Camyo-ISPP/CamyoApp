@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, Modal, ScrollView } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
@@ -15,66 +15,241 @@ const PublicCamionero = ({ userId }) => {
     const { user } = useAuth();
     const router = useRouter();
 
+    const [showResenaModal, setShowResenaModal] = useState(false);
+    const [resenaForm, setResenaForm] = useState({ valoracion: 5, comentarios: "" });
+
+    const [resenas, setResenas] = useState([]);
+
     // user2 es el usuario que se está visualizando
     const [user2, setUser2] = useState(null);
 
     useEffect(() => {
         // Si el usuario autenticado es el mismo usuario, redirigir a su perfil
         if (user?.id == userId) {
-          router.push("/miperfil");
-          return;
+            router.push("/miperfil");
+            return;
         }
-    
+
         const fetchUser = async () => {
-          try {
-            const response = await axios.get(`${BACKEND_URL}/camioneros/${userId}`);
-            const unifiedData = unifyUserData(response.data)
-            setUser2(unifiedData);
-          } catch (error) {
-            console.error("Error al cargar los datos de la empresa:", error);
-          }
+            try {
+                const response = await axios.get(`${BACKEND_URL}/camioneros/${userId}`);
+                const unifiedData = unifyUserData(response.data)
+                setUser2(unifiedData);
+            } catch (error) {
+                console.error("Error al cargar los datos de la empresa:", error);
+            }
         };
-    
+
         fetchUser();
-      }, [userId]);
+    }, [userId]);
+
+    const fetchResenas = async () => {
+        try {
+            const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
+            setResenas(response.data);
+        } catch (error) {
+            console.error("Error al cargar las reseñas:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (user2?.id) {
+            fetchResenas();
+        }
+    }, [user2]);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.card}>
-                <View style={styles.rowContainer}>
-                <BackButton />
-                    {/* Imagen de perfil */}
-                    <View style={styles.profileContainer}>
-                        <Image
-                            source={user2?.foto ? { uri: user2?.foto } : defaultImage}
-                            style={styles.profileImage}
-                        />
-                    </View>
-                    {/* Información del usuario */}
-                    <View style={styles.infoContainer}>
-                        <Text style={styles.name}>{user2?.nombre}</Text>
-                        <Text style={styles.username}>@{user2?.username}</Text>
-                        <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
-                        <Text style={styles.description}>{user2?.descripcion}</Text>
-                    </View>
-                </View>
-                {/* Separador */}
-                <View style={styles.separator} />
+        <>
+            <Modal visible={showResenaModal} transparent animationType="fade">
+                <View style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                }}>
+                    <View style={{
+                        width: "85%",
+                        backgroundColor: colors.white,
+                        padding: 25,
+                        borderRadius: 12,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 6,
+                        elevation: 10,
+                    }}>
+                        <Text style={{
+                            fontSize: 22,
+                            fontWeight: "bold",
+                            color: colors.secondary,
+                            marginBottom: 15,
+                            textAlign: "center"
+                        }}>
+                            Escribir Reseña
+                        </Text>
 
-                <View style={styles.downContainer}>
-                    {/* Información profesional */}
-                    <Text style={styles.sectionTitle}>Información Profesional</Text>
-                    <Text style={styles.info}>
-                        <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
-                        {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
-                    </Text>
-                    <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user2?.disponibilidad}</Text>
-                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
-                    {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
-                    {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
+                        <Text style={{ fontSize: 16, color: colors.secondary }}>Valoración (0-5)</Text>
+                        <TextInput
+                            keyboardType="numeric"
+                            maxLength={1}
+                            value={resenaForm.valoracion.toString()}
+                            onChangeText={(val) =>
+                                setResenaForm({ ...resenaForm, valoracion: parseInt(val) || 0 })
+                            }
+                            style={{
+                                borderWidth: 1,
+                                borderColor: colors.mediumGray,
+                                borderRadius: 10,
+                                paddingHorizontal: 10,
+                                paddingVertical: 8,
+                                fontSize: 16,
+                                marginBottom: 15,
+                                color: colors.secondary
+                            }}
+                        />
+
+                        <Text style={{ fontSize: 16, color: colors.secondary }}>Comentarios</Text>
+                        <TextInput
+                            multiline
+                            numberOfLines={4}
+                            value={resenaForm.comentarios}
+                            onChangeText={(text) =>
+                                setResenaForm({ ...resenaForm, comentarios: text })
+                            }
+                            placeholder="Escribe tu experiencia con esta empresa..."
+                            placeholderTextColor={colors.mediumGray}
+                            style={{
+                                borderWidth: 1,
+                                borderColor: colors.mediumGray,
+                                borderRadius: 10,
+                                paddingHorizontal: 10,
+                                paddingVertical: 8,
+                                fontSize: 16,
+                                marginBottom: 20,
+                                color: colors.secondary,
+                                textAlignVertical: "top"
+                            }}
+                        />
+
+                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1,
+                                    marginRight: 8,
+                                    backgroundColor: "#D14F45",
+                                    paddingVertical: 12,
+                                    borderRadius: 10,
+                                    alignItems: "center",
+                                }}
+                                onPress={() => setShowResenaModal(false)}
+                            >
+                                <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>Cancelar</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1,
+                                    marginLeft: 8,
+                                    backgroundColor: colors.primary,
+                                    paddingVertical: 12,
+                                    borderRadius: 10,
+                                    alignItems: "center",
+                                }}
+                                onPress={async () => {
+                                    try {
+                                        const payload = {
+                                            valoracion: resenaForm.valoracion,
+                                            comentarios: resenaForm.comentarios,
+                                            comentador: { id: user.userId },
+                                            comentado: { id: user2?.userId },
+                                        };
+
+                                        const headers = {
+                                            Authorization: `Bearer ${user.token}`, // Usa userToken si lo tienes separado
+                                            "Content-Type": "application/json",
+                                        };
+
+                                        const res = await axios.post(`${BACKEND_URL}/resenas`, payload, { headers });
+
+                                        if (res.status === 201) {
+                                            alert("¡Reseña enviada con éxito!");
+                                            setShowResenaModal(false);
+                                            setResenaForm({ valoracion: 5, comentarios: "" });
+                                            fetchResenas();
+                                        }
+                                    } catch (error) {
+                                        console.error("Error al enviar reseña:", error);
+                                        alert("No se pudo enviar la reseña.");
+                                    }
+                                }}
+                            >
+                                <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>Enviar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
-            </View>
-        </View>
+            </Modal>
+            <ScrollView>
+
+                <View style={styles.container}>
+                    <View style={styles.card}>
+                        <View style={styles.rowContainer}>
+                            <BackButton />
+                            {/* Imagen de perfil */}
+                            <View style={styles.profileContainer}>
+                                <Image
+                                    source={user2?.foto ? { uri: user2?.foto } : defaultImage}
+                                    style={styles.profileImage}
+                                />
+                            </View>
+                            {/* Información del usuario */}
+                            <View style={styles.infoContainer}>
+                                <Text style={styles.name}>{user2?.nombre}</Text>
+                                <Text style={styles.username}>@{user2?.username}</Text>
+                                <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
+                                <Text style={styles.description}>{user2?.descripcion}</Text>
+                            </View>
+                        </View>
+                        {/* Separador */}
+                        <View style={styles.separator} />
+
+                        <View style={styles.downContainer}>
+                            {/* Información profesional */}
+                            <Text style={styles.sectionTitle}>Información Profesional</Text>
+                            <Text style={styles.info}>
+                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                            </Text>
+                            <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user2?.disponibilidad}</Text>
+                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
+                            {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
+                            {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
+                        </View>
+                        <View style={styles.separator} />
+
+                        <View style={styles.reseñasContainer}>
+                            <Text style={styles.sectionTitle}>Reseñas</Text>
+
+                            {resenas.length === 0 ? (
+                                <Text style={styles.info}>Todavía no hay reseñas.</Text>
+                            ) : (
+                                resenas.map((resena) => (
+                                    <View key={resena.id} style={styles.reseñaCard}>
+                                        <Text style={styles.reseñaAutor}>
+                                            <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
+                                        </Text>
+                                        <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
+                                        <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
+                                    </View>
+                                ))
+                            )}
+                        </View>
+                    </View>
+                </View>
+            </ScrollView >
+
+        </>
+
     );
 };
 
@@ -184,6 +359,30 @@ const styles = StyleSheet.create({
     },
     downContainer: {
         paddingHorizontal: 30,
+    },
+    reseñasContainer: {
+        paddingHorizontal: 30,
+        marginTop: 20,
+    },
+    reseñaCard: {
+        backgroundColor: colors.lightGray,
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+    reseñaAutor: {
+        fontWeight: "bold",
+        marginBottom: 5,
+        color: colors.secondary,
+    },
+    reseñaValoracion: {
+        fontSize: 14,
+        color: colors.primary,
+        marginBottom: 4,
+    },
+    reseñaComentario: {
+        fontSize: 14,
+        color: colors.darkGray,
     },
 });
 
