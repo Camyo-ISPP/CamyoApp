@@ -28,9 +28,11 @@ import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.camionero.Disponibilidad;
 import com.camyo.backend.camionero.Licencia;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.resena.Resena;
+import com.camyo.backend.resena.ResenaService;
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesService;
-import com.camyo.backend.usuario.Resena;
+
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
 
@@ -46,8 +48,8 @@ class CamioneroServiceTests {
     @Autowired
     protected UsuarioService usuarioService;
 
-    // @Autowired
-    // protected ResenaService resenaService;
+    @Autowired
+    protected ResenaService resenaService;
 
     @Autowired
     protected AuthoritiesService authoritiesService;
@@ -63,6 +65,10 @@ class CamioneroServiceTests {
         authCam.setAuthority("Camionero");
         authoritiesService.saveAuthorities(authCam);
 
+        Authorities authEmp = new Authorities();
+        authCam.setAuthority("Empresa");
+        authoritiesService.saveAuthorities(authEmp);
+
         Usuario u1 = new Usuario();
         u1.setNombre("Manolo");
         u1.setTelefono("123456879");
@@ -72,15 +78,44 @@ class CamioneroServiceTests {
         u1.setAuthority(authCam);
         usuarioService.guardarUsuario(u1);
 
+        Usuario u2 = new Usuario();
+        u2.setNombre("Paco");
+        u2.setTelefono("123456872");
+        u2.setUsername("Pacomé");
+        u2.setPassword("12");
+        u2.setEmail("pacome@gmail.com");
+        u2.setAuthority(authCam);
+        usuarioService.guardarUsuario(u2);
+
+        Usuario u3 = new Usuario();
+        u3.setNombre("José");
+        u3.setTelefono("341256872");
+        u3.setUsername("Joselito");
+        u3.setPassword("12");
+        u3.setEmail("pa23@gmail.com");
+        u3.setAuthority(authEmp);
+        usuarioService.guardarUsuario(u3);
+
+        Usuario u4 = new Usuario();
+        u4.setNombre("Carlos");
+        u4.setTelefono("681234572");
+        u4.setUsername("Carlongo");
+        u4.setPassword("12");
+        u4.setEmail("caralingo@gmail.com");
+        u4.setAuthority(authEmp);
+        usuarioService.guardarUsuario(u4);
+
         Resena resena1 = new Resena();
         resena1.setValoracion(5);
-        resena1.setUsuario(u1);
-        //resenaService.guardarResena(resena1);
+        resena1.setComentado(u1);
+        resena1.setComentador(u3);
+        resenaService.crearResena(resena1);
 
         Resena resena2 = new Resena();
         resena2.setValoracion(3);
-        resena2.setUsuario(u1);
-        //resenaService.guardarResena(resena2);
+        resena2.setComentado(u1);
+        resena2.setComentador(u4);
+        resenaService.crearResena(resena2);
 
         
 
@@ -93,15 +128,6 @@ class CamioneroServiceTests {
         c1.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c1.setUsuario(u1);
         camioneroService.guardarCamionero(c1);
-
-        Usuario u2 = new Usuario();
-        u2.setNombre("Paco");
-        u2.setTelefono("123456872");
-        u2.setUsername("Pacomé");
-        u2.setPassword("12");
-        u2.setEmail("pacome@gmail.com");
-        u2.setAuthority(authCam);
-        usuarioService.guardarUsuario(u2);
 
         Camionero c2 = new Camionero();
         c2.setExperiencia(10);
@@ -220,9 +246,9 @@ class CamioneroServiceTests {
         Usuario u1 = new Usuario();
         u1.setNombre("José");
         u1.setTelefono("123455879");
-        u1.setUsername("Joselito");
+        u1.setUsername("Joselingo");
         u1.setPassword("12");
-        u1.setEmail("joselito@gmail.com");
+        u1.setEmail("joselingo@gmail.com");
         u1.setAuthority(authCam);
         usuarioService.guardarUsuario(u1);
         
