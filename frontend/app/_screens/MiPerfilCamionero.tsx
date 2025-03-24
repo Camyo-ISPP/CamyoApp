@@ -1,56 +1,116 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilCamionero = () => {
     const { user } = useAuth();
     const router = useRouter();
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.card}>
-                <View style={styles.rowContainer}>
-                <BackButton />
-                    {/* Imagen de perfil */}
-                    <View style={styles.profileContainer}>
-                        <Image
-                            source={user?.foto ? { uri: user.foto } : defaultImage}
-                            style={styles.profileImage}
-                        />
-                        {/* Botón de edición */}
-                        <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
-                            <Feather name="edit-3" size={22} color={colors.white} />
-                        </TouchableOpacity>
-                    </View>
-                    {/* Información del usuario */}
-                    <View style={styles.infoContainer}>
-                        <Text style={styles.name}>{user.nombre}</Text>
-                        <Text style={styles.username}>@{user.username}</Text>
-                        <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
-                        <Text style={styles.description}>{user.descripcion}</Text>
-                    </View>
-                </View>
-                {/* Separador */}
-                <View style={styles.separator} />
+    const [resenas, setResenas] = useState([]);
 
-                <View style={styles.downContainer}>
-                    {/* Información profesional */}
-                    <Text style={styles.sectionTitle}>Información Profesional</Text>
-                    <Text style={styles.info}>
-                        <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
-                        {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
-                    </Text>
-                    <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user.disponibilidad}</Text>
-                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
-                    {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
-                    {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+    const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchResenas = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
+                setResenas(response.data);
+
+                // Obtener valoración media del backend
+                const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
+                setValoracionMedia(mediaResponse.data);
+            } catch (error) {
+                console.error("Error al cargar las reseñas o valoración:", error);
+            }
+        };
+
+        if (user?.id) {
+            fetchResenas();
+        }
+    }, [user]);
+
+    return (
+        <ScrollView>
+            <View style={styles.container}>
+                <View style={styles.card}>
+                    <View style={styles.rowContainer}>
+                        <BackButton />
+                        {/* Imagen de perfil */}
+                        <View style={styles.profileContainer}>
+                            <Image
+                                source={user?.foto ? { uri: user.foto } : defaultImage}
+                                style={styles.profileImage}
+                            />
+                            {/* Botón de edición */}
+                            <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
+                                <Feather name="edit-3" size={22} color={colors.white} />
+                            </TouchableOpacity>
+                        </View>
+                        {/* Información del usuario */}
+                        <View style={styles.infoContainer}>
+                            <Text style={styles.name}>{user.nombre}</Text>
+                            <Text style={styles.username}>@{user.username}</Text>
+                            <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
+                            <Text style={styles.description}>{user.descripcion}</Text>
+                        </View>
+                    </View>
+                    {/* Separador */}
+                    <View style={styles.separator} />
+
+                    <View style={styles.downContainer}>
+                        {/* Información profesional */}
+                        <Text style={styles.sectionTitle}>Información Profesional</Text>
+                        <Text style={styles.info}>
+                            <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                            {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                        </Text>
+                        <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user.disponibilidad}</Text>
+                        <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
+                        {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
+                        {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+                    </View>
+                    <View style={styles.separator} />
+
+                    <View style={styles.reseñasContainer}>
+                        <Text style={styles.sectionTitle}>Reseñas</Text>
+                        {resenas.length > 0 ? (
+                            valoracionMedia !== null && (
+                                <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                                </Text>
+                            )
+                        ) : (
+                            <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                                Valoración media: No hay datos suficientes
+                            </Text>
+                        )}
+
+
+                        {resenas.length === 0 ? (
+                            <Text style={styles.info}>Todavía no tienes reseñas.</Text>
+                        ) : (
+                            resenas.map((resena) => (
+                                <View key={resena.id} style={styles.reseñaCard}>
+                                    <Text style={styles.reseñaAutor}>
+                                        <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
+                                    </Text>
+                                    <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
+                                    <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
+                                </View>
+                            ))
+                        )}
+                    </View>
                 </View>
             </View>
-        </View>
+        </ScrollView >
     );
 };
 
@@ -61,7 +121,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         paddingVertical: 20,
         backgroundColor: colors.white,
-        marginTop: 20,
+        marginTop: 80,
     },
     card: {
         backgroundColor: colors.white,
@@ -160,6 +220,30 @@ const styles = StyleSheet.create({
     },
     downContainer: {
         paddingHorizontal: 30,
+    },
+    reseñasContainer: {
+        paddingHorizontal: 30,
+        marginTop: 20,
+    },
+    reseñaCard: {
+        backgroundColor: colors.lightGray,
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+    reseñaAutor: {
+        fontWeight: "bold",
+        marginBottom: 5,
+        color: colors.secondary,
+    },
+    reseñaValoracion: {
+        fontSize: 14,
+        color: colors.primary,
+        marginBottom: 4,
+    },
+    reseñaComentario: {
+        fontSize: 14,
+        color: colors.darkGray,
     },
 });
 
