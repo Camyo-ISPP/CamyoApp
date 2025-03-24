@@ -7,9 +7,10 @@ import {Elements, PaymentElement, useElements, useStripe} from '@stripe/react-st
 import {loadStripe, Stripe} from '@stripe/stripe-js';
 import { useLocalSearchParams } from "expo-router";
 import { usePayment } from "@/contexts/PaymentContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 function IntegratedCheckout() {
-    const {id} = usePayment();
+    const { id } = usePayment();
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
     const params = useLocalSearchParams();
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
@@ -17,7 +18,9 @@ function IntegratedCheckout() {
     useEffect(() => {
         // Make sure to call `loadStripe` outside of a component’s render to avoid
         // recreating the `Stripe` object on every render.
-        setStripePromise(loadStripe(process.env.STRIPE_API_KEY || "pk_test_51R1s9PC8z1doGFyHZ51UNEI7OrBTwMv1qCYeJp8WTdeTsroq1ARp16l16jc3eYBKCo9F0e0RECGQrV7dLDlvedST00xEdKOpRl"));
+        setStripePromise(loadStripe(process.env.STRIPE_API_KEY || "pk_test_51R1s9PC8z1doGFyHZ51UNEI7OrBTwMv1qCYeJp8WTdeTsroq1ARp16l16jc3eYBKCo9F0e0RECGQrV7dLDlvedST00xEdKOpRl",
+            { locale: 'es' }
+        ));
 
     }, [])
 
@@ -65,6 +68,7 @@ function IntegratedCheckout() {
 
 const CheckoutForm = (transactionClientSecret: any, plan: any) => {
     const stripe = useStripe();
+    const { user, userToken } = useAuth();
     const elements = useElements();
     const handleSubmit = async () => {
         if (!stripe || !elements) {
@@ -85,7 +89,10 @@ const CheckoutForm = (transactionClientSecret: any, plan: any) => {
         .then(function(result) {
             fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/pago/apply_subscription", {
                 method: "POST",
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userToken}`
+                },
                 body: JSON.stringify({
                     intent: result.paymentIntent?.id,
                     compra: transactionClientSecret.plan,

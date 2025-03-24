@@ -14,7 +14,7 @@ import { usePayment } from "../../contexts/PaymentContext";
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilEmpresa = () => {
-  const { id } = usePayment();
+  const { id, setId } = usePayment();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -73,6 +73,7 @@ const MiPerfilEmpresa = () => {
               <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user.telefono}</Text>
               <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
               <Text style={styles.description}>{user.descripcion}</Text>
+              <Text>{id}</Text>
             </View>
 
             <View style={styles.buttonsWrapper}>

@@ -1,10 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 interface PaymentContextType {
     id: string | null;
+    setId: (id: string) => void;
   }
 
-const PaymentContext = React.createContext<PaymentContextType>({id: null});
+const PaymentContext = React.createContext<PaymentContextType>({id: null, setId: () => {}});
 
 interface PaymentProviderProps {
   children: React.ReactNode;
@@ -15,10 +16,12 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
   
   const [id, setId] = useState<string | null>(null);
 
-  const change = (newId: string) => { setId(newId) };
+  useEffect(() => {
+    
+  }, [id]);
 
   return (
-    <PaymentContext.Provider value={{ id }}>
+    <PaymentContext.Provider value={{ id, setId }}>
       {children}
     </PaymentContext.Provider>
   );
