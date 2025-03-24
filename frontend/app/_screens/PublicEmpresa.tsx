@@ -34,6 +34,8 @@ const PublicEmpresa = ({ userId }) => {
   const [resenas, setResenas] = useState([]);
   const [editResenaId, setEditResenaId] = useState(null);
   const [yaEscribioResena, setYaEscribioResena] = useState(false);
+  const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+
 
   useEffect(() => {
     if (user?.id == userId) {
@@ -70,8 +72,12 @@ const PublicEmpresa = ({ userId }) => {
     try {
       const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
       setResenas(response.data);
+
       const yaExiste = response.data.some(res => res.comentador?.id === user?.userId);
       setYaEscribioResena(yaExiste);
+
+      const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user2?.userId}/valoracion`);
+      setValoracionMedia(mediaResponse.data);
     } catch (error) {
       console.error("Error al cargar las reseñas:", error);
     }
@@ -349,6 +355,18 @@ const PublicEmpresa = ({ userId }) => {
 
             <View style={styles.reseñasContainer}>
               <Text style={styles.sectionTitle}>Reseñas</Text>
+              {resenas.length > 0 ? (
+                valoracionMedia !== null && (
+                  <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                  </Text>
+                )
+              ) : (
+                <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                  Valoración media: No hay datos suficientes
+                </Text>
+              )}
+
 
               {resenas.length === 0 ? (
                 <Text style={styles.info}>Todavía no hay reseñas.</Text>
