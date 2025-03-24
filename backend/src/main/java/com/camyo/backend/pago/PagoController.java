@@ -1,6 +1,8 @@
 package com.camyo.backend.pago;
 
+import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.suscripcion.PlanNivel;
+import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
 import com.stripe.Stripe;
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,12 +41,18 @@ public class PagoController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private SuscripcionService suscripcionService;
+
+    @Autowired
+    private EmpresaService empresaService;
+
     String STRIPE_API_KEY = System.getenv().get("STRIPE_API_KEY");
 
     @PostMapping("/integrated")
     String integratedCheckout(@RequestBody Pago pago) throws StripeException {
 
-        Stripe.apiKey = "<PUT KEY HERE>";
+        Stripe.apiKey = STRIPE_API_KEY;
 
         String clientBaseURL = "http://localhost:8081";
 
@@ -77,10 +86,25 @@ public class PagoController {
         return paymentIntent.getClientSecret();
     }
 
+    @PostMapping("/apply_subscription")
+    public ResponseEntity<String> applySubscription(@RequestBody RequestDTO requestDto) throws StripeException {
+        System.out.println(requestDto);
+        Stripe.apiKey = Stripe.apiKey = STRIPE_API_KEY;
+
+        PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
+        if (paymentIntent.getStatus().equals("succeeded")) {
+                Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
+                suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), null);
+                return ResponseEntity.ok("Suscripción aplicada con éxito");
+        } else {
+                return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PostMapping("/create-checkout-session")
     String hostedCheckout() throws StripeException {
 
-        Stripe.apiKey = "<PUT KEY HERE>";
+        Stripe.apiKey = STRIPE_API_KEY;
         String clientBaseURL = System.getenv().get("CLIENT_BASE_URL");
 
         // Usuario cliente = usuarioService.obtenerUsuarioActual();
@@ -150,7 +174,7 @@ public class PagoController {
     @PostMapping("/subscripcion")
     String newSubscription(@RequestBody PaymentRequest PaymentRequest) throws StripeException {
 
-        Stripe.apiKey = "<PUT KEY HERE>";
+        Stripe.apiKey = STRIPE_API_KEY;
 
         String clientBaseURL = "http://localhost:8081";
 
