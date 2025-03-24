@@ -1,9 +1,8 @@
 import { useRouter } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, TouchableWithoutFeedback } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, TextInput, Image, Dimensions } from "react-native";
 import colors from "frontend/assets/styles/colors";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Ionicons from '@expo/vector-icons/Ionicons';
 const ProyectoLogo = require('../../assets/images/camyoV1.png');
 import routes from "./routes";
 import PerfilDropdown from "./ProfileDropdown";

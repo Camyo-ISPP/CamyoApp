@@ -1,8 +1,8 @@
-import { router, useRouter } from "expo-router";
+import { router } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, ScrollView, ActivityIndicator, Dimensions } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -12,7 +12,6 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
 const truckImage = require("../../assets/images/camion.png");
-import Titulo from "../_components/Titulo";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
