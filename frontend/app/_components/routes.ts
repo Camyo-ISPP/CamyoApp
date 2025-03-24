@@ -9,7 +9,8 @@ const routes = {
   createOffer: "/oferta/crear",
   editProfile: "/miperfil/editar",
   editProfileEmpresa: "/miperfil/editar",
-  chat:"/chat"
+  chat:"/chat",
+  payment:"/pago/checkout"
 };
 
 export default routes;

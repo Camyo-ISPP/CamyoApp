@@ -39,6 +39,7 @@ const MiPerfilEmpresa = () => {
 
   const canCreateNewOffer = () => {
     console.log("rules", rules);
+    setId("BASICO")
     console.log("offers", offers);
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
     console.log("activeOffersCount", activeOffersCount);

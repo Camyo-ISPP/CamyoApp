@@ -5,6 +5,7 @@ import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { PaymentProvider } from "@/contexts/PaymentContext";
 
 function RootLayout() {
   const segments = useSegments();
@@ -30,7 +31,8 @@ function RootLayout() {
         "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
-        chat:"Mis Mensajes"
+        chat:"Mis Mensajes",
+        "pago/checkout": "Pago"
       };
 
       const currentSegment = segments.join("/");
@@ -47,6 +49,7 @@ function RootLayout() {
         }}
       />}
       
+      <PaymentProvider>
       <SubscriptionProvider>
       
       <Stack screenOptions={{ headerShown: false }}>
@@ -73,9 +76,12 @@ function RootLayout() {
 
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />
+
+        <Stack.Screen name="pago/checkout" />
       </Stack>
       {isMobile && <BottomBar />}
       </SubscriptionProvider>
+      </PaymentProvider>
     </>
 
   );
