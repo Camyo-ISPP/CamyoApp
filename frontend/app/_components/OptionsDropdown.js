@@ -3,8 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Entypo, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
 import { router } from 'expo-router';
+import { useAuth } from "../../contexts/AuthContext";
 
 const OptionsDropdown = () => {
+  const { user } = useAuth();
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   return (
@@ -22,9 +24,22 @@ const OptionsDropdown = () => {
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => router.replace('/empresas')} style={styles.dropdownButton}>
-                <MaterialIcons name="business" size={20} style={styles.dropdownButtonIcon} />
+                <MaterialIcons name="domain" size={20} style={styles.dropdownButtonIcon} />
                 <Text style={styles.dropdownButtonText}>Empresas</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => router.replace('/chat/list')} style={styles.dropdownButton}>
+                <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
+                <Text style={styles.dropdownButtonText}>Mensajes</Text>
+              </TouchableOpacity>
+
+              {user?.rol === "EMPRESA" && (
+              <TouchableOpacity onPress={() => router.replace('/suscripcion')} style={styles.dropdownButton}>
+                <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
+                <Text style={styles.dropdownButtonText}>Suscripción</Text>
+              </TouchableOpacity>
+              )}
+
             </View>
         )}
       </View >

@@ -15,12 +15,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function CamyoWebNavBar({ onSearch }) {
   const { user, userToken, logout } = useAuth();
   const router = useRouter();
-  const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1040);
+  const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1140);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const updateSize = () => {
-      setIsCompact(Dimensions.get("window").width < 1040);
+      setIsCompact(Dimensions.get("window").width < 1140);
     };
     Dimensions.addEventListener("change", updateSize);
     return () => Dimensions.removeEventListener("change", updateSize);
@@ -28,6 +28,7 @@ export default function CamyoWebNavBar({ onSearch }) {
 
   const handleSearch = () => {
     onSearch(searchQuery); 
+    setSearchQuery("");
   };
 
   return (
@@ -39,8 +40,8 @@ export default function CamyoWebNavBar({ onSearch }) {
           </TouchableOpacity>
           <View style={styles.separator} />
           <View style={styles.searchContainer}>
-            <TextInput style={styles.searchInput} placeholder="Buscar Ofertas"/>
-            <TouchableOpacity><FontAwesome name="search" size={20} color="black" style={styles.searchIcon} /></TouchableOpacity>
+            <TextInput style={styles.searchInput} placeholder="Buscar Ofertas" value={searchQuery} onChangeText={setSearchQuery} onSubmitEditing={handleSearch}/>
+            <TouchableOpacity onPress={handleSearch}><FontAwesome name="search" size={20} color="black" style={styles.searchIcon} /></TouchableOpacity>
           </View>
         </View>
 
@@ -48,9 +49,26 @@ export default function CamyoWebNavBar({ onSearch }) {
         {isCompact ? (
             <OptionsDropdown />
           ) : (
-            <TouchableOpacity style={styles.button} onPress={() => router.push(routes.listcompanies)}>
-              <Text style={styles.buttonText}>Empresas</Text>
-            </TouchableOpacity>
+            <>
+              {user?.rol === "EMPRESA" && (
+                  <>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => router.push("/suscripcion")}
+                    >
+                      <Text style={styles.buttonText}>Suscripción</Text>
+                    </TouchableOpacity>
+                    <View style={styles.dot} />
+                  </>
+              )}
+              <TouchableOpacity style={styles.button} onPress={() => router.push('/chat/list')}>
+                    <Text style={styles.buttonText}>Mis Mensajes</Text>
+              </TouchableOpacity>
+              <View style={styles.dot} />
+              <TouchableOpacity style={styles.button} onPress={() => router.push(routes.listcompanies)}>
+                <Text style={styles.buttonText}>Empresas</Text>
+              </TouchableOpacity>
+            </>
           )}
           <View style={styles.dot} />
           {user ? (
