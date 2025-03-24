@@ -408,7 +408,7 @@ export default function OfertaDetalleScreen() {
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                             <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
                                                 <MaterialCommunityIcons name="eye" size={15} color="white" />
-                                                <Text style={styles.buttonText}>Ver Detalles</Text>
+                                                <Text style={styles.buttonText}> Ver Detalles</Text>
                                             </TouchableOpacity>
                                             <TouchableOpacity style={[styles.button, { backgroundColor: "green" }]} onPress={() => handleAsignarCamionero(item)}>
                                                 <MaterialCommunityIcons name="thumb-up" size={15} color="white" />
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         padding: 20,
         marginVertical: 10,
-        width: "70%",
+        width: "100%",
         borderRadius: 10,
         display: "flex",
         flexWrap: "wrap",
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
         paddingLeft: 5,
         paddingRight: 5,
         marginLeft: "2%",
-        marginTop: 4,
+        marginTop: 5,
         flexDirection: "row",
         flexWrap: "nowrap",
         height: 40,

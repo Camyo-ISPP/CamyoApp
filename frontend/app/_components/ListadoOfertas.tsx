@@ -18,6 +18,7 @@ const ListadoOfertas = ({ data }: { data: any[] }) => {
 
             <View style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
               <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
+              <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
               <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
 
               <View style={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
