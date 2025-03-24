@@ -6,7 +6,6 @@ import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-const ProyectoLogo = require('frontend/assets/images/camyo.png');
 import BottomBar from '../_components/BottomBar';
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
