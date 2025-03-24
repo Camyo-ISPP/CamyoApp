@@ -63,11 +63,11 @@ const EmpresasLista = () => {
           </View>
 
           <View>
-            {user && empresa.id === user.id ? (
-              <View style={styles.ownOfferBadge}>
+            {user && user.rol == "EMPRESA" && empresa.id === user.id ? (
+              <TouchableOpacity style={styles.ownOfferBadge} onPress={() => router.push('/miperfil')}>
                 <MaterialCommunityIcons name="office-building" size={15} color="white" style={styles.detailsIcon} />
                 <Text style={styles.ownOfferText}>Tu Empresa</Text>
-              </View>
+              </TouchableOpacity>
             ) : (
               <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
                 <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 5
   },
-  
+
 });
 
 export default EmpresasLista;

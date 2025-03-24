@@ -203,7 +203,7 @@ export default function OfertaDetalleScreen() {
                     </View>
 
                     <View style={{ alignItems: "flex-end" }}>
-                        {offerData.empresa.id === user.id ? (
+                        {user && user.rol == "EMPRESA" && offerData.empresa.id === user.id ? (
                             <View style={styles.ownOfferBadgeAlt}>
                                 <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
                                 <Text style={styles.ownOfferTextAlt}>Tu Oferta</Text>

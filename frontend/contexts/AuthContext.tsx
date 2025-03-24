@@ -12,18 +12,20 @@ interface AuthContextType {
   validateToken: (token: string) => Promise<boolean>;
   getUserData: (userRole: string, userId: number) => void;
   updateUser: (updatedUserData: any) => void;
-  isAuthenticated: () => Promise<boolean>; // Nueva función
+  isAuthenticated: () => Promise<boolean>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   userToken: null,
-  login: () => {},
-  logout: () => {},
+  login: () => { },
+  logout: () => { },
   validateToken: async () => false,
-  getUserData: () => {},
-  updateUser: () => {},
-  isAuthenticated: async () => false, // Valor por defecto
+  getUserData: () => { },
+  updateUser: () => { },
+  isAuthenticated: async () => false,
+  loading: false,
 });
 
 interface AuthProviderProps {
@@ -32,37 +34,40 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  
+
   const [user, setUser] = useState<any | null>(null);
   const [userToken, setUserToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const loadAuthData = async () => {
       try {
         const storedUser = await AsyncStorage.getItem("user");
         const storedToken = await AsyncStorage.getItem("userToken");
-  
+
         if (storedUser && storedToken) {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
           setUserToken(storedToken);
-  
+
           const rol = parsedUser.roles[0] === "EMPRESA" ? "empresas" :
             parsedUser.roles[0] === "ADMIN" ? "admin" : "camioneros";
           getUserData(rol, parsedUser.id);
         }
       } catch (error) {
         console.error("Error cargando la autentificación:", error);
+      } finally {
+        setLoading(false);
       }
     };
-  
+
     loadAuthData();
   }, []);
 
   const login = async (userData: any, token: string) => {
     setUser(userData);
     setUserToken(token);
-    
+
     await AsyncStorage.setItem("user", JSON.stringify(userData));
     await AsyncStorage.setItem("userToken", token);
 
@@ -110,10 +115,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             : `${BACKEND_URL}/${userRole}/por_usuario/${userId}`
       );
 
-      const unifiedUser = userRole === "admin" 
-          ? { ...response.data, rol: response.data.authority.authority } 
-          : unifyUserData(response.data);
-      
+      const unifiedUser = userRole === "admin"
+        ? { ...response.data, rol: response.data.authority.authority }
+        : unifyUserData(response.data);
+
       setUser(unifiedUser);
       await AsyncStorage.setItem("user", JSON.stringify(unifiedUser));
 
@@ -131,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, userToken, login, logout, validateToken, getUserData, updateUser, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, userToken, login, logout, validateToken, getUserData, updateUser, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   );

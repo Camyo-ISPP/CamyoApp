@@ -60,7 +60,7 @@ export default function CamyoWebNavBar({ onSearch }) {
                 <Ionicons name="menu" size={30} color="white" />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => router.push("/")}>
+            <TouchableOpacity onPress={() => router.replace("/")}>
               <Image source={ProyectoLogo} style={styles.logoZoomed} resizeMode="cover" />
             </TouchableOpacity>
           </View>
@@ -93,7 +93,7 @@ export default function CamyoWebNavBar({ onSearch }) {
         <>
           <View style={styles.headerWeb}>
             <View style={[styles.leftSection, isZoomed && styles.centerSection]}>
-              <TouchableOpacity onPress={() => router.push("/")}>
+              <TouchableOpacity onPress={() => router.replace("/")}>
                 <Image source={ProyectoLogo} style={styles.logoZoomed} resizeMode="cover" />
               </TouchableOpacity>
             </View>
