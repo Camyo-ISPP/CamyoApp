@@ -6,7 +6,7 @@ import { FontAwesome, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import { useState, useEffect } from "react";
 import axios from "axios";
-const { unifyUserData } = require("../../utils");
+const { unifyUserData } = require("../../utils/unifyData");
 import BackButton from "../_components/BackButton";
 import SuccessModal from "../_components/SuccessModal";
 
@@ -35,8 +35,10 @@ const PublicCamionero = ({ userId }) => {
 
     useEffect(() => {
         if (user?.id == userId) {
-            router.push("/miperfil");
-            return;
+            if (user.rol == "CAMIONERO") {
+                router.push("/miperfil");
+                return;
+            }
         }
 
         const fetchUser = async () => {
@@ -51,7 +53,6 @@ const PublicCamionero = ({ userId }) => {
 
         fetchUser();
     }, [userId]);
-
 
     const fetchResenas = async () => {
         try {
@@ -218,7 +219,7 @@ const PublicCamionero = ({ userId }) => {
                 </View>
             </Modal>
 
-            <ScrollView>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View style={styles.container}>
                     <View style={styles.card}>
                         <View style={styles.rowContainer}>
@@ -424,13 +425,12 @@ const PublicCamionero = ({ userId }) => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         alignItems: "center",
-        justifyContent: "center",
         paddingVertical: 20,
         backgroundColor: colors.white,
-        marginTop: 20,
-    },
+        minHeight: "100%",
+        marginTop: 80,
+    },    
     card: {
         backgroundColor: colors.white,
         padding: 30,
