@@ -325,7 +325,7 @@ const PublicEmpresa = ({ userId }) => {
               <Text style={styles.sectionTitle}>Reseñas</Text>
 
               {resenas.length === 0 ? (
-                <Text style={styles.info}>Todavía no tienes reseñas.</Text>
+                <Text style={styles.info}>Todavía no hay reseñas.</Text>
               ) : (
                 resenas.map((resena) => (
                   <View key={resena.id} style={styles.reseñaCard}>
