@@ -2,7 +2,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, Modal, Scro
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -88,25 +88,22 @@ const PublicCamionero = ({ userId }) => {
                             Escribir Reseña
                         </Text>
 
-                        <Text style={{ fontSize: 16, color: colors.secondary }}>Valoración (0-5)</Text>
-                        <TextInput
-                            keyboardType="numeric"
-                            maxLength={1}
-                            value={resenaForm.valoracion.toString()}
-                            onChangeText={(val) =>
-                                setResenaForm({ ...resenaForm, valoracion: parseInt(val) || 0 })
-                            }
-                            style={{
-                                borderWidth: 1,
-                                borderColor: colors.mediumGray,
-                                borderRadius: 10,
-                                paddingHorizontal: 10,
-                                paddingVertical: 8,
-                                fontSize: 16,
-                                marginBottom: 15,
-                                color: colors.secondary
-                            }}
-                        />
+                        <Text style={{ fontSize: 16, color: colors.secondary, marginBottom: 10 }}>Valoración</Text>
+                        <View style={{ flexDirection: "row", marginBottom: 20 }}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <TouchableOpacity
+                                    key={star}
+                                    onPress={() => setResenaForm({ ...resenaForm, valoracion: star })}
+                                >
+                                    <FontAwesome
+                                        name={star <= resenaForm.valoracion ? "star" : "star-o"}
+                                        size={28}
+                                        color={colors.primary}
+                                        style={{ marginHorizontal: 5 }}
+                                    />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
 
                         <Text style={{ fontSize: 16, color: colors.secondary }}>Comentarios</Text>
                         <TextInput
@@ -208,6 +205,15 @@ const PublicCamionero = ({ userId }) => {
                                 <Text style={styles.username}>@{user2?.username}</Text>
                                 <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
                                 <Text style={styles.description}>{user2?.descripcion}</Text>
+                                {user && user.rol === "EMPRESA" && (
+                                    <TouchableOpacity
+                                        style={styles.publishButton}
+                                        onPress={() => setShowResenaModal(true)}
+                                    >
+                                        <FontAwesome name="star" size={16} color="white" style={styles.plusIcon} />
+                                        <Text style={styles.publishButtonText}>Hacer Reseña</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </View>
                         {/* Separador */}
@@ -383,6 +389,29 @@ const styles = StyleSheet.create({
     reseñaComentario: {
         fontSize: 14,
         color: colors.darkGray,
+    },
+    publishButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.primary,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 3,
+        marginTop: 10,
+    },
+    plusIcon: {
+        marginRight: 6,
+    },
+    publishButtonText: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "bold",
     },
 });
 
