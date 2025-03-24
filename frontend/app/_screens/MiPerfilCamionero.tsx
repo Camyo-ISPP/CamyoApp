@@ -16,13 +16,20 @@ const MiPerfilCamionero = () => {
 
     const [resenas, setResenas] = useState([]);
 
+    const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+
+
     useEffect(() => {
         const fetchResenas = async () => {
             try {
                 const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
                 setResenas(response.data);
+
+                // Obtener valoración media del backend
+                const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
+                setValoracionMedia(mediaResponse.data);
             } catch (error) {
-                console.error("Error al cargar las reseñas:", error);
+                console.error("Error al cargar las reseñas o valoración:", error);
             }
         };
 
@@ -30,6 +37,7 @@ const MiPerfilCamionero = () => {
             fetchResenas();
         }
     }, [user]);
+
     return (
         <ScrollView>
             <View style={styles.container}>
@@ -74,6 +82,18 @@ const MiPerfilCamionero = () => {
 
                     <View style={styles.reseñasContainer}>
                         <Text style={styles.sectionTitle}>Reseñas</Text>
+                        {resenas.length > 0 ? (
+                            valoracionMedia !== null && (
+                                <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                                </Text>
+                            )
+                        ) : (
+                            <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                                Valoración media: No hay datos suficientes
+                            </Text>
+                        )}
+
 
                         {resenas.length === 0 ? (
                             <Text style={styles.info}>Todavía no tienes reseñas.</Text>
