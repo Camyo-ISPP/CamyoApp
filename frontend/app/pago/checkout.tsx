@@ -2,7 +2,6 @@ import {Button, TextInput, View, Text} from "react-native";
 import {useContext, useEffect, useState} from "react";
 import CartItem, {ItemData} from "../_components/CartItem";
 import TotalFooter from "../_components/TotalFooter";
-import {Products} from './datosdeprueba'
 import {Elements, PaymentElement, useElements, useStripe} from '@stripe/react-stripe-js';
 import {loadStripe, Stripe} from '@stripe/stripe-js';
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,7 +10,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 
 function IntegratedCheckout() {
-    const { id } = usePayment();
+    const { id, setId } = usePayment();
+    const { user, userToken } = useAuth();
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
 
@@ -27,7 +27,10 @@ function IntegratedCheckout() {
     const createTransactionSecret = () => {
         fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/pago/integrated", {
             method: "POST",
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+            },
             body: JSON.stringify({
                 compra: id,
             })
@@ -36,6 +39,11 @@ function IntegratedCheckout() {
             .then(r => {
                 setTransactionClientSecret(r)
             })
+    }
+
+    const handleCancel = () => {
+        setId("");
+        router.back();
     }
 
     return <>
@@ -52,6 +60,8 @@ function IntegratedCheckout() {
                         : <Elements stripe={stripePromise} options={{clientSecret: transactionClientSecret}}>
                             <CheckoutForm transactionClientSecret={transactionClientSecret} plan={id}/>
                         </Elements>)}
+                    
+                    <Button onPress={handleCancel} title="Cancelar"/>
                 </View>
             </View>
 
@@ -69,6 +79,7 @@ function IntegratedCheckout() {
 const CheckoutForm = (transactionClientSecret: any) => {
     const stripe = useStripe();
     const { user, userToken } = useAuth();
+    const { setId } = usePayment();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -110,9 +121,12 @@ const CheckoutForm = (transactionClientSecret: any) => {
                                 setSuccessModalVisible(false);
                                 router.replace("/");
                             }, 1000);
+                    } else {
+                        alert(res.body)
                     }
                 })
                 .then(() => setLoading(false))
+                .then(() => setId(""))
         });
         
     };

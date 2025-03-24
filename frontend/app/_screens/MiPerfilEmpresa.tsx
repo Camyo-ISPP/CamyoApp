@@ -16,7 +16,6 @@ import { useFocusEffect } from '@react-navigation/native';
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilEmpresa = () => {
-  const { id, setId } = usePayment();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -43,7 +42,6 @@ const MiPerfilEmpresa = () => {
         setLoading(false);
       }
     };
-    setId("BASICO");
     fetchOffers();
   }, []);
 
