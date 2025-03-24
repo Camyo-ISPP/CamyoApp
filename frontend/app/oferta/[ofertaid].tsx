@@ -8,15 +8,16 @@ import { Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import defaultCamImage from "../../assets/images/defaultAvatar.png";
+import BackButton from "../_components/BackButton";
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
     return new Date(fecha).toLocaleDateString("es-ES", opciones);
 };
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 export default function OfertaDetalleScreen() {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const [offerData, setOfferData] = useState<any>(null);
     const [offerTrabajoData, setOfferTrabajoData] = useState<any>(null);
     const [offerCargaData, setOfferCargaData] = useState<any>(null);
@@ -186,18 +187,7 @@ export default function OfertaDetalleScreen() {
         return (
             <View style={styles.card}>
                 <View style={styles.header}>
-                    <TouchableOpacity
-                        style={styles.backIcon}
-                        onPress={() => {
-                            if (router.canGoBack()) {
-                                router.back();
-                            } else {
-                                router.replace('/');
-                                }
-                            }}
-                    >
-                        <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
-                    </TouchableOpacity>
+                    <BackButton />
                     <Image
                         source={defaultCompanyLogo} 
                         style={styles.logo}
@@ -210,6 +200,12 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.empresa}> {offerData.localizacion}</Text>
                             </Text>
                             <Text style={styles.empresa}>Estado: {offerData.estado} </Text>
+                    </View>
+                    <View style={{ alignItems: "flex-end" }}>
+                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${offerData.empresa.id}`)}>
+                            <MaterialIcons name="business" size={15} color="white" />
+                            <Text style={styles.buttonText}> Ver Empresa</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
                         
@@ -399,7 +395,7 @@ export default function OfertaDetalleScreen() {
                                             </View>
                                             <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                                 <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
-                                                    <MaterialCommunityIcons name="details" size={15} color="white" />
+                                                    <MaterialCommunityIcons name="eye" size={15} color="white" />
                                                     <Text style={styles.buttonText}>Ver Detalles</Text>
                                                 </TouchableOpacity>
                                                 <TouchableOpacity style={[styles.button, { backgroundColor: "green" }]} onPress={() => handleAsignarCamionero(item)}>
@@ -427,7 +423,7 @@ export default function OfertaDetalleScreen() {
                                         </View>
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                             <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${offerData.camionero.id}`)}>
-                                                <MaterialCommunityIcons name="details" size={15} color="white" />
+                                                <MaterialCommunityIcons name="eye" size={15} color="white" />
                                                 <Text style={styles.buttonText}>Ver Detalles</Text>
                                             </TouchableOpacity>
                                         </View>
@@ -458,14 +454,14 @@ const styles = StyleSheet.create    ({
         flex: 1,
         //justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#e6e8e6',
+        backgroundColor: colors.white,
         paddingVertical: 20,
         paddingTop: Platform.OS === "web" ? '5.8%' : '0%',
-        
+        marginTop: 20,
     },
     scrollContainer: {
         flex: 1,
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white,
         paddingHorizontal: 0,
         paddingVertical: 0,
     },
@@ -473,13 +469,16 @@ const styles = StyleSheet.create    ({
         width: Platform.OS === "web" ? '60%' : '100%',
         marginHorizontal: '15%',
         padding: Platform.OS === "web" ? 20 : 10,
-        backgroundColor: 'white',
+        backgroundColor: colors.white,
         borderRadius: 10,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
         elevation: 5,
+        alignSelf: "center",
+        borderWidth: 1,
+        borderColor: colors.lightGray,
     },
     header: {
         flexDirection: 'row',

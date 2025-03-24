@@ -1,4 +1,4 @@
-{
+export default{
   "expo": {
     "name": "frontend",
     "slug": "frontend",
@@ -43,7 +43,13 @@
       },
       "eas": {
         "projectId": "af3cecf0-ee15-4605-9719-66153ca94e8c"
-      }
+      },
+      apiKey: process.env.API_KEY,
+      authDomain: process.env.AUTH_DOMAIN,
+      projectId: process.env.PROJECT_ID,
+      storageBucket: process.env.STORAGE_BUCKET,
+      messagingSenderId: process.env.MESSAGING_SENDER_ID,
+      appId: process.env.APP_ID
     }
   }
 }
