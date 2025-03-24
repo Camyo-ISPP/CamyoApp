@@ -21,28 +21,30 @@ const PublicCamionero = ({ userId }) => {
     useEffect(() => {
         // Si el usuario autenticado es el mismo usuario, redirigir a su perfil
         if (user?.id == userId) {
-          router.push("/miperfil");
-          return;
+            if (user.rol == "CAMIONERO") {
+                router.push("/miperfil");
+                return;
+            }
         }
-    
+
         const fetchUser = async () => {
-          try {
-            const response = await axios.get(`${BACKEND_URL}/camioneros/${userId}`);
-            const unifiedData = unifyUserData(response.data)
-            setUser2(unifiedData);
-          } catch (error) {
-            console.error("Error al cargar los datos de la empresa:", error);
-          }
+            try {
+                const response = await axios.get(`${BACKEND_URL}/camioneros/${userId}`);
+                const unifiedData = unifyUserData(response.data)
+                setUser2(unifiedData);
+            } catch (error) {
+                console.error("Error al cargar los datos de la empresa:", error);
+            }
         };
-    
+
         fetchUser();
-      }, [userId]);
+    }, [userId]);
 
     return (
         <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.rowContainer}>
-                <BackButton />
+                    <BackButton />
                     {/* Imagen de perfil */}
                     <View style={styles.profileContainer}>
                         <Image

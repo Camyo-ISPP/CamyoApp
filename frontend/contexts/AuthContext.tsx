@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
 import { unifyUserData } from "../utils/unifyData"
+import { fetchUserData } from "../utils/apiUtils";
 
 interface AuthContextType {
   user: any | null;
@@ -50,9 +51,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(parsedUser);
           setUserToken(storedToken);
 
-          const rol = parsedUser.roles[0] === "EMPRESA" ? "empresas" :
-            parsedUser.roles[0] === "ADMIN" ? "admin" : "camioneros";
-          getUserData(rol, parsedUser.id);
+          //const rol = parsedUser.rol || parsedUser.roles[0];
+
+          //getUserData(rol, parsedUser.id);
         }
       } catch (error) {
         console.error("Error cargando la autentificación:", error);
@@ -71,9 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await AsyncStorage.setItem("user", JSON.stringify(userData));
     await AsyncStorage.setItem("userToken", token);
 
-    const rol = userData.roles[0] === "EMPRESA" ? "empresas" : 
-            userData.roles[0] === "ADMIN" ? "admin" : 
-            "camioneros";
+    const rol = userData.rol || userData.roles[0];
 
     getUserData(rol, userData.id);
   };
@@ -109,13 +108,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const getUserData = async (userRole: string, userId: number) => {
     try {
-      const response = await axios.get(
-        userRole === "admin" 
-            ? `${BACKEND_URL}/usuarios/${userId}` 
-            : `${BACKEND_URL}/${userRole}/por_usuario/${userId}`
-      );
+      const response = await fetchUserData(userRole, userId);      
 
-      const unifiedUser = userRole === "admin"
+      const unifiedUser = userRole === "ADMIN"
         ? { ...response.data, rol: response.data.authority.authority }
         : unifyUserData(response.data);
 

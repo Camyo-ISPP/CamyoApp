@@ -436,7 +436,7 @@ export default function OfertaDetalleScreen() {
                                     <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                         <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${offerData.camionero.id}`)}>
                                             <MaterialCommunityIcons name="eye" size={15} color="white" />
-                                            <Text style={styles.buttonText}>Ver Detalles</Text>
+                                            <Text style={styles.buttonText}> Ver Detalles</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>

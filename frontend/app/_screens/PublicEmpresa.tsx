@@ -26,11 +26,13 @@ const PublicEmpresa = ({ userId }) => {
   useEffect(() => {
     // Si el usuario autenticado es la empresa, redirigir a su perfil
     if (user?.id == userId) {
-      router.push("/miperfil");
-      return;
+      if (user.rol == "EMPRESA"){
+        router.push("/miperfil");
+        return;
+      }
     }
 
-    const fetchOffers = async () => {
+    const fetchOpenOffers = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${userId}`);
         setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
@@ -51,7 +53,7 @@ const PublicEmpresa = ({ userId }) => {
       }
     };
 
-    fetchOffers();
+    fetchOpenOffers();
     fetchUser();
   }, [userId]);
 

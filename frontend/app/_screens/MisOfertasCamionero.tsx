@@ -66,7 +66,7 @@ const MisOfertasCamionero = () => {
         if (tab === "PENDIENTE") {
             if (pendingOffers.length === 0) {
                 return (
-                    <>
+                    <View style={styles.emptyContainer}>
                         <Text style={styles.emptyTitle}>
                             No hay ofertas pendientes por el momento.
                         </Text>
@@ -76,7 +76,7 @@ const MisOfertasCamionero = () => {
                         <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/")}>
                             <Text style={styles.emptyButtonText}>Buscar Ofertas</Text>
                         </TouchableOpacity>
-                    </>
+                    </View>
                 );
             }
             return <ListadoOfertas data={pendingOffers} />;

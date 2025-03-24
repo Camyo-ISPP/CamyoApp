@@ -17,8 +17,8 @@ const MisOfertasEmpresa = () => {
     const [closedOffers, setClosedOffers] = useState<any[]>([]);
 
     const noOffersInAllCategories =
-            openOffers.length === 0 &&
-            closedOffers.length === 0;
+        openOffers.length === 0 &&
+        closedOffers.length === 0;
 
     useEffect(() => {
         const fetchOffers = async () => {
@@ -56,14 +56,14 @@ const MisOfertasEmpresa = () => {
         if (tab === "ABIERTA") {
             if (openOffers.length === 0) {
                 return (
-                    <>
-                        <Text style={styles.emptyTitle}>
-                            No tienes ofertas abiertas por el momento.
-                        </Text>
-                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/oferta/crear")}>
-                            <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
-                        </TouchableOpacity>
-                    </>
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyTitle}>
+                                No tienes ofertas abiertas por el momento.
+                            </Text>
+                            <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/oferta/crear")}>
+                                <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
+                            </TouchableOpacity>
+                        </View>
                 );
             }
             return <ListadoOfertas data={openOffers} />;
@@ -226,7 +226,10 @@ const styles = StyleSheet.create({
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
-        shadowRadius: 4
+        shadowRadius: 4,
+        width: 200,
+        alignItems: "center",
+        marginTop: 10
     },
     emptyButtonText: {
         color: colors.white,
