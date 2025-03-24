@@ -6,6 +6,8 @@ import colors from "frontend/assets/styles/colors";
 import { useRouter } from 'expo-router';
 import SuccessModal from './SuccessModal';
 import routes from './routes';
+import defaultImageEmpresa from "../../assets/images/empresa.jpg";
+import defaultImageCamionero from "../../assets/images/camionero.png";
 
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -15,8 +17,10 @@ const ProfileDropdown = ({ user }) => {
   const router = useRouter();
   const { logout } = useAuth();
 
+  const defaultImage = user.rol === 'EMPRESA' ? defaultImageEmpresa : defaultImageCamionero;
+
   const handleLogout = () => {
-    setModalVisible(false); 
+    setModalVisible(false);
 
     logout();
   };
@@ -26,9 +30,7 @@ const ProfileDropdown = ({ user }) => {
       {/* Foto de perfil */}
       <TouchableOpacity onPress={() => setDropdownVisible(!dropdownVisible)}>
         <Image
-          source={{
-            uri: user?.foto || 'https://ui-avatars.com/api/?name=' + user?.nombre,
-          }}
+          source={user.foto ? { uri: user.foto } : defaultImage}
           style={styles.avatar}
         />
       </TouchableOpacity>
@@ -44,22 +46,20 @@ const ProfileDropdown = ({ user }) => {
             onPress={() => setDropdownVisible(false)}
           />
           <Image
-            source={{
-              uri: user?.foto || 'https://ui-avatars.com/api/?name=' + user?.nombre,
-            }}
+            source={user.foto ? { uri: user.foto } : defaultImage}
             style={styles.avatarDropdown}
           />
 
           <Text style={styles.dropdownRole}>{user.rol}</Text>
           <Text style={styles.dropdownHeader}>¡Hola, {user.nombre}!</Text>
           <Text style={styles.dropdownEmail}>{user.email}</Text>
-          
+
           {user.rol !== 'ADMIN' && (
             <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push(routes.profile)} >
               <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
             </TouchableOpacity>
           )}
-          
+
           <TouchableOpacity style={styles.dropdownButton} onPress={() => setModalVisible(true)}>
             <Text style={styles.dropdownButtonText2}>Cerrar sesión</Text>
           </TouchableOpacity>
@@ -94,9 +94,9 @@ const ProfileDropdown = ({ user }) => {
 
       {/* Modal de éxito de cierre de sesión*/}
       <SuccessModal
-          isVisible={successModalVisible}
-          onClose={() => setSuccessModalVisible(false)}
-          message={<Text>¡Hasta pronto!{'\n'}Cerrando sesión...</Text>}
+        isVisible={successModalVisible}
+        onClose={() => setSuccessModalVisible(false)}
+        message={<Text>¡Hasta pronto!{'\n'}Cerrando sesión...</Text>}
       />
     </View>
   );
@@ -154,8 +154,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   dropdownRole: {
-    fontWeight: 'bold', 
-    textTransform: 'uppercase', 
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
     marginBottom: 5,
     fontSize: 12,
     color: colors.gray,

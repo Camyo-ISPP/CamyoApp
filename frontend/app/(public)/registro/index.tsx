@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     paddingVertical: 20,
   },
   container: {
@@ -78,6 +78,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
   title: {
     fontSize: 24,

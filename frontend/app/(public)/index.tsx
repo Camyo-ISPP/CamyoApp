@@ -1,11 +1,12 @@
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, ScrollView, ActivityIndicator, Dimensions } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+const ProyectoLogo = require('frontend/assets/images/camyo.png');
 import BottomBar from '../_components/BottomBar';
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
@@ -13,9 +14,9 @@ const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
 const truckImage = require("../../assets/images/camion.png");
 import Titulo from "../_components/Titulo";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 export default function Index() {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -84,49 +85,41 @@ export default function Index() {
     <>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
-          <CamyoWebNavBar />
-          <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false} contentContainerStyle={{ scrollbarWidth: "none" }}>
-          
-          <View style={styles.heroContainer}>
-            <View style={styles.heroBox}>
-              <View style={styles.textContainer}>
-                <Text style={styles.heroText}>Donde los camioneros y las empresas se encuentran.</Text>
-                <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/login")}>
-                  <Text style={styles.registerButtonText}>Accede</Text>
-                  <Ionicons name="arrow-forward" size={25} color="white" style={styles.arrowIcon} />
-                </TouchableOpacity>
-              </View>
-              <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
-            </View>
-          </View>
-          
-          <View style={styles.separator} />
+          <CamyoWebNavBar /> {/* <CamyoWebNavBar onSearch={undefined} /> */}
+          <ScrollView style={styles.scrollview}>
+            <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              {data && data.map((item) => (
+                <View key={item.id} style={styles.card}>
+                  <Image source={defaultCompanyLogo} style={styles.companyLogo} />
+                  <View style={{width:"30%"}}>
+                    <Text style={styles.offerTitle}>{item.titulo}</Text>
 
-          <Titulo texto="Lista de Ofertas"/>
-          <View style={styles.listaContainer}>
-            {/* Columna de Carga */}
-            <View style={styles.columna}>
-              <View style={styles.columnaTituloContainer}>
-                <FontAwesome5 name="route" size={23} color={colors.secondary} />
-                <Text style={styles.columnaTitulo}>Carga</Text>
-              </View>
-              {data.filter(item => item.tipoOferta === "CARGA").map(item => <CardOferta key={item.id} item={item} />)}
-            </View>
+                    <View style={{ display: "flex", flexDirection: "row" }}>
+                      <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
+                      <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
+                      <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text> 
 
-            {/* Columna de Trabajo */}
-            <View style={styles.columna}>
-              <View style={styles.columnaTituloContainer}>
-                <MaterialIcons name="work-history" size={23
-                  
-                } color={colors.secondary} />
-                <Text style={styles.columnaTitulo}>Trabajo</Text>
-              </View>
-              {data.filter(item => item.tipoOferta === "TRABAJO").map(item => <CardOferta key={item.id} item={item} />)}
-            </View>
-          </View>
+                      <View style={{display:"flex",alignItems:"center",flexDirection:"row"}}>
+                        <Text style={styles.localizacion}>|</Text>
+                        <MaterialIcons name="location-on" size={20} color="#696969" />
+                        <Text style={styles.localizacion}>{item.localizacion}</Text>
+                      </View>
+                      
+                    </View>
 
-          <View style={styles.separator} />
+                    <Text style={styles.offerInfo}>{item.notas}</Text>
 
+                    <View/>
+                  </View>
+                    <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
+                    <TouchableOpacity style={styles.button} onPress={()=>router.push(`/oferta/${item.id}`)}>
+                    <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+                    <Text style={styles.buttonText}>Ver Detalles</Text>
+
+                    </TouchableOpacity>
+                </View>
+              ))}
+            </View >
           </ScrollView >
         </View >
       ) : (
@@ -189,8 +182,13 @@ const styles = StyleSheet.create({
   columna: {
     width: "50%",
     alignItems: "center",
+    backgroundColor: colors.mediumGray,
   },
-  columnaTituloContainer: {
+  searchIcon: {
+    color: colors.primary,
+    marginRight: 10,
+  },
+  searchView: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
@@ -222,6 +220,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    backgroundColor: colors.lightGray,
+    flex: 1,
+    borderRadius: 25,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -251,22 +254,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  registerButtonText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  arrowIcon: {
-    marginLeft: 10,
-  },
-  truckImage: {
-    position: "absolute",
-    marginLeft: "45%",
-    marginTop: "15%",
-    width: 450,
-    height: 300,
-    borderRadius: 10,
-    alignSelf: "center",
+  webContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: "center",
+    alignContent: "center",
+    flex: 1,
+    backgroundColor: colors.lightGray,
   },
 
   /* Estilos Ofertas */

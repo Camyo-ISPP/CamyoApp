@@ -11,10 +11,12 @@ import { useAuth } from "../../../contexts/AuthContext";
 import SuccessModal from "../../_components/SuccessModal";
 import EmpresaRoute from "../../../security/EmpresaRoute";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import BackButtonAbsolute from "@/app/_components/BackButtonAbsolute";
+import { useSubscriptionRules } from '../../../utils/useSubscriptionRules';
 
 const EditarOfertaScreen = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const [tipoOferta, setTipoOferta] = useState("");
   const router = useRouter();
   const { ofertaid } = useLocalSearchParams();
@@ -23,6 +25,7 @@ const EditarOfertaScreen = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const [isUserLoading, setIsUserLoading] = useState(true);
   const [isAuthLoaded, setIsAuthLoaded] = useState(false);
+  const { rules, loading: subscriptionLoading } = useSubscriptionRules();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -52,16 +55,6 @@ const EditarOfertaScreen = () => {
     tipoAnterior: "",
 
   });
-
-  useEffect(() => {
-    if (!user || !user.rol) {
-      router.replace("/login");
-    }
-  }, [user, router]);
-
-  if (!user || !user.rol) {
-    return null;
-  }
 
   const fetchOferta = async () => {
     try {
@@ -146,7 +139,7 @@ const EditarOfertaScreen = () => {
     fetchOferta();
   }, [isAuthLoaded]);
 
-  if (!isAuthLoaded || loading) {
+  if (!isAuthLoaded || loading || subscriptionLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -379,46 +372,37 @@ const EditarOfertaScreen = () => {
       console.error("Error al eliminar la oferta:", error);
     }
   };
-  // Función para renderizar cada input del formulario
-  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "") => (
+
+  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "", disabled = false) => {
+    const iconColor = disabled ? colors.lightGray : colors.primary;
+    return (
     <View style={{ width: '90%', marginBottom: 15 }}>
       <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
-        {icon}
+      <View style={[styles.inputContainerStyle, disabled && styles.disabledInputContainer]}>
+        {React.cloneElement(icon, { color: iconColor })}
         <TextInput
           style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline: "none", textAlignVertical: multiline ? 'top' : 'center' }}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
-          placeholder={placeholder}
+          placeholder={disabled ? "Solo disponible para clientes BASIC y PREMIUM." : placeholder}
           placeholderTextColor={colors.mediumGray}
+          onChangeText={(value) => !disabled && handleInputChange(field, value)}
+          editable={!disabled}
           value={formData[field]}
-          onChangeText={(value) => handleInputChange(field, value)}
         />
       </View>
+
+      {disabled && (
+        <TouchableOpacity onPress={() => router.replace("/suscripcion")}>
+          <Text style={styles.upgradeMessage}>
+            ¿Quieres más opciones? Mejora tu plan aquí.
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
-  );
-
-  const handleTipoOfertaChange = (nuevoTipo) => {
-    if (tipoOferta === nuevoTipo) return;
-
-    setTipoOferta(nuevoTipo);
-
-    // Limpiamos solo el estado local, sin afectar el backend todavía
-    setFormData((prevState) => ({
-      ...prevState,
-      fechaIncorporacion: nuevoTipo === "TRABAJO" ? "" : prevState.fechaIncorporacion,
-      jornada: nuevoTipo === "TRABAJO" ? "" : prevState.jornada,
-      mercancia: nuevoTipo === "CARGA" ? "" : prevState.mercancia,
-      peso: nuevoTipo === "CARGA" ? "" : prevState.peso,
-      origen: nuevoTipo === "CARGA" ? "" : prevState.origen,
-      destino: nuevoTipo === "CARGA" ? "" : prevState.destino,
-      distancia: nuevoTipo === "CARGA" ? "" : prevState.distancia,
-      inicio: nuevoTipo === "CARGA" ? "" : prevState.inicio,
-      finMinimo: nuevoTipo === "CARGA" ? "" : prevState.finMinimo,
-      finMaximo: nuevoTipo === "CARGA" ? "" : prevState.finMaximo,
-    }));
+    );
   };
 
   return (
@@ -426,11 +410,21 @@ const EditarOfertaScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.cardContainer}>
+            <BackButtonAbsolute />
             <Text style={styles.title}>Editar oferta</Text>
 
             {/* Campos generales */}
             {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
-            {renderInput("Experiencia (años)", "experiencia", <FontAwesome5 name="briefcase" size={20} color={colors.primary} />)}
+            {renderInput(
+                "Experiencia (años)",
+                "experiencia",
+                <FontAwesome5 name="briefcase" size={20} />,
+                "numeric",
+                false,
+                false,
+                "",
+                !rules.fullFormFields
+              )}
             <View style={styles.inputContainer}>
               <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
                 Licencia:
@@ -453,7 +447,7 @@ const EditarOfertaScreen = () => {
                         styles.licenciaText,
                         isSelected && styles.licenciaTextSelected
                       ]}>
-                        {licencia}
+                        {licencia} {/* Mostramos el valor con + en la UI */}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -468,7 +462,7 @@ const EditarOfertaScreen = () => {
             {/* Campos dinámicos según el tipo de oferta */}
             {tipoOferta === "TRABAJO" ? (
               <>
-                {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
+                {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
 
                 <View style={styles.inputContainer}>
                   <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
@@ -502,28 +496,27 @@ const EditarOfertaScreen = () => {
                 {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
                 {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
                 {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
-                {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
-                {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
-                {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "defaul", false, false, "AAAA-mm-dd")}
+                {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+                {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+                {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
               </>
             )}
-
 
             {/* Botón de publicación */}
             <View style={styles.buttonRow}>
               <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteOffer}>
                 <Text style={styles.deleteButtonText}>Eliminar Oferta</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
+            <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
                 <Text style={styles.publishButtonText}>Actualizar oferta</Text>
-              </TouchableOpacity>
+            </TouchableOpacity>
 
-              {/* Modal de éxito */}
-              <SuccessModal
-                isVisible={successModalVisible}
-                onClose={() => setSuccessModalVisible(false)}
+            {/* Modal de éxito */}
+            <SuccessModal
+              isVisible={successModalVisible}
+              onClose={() => setSuccessModalVisible(false)}
                 message="¡Tu oferta se actualizó correctamente!"
-              />
+            />
 
             </View>
 
@@ -539,7 +532,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.lightGray,
+    backgroundColor: colors.white,
     paddingVertical: 20,
     paddingTop: 80,
   },
@@ -555,6 +548,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 5,
     alignItems: "center",
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
   title: {
     fontSize: 28,
@@ -567,11 +563,31 @@ const styles = StyleSheet.create({
     width: "90%",
     marginBottom: 15,
   },
+  inputContainerStyle: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.mediumGray,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: colors.white,
+  },
+  disabledInputContainer: {
+    borderColor: colors.lightGray,
+    backgroundColor: colors.white,
+  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
     maxWidth: 600,
+  },
+  upgradeMessage: {
+    color: colors.primary,
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
   userTypeButton: {
     flex: 1,

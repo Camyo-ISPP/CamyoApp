@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platfor
 import colors from "frontend/assets/styles/colors";
 import React, { useEffect, useState, useRef } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Ionicons from '@expo/vector-icons/Ionicons';
 const ProyectoLogo = require('../../assets/images/camyoV1.png');
 import routes from "./routes";
 import PerfilDropdown from "./ProfileDropdown";
@@ -10,10 +11,12 @@ import OptionsDropdown from "./OptionsDropdown";
 import { useAuth } from "../../contexts/AuthContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function CamyoWebNavBar() {
+
+export default function CamyoWebNavBar({ onSearch }) {
   const { user, userToken, logout } = useAuth();
   const router = useRouter();
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1040);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const updateSize = () => {
@@ -22,6 +25,10 @@ export default function CamyoWebNavBar() {
     Dimensions.addEventListener("change", updateSize);
     return () => Dimensions.removeEventListener("change", updateSize);
   }, []);
+
+  const handleSearch = () => {
+    onSearch(searchQuery); 
+  };
 
   return (
     <LinearGradient colors={["rgba(255, 255, 255, 1)", "rgba(0, 0, 0, 0)"]}  style={styles.headerWeb}>
