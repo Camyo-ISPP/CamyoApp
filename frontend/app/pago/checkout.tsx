@@ -5,14 +5,14 @@ import TotalFooter from "../_components/TotalFooter";
 import {Products} from './datosdeprueba'
 import {Elements, PaymentElement, useElements, useStripe} from '@stripe/react-stripe-js';
 import {loadStripe, Stripe} from '@stripe/stripe-js';
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { usePayment } from "@/contexts/PaymentContext";
 import { useAuth } from "../../contexts/AuthContext";
+import SuccessModal from "../_components/SuccessModal";
 
 function IntegratedCheckout() {
     const { id } = usePayment();
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
-    const params = useLocalSearchParams();
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
 
     useEffect(() => {
@@ -29,7 +29,7 @@ function IntegratedCheckout() {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                compra: params.plan,
+                compra: id,
             })
         })
             .then(r => r.text())
@@ -39,18 +39,18 @@ function IntegratedCheckout() {
     }
 
     return <>
-        {params.plan === 'BASICO' || params.plan === 'PREMIUM' ?
+        {id === 'BASICO' || id === 'PREMIUM' ?
             <View>
                 <View style={{ marginTop: '100px' }}>
                     <Text>Integrated Checkout Example</Text>
-                    <Text>{id}</Text>
-                    <TotalFooter total={params.plan === 'BASICO' ? 24.99 : 49.99} mode={"subscription"}/>
+                    <Text>Plan elegido: {id === 'BASICO' ? 'Básico' : 'Premium'}</Text>
+                    <TotalFooter total={id === 'BASICO' ? 24.99 : 49.99} mode={"subscription"}/>
                     <Button onPress={createTransactionSecret} title="Iniciar pago"/>
 
                     {(transactionClientSecret === "" ?
                         <></>
                         : <Elements stripe={stripePromise} options={{clientSecret: transactionClientSecret}}>
-                            <CheckoutForm transactionClientSecret={transactionClientSecret} plan={params.plan}/>
+                            <CheckoutForm transactionClientSecret={transactionClientSecret} plan={id}/>
                         </Elements>)}
                 </View>
             </View>
@@ -66,11 +66,15 @@ function IntegratedCheckout() {
     </>
 }
 
-const CheckoutForm = (transactionClientSecret: any, plan: any) => {
+const CheckoutForm = (transactionClientSecret: any) => {
     const stripe = useStripe();
     const { user, userToken } = useAuth();
     const elements = useElements();
+    const [loading, setLoading] = useState(false);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+
     const handleSubmit = async () => {
+        setLoading(true);
         if (!stripe || !elements) {
             return;
         }
@@ -84,6 +88,7 @@ const CheckoutForm = (transactionClientSecret: any, plan: any) => {
         })
         if (result.error) {
             console.log(result.error.message);
+            setLoading(false);
         }
         stripe.retrievePaymentIntent(transactionClientSecret.transactionClientSecret)
         .then(function(result) {
@@ -98,7 +103,16 @@ const CheckoutForm = (transactionClientSecret: any, plan: any) => {
                     compra: transactionClientSecret.plan,
                 })
             })
-                .then(res => console.log(res))
+                .then(res => {
+                    if (res.status == 200) {
+                        setSuccessModalVisible(true);
+                        setTimeout(() => {
+                                setSuccessModalVisible(false);
+                                router.replace("/");
+                            }, 1000);
+                    }
+                })
+                .then(() => setLoading(false))
         });
         
     };
@@ -106,7 +120,12 @@ const CheckoutForm = (transactionClientSecret: any, plan: any) => {
     return <>
         <View>
             <PaymentElement/>
-            <Button disabled={!stripe} onPress={handleSubmit} title="Pagar"/>
+            <Button disabled={!stripe || loading} onPress={handleSubmit} title="Pagar"/>
+            <SuccessModal
+                isVisible={successModalVisible}
+                onClose={() => setSuccessModalVisible(false)}
+                message="¡Pago exitoso! Redirigiendo..."
+            />
         </View>
     </>
 }
