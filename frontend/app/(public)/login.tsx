@@ -12,7 +12,7 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const LoginScreen = () => {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -36,10 +36,16 @@ const LoginScreen = () => {
       const { token } = response.data;
       login(response.data, token);
 
+      const rol = response.data.roles[0]
+
       setSuccessModalVisible(true);
         setTimeout(() => {
           setSuccessModalVisible(false);
-          router.replace("/");
+          if (rol == "ADMIN") {
+            router.replace("/workinprogress");
+          } else {
+            router.replace("/");
+          }
         }, 1000);
 
     } catch (error) {

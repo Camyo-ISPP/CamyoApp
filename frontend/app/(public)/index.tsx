@@ -6,12 +6,12 @@ import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import BottomBar from './_components/BottomBar';
+import BottomBar from '../_components/BottomBar';
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import CamyoWebNavBar from "./_components/CamyoNavBar";
-const defaultCompanyLogo = require("../assets/images/defaultCompImg.png");
-const truckImage = require("../assets/images/camion.png");
-import Titulo from "./_components/Titulo";
+import CamyoWebNavBar from "../_components/CamyoNavBar";
+const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
+const truckImage = require("../../assets/images/camion.png");
+import Titulo from "../_components/Titulo";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 

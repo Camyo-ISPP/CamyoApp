@@ -10,7 +10,7 @@ import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const EditProfileScreen = () => {
+const EditarPerfilCamionero = () => {
   const { width } = useWindowDimensions();
   const isWideScreen = width > 1074;
   const router = useRouter();
@@ -94,7 +94,7 @@ const EditProfileScreen = () => {
         setSuccessModalVisible(true);
         setTimeout(() => {
           setSuccessModalVisible(false);
-          router.push("/miperfilcamionero");
+          router.push("/miperfil");
         }, 1000);
       }
     } catch (error) {
@@ -167,4 +167,4 @@ const EditProfileScreen = () => {
   );
 };
 
-export default EditProfileScreen;
+export default EditarPerfilCamionero;
