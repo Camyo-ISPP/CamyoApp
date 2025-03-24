@@ -1,6 +1,7 @@
 package com.camyo.backend.oferta;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.camyo.backend.camionero.Licencia;
 
@@ -25,7 +26,7 @@ public class OfertaConCargaDTO {
     private String origen;
     private String destino;
     private Integer distancia;
-    private LocalDateTime inicio;
-    private LocalDateTime finMinimo;
-    private LocalDateTime finMaximo;
+    private LocalDate inicio;
+    private LocalDate finMinimo;
+    private LocalDate finMaximo;
 }
