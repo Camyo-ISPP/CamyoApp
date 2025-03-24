@@ -24,6 +24,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const { user, userToken } = useAuth();
 
+  const isCamionero = user?.roles?.includes('CAMIONERO');
+
   const fetchSubscriptionLevel = async (empresaId: number) => {
     try {
       const response = await axios.get(`${BACKEND_URL}/suscripciones/nivel/${empresaId}`, {
@@ -49,15 +51,24 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setLoading(false);
         return;
       }
-      if (user?.rol === 'CAMIONERO') {
-        setSubscriptionLevel('GRATIS');
-        setLoading(false);
-        return;
-      }
+
       try {
-        const response = await axios.get(`${BACKEND_URL}/empresas/${user.id}`);
-        const empresaId = response.data.id;
-        await fetchSubscriptionLevel(empresaId);
+        if (isCamionero) {
+          setSubscriptionLevel('GRATIS');
+          setLoading(false);
+          return;
+        }
+
+        // If user has userId field
+        if (user?.userId) {
+          const response = await axios.get(`${BACKEND_URL}/empresas/${user.id}`);
+          const empresaId = response.data.id;
+          await fetchSubscriptionLevel(empresaId);
+        } else {
+          setSubscriptionLevel('GRATIS');
+          setLoading(false);
+          return;
+        }
       } catch (err) {
         console.error('Error al obtener datos de la empresa o suscripción:', err);
         setSubscriptionLevel('GRATIS'); // Default si hay error
