@@ -8,20 +8,9 @@ import {loadStripe, Stripe} from '@stripe/stripe-js';
 import { useLocalSearchParams } from "expo-router";
 
 function IntegratedCheckout() {
-
-    const params = useLocalSearchParams();
-    const [item] = useState<ItemData>(Products)
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
+    const params = useLocalSearchParams();
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const onCustomerNameChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-        setName(ev.target.value)
-    }
-
-    const onCustomerEmailChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-        setEmail(ev.target.value)
-    }
 
     useEffect(() => {
         // Make sure to call `loadStripe` outside of a component’s render to avoid
@@ -55,7 +44,7 @@ function IntegratedCheckout() {
                     {(transactionClientSecret === "" ?
                         <></>
                         : <Elements stripe={stripePromise} options={{clientSecret: transactionClientSecret}}>
-                            <CheckoutForm/>
+                            <CheckoutForm transactionClientSecret={transactionClientSecret} plan={params.plan}/>
                         </Elements>)}
                 </View>
             </View>
@@ -71,8 +60,7 @@ function IntegratedCheckout() {
     </>
 }
 
-const CheckoutForm = () => {
-
+const CheckoutForm = (transactionClientSecret: any, plan: any) => {
     const stripe = useStripe();
     const elements = useElements();
     const handleSubmit = async () => {
@@ -83,13 +71,25 @@ const CheckoutForm = () => {
         const result = await stripe.confirmPayment({
             elements,
             confirmParams: {
-                return_url: "https://example.com",
+                return_url: "http://localhost:8081/miperfil",
             },
-        });
-
+        })
         if (result.error) {
             console.log(result.error.message);
         }
+        stripe.retrievePaymentIntent(transactionClientSecret.transactionClientSecret)
+        .then(function(result) {
+            fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/pago/apply_subscription", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    intent: result.paymentIntent?.id,
+                    compra: transactionClientSecret.plan,
+                })
+            })
+                .then(res => console.log(res))
+        });
+        
     };
 
     return <>
