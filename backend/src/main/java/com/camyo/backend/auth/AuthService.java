@@ -77,9 +77,6 @@ public class AuthService {
 		if (request.getTarjetasAutonomo() != null) {
 			camionero.setTarjetasAutonomo(request.getTarjetasAutonomo());
 		}
-
-		
-
 	}
 
 	@Transactional
@@ -101,9 +98,7 @@ public class AuthService {
 		Empresa empresa = new Empresa();
 		empresa.setUsuario(usuario);
 		empresa.setNif(request.getNif());
-		if (request.getWeb() != null) {
-			empresa.setWeb(request.getWeb());
-		}
+		empresa.setWeb(request.getWeb());
 		empresaService.guardarEmpresa(empresa);
 		suscripcionService.asignarSuscripcion(empresa.getId(), PlanNivel.GRATIS, null);
 	}

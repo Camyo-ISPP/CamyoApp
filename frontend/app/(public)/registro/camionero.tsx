@@ -41,7 +41,7 @@ const CamioneroRegisterScreen = () => {
     dni: "",
     licencias: [],
     disponibilidad: "",
-    experiencia: 0,
+    experiencia: null,
     tieneCAP: false,
     expiracionCAP: "",
     isAutonomo: false,
@@ -88,6 +88,128 @@ const CamioneroRegisterScreen = () => {
   const handleRegister = async () => {
     const licenciasBackend = formData.licencias.map((licencia) => licencias_backend[licencias.indexOf(licencia)]);
 
+    // Validación de nombre y apellidos
+    if (!formData.nombre){
+      setErrorMessage("El campo nombre y apellidos es obligatorio.");
+      return;
+    }
+    if (formData.nombre.length > 100){
+      setErrorMessage("El campo nombre y apellidos es demasiado largo.");
+      return; 
+    }
+
+    // Validación de nombre de usuario
+    if (!formData.username){
+      setErrorMessage("El campo nombre de usuario es obligatorio.");
+      return;
+    }
+    if (formData.username.length > 30){
+      setErrorMessage("El campo nombre de usuario es demasiado largo.");
+      return;
+    }
+
+    // Validación de correo electrónico
+    if (!formData.email){
+      setErrorMessage("El campo correo electrónico es obligatorio.");
+      return;
+    }
+    if (formData.email.length > 255){
+      setErrorMessage("El campo correo electrónico es demasiado largo.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setErrorMessage("El formato del correo electrónico no es válido.");
+      return;
+    }
+
+    // Validación de contraseña
+    if (!formData.password){
+      setErrorMessage("El campo contraseña es obligatorio.");
+      return;
+    }
+
+    // Validación de número de teléfono
+    if (!formData.telefono){
+      setErrorMessage("El campo teléfono es obligatorio.");
+      return;
+    }
+    if (!/^\d{9}$/.test(formData.telefono)) {
+      setErrorMessage("El número de teléfono debe tener 9 dígitos.");
+      return;
+    }
+
+    // Validación de la localización
+    if (!formData.localizacion){
+      setErrorMessage("El campo localización es obligatorio.");
+      return;
+    }
+    if (formData.localizacion.length > 200){
+      setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+
+    // Validación de la descripción
+    if (formData.descripcion && formData.descripcion.length > 500){
+      setErrorMessage("El campo descripción es demasiado largo.");
+      return;
+    }
+
+    // Validación del DNI
+    if (!formData.dni){
+      setErrorMessage("El campo DNI es obligatorio.");
+      return;
+    }
+    if (!/^\d{8}[A-Z]$/.test(formData.dni)) {
+      setErrorMessage("El formato del DNI no es válido.");
+      return;
+    }
+
+    // Validación de licencias
+    if (formData.licencias.length === 0){
+      setErrorMessage("Debe elegir al menos una licencia.");
+      return;
+    }
+
+    // Validación de disponibilidad
+    if (!formData.disponibilidad){
+      setErrorMessage("El campo disponibilidad es obligatorio.");
+      return;
+    }
+
+    // Validación de experiencia
+    if (!formData.experiencia){
+      setErrorMessage("El campo años de experiencia es obligatorio.");
+      return;
+    }
+    if (isNaN(formData.experiencia)) {
+      setErrorMessage("El campo años de experiencia debe ser un número.");
+      return;
+    }
+    if (formData.experiencia < 0) {
+      setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
+      return;
+    }
+
+    // Validación de fecha de expiración del CAP
+    if (formData.tieneCAP){
+      if(!formData.expiracionCAP){
+        setErrorMessage("El campo fecha de expiración del CAP es obligatorio.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.expiracionCAP)) {
+        setErrorMessage("El formato de la fecha de expiración del CAP no es válido.");
+        return;
+      }
+    }
+
+    // Validación de tarjetas de autónomo
+    if (formData.isAutonomo){
+      if(formData.tarjetas.length === 0){
+        setErrorMessage("Debe elegir al menos una tarjeta.");
+        return;
+      }
+    }
+
     // Datos del usuario
     const userData = {
       nombre: formData.nombre,
@@ -102,7 +224,7 @@ const CamioneroRegisterScreen = () => {
       dni: formData.dni,
       licencias: licenciasBackend,
       disponibilidad: formData.disponibilidad,
-      experiencia: parseInt(formData.experiencia.toString()),
+      experiencia: parseInt(formData.experiencia),
       tieneCAP: formData.tieneCAP,
       expiracionCAP: formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
       isAutonomo: formData.isAutonomo,
@@ -152,7 +274,7 @@ const CamioneroRegisterScreen = () => {
   };
 
   // Render input function
-  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false) => (
+  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "") => (
     <View style={{ width: '90%', marginBottom: 15 }}>
       <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
       <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
@@ -164,6 +286,8 @@ const CamioneroRegisterScreen = () => {
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
           onChangeText={(value) => handleInputChange(field, value)}
+          placeholder={placeholder}
+          placeholderTextColor="gray"
         />
       </View>
     </View>
@@ -218,7 +342,7 @@ const CamioneroRegisterScreen = () => {
                   <Text style={globalStyles.buttonText}>Cambiar</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setFormData({ ...formData, fotoUri: null })} style={[globalStyles.button, { backgroundColor: colors.red, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
+                <TouchableOpacity onPress={() => setFormData({ ...formData, fotoUri: null, foto: null })} style={[globalStyles.button, { backgroundColor: colors.red, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
                   <FontAwesome5 name="trash" size={18} color={colors.white} style={{ marginRight: 8 }} />
                   <Text style={globalStyles.buttonText}>Borrar</Text>
                 </TouchableOpacity>
@@ -227,16 +351,16 @@ const CamioneroRegisterScreen = () => {
           </View>
 
           {/* Campos del formulario */}
-          {renderInput("Nombre y Apellidos", "nombre", <FontAwesome5 name="user" size={20} color={colors.primary} />)}
-          {renderInput("Nombre de Usuario", "username", <FontAwesome5 name="user-alt" size={20} color={colors.primary} />)}
-          {renderInput("Email", "email", <MaterialIcons name="email" size={20} color={colors.primary} />, "email-address")}
+          {renderInput("Nombre y apellidos", "nombre", <FontAwesome5 name="user" size={20} color={colors.primary} />)}
+          {renderInput("Nombre de usuario", "username", <FontAwesome5 name="user-alt" size={20} color={colors.primary} />)}
+          {renderInput("Correo electrónico", "email", <MaterialIcons name="email" size={20} color={colors.primary} />, "email-address", false, false, "usuario@ejemplo.com")}
           {renderPasswordInput()}
-          {renderInput("Teléfono", "telefono", <MaterialIcons name="phone" size={20} color={colors.primary} />, "phone-pad")}
+          {renderInput("Teléfono", "telefono", <MaterialIcons name="phone" size={20} color={colors.primary} />, "phone-pad", false, false, "987654321")}
           {renderInput("Localización", "localizacion", <MaterialIcons name="location-pin" size={20} color={colors.primary} />)}
           {renderInput("Descripción", "descripcion", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
 
           {/* Campos del formulario específicos de camionero */}
-          {renderInput("DNI", "dni", <FontAwesome5 name="address-card" size={20} color={colors.primary} />)}
+          {renderInput("DNI", "dni", <FontAwesome5 name="address-card" size={20} color={colors.primary} />, "default", false, false, "12345678A")}
           <View style={styles.inputContainer}>
             <Text style={{ color: colors.secondary, fontSize: 16, marginRight: 10, flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
               Selecciona tus licencias:
@@ -281,7 +405,7 @@ const CamioneroRegisterScreen = () => {
           {formData.tieneCAP && (
             <>
               {/* Expiración del CAP */}
-              {renderInput("Fecha de expiración del CAP (dd-mm-AAAA)", "expiracionCAP", <FontAwesome5 name="calendar" size={20} color={colors.primary} />, "default")}
+              {renderInput("Fecha de expiración del CAP", "expiracionCAP", <FontAwesome5 name="calendar" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
             </>
           )}
 

@@ -29,8 +29,9 @@ public class Usuario {
     @Pattern(regexp = "\\d{9}", message = "El número de teléfono debe tener 9 dígitos")
     private String telefono;
 
+    @Size(max = 30, message = "El nombre de usuario no puede tener más de 30 caracteres")
     @Column(unique = true)
-	  String username;
+	String username;
     
     @Column(unique = true)
     @Email

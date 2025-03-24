@@ -110,7 +110,7 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + signUpRequest.getEmail() + "' ya está registrado."));
 		}
 		if (camioneroService.obtenerCamioneroPorDNI(signUpRequest.getDni()).isPresent()) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' ya está asociado a otra cuenta. Verifica tus datos."));
+			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' ya está asociado a otra cuenta."));
 		}
 		authService.createCamionero(signUpRequest);
 		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
@@ -130,7 +130,7 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + signUpRequest.getEmail() + "' ya está registrado."));
 		}
 		if (empresaService.obtenerEmpresaPorNif(signUpRequest.getNif()).isPresent()) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' ya está registrado. Verifica tus datos."));
+			return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' ya está registrado."));
 		}
 		authService.createEmpresa(signUpRequest);
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
