@@ -1,13 +1,15 @@
 import {Button, TextInput, View, Text} from "react-native";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import CartItem, {ItemData} from "../_components/CartItem";
 import TotalFooter from "../_components/TotalFooter";
 import {Products} from './datosdeprueba'
 import {Elements, PaymentElement, useElements, useStripe} from '@stripe/react-stripe-js';
 import {loadStripe, Stripe} from '@stripe/stripe-js';
 import { useLocalSearchParams } from "expo-router";
+import { usePayment } from "@/contexts/PaymentContext";
 
 function IntegratedCheckout() {
+    const {id} = usePayment();
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
     const params = useLocalSearchParams();
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
@@ -38,6 +40,7 @@ function IntegratedCheckout() {
             <View>
                 <View style={{ marginTop: '100px' }}>
                     <Text>Integrated Checkout Example</Text>
+                    <Text>{id}</Text>
                     <TotalFooter total={params.plan === 'BASICO' ? 24.99 : 49.99} mode={"subscription"}/>
                     <Button onPress={createTransactionSecret} title="Iniciar pago"/>
 
@@ -73,6 +76,7 @@ const CheckoutForm = (transactionClientSecret: any, plan: any) => {
             confirmParams: {
                 return_url: "http://localhost:8081/miperfil",
             },
+            redirect: "if_required",
         })
         if (result.error) {
             console.log(result.error.message);

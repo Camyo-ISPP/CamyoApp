@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -9,10 +9,12 @@ import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import { usePayment } from "../../contexts/PaymentContext";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilEmpresa = () => {
+  const { id } = usePayment();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -113,7 +115,7 @@ const MiPerfilEmpresa = () => {
 
                 <TouchableOpacity
                   style={styles.mejorarPlanButton}
-                  onPress={() => router.push(`/`)}
+                  onPress={() => router.push(`/pago/checkout`)}
                 >
                   {/** TODO: Add route to upgrade plan */}
                   <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
