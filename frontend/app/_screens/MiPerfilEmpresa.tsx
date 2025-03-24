@@ -3,13 +3,15 @@ import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { Link, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { usePayment } from "../../contexts/PaymentContext";
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useFocusEffect } from '@react-navigation/native';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -21,6 +23,14 @@ const MiPerfilEmpresa = () => {
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
+  const { refreshSubscriptionLevel } = useSubscription();
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshSubscriptionLevel();
+    }, [])
+  );
+
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -116,7 +126,7 @@ const MiPerfilEmpresa = () => {
 
                 <TouchableOpacity
                   style={styles.mejorarPlanButton}
-                  onPress={() => router.push(`/pago/checkout`)}
+                  onPress={() => router.push(`/suscripcion`)}
                 >
                   {/** TODO: Add route to upgrade plan */}
                   <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />

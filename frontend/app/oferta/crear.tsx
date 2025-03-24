@@ -196,7 +196,7 @@ const CrearOfertaScreen = () => {
       </View>
 
       {disabled && (
-        <TouchableOpacity onPress={() => router.replace("/")}>
+        <TouchableOpacity onPress={() => router.replace("/suscripcion")}>
           <Text style={styles.upgradeMessage}>
             ¿Quieres más opciones? Mejora tu plan aquí.
           </Text>

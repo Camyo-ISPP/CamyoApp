@@ -32,7 +32,8 @@ function RootLayout() {
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
         chat:"Mis Mensajes",
-        "pago/checkout": "Pago"
+        "pago/checkout": "Pago",
+        suscripcion: "Planes de Suscripción",
       };
 
       const currentSegment = segments.join("/");
@@ -73,6 +74,8 @@ function RootLayout() {
         <Stack.Screen name="buscar-ofertas" />
         <Stack.Screen name="chat" />
         <Stack.Screen name="chat/list" />
+        
+        <Stack.Screen name="suscripcion" />
 
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />
