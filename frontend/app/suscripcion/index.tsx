@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import axios from "axios";
-
+import SuccessModal from "../_components/SuccessModal";
 
 const SubscriptionPlans = () => {
 
@@ -22,99 +22,104 @@ const SubscriptionPlans = () => {
     const [currentPlan, setCurrentPlan] = useState<string | null>(null);
     const [loadingPlan, setLoadingPlan] = useState<boolean>(true);
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     useEffect(() => {
         if (user === undefined) {
-          return;
+            return;
         }
-    
+
         setIsAuthLoaded(true);
-    
+
     }, [user]);
-    
+
     useEffect(() => {
         if (!isAuthLoaded) {
-          return;
+            return;
         }
-    
+
         if (user === undefined) {
-          return; 
+            return;
         }
-        setIsUserLoading(false); 
+        setIsUserLoading(false);
     }, [isAuthLoaded]);
-    
+
     useEffect(() => {
         const fetchPlan = async () => {
-          if (!user?.id || !userToken) return;
-      
-          try {
-            const response = await axios.get(`${BACKEND_URL}/suscripciones/nivel/${user.id}`, {
-              headers: {
-                Authorization: `Bearer ${userToken}`,
-              },
-            });
-      
-            setCurrentPlan(response.data);
-          } catch (error) {
-            console.error("Error al obtener el plan de suscripción:", error);
-            setCurrentPlan("GRATIS");
-          } finally {
-            setLoadingPlan(false);
-          }
+            if (!user?.id || !userToken) return;
+
+            try {
+                const response = await axios.get(`${BACKEND_URL}/suscripciones/nivel/${user.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                    },
+                });
+
+                setCurrentPlan(response.data);
+            } catch (error) {
+                console.error("Error al obtener el plan de suscripción:", error);
+                setCurrentPlan("GRATIS");
+            } finally {
+                setLoadingPlan(false);
+            }
         };
-      
+
         fetchPlan();
     }, [user?.id, userToken]);
-      
+
     if (!isAuthLoaded) {
         return (
-          <View>
-            <ActivityIndicator size="large" color={colors.primary} />
-          </View>
+            <View>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
         );
     }
 
     const handleChangePlan = async (planLevel: string) => {
         if (!user || !user.id || !userToken) return;
-      
+
         try {
             setLoadingPlan(true);
-        
+
             const response = await axios.post(
                 `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
                 {},
                 {
-                headers: {
-                    Authorization: `Bearer ${userToken}`,
-                },
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                    },
                 }
             );
-        
+
             if (response.status === 201) {
-                setCurrentPlan(planLevel); 
-                alert(`¡Tu plan ha sido cambiado a ${formatPlanLevel(planLevel)}!`);
+                setCurrentPlan(planLevel);
+                setSuccessModalVisible(true);
+                setTimeout(() => {
+                    setSuccessModalVisible(false);
+                }, 1000);
             } else {
                 alert("No se pudo cambiar el plan.");
             }
+
         } catch (error) {
             alert("Ocurrió un error al cambiar el plan.");
         } finally {
-           setLoadingPlan(false);
+            setLoadingPlan(false);
         }
     };
 
     const formatPlanLevel = (plan: string): string => {
         switch (plan.toUpperCase()) {
-          case "GRATIS":
-            return "GRATIS";
-          case "BASIC":
-            return "BÁSICO";
-          case "PREMIUM":
-            return "PREMIUM";
-          default:
-            return plan;
+            case "GRATIS":
+                return "GRATIS";
+            case "BASIC":
+                return "BÁSICO";
+            case "PREMIUM":
+                return "PREMIUM";
+            default:
+                return plan;
         }
-      };
+    };
 
     const getPlanIcon = (planLevel: string) => {
         switch (planLevel) {
@@ -137,8 +142,8 @@ const SubscriptionPlans = () => {
         planLevel: string;
         currentPlan: string;
         onChangePlan: (planLevel: string) => void;
-        }> = ({ title, price, description, borderColor, planLevel, currentPlan, onChangePlan }) => {
-    
+    }> = ({ title, price, description, borderColor, planLevel, currentPlan, onChangePlan }) => {
+
         const isCurrentPlan = planLevel === currentPlan;
         const buttonText = isCurrentPlan ? "Plan actual" : "Cambiar a este plan";
         const scaleValue = useRef(new Animated.Value(1)).current;
@@ -153,7 +158,7 @@ const SubscriptionPlans = () => {
                 }).start();
             }
         };
-    
+
         const handleMouseLeave = () => {
             if (Platform.OS === "web") {
                 Animated.timing(scaleValue, {
@@ -164,7 +169,7 @@ const SubscriptionPlans = () => {
                 }).start();
             }
         };
-    
+
         return (
             <Animated.View
                 style={[
@@ -178,7 +183,7 @@ const SubscriptionPlans = () => {
                 <View style={styles.planTitleContainer}>
                     {getPlanIcon(planLevel)}
                     <Text style={styles.planTitle}>{title}</Text>
-                </View>            
+                </View>
                 <Text style={styles.planPrice}>{price}</Text>
                 <Text style={styles.planDescription}>{description}</Text>
                 <TouchableOpacity
@@ -229,6 +234,13 @@ const SubscriptionPlans = () => {
                                 planLevel="PREMIUM"
                                 currentPlan={currentPlan}
                                 onChangePlan={handleChangePlan}
+                            />
+
+                            {/* Modal de éxito */}
+                            <SuccessModal
+                                isVisible={successModalVisible}
+                                onClose={() => setSuccessModalVisible(false)}
+                                message="¡Cambio de plan exitoso!"
                             />
                         </View>
                     </ScrollView>
@@ -323,17 +335,17 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     planTitleContainer: {
-        flexDirection: "row",     
-        alignItems: "center",     
-        justifyContent: "center",          
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         marginBottom: 5,
-      },
+    },
     planTitle: {
         fontSize: 18,
         fontWeight: "bold",
         color: colors.primary,
-        marginLeft: 8, 
-      },
+        marginLeft: 8,
+    },
     planPrice: {
         fontSize: 22,
         fontWeight: "bold",
