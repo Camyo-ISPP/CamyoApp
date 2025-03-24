@@ -85,41 +85,49 @@ export default function Index() {
     <>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
-          <CamyoWebNavBar /> {/* <CamyoWebNavBar onSearch={undefined} /> */}
-          <ScrollView style={styles.scrollview}>
-            <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              {data && data.map((item) => (
-                <View key={item.id} style={styles.card}>
-                  <Image source={defaultCompanyLogo} style={styles.companyLogo} />
-                  <View style={{width:"30%"}}>
-                    <Text style={styles.offerTitle}>{item.titulo}</Text>
+          <CamyoWebNavBar onSearch={undefined}/>
+          <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false} contentContainerStyle={{ scrollbarWidth: "none" }}>
 
-                    <View style={{ display: "flex", flexDirection: "row" }}>
-                      <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
-                      <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-                      <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text> 
-
-                      <View style={{display:"flex",alignItems:"center",flexDirection:"row"}}>
-                        <Text style={styles.localizacion}>|</Text>
-                        <MaterialIcons name="location-on" size={20} color="#696969" />
-                        <Text style={styles.localizacion}>{item.localizacion}</Text>
-                      </View>
-                      
-                    </View>
-
-                    <Text style={styles.offerInfo}>{item.notas}</Text>
-
-                    <View/>
-                  </View>
-                    <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                    <TouchableOpacity style={styles.button} onPress={()=>router.push(`/oferta/${item.id}`)}>
-                    <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
-                    <Text style={styles.buttonText}>Ver Detalles</Text>
-
-                    </TouchableOpacity>
+            <View style={styles.heroContainer}>
+              <View style={styles.heroBox}>
+                <View style={styles.textContainer}>
+                  <Text style={styles.heroText}>Donde los camioneros y las empresas se encuentran.</Text>
+                  <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/login")}>
+                    <Text style={styles.registerButtonText}>Accede</Text>
+                    <Ionicons name="arrow-forward" size={25} color="white" style={styles.arrowIcon} />
+                  </TouchableOpacity>
                 </View>
-              ))}
-            </View >
+                <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
+              </View>
+            </View>
+            
+            <View style={styles.separator} />
+
+            <Text style={styles.title}> Lista de Ofertas </Text>
+            <View style={styles.listaContainer}>
+              {/* Columna de Carga */}
+              <View style={styles.columna}>
+                <View style={styles.columnaTituloContainer}>
+                  <FontAwesome5 name="route" size={23} color={colors.secondary} />
+                  <Text style={styles.columnaTitulo}>Carga</Text>
+                </View>
+                {data.filter(item => item.tipoOferta === "CARGA").map(item => <CardOferta key={item.id} item={item} />)}
+              </View>
+
+              {/* Columna de Trabajo */}
+              <View style={styles.columna}>
+                <View style={styles.columnaTituloContainer}>
+                  <MaterialIcons name="work-history" size={23
+                    
+                  } color={colors.secondary} />
+                  <Text style={styles.columnaTitulo}>Trabajo</Text>
+                </View>
+                {data.filter(item => item.tipoOferta === "TRABAJO").map(item => <CardOferta key={item.id} item={item} />)}
+              </View>
+            </View>
+
+            <View style={styles.separator} />
+
           </ScrollView >
         </View >
       ) : (
@@ -164,6 +172,14 @@ const styles = StyleSheet.create({
     bottom: 40,
   },
 
+  title: {
+    fontSize: 40,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 100,
+    marginBottom: 20,
+  },
+
   separator: {
     width: "80%",
     height: 2,
@@ -182,13 +198,8 @@ const styles = StyleSheet.create({
   columna: {
     width: "50%",
     alignItems: "center",
-    backgroundColor: colors.mediumGray,
   },
-  searchIcon: {
-    color: colors.primary,
-    marginRight: 10,
-  },
-  searchView: {
+  columnaTituloContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
@@ -220,11 +231,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.lightGray,
-    flex: 1,
-    borderRadius: 25,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -254,13 +260,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  webContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: "center",
-    alignContent: "center",
-    flex: 1,
-    backgroundColor: colors.lightGray,
+  registerButtonText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  arrowIcon: {
+    marginLeft: 10,
+  },
+  truckImage: {
+    position: "absolute",
+    marginLeft: "45%",
+    marginTop: "15%",
+    width: 450,
+    height: 300,
+    borderRadius: 10,
+    alignSelf: "center",
   },
 
   /* Estilos Ofertas */
