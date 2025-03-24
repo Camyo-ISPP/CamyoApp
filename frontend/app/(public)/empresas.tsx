@@ -63,7 +63,7 @@ const EmpresasLista = () => {
           </View>
 
           <View>
-            {empresa.id === user.id ? (
+            {user && empresa.id === user.id ? (
               <View style={styles.ownOfferBadge}>
                 <MaterialCommunityIcons name="office-building" size={15} color="white" style={styles.detailsIcon} />
                 <Text style={styles.ownOfferText}>Tu Empresa</Text>
