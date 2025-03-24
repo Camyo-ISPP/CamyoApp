@@ -33,9 +33,9 @@ const PublicEmpresa = ({ userId }) => {
   const [resenaForm, setResenaForm] = useState({ valoracion: 5, comentarios: "" });
   const [resenas, setResenas] = useState([]);
   const [editResenaId, setEditResenaId] = useState(null);
+  const [yaEscribioResena, setYaEscribioResena] = useState(false);
 
   useEffect(() => {
-    // Si el usuario autenticado es la empresa, redirigir a su perfil
     if (user?.id == userId) {
       router.push("/miperfil");
       return;
@@ -70,6 +70,8 @@ const PublicEmpresa = ({ userId }) => {
     try {
       const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
       setResenas(response.data);
+      const yaExiste = response.data.some(res => res.comentador?.id === user?.userId);
+      setYaEscribioResena(yaExiste);
     } catch (error) {
       console.error("Error al cargar las reseñas:", error);
     }
@@ -84,7 +86,6 @@ const PublicEmpresa = ({ userId }) => {
 
   return (
     <>
-
       <Modal visible={showResenaModal} transparent animationType="fade">
         <View style={{
           flex: 1,
@@ -270,7 +271,7 @@ const PublicEmpresa = ({ userId }) => {
                       <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
                       <Text style={styles.publishButtonText}>Contactar</Text>
                     </TouchableOpacity>
-                    {user && user.rol === "CAMIONERO" && (
+                    {user && user.rol === "CAMIONERO" && !yaEscribioResena &&(
                       <TouchableOpacity
                         style={[styles.publishButton, { marginTop: 10 }]}
                         onPress={() => {
