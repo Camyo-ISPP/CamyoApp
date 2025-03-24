@@ -14,11 +14,15 @@ import SuccessModal from "../_components/SuccessModal";
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const PublicCamionero = ({ userId }) => {
-    const { user } = useAuth();
+    const { user, userToken } = useAuth();
     const router = useRouter();
 
     const [showResenaModal, setShowResenaModal] = useState(false);
     const [resenaForm, setResenaForm] = useState({ valoracion: 5, comentarios: "" });
+    const [confirmDeleteModalVisible, setConfirmDeleteModalVisible] = useState(false);
+    const [resenaAEliminar, setResenaAEliminar] = useState(null);
+    const [editResenaId, setEditResenaId] = useState(null);
+    const [yaEscribioResena, setYaEscribioResena] = useState(false);
 
     const [resenas, setResenas] = useState([]);
 
@@ -52,13 +56,15 @@ const PublicCamionero = ({ userId }) => {
         try {
             const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
             setResenas(response.data);
+            const yaExiste = response.data.some(res => res.comentador?.id === user?.userId);
+            setYaEscribioResena(yaExiste);
         } catch (error) {
             console.error("Error al cargar las reseñas:", error);
         }
     };
 
     useEffect(() => {
-        if (user2?.id) {
+        if (user2?.userId) {
             fetchResenas();
         }
     }, [user2]);
@@ -167,20 +173,32 @@ const PublicCamionero = ({ userId }) => {
                                         };
 
                                         const headers = {
-                                            Authorization: `Bearer ${user.token}`, // Usa userToken si lo tienes separado
+                                            Authorization: `Bearer ${userToken}`,
                                             "Content-Type": "application/json",
                                         };
 
-                                        const res = await axios.post(`${BACKEND_URL}/resenas`, payload, { headers });
+                                        if (editResenaId) {
+                                            console.log("Editando reseña con ID:", editResenaId);
+                                            const res = await axios.put(`${BACKEND_URL}/resenas/${editResenaId}`, payload, { headers });
 
-                                        if (res.status === 201) {
-                                            setShowResenaModal(false);
-                                            setResenaForm({ valoracion: 5, comentarios: "" });
-                                            fetchResenas();
-                                            setSuccessModalVisible(true);
-                                            setTimeout(() => {
-                                                setSuccessModalVisible(false);
-                                            }, 1000);
+                                            if (res.status === 200) {
+                                                setSuccessModalVisible(true);
+                                                setTimeout(() => setSuccessModalVisible(false), 1000);
+                                                setEditResenaId(null);
+                                                setResenaForm({ valoracion: 5, comentarios: "" });
+                                                setShowResenaModal(false);
+                                                fetchResenas();
+                                            }
+                                        } else {
+                                            const res = await axios.post(`${BACKEND_URL}/resenas`, payload, { headers });
+
+                                            if (res.status === 201) {
+                                                setSuccessModalVisible(true);
+                                                setTimeout(() => setSuccessModalVisible(false), 1000);
+                                                setResenaForm({ valoracion: 5, comentarios: "" });
+                                                setShowResenaModal(false);
+                                                fetchResenas();
+                                            }
                                         }
                                     } catch (error) {
                                         console.error("Error al enviar reseña:", error);
@@ -194,8 +212,8 @@ const PublicCamionero = ({ userId }) => {
                     </View>
                 </View>
             </Modal>
-            <ScrollView>
 
+            <ScrollView>
                 <View style={styles.container}>
                     <View style={styles.card}>
                         <View style={styles.rowContainer}>
@@ -213,13 +231,17 @@ const PublicCamionero = ({ userId }) => {
                                 <Text style={styles.username}>@{user2?.username}</Text>
                                 <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
                                 <Text style={styles.description}>{user2?.descripcion}</Text>
-                                {user && user.rol === "EMPRESA" && (
+                                {user && user.rol === "EMPRESA" && !yaEscribioResena && (
                                     <TouchableOpacity
-                                        style={styles.publishButton}
-                                        onPress={() => setShowResenaModal(true)}
+                                        style={[styles.publishButton, { marginTop: 10 }]}
+                                        onPress={() => {
+                                            setResenaForm({ valoracion: 5, comentarios: "" });
+                                            setEditResenaId(null);
+                                            setShowResenaModal(true);
+                                        }}
                                     >
                                         <FontAwesome name="star" size={16} color="white" style={styles.plusIcon} />
-                                        <Text style={styles.publishButtonText}>Hacer Reseña</Text>
+                                        <Text style={styles.publishButtonText}>Escribir Reseña</Text>
                                     </TouchableOpacity>
                                 )}
                             </View>
@@ -254,6 +276,43 @@ const PublicCamionero = ({ userId }) => {
                                         </Text>
                                         <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
                                         <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
+                                        {user?.userId === resena.comentador?.id && (
+                                            <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 10, marginTop: 8 }}>
+
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setResenaForm({
+                                                            valoracion: resena.valoracion,
+                                                            comentarios: resena.comentarios,
+                                                        });
+                                                        setEditResenaId(resena.id);
+                                                        setShowResenaModal(true);
+                                                    }}
+                                                    style={[styles.button, { marginTop: 8, alignSelf: 'flex-end' }]}>
+
+                                                    <Text style={styles.buttonText}>
+                                                        Editar reseña
+                                                    </Text>
+                                                </TouchableOpacity>
+
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setResenaAEliminar(resena.id);
+                                                        setConfirmDeleteModalVisible(true);
+                                                    }}
+                                                    style={[
+                                                        styles.button,
+                                                        {
+                                                            marginTop: 8,
+                                                            alignSelf: 'flex-end',
+                                                            backgroundColor: '#D14F45',
+                                                        },
+                                                    ]}
+                                                >
+                                                    <Text style={styles.buttonText}>Eliminar reseña</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        )}
                                     </View>
                                 ))
                             )}
@@ -265,6 +324,81 @@ const PublicCamionero = ({ userId }) => {
                         onClose={() => setSuccessModalVisible(false)}
                         message="¡Reseña creada con exito!"
                     />
+                    <Modal visible={confirmDeleteModalVisible} transparent animationType="fade">
+                        <View style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                        }}>
+                            <View style={{
+                                backgroundColor: colors.white,
+                                paddingVertical: 16,
+                                paddingHorizontal: 10,
+                                borderRadius: 12,
+                                width: "60%",
+                                shadowColor: "#000",
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 6,
+                                elevation: 10,
+                            }}>
+                                <Text style={{
+                                    fontSize: 18,
+                                    fontWeight: "bold",
+                                    marginBottom: 12,
+                                    color: colors.secondary,
+                                    textAlign: "center"
+                                }}>
+                                    ¿Estás seguro de que quieres eliminar esta reseña?
+                                </Text>
+
+                                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                                    <TouchableOpacity
+                                        onPress={() => setConfirmDeleteModalVisible(false)}
+                                        style={{
+                                            flex: 1,
+                                            backgroundColor: colors.mediumGray,
+                                            padding: 12,
+                                            borderRadius: 10,
+                                            marginRight: 10,
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <Text style={{ color: "black", fontWeight: "bold" }}>Cancelar</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={async () => {
+                                            try {
+                                                const res = await axios.delete(`${BACKEND_URL}/resenas/${resenaAEliminar}`, {
+                                                    headers: { Authorization: `Bearer ${userToken}` },
+                                                });
+                                                if (res.status === 200 || res.status === 204) {
+                                                    fetchResenas();
+                                                    setConfirmDeleteModalVisible(false);
+                                                    setResenaAEliminar(null);
+                                                }
+                                            } catch (error) {
+                                                console.error("Error al eliminar reseña:", error);
+                                                alert("No se pudo eliminar la reseña.");
+                                            }
+                                        }}
+                                        style={{
+                                            flex: 1,
+                                            backgroundColor: "#D14F45",
+                                            padding: 12,
+                                            borderRadius: 10,
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <Text style={{ color: "white", fontWeight: "bold" }}>Eliminar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+
                 </View>
             </ScrollView >
 
@@ -426,6 +560,25 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 18,
         fontWeight: "bold",
+    },
+    button: {
+        backgroundColor: colors.primary,
+        color: colors.white,
+        paddingLeft: 5,
+        paddingRight: 5,
+        marginLeft: "2%",
+        marginTop: 4,
+        flexDirection: "row",
+        flexWrap: "nowrap",
+        height: 40,
+        width: 150,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    buttonText: {
+        color: colors.white,
+        fontWeight: "bold"
     },
 });
 

@@ -271,7 +271,7 @@ const PublicEmpresa = ({ userId }) => {
                       <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
                       <Text style={styles.publishButtonText}>Contactar</Text>
                     </TouchableOpacity>
-                    {user && user.rol === "CAMIONERO" && !yaEscribioResena &&(
+                    {user && user.rol === "CAMIONERO" && !yaEscribioResena && (
                       <TouchableOpacity
                         style={[styles.publishButton, { marginTop: 10 }]}
                         onPress={() => {
@@ -417,9 +417,10 @@ const PublicEmpresa = ({ userId }) => {
             }}>
               <View style={{
                 backgroundColor: colors.white,
-                padding: 25,
+                paddingVertical: 16,
+                paddingHorizontal: 10,
                 borderRadius: 12,
-                width: "80%",
+                width: "60%",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
@@ -429,7 +430,7 @@ const PublicEmpresa = ({ userId }) => {
                 <Text style={{
                   fontSize: 18,
                   fontWeight: "bold",
-                  marginBottom: 15,
+                  marginBottom: 12,
                   color: colors.secondary,
                   textAlign: "center"
                 }}>
@@ -448,7 +449,7 @@ const PublicEmpresa = ({ userId }) => {
                       alignItems: "center",
                     }}
                   >
-                    <Text style={{ color: "white", fontWeight: "bold" }}>Cancelar</Text>
+                    <Text style={{ color: "black", fontWeight: "bold" }}>Cancelar</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
