@@ -12,6 +12,7 @@ const routes = {
   chat:"/chat",
   chatList:"/chat/list",
   myoffers: "/misofertas",
+  suscripcion: "/suscripcion",
 };
 
 export default routes;

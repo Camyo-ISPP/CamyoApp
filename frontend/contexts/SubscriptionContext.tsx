@@ -7,11 +7,13 @@ type SubscriptionLevel = 'GRATIS' | 'BASIC' | 'PREMIUM';
 interface SubscriptionContextType {
   subscriptionLevel: SubscriptionLevel | null;
   loading: boolean;
+  refreshSubscriptionLevel: () => void;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
   subscriptionLevel: null,
   loading: true,
+  refreshSubscriptionLevel: () => {},
 });
 
 export const useSubscription = () => useContext(SubscriptionContext);
@@ -41,6 +43,21 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setLoading(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshSubscriptionLevel = async () => {
+    if (!user?.id || user.rol === 'CAMIONERO') {
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${BACKEND_URL}/empresas/${user.id}`);
+      const empresaId = response.data.id;
+      await fetchSubscriptionLevel(empresaId);
+    } catch (err) {
+      console.error('Error al refrescar suscripción:', err);
+      setSubscriptionLevel('GRATIS');
     }
   };
 
@@ -80,7 +97,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [user?.id]);
 
   return (
-    <SubscriptionContext.Provider value={{ subscriptionLevel, loading }}>
+    <SubscriptionContext.Provider value={{ subscriptionLevel, loading, refreshSubscriptionLevel }}>
       {children}
     </SubscriptionContext.Provider>
   );
