@@ -27,13 +27,13 @@ const PublicCamionero = ({ userId }) => {
     const [resenas, setResenas] = useState([]);
 
     const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
 
 
     // user2 es el usuario que se está visualizando
     const [user2, setUser2] = useState(null);
 
     useEffect(() => {
-        // Si el usuario autenticado es el mismo usuario, redirigir a su perfil
         if (user?.id == userId) {
             router.push("/miperfil");
             return;
@@ -52,12 +52,17 @@ const PublicCamionero = ({ userId }) => {
         fetchUser();
     }, [userId]);
 
+
     const fetchResenas = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
             setResenas(response.data);
+
             const yaExiste = response.data.some(res => res.comentador?.id === user?.userId);
             setYaEscribioResena(yaExiste);
+
+            const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user2?.userId}/valoracion`);
+            setValoracionMedia(mediaResponse.data);
         } catch (error) {
             console.error("Error al cargar las reseñas:", error);
         }
@@ -265,7 +270,17 @@ const PublicCamionero = ({ userId }) => {
 
                         <View style={styles.reseñasContainer}>
                             <Text style={styles.sectionTitle}>Reseñas</Text>
-
+                            {resenas.length > 0 ? (
+                                valoracionMedia !== null && (
+                                    <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                                        ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                                    </Text>
+                                )
+                            ) : (
+                                <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                                    Valoración media: No hay datos suficientes
+                                </Text>
+                            )}
                             {resenas.length === 0 ? (
                                 <Text style={styles.info}>Todavía no hay reseñas.</Text>
                             ) : (
