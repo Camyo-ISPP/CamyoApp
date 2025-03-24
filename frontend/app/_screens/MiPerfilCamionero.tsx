@@ -38,7 +38,7 @@ const MiPerfilCamionero = () => {
     }, [user]);
 
     return (
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.container}>
                 <View style={styles.card}>
                     <View style={styles.rowContainer}>
@@ -121,7 +121,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         paddingVertical: 20,
         backgroundColor: colors.white,
-        marginTop: 80,
+        marginTop: 20,
+        minHeight: "90%",
     },
     card: {
         backgroundColor: colors.white,

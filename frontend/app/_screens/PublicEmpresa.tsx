@@ -239,7 +239,7 @@ const PublicEmpresa = ({ userId }) => {
         </View>
       </Modal >
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           <View style={styles.card}>
             <View style={styles.rowContainer}>
@@ -315,7 +315,7 @@ const PublicEmpresa = ({ userId }) => {
               {offers.length === 0 ? (
                 <Text style={styles.info}>No hay ofertas abiertas</Text>
               ) : (
-                <ScrollView style={styles.scrollview}>
+                <ScrollView>
                   <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                     {offers && offers.map((item) => (
                       <View key={item.id} style={styles.card2}>
@@ -516,8 +516,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 20,
     backgroundColor: colors.white,
-    marginTop: 80,
+    marginTop: 20,
     paddingTop: 70,
+    minHeight: "90%",
   },
   card: {
     backgroundColor: colors.white,

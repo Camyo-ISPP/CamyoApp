@@ -249,8 +249,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 20,
     backgroundColor: colors.white,
-    marginTop: 80,
+    marginTop: 20,
     paddingTop: 70,
+    minHeight: "100%",
   },
   card: {
     backgroundColor: colors.white,

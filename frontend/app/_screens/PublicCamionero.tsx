@@ -219,7 +219,7 @@ const PublicCamionero = ({ userId }) => {
                 </View>
             </Modal>
 
-            <ScrollView>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View style={styles.container}>
                     <View style={styles.card}>
                         <View style={styles.rowContainer}>
@@ -425,13 +425,12 @@ const PublicCamionero = ({ userId }) => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         alignItems: "center",
-        justifyContent: "center",
         paddingVertical: 20,
         backgroundColor: colors.white,
+        minHeight: "100%",
         marginTop: 80,
-    },
+    },    
     card: {
         backgroundColor: colors.white,
         padding: 30,
