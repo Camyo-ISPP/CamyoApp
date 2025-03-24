@@ -57,6 +57,6 @@ public class SignupRequestCamionero {
 
 	private LocalDate expiracionCAP;
 
-	private List<Tarjetas> tarjetasAutonomo;
+	private Set<Tarjetas> tarjetasAutonomo;
 
 }

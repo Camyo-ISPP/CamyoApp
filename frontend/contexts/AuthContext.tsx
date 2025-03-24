@@ -2,8 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { unifyUserData } from "../utils"
 
 interface AuthContextType {
   user: any | null;
@@ -32,6 +31,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const [user, setUser] = useState<any | null>(null);
   const [userToken, setUserToken] = useState<string | null>(null);
 
@@ -101,63 +102,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
   };
 
-  const unifyUserData = (data: any) => {
-    const unifiedData: any = {
-      id: data.id, // el id es el del rol (camioneroId o empresaId)
-      rol: data.usuario.authority.authority,  // El rol de usuario (CAMIONERO o EMPRESA)
-    };
-  
-    // Si el usuario es un CAMIONERO
-    if (data.usuario.authority.authority === 'CAMIONERO') {
-      unifiedData.experiencia = data.experiencia;
-      unifiedData.dni = data.dni;
-      unifiedData.licencias = data.licencias;
-      unifiedData.disponibilidad = data.disponibilidad;
-      unifiedData.tieneCAP = data.tieneCAP;
-      unifiedData.expiracionCAP = data.expiracionCAP;
-      unifiedData.userId = data.usuario.id;
-      unifiedData.nombre = data.usuario.nombre;
-      unifiedData.telefono = data.usuario.telefono;
-      unifiedData.username = data.usuario.username;
-      unifiedData.email = data.usuario.email;
-      unifiedData.localizacion = data.usuario.localizacion;
-      unifiedData.descripcion = data.usuario.descripcion;
-      unifiedData.foto = data.usuario.foto;
-    } 
-  
-    // Si el usuario es una EMPRESA
-    else if (data.usuario.authority.authority === 'EMPRESA') {
-      unifiedData.nif = data.nif;
-      unifiedData.descripcion = data.descripcion;
-      unifiedData.web = data.web;
-      unifiedData.userId = data.usuario.id;
-      unifiedData.nombre = data.usuario.nombre;
-      unifiedData.telefono = data.usuario.telefono;
-      unifiedData.username = data.usuario.username;
-      unifiedData.email = data.usuario.email;
-      unifiedData.localizacion = data.usuario.localizacion;
-      unifiedData.foto = data.usuario.foto;
-    } 
-
-    // Si el usuario es un ADMIN
-    else if (data.usuario.authority.authority === 'ADMIN') {
-      unifiedData.userId = data.usuario.id;
-      unifiedData.nombre = data.usuario.nombre;
-      unifiedData.telefono = data.usuario.telefono;
-      unifiedData.username = data.usuario.username;
-      unifiedData.email = data.usuario.email;
-      unifiedData.localizacion = data.usuario.localizacion;
-      unifiedData.foto = data.usuario.foto;
-    }
-  
-    return unifiedData;
-  };  
-
   const getUserData = async (userRole: string, userId: number) => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/${userRole}/por_usuario/${userId}`);
+      const response = await axios.get(
+        userRole === "admin" 
+            ? `${BACKEND_URL}/usuarios/${userId}` 
+            : `${BACKEND_URL}/${userRole}/por_usuario/${userId}`
+      );
 
-      const unifiedUser = unifyUserData(response.data);
+      const unifiedUser = userRole === "admin" 
+          ? { ...response.data, rol: response.data.authority.authority } 
+          : unifyUserData(response.data);
+      
       setUser(unifiedUser);
       await AsyncStorage.setItem("user", JSON.stringify(unifiedUser));
 

@@ -3,6 +3,7 @@ package com.camyo.backend.usuario;
 
 import java.util.Set;
 
+import com.camyo.backend.resena.Resena;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -36,7 +37,7 @@ public class Usuario {
     private String email;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "usuario", cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true)
+    @OneToMany(mappedBy = "comentado", cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true)
     private Set<Resena> reseñas;
     
     @Size(max = 200, message = "La localización no puede tener más de 200 caracteres")
