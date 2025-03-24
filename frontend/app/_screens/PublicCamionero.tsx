@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 const { unifyUserData } = require("../../utils");
 import BackButton from "../_components/BackButton";
+import SuccessModal from "../_components/SuccessModal";
+
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -19,6 +21,9 @@ const PublicCamionero = ({ userId }) => {
     const [resenaForm, setResenaForm] = useState({ valoracion: 5, comentarios: "" });
 
     const [resenas, setResenas] = useState([]);
+
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+
 
     // user2 es el usuario que se está visualizando
     const [user2, setUser2] = useState(null);
@@ -169,10 +174,13 @@ const PublicCamionero = ({ userId }) => {
                                         const res = await axios.post(`${BACKEND_URL}/resenas`, payload, { headers });
 
                                         if (res.status === 201) {
-                                            alert("¡Reseña enviada con éxito!");
                                             setShowResenaModal(false);
                                             setResenaForm({ valoracion: 5, comentarios: "" });
                                             fetchResenas();
+                                            setSuccessModalVisible(true);
+                                            setTimeout(() => {
+                                                setSuccessModalVisible(false);
+                                            }, 1000);
                                         }
                                     } catch (error) {
                                         console.error("Error al enviar reseña:", error);
@@ -251,6 +259,12 @@ const PublicCamionero = ({ userId }) => {
                             )}
                         </View>
                     </View>
+                    {/* Modal de éxito */}
+                    <SuccessModal
+                        isVisible={successModalVisible}
+                        onClose={() => setSuccessModalVisible(false)}
+                        message="¡Reseña creada con exito!"
+                    />
                 </View>
             </ScrollView >
 

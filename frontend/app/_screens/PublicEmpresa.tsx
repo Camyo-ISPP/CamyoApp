@@ -10,6 +10,7 @@ import defaultImage from "../../assets/images/empresa.jpg";
 import { useAuth } from "../../contexts/AuthContext";
 import BackButton from "../_components/BackButton";
 import { startChat } from "../chat/services";
+import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -20,6 +21,8 @@ const PublicEmpresa = ({ userId }) => {
   const [user2, setUser2] = useState(null);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   // usuario autenticado
   const { user } = useAuth();
@@ -191,10 +194,14 @@ const PublicEmpresa = ({ userId }) => {
                     const res = await axios.post(`${BACKEND_URL}/resenas`, payload, { headers });
 
                     if (res.status === 201) {
-                      alert("¡Reseña enviada con éxito!");
+
                       setShowResenaModal(false);
                       setResenaForm({ valoracion: 5, comentarios: "" });
                       fetchResenas();
+                      setSuccessModalVisible(true);
+                      setTimeout(() => {
+                        setSuccessModalVisible(false);
+                      }, 1000);
                     }
                   } catch (error) {
                     console.error("Error al enviar reseña:", error);
@@ -313,6 +320,7 @@ const PublicEmpresa = ({ userId }) => {
                       </View>
                     ))}
                   </View >
+
                 </ScrollView >
               )}
             </View>
@@ -336,6 +344,12 @@ const PublicEmpresa = ({ userId }) => {
               )}
             </View>
           </View>
+          {/* Modal de éxito */}
+          <SuccessModal
+            isVisible={successModalVisible}
+            onClose={() => setSuccessModalVisible(false)}
+            message="¡Reseña creada con exito!"
+          />
         </View>
       </ScrollView>
     </>
