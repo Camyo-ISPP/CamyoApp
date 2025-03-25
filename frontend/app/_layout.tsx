@@ -30,7 +30,8 @@ function RootLayout() {
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
         suscripcion: "Planes de Suscripción",
-        chat:"Mis Mensajes"
+        chat:"Mis Mensajes",
+        misofertas: "Mis Ofertas"
       };
 
       const currentSegment = segments.join("/");

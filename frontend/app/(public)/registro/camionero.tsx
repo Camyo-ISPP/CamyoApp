@@ -42,7 +42,6 @@ const CamioneroRegisterScreen = () => {
     // Camionero
     dni: "",
     licencias: [],
-    disponibilidad: "",
     experiencia: null,
     tieneCAP: false,
     expiracionCAP: "",
@@ -173,12 +172,6 @@ const CamioneroRegisterScreen = () => {
       return;
     }
 
-    // Validación de disponibilidad
-    if (!formData.disponibilidad){
-      setErrorMessage("El campo disponibilidad es obligatorio.");
-      return;
-    }
-
     // Validación de experiencia
     if (!formData.experiencia){
       setErrorMessage("El campo años de experiencia es obligatorio.");
@@ -226,7 +219,7 @@ const CamioneroRegisterScreen = () => {
 
       dni: formData.dni,
       licencias: licenciasBackend,
-      disponibilidad: formData.disponibilidad,
+      disponibilidad: "NACIONAL",
       experiencia: parseInt(formData.experiencia),
       tieneCAP: formData.tieneCAP,
       expiracionCAP: formData.tieneCAP? formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'): null,
@@ -377,19 +370,6 @@ const CamioneroRegisterScreen = () => {
               onChange={(value) => handleInputChange("licencias", value)}
               options={licencias}
               colors={colors}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={{ color: colors.secondary, fontSize: 16, marginRight: 10, flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-              Disponibilidad:
-            </Text>
-            <Selector
-              value={formData.disponibilidad}
-              onChange={(value) => handleInputChange("disponibilidad", value)}
-              options={["NACIONAL", "INTERNACIONAL"]}
-              colors={colors}
-              globalStyles={globalStyles}
             />
           </View>
 
