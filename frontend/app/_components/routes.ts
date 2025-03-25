@@ -10,7 +10,6 @@ const routes = {
   editProfile: "/miperfil/editar",
   editProfileEmpresa: "/miperfil/editar",
   chat:"/chat",
-  chatList:"/chat/list",
   myoffers: "/misofertas",
   suscripcion: "/suscripcion",
 };
