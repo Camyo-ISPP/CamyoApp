@@ -14,12 +14,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function CamyoWebNavBar({ onSearch }) {
   const { user } = useAuth();
   const router = useRouter();
-  const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1140);
+  const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1300);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const updateSize = () => {
-      setIsCompact(Dimensions.get("window").width < 1140);
+      setIsCompact(Dimensions.get("window").width < 1300);
     };
     Dimensions.addEventListener("change", updateSize);
     return () => Dimensions.removeEventListener("change", updateSize);
