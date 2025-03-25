@@ -451,7 +451,7 @@ export default function OfertaDetalleScreen() {
     };
 
     return (
-        <ScrollView style={[styles.scrollContainer, { paddingTop: 0 }]}>
+        <ScrollView style={[styles.scrollContainer, { paddingTop: 30 }]}>
             <View style={styles.container}>
                 {renderOfferCard()}
             </View>
