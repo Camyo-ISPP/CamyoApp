@@ -248,7 +248,7 @@ const PublicEmpresa = ({ userId }) => {
               {/* Logo de empresa */}
               <View style={styles.profileContainer}>
                 <Image
-                  source={empresa?.foto ? { uri: empresa.foto } : defaultImage}
+                  source={empresa?.foto ? { uri: `data:image/png;base64,${empresa.foto}` } : defaultImage}
                   style={styles.profileImage}
                 />
               </View>

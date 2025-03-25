@@ -50,7 +50,7 @@ public class Oferta {
     @Column(name="licencia")
     Licencia licencia;
 
-    @Column(name="notas")
+    @Column(name="notas", length = 500)
     @NotBlank
     String notas;
 
