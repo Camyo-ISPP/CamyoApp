@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet,
   ActivityIndicator
 } from "react-native";
+import axios from "axios";
 import { FontAwesome5 } from "@expo/vector-icons";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
@@ -18,16 +19,17 @@ const CrearOfertaScreen = () => {
   
   const { user, userToken } = useAuth();
   const [tipoOferta, setTipoOferta] = useState("TRABAJO");
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const { rules, loading } = useSubscriptionRules();
   const [formData, setFormData] = useState({
     titulo: "",
-    experiencia: "",
+    experiencia: null,
     licencia: "",
     notas: "",
     estado: "ABIERTA",
-    sueldo: "",
+    sueldo: null,
     localizacion: "",
     fechaPublicacion: new Date().toISOString(), // Fecha actual del sistema
     empresa: { id: user?.id ?? null },
@@ -36,10 +38,10 @@ const CrearOfertaScreen = () => {
     jornada: "",
     // Carga
     mercancia: "",
-    peso: "",
+    peso: null,
     origen: "",
     destino: "",
-    distancia: "",
+    distancia: null,
     inicio: "",
     finMinimo: "",
     finMaximo: "",
@@ -76,14 +78,6 @@ const CrearOfertaScreen = () => {
     setFormData((prevState) => ({ ...prevState, [field]: formattedValue }));
   };
 
-  const validateForm = () => {
-    if (!formData.titulo) {
-      alert("El título es obligatorio.");
-      return false;
-    }
-    return true;
-  };
-
   const formatDate = (date) => {
     const d = new Date(date);
     const year = d.getFullYear();
@@ -96,78 +90,270 @@ const CrearOfertaScreen = () => {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   };
 
+  const convertirFecha = (fecha) => {
+    const [dia, mes, anio] = fecha.split('-').map(Number);
+    return new Date(anio, mes - 1, dia);
+  };
 
   const handlePublish = async () => {
-    if (validateForm()) {
-      // Construcción del objeto base de la oferta
-      let ofertaData: any = {
-        tipoOferta,
-        oferta: {
-          titulo: formData.titulo,
-          experiencia: Number(formData.experiencia), // Convertir a número
-          licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
-          notas: formData.notas,
-          estado: formData.estado || "ABIERTA",
-          sueldo: parseFloat(formData.sueldo).toFixed(2), // Convertir a float con 2 decimal
-          localizacion: formData.localizacion,
-          fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales
-          empresa: { id: user?.id ?? null }
-        }
-      };
+    // Validación de título
+    if (!formData.titulo){
+      setErrorMessage("El campo título es obligatorio.");
+      return;
+    }
+    if (formData.titulo.length > 255){
+      setErrorMessage("El campo titulo es demasiado largo.");
+      return;
+    }
 
-      // Agregar detalles según el tipo de oferta
-      if (tipoOferta === "TRABAJO" && formData.fechaIncorporacion && formData.jornada) {
-        ofertaData = {
-          ...ofertaData,
-          trabajo: {
-            fechaIncorporacion: formatDate(formData.fechaIncorporacion), // Aplicar formato correcto
-            jornada: formData.jornada
-          }
-        };
-      } else if (tipoOferta === "CARGA" && formData.mercancia && formData.origen && formData.destino) {
-        ofertaData = {
-          ...ofertaData,
-          carga: {
-            mercancia: formData.mercancia,
-            peso: Number(formData.peso), // Convertir a número
-            origen: formData.origen,
-            destino: formData.destino,
-            distancia: Number(formData.distancia), // Convertir a número
-            inicio: formData.inicio ? formatDate(formData.inicio) : null,
-            finMinimo: formData.finMinimo ? formatDate(formData.finMinimo) : null,
-            finMaximo: formData.finMaximo ? formatDate(formData.finMaximo) : null
-          }
-        };
-      } else {
-        alert("Faltan datos obligatorios para este tipo de oferta.");
+    // Validación de experiencia
+    if (rules.fullFormFields){
+      if (!formData.experiencia){
+        setErrorMessage("El campo años de experiencia es obligatorio.");
+        return;
+      }
+      if (isNaN(formData.experiencia)) {
+        setErrorMessage("El campo años de experiencia debe ser un número.");
+        return;
+      }
+      if (formData.experiencia < 0) {
+        setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
+        return;
+      }
+    }
+
+    // Validación de licencia
+    if (!formData.licencia){
+      setErrorMessage("El campo licencia es obligatorio.");
+      return;
+    }
+
+    // Validación de la descripción
+    if (!formData.notas){
+      setErrorMessage("El campo descripción es obligatorio.");
+      return;
+    }
+    if (formData.notas.length > 500){
+      setErrorMessage("El campo descripción es demasiado largo.");
+      return;
+    }
+
+    // Validación de sueldo
+    if (!formData.sueldo){
+      setErrorMessage("El campo sueldo es obligatorio.");
+      return;
+    }
+    if (isNaN(formData.sueldo)) {
+      setErrorMessage("El campo sueldo debe ser un número.");
+      return;
+    }
+    if (formData.sueldo <= 0) {
+      setErrorMessage("El campo sueldo debe ser mayor a 0.0.");
+      return;
+    }
+
+    // Validación de localización
+    if (!formData.localizacion){
+      setErrorMessage("El campo localización es obligatorio.");
+      return;
+    }
+    if (formData.localizacion.length > 255){
+      setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    if(tipoOferta === "TRABAJO"){
+      // Validación fecha de incorporación
+      if(!formData.fechaIncorporacion){
+        setErrorMessage("El campo fecha de incorporación es obligatorio.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.fechaIncorporacion)) {
+        setErrorMessage("El formato de la fecha de incorporación no es válido.");
+        return;
+      }
+      const fechaI = convertirFecha(formData.fechaIncorporacion);
+      if(fechaI < hoy){
+        setErrorMessage("La fecha de incorporación no puede ser anterior a hoy.");
         return;
       }
 
-      try {
-        const response = await fetch(`${BACKEND_URL}/ofertas`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            'Authorization': `Bearer ${userToken}`
-          },
-          body: JSON.stringify(ofertaData),
-        });
+      // Validación de jornada
+      if (!formData.jornada){
+        setErrorMessage("El campo jornada es obligatorio.");
+        return;
+      }
+    }
+    if(tipoOferta === "CARGA"){
+      // Validación de mercancía
+      if (!formData.mercancia){
+        setErrorMessage("El campo mercancía es obligatorio.");
+        return;
+      }
+      if (formData.mercancia.length > 255){
+        setErrorMessage("El campo mercancía es demasiado largo.");
+        return;
+      }
 
-        if (!response.ok) {
-          throw new Error(`Error al crear la oferta: ${response.statusText}`);
+      // Validación de peso
+      if (!formData.peso){
+        setErrorMessage("El campo peso es obligatorio.");
+        return;
+      }
+      if (isNaN(formData.peso)) {
+        setErrorMessage("El campo peso debe ser un número.");
+        return;
+      }
+      if (formData.peso <= 0) {
+        setErrorMessage("El campo peso debe ser mayor a 0.0.");
+        return;
+      }
+    
+      // Validación de origen
+      if (!formData.origen){
+        setErrorMessage("El campo origen es obligatorio.");
+        return;
+      }
+      if (formData.origen.length > 255){
+        setErrorMessage("El campo origen es demasiado largo.");
+        return;
+      }
+
+      // Validación de destino
+      if (!formData.destino){
+        setErrorMessage("El campo destino es obligatorio.");
+        return;
+      }
+      if (formData.destino.length > 255){
+        setErrorMessage("El campo destino es demasiado largo.");
+        return;
+      }
+
+      // Validación de distancia
+      if (!formData.distancia){
+        setErrorMessage("El distancia es obligatorio.");
+        return;
+      }
+      if (isNaN(formData.distancia)) {
+        setErrorMessage("El campo distancia debe ser un número.");
+        return;
+      }
+      if (formData.distancia <= 0) {
+        setErrorMessage("El campo distancia debe ser mayor a 0.");
+        return;
+      }
+
+      // Validación inicio
+      if(!formData.inicio){
+        setErrorMessage("El campo inicio es obligatorio.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.inicio)) {
+        setErrorMessage("El formato de la fecha de inicio no es válido.");
+        return;
+      }
+      const fechaI = convertirFecha(formData.inicio);
+      if(fechaI < hoy){
+        setErrorMessage("La fecha de inicio no puede ser anterior a hoy.");
+        return;
+      }
+      // Validación fin mínimo
+      if(!formData.finMinimo){
+        setErrorMessage("El campo fin mínino es obligatorio.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.finMinimo)) {
+        setErrorMessage("El formato de la fecha de fin mínimo no es válido.");
+        return;
+      }
+      // Validación fin máximo
+      if(!formData.finMaximo){
+        setErrorMessage("El campo fin máximo es obligatorio.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.finMaximo)) {
+        setErrorMessage("El formato de la fecha de fin máximo no es válido.");
+        return;
+      }
+      const fechaFMin = convertirFecha(formData.finMinimo);
+      const fechaFMax = convertirFecha(formData.finMaximo);
+      if (fechaI > fechaFMin) {
+        setErrorMessage("La fecha de inicio no puede ser posterior a la fecha de fin mínimo.");
+        return;
+      }
+      if (fechaFMin > fechaFMax) {
+        setErrorMessage("La fecha de fin mínimo no puede ser posterior a la fecha de fin máximo.");
+        return;
+      }
+
+    }
+
+    // Construcción del objeto base de la oferta
+    let ofertaData: any = {
+      tipoOferta,
+      oferta: {
+        titulo: formData.titulo,
+        experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
+        licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
+        notas: formData.notas,
+        estado: formData.estado || "ABIERTA",
+        sueldo: parseFloat(formData.sueldo).toFixed(2), // Convertir a float con 2 decimal
+        localizacion: formData.localizacion,
+        fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales
+        empresa: { id: user?.id ?? null }
+      }
+    };
+
+    // Agregar detalles según el tipo de oferta
+    if (tipoOferta === "TRABAJO") {
+      ofertaData = {
+        ...ofertaData,
+        trabajo: {
+          fechaIncorporacion: formData.fechaIncorporacion.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          jornada: formData.jornada
         }
+      };
+    } else if (tipoOferta === "CARGA") {
+      ofertaData = {
+        ...ofertaData,
+        carga: {
+          mercancia: formData.mercancia,
+          peso: Number(formData.peso), // Convertir a número
+          origen: formData.origen,
+          destino: formData.destino,
+          distancia: Number(formData.distancia), // Convertir a número
+          inicio: formData.inicio.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          finMinimo: formData.finMinimo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          finMaximo: formData.finMaximo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1')
+        }
+      };
+    }
 
-        const data = await response.json();
+    try {
+      const response = await axios.post(`${BACKEND_URL}/ofertas`, ofertaData, {
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (response.status === 201) {
+        setErrorMessage("")
 
         setSuccessModalVisible(true);
         setTimeout(() => {
           setSuccessModalVisible(false);
           router.replace("/miperfil");
         }, 1000);
+      }
 
-      } catch (error) {
-        console.error("Error al enviar la oferta:", error);
-        alert("Hubo un error al publicar la oferta.");
+    } catch (error) {
+      console.error('Error en la solicitud', error);
+      if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
       }
     }
 
@@ -264,7 +450,7 @@ const CrearOfertaScreen = () => {
               </View>
             </View>
 
-            {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />)}
+            {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
             {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} color={colors.primary} />)}
             {renderInput("Localización", "localizacion", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
 
@@ -295,7 +481,7 @@ const CrearOfertaScreen = () => {
             {/* Campos dinámicos según el tipo de oferta */}
             {tipoOferta === "TRABAJO" ? (
               <>
-                {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+                {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
 
                 <View style={styles.inputContainer}>
                   <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
@@ -329,11 +515,17 @@ const CrearOfertaScreen = () => {
                 {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
                 {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
                 {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
-                {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
-                {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
-                {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "AAAA-mm-dd")}
+                {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
+                {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
+                {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
               </>
             )}
+
+            {errorMessage ? (
+              <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
+                {errorMessage}
+              </Text>
+            ) : null}
 
             {/* Botón de publicación */}
             <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>

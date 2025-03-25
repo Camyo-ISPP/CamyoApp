@@ -27,7 +27,6 @@ function RootLayout() {
         "oferta/[ofertaId]": "Detalles de la Oferta",
         "miperfilcamionero/editar": "Editar Perfil Camionero",
         "miperfilempresa/editar": "Editar Perfil Empresa",
-        "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
         suscripcion: "Planes de Suscripción",
@@ -66,7 +65,6 @@ function RootLayout() {
         <Stack.Screen name="camionero/[camioneroId]" />
         
         <Stack.Screen name="oferta/crear" />
-        <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
         <Stack.Screen name="buscar-ofertas" />
         <Stack.Screen name="chat" />

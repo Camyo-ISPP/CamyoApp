@@ -315,20 +315,20 @@ public class DataInitializer {
 
                                 // Insert Cargas
                                 statement.addBatch("INSERT IGNORE INTO cargas (id, mercancia, peso, origen, destino, distancia, inicio, fin_minimo, fin_maximo, oferta_id) VALUES "
-                                        + "(201, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10 09:30', '2025-05-11 08:00', '2025-05-12 09:30', 203),"
-                                        + "(202, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 204),"
-                                        + "(203, 'Alimentos', 10000.00 , 'Barcelona', 'Sevilla', 830, '2025-07-10 09:30', '2025-07-13 08:00', '2025-07-17 09:30', 207),"
-                                        + "(204, 'Muebles', 2000.00, 'Barcelona', 'Madrid', 620, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 208),"
-                                        + "(205, 'Pescado', 3500.50, 'Valencia', 'Vigo', 955, '2025-05-10 09:30', '2025-05-13 08:00', '2025-05-17 09:30', 211),"
-                                        + "(206, 'Conjunto de paquete pequeños', 300.00, 'Sevilla', 'Alicante', 595, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 212),"
-                                        + "(207, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10 09:30', '2025-05-11 08:00', '2025-05-12 09:30', 214),"
-                                        + "(208, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 215),"
-                                        + "(209, 'Conjunto de paquete pequeños', 300.00, 'Cáceres', 'Sevilla', 595, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 219),"
-                                        + "(210, 'Conjunto de paquete pequeños', 350.00, 'Sevilla', 'Córdoba', 580, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 223),"
-                                        + "(211, 'Conjunto de documentos urgentes', 350.00, 'Sevilla', 'Córdoba', 595, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 224),"
-                                        + "(212, 'Conjunto de productos electrónicos', 350.00, 'Sevilla', 'Córdoba', 600, '2025-05-10 10:00', '2025-05-11 10:00', '2025-05-12 10:00', 225),"
-                                        + "(213, 'Conjunto de paquetes comerciales', 350.00, 'Sevilla', 'Córdoba', 605, '2025-05-10 10:30', '2025-05-11 10:30', '2025-05-12 10:30', 226),"
-                                        + "(214, 'Conjunto de materiales médicos', 350.00, 'Sevilla', 'Córdoba', 610, '2025-05-10 11:00', '2025-05-11 11:00', '2025-05-12 11:00', 227)");
+                                        + "(201, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10', '2025-05-11', '2025-05-12', 203),"
+                                        + "(202, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10', '2025-05-11', '2025-05-12', 204),"
+                                        + "(203, 'Alimentos', 10000.00 , 'Barcelona', 'Sevilla', 830, '2025-07-10', '2025-07-13', '2025-07-17', 207),"
+                                        + "(204, 'Muebles', 2000.00, 'Barcelona', 'Madrid', 620, '2025-05-10', '2025-05-11', '2025-05-12', 208),"
+                                        + "(205, 'Pescado', 3500.50, 'Valencia', 'Vigo', 955, '2025-05-10', '2025-05-13', '2025-05-17', 211),"
+                                        + "(206, 'Conjunto de paquete pequeños', 300.00, 'Sevilla', 'Alicante', 595, '2025-05-10', '2025-05-11', '2025-05-12', 212),"
+                                        + "(207, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10', '2025-05-11', '2025-05-12', 214),"
+                                        + "(208, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10', '2025-05-11', '2025-05-12', 215),"
+                                        + "(209, 'Conjunto de paquete pequeños', 300.00, 'Cáceres', 'Sevilla', 595, '2025-05-10', '2025-05-11', '2025-05-12', 219),"
+                                        + "(210, 'Conjunto de paquete pequeños', 350.00, 'Sevilla', 'Córdoba', 580, '2025-05-10', '2025-05-11', '2025-05-12', 223),"
+                                        + "(211, 'Conjunto de documentos urgentes', 350.00, 'Sevilla', 'Córdoba', 595, '2025-05-10', '2025-05-11', '2025-05-12', 224),"
+                                        + "(212, 'Conjunto de productos electrónicos', 350.00, 'Sevilla', 'Córdoba', 600, '2025-05-10', '2025-05-11', '2025-05-12', 225),"
+                                        + "(213, 'Conjunto de paquetes comerciales', 350.00, 'Sevilla', 'Córdoba', 605, '2025-05-10', '2025-05-11', '2025-05-12', 226),"
+                                        + "(214, 'Conjunto de materiales médicos', 350.00, 'Sevilla', 'Córdoba', 610, '2025-05-10', '2025-05-11', '2025-05-12', 227)");
 
                                 // Insert aplicados
                                 statement.addBatch("INSERT IGNORE INTO aplicados (oferta_id, camionero_id) VALUES "
