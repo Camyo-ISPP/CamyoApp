@@ -12,7 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 
 export default function CamyoWebNavBar({ onSearch }) {
-  const { user, userToken, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1140);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,7 +31,7 @@ export default function CamyoWebNavBar({ onSearch }) {
   };
 
   return (
-    <LinearGradient colors={["rgba(255, 255, 255, 1)", "rgba(0, 0, 0, 0)"]}  style={styles.headerWeb}>
+    <LinearGradient colors={["rgba(220, 220, 220, 1)", "rgba(0, 0, 0, 0)"]}  style={styles.headerWeb}>
       <View style={styles.contentContainer}>
         <View style={styles.leftSection}>
           <TouchableOpacity onPress={() => router.push("/")}>
@@ -39,7 +39,7 @@ export default function CamyoWebNavBar({ onSearch }) {
           </TouchableOpacity>
           <View style={styles.separator} />
           <View style={styles.searchContainer}>
-            <TextInput style={styles.searchInput} placeholder="Buscar Ofertas" value={searchQuery} onChangeText={setSearchQuery} onSubmitEditing={handleSearch}/>
+            <TextInput style={styles.searchInput} placeholder="Buscar ofertas..." placeholderTextColor={colors.lightGray} value={searchQuery} onChangeText={setSearchQuery} onSubmitEditing={handleSearch}/>
             <TouchableOpacity onPress={handleSearch}><FontAwesome name="search" size={20} color="black" style={styles.searchIcon} /></TouchableOpacity>
           </View>
         </View>
@@ -60,10 +60,14 @@ export default function CamyoWebNavBar({ onSearch }) {
                     <View style={styles.dot} />
                   </>
               )}
-              <TouchableOpacity style={styles.button} onPress={() => router.push('/chat/list')}>
-                    <Text style={styles.buttonText}>Mis Mensajes</Text>
-              </TouchableOpacity>
-              <View style={styles.dot} />
+              {!(!user || !user.rol) && (
+                  <>
+                    <TouchableOpacity style={styles.button} onPress={() => router.push('/chat/list')}>
+                          <Text style={styles.buttonText}>Mis Mensajes</Text>
+                    </TouchableOpacity>
+                    <View style={styles.dot} />
+                  </>
+              )}
               <TouchableOpacity style={styles.button} onPress={() => router.push(routes.listcompanies)}>
                 <Text style={styles.buttonText}>Empresas</Text>
               </TouchableOpacity>

@@ -28,16 +28,18 @@ const OptionsDropdown = () => {
                 <Text style={styles.dropdownButtonText}>Empresas</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => router.replace('/chat/list')} style={styles.dropdownButton}>
-                <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
-                <Text style={styles.dropdownButtonText}>Mensajes</Text>
-              </TouchableOpacity>
+              {!(!user || !user.rol) && (
+                <TouchableOpacity onPress={() => router.push('/chat/list')} style={styles.dropdownButton}>
+                  <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
+                  <Text style={styles.dropdownButtonText}>Mensajes</Text>
+                </TouchableOpacity>
+              )}
 
               {user?.rol === "EMPRESA" && (
-              <TouchableOpacity onPress={() => router.replace('/suscripcion')} style={styles.dropdownButton}>
-                <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
-                <Text style={styles.dropdownButtonText}>Suscripción</Text>
-              </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.replace('/suscripcion')} style={styles.dropdownButton}>
+                  <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
+                  <Text style={styles.dropdownButtonText}>Suscripción</Text>
+                </TouchableOpacity>
               )}
 
             </View>
