@@ -6,9 +6,9 @@ import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import ListadoOfertas from "../_components/ListadoOfertas";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const MisOfertasEmpresa = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const { user } = useAuth();
     const router = useRouter();
 

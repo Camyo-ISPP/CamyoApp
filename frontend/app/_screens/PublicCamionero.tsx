@@ -11,10 +11,9 @@ import BackButton from "../_components/BackButton";
 import { startChat } from "../chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const PublicCamionero = ({ userId }) => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const { user, userToken } = useAuth();
     const router = useRouter();
 

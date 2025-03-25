@@ -179,22 +179,22 @@ export default function OfertaDetalleScreen() {
     };
 
     const handleDeleteOffer = async () => {
-    try {
-        const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
-        method: "DELETE",
-        headers: {
-            'Authorization': `Bearer ${userToken}`
-        }
-        });
+        try {
+            const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
+                method: "DELETE",
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
 
-        if (response.ok) {
-        router.replace("/miperfil");    
-        } else {
-            Alert.alert("Error", "No se pudo eliminar la oferta.");
+            if (response.ok) {
+                router.replace("/miperfil");
+            } else {
+                Alert.alert("Error", "No se pudo eliminar la oferta.");
+            }
+        } catch (error) {
+            console.error("Error al eliminar la oferta:", error);
         }
-    } catch (error) {
-        console.error("Error al eliminar la oferta:", error);
-    }
     };
 
     const renderOfferCard = () => {
@@ -411,7 +411,11 @@ export default function OfertaDetalleScreen() {
                             <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                                 {offerData && offerData.aplicados.map((item) => (
                                     <View key={item.id} style={styles.camCard}>
-                                        <Image source={defaultCamImage} style={styles.logo} />
+                                        <Image
+                                            source={item?.usuario.foto ? { uri: `data:image/png;base64,${item.usuario.foto}` } : defaultCamImage}
+                                            style={styles.logo}
+                                        />
+
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
                                         </View>
@@ -432,14 +436,14 @@ export default function OfertaDetalleScreen() {
                                     </View>
                                 ))}
                             </View>
-                            <View style={styles.separator}/>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <TouchableOpacity
-                                        style={styles.deleteButton}
-                                        onPress={handleDeleteOffer}
-                                    >
-                                        <Text style={styles.deleteButtonText}>Eliminar Oferta</Text>
-                                    </TouchableOpacity>
+                            <View style={styles.separator} />
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TouchableOpacity
+                                    style={styles.deleteButton}
+                                    onPress={handleDeleteOffer}
+                                >
+                                    <Text style={styles.deleteButtonText}>Eliminar Oferta</Text>
+                                </TouchableOpacity>
                             </View>
                         </>
                     ) : (
@@ -448,7 +452,10 @@ export default function OfertaDetalleScreen() {
                             <Text style={styles.subTitulo}>Camionero asignado</Text>
                             <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                                 <View key={offerData.camionero.id} style={styles.camCard}>
-                                    <Image source={defaultCamImage} style={styles.logo} />
+                                    <Image
+                                        source={offerData.camionero?.usuario.foto ? { uri: `data:image/png;base64,${offerData.camionero.usuario.foto}` } : defaultCamImage}
+                                        style={styles.logo}
+                                    />
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.camTitle}>{offerData.camionero.usuario.nombre}</Text>
                                     </View>

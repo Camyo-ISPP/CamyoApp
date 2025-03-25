@@ -8,9 +8,9 @@ import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const MiPerfilCamionero = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+    
     const { user } = useAuth();
     const router = useRouter();
 
