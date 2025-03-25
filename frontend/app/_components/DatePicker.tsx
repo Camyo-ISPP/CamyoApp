@@ -3,6 +3,7 @@ import { Platform, View, Text, TouchableOpacity, StyleSheet } from "react-native
 import DateTimePicker from "@react-native-community/datetimepicker"; // Móvil
 import DatePickerWeb from "react-datepicker"; // Navegador
 import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { FontAwesome5 } from "@expo/vector-icons";
 import colors from "../../assets/styles/colors";
@@ -20,9 +21,27 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
     setShowPicker(false);
     const finalDate = Platform.OS === 'android' ? new Date(event.nativeEvent.timestamp) : selectedDate;
     if (finalDate) {
-      onChange(finalDate.toISOString().split("T")[0]);
+      onChange(format(finalDate, "dd-MM-yyyy", { locale: es }));
     }
   };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Selecciona una fecha";
+    const date = new Date(dateString);
+    return format(date, "dd-MM-yyyy", { locale: es });
+  };
+
+  const parseDate = (dateString) => {
+    if (!dateString) return new Date();
+  
+    const parts = dateString.split("-");
+    if (parts.length === 3) {
+      return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+  
+    return new Date(dateString);
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -31,8 +50,8 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
         <FontAwesome5 name={iconName} size={20} style={styles.icon} />
         {Platform.OS === "web" ? (
           <DatePickerWeb
-            selected={value ? new Date(value) : new Date()}
-            onChange={(date) => onChange(date ? date.toISOString().split("T")[0] : null)}
+            selected={value ? parseDate(value) : new Date()}
+            onChange={(date) => onChange(format(date, "dd-MM-yyyy", { locale: es }))} 
             dateFormat="dd-MM-yyyy"
             locale={es}
             className="react-datepicker"
@@ -42,7 +61,7 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
           />
         ) : (
           <TouchableOpacity onPress={openDatePicker} style={styles.datePickerButton}>
-            <Text style={styles.dateText}>{value || "Selecciona una fecha"}</Text>
+            <Text style={styles.dateText}>{formatDate(value) || "Selecciona una fecha"}</Text>
           </TouchableOpacity>
         )}
         {showPicker && (
