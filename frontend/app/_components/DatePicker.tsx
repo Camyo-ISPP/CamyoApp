@@ -18,8 +18,9 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
 
   const handleDateChange = (event, selectedDate) => {
     setShowPicker(false);
-    if (selectedDate) {
-      onChange(selectedDate.toISOString().split("T")[0]);
+    const finalDate = Platform.OS === 'android' ? new Date(event.nativeEvent.timestamp) : selectedDate;
+    if (finalDate) {
+      onChange(finalDate.toISOString().split("T")[0]);
     }
   };
 
@@ -31,7 +32,7 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
         {Platform.OS === "web" ? (
           <DatePickerWeb
             selected={value ? new Date(value) : new Date()}
-            onChange={(date) => onChange(date.toISOString().split("T")[0])}
+            onChange={(date) => onChange(date ? date.toISOString().split("T")[0] : null)}
             dateFormat="dd-MM-yyyy"
             locale={es}
             className="react-datepicker"
@@ -46,7 +47,7 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
         )}
         {showPicker && (
           <DateTimePicker
-            value={value ? new Date(value) : new Date()}
+            value={value && !isNaN(new Date(value).getTime()) ? new Date(value) : new Date()}
             mode="date"
             display="default"
             onChange={handleDateChange}
