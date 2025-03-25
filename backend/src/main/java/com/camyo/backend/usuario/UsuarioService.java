@@ -81,6 +81,11 @@ public class UsuarioService {
     }
 
     @Transactional
+    public Usuario guardarUsuarioSinEncode(Usuario usuario) throws DataAccessException {
+		return usuarioRepository.save(usuario);
+    }
+
+    @Transactional
     public void eliminarUsuario(Integer id) {
         Usuario usuarioABorrar = obtenerUsuarioPorId(id);
         this.usuarioRepository.delete(usuarioABorrar);

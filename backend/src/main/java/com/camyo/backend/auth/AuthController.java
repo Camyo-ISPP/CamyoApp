@@ -13,14 +13,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.camyo.backend.auth.payload.request.EditRequestEmpresa;
 import com.camyo.backend.auth.payload.request.LoginRequest;
 import com.camyo.backend.auth.payload.request.SignupRequestCamionero;
 import com.camyo.backend.auth.payload.request.SignupRequestEmpresa;
@@ -29,7 +30,10 @@ import com.camyo.backend.auth.payload.response.MessageResponse;
 import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.configuration.jwt.JwtUtils;
 import com.camyo.backend.configuration.services.UserDetailsImpl;
+import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -134,6 +138,42 @@ public class AuthController {
 		}
 		authService.createEmpresa(signUpRequest);
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
+	}
+
+	@Operation(summary = "Editar usuario empresa", description = "Edita los datos de un usuario y su empresa.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Edición exitosa"),
+		@ApiResponse(responseCode = "403", description = "Acceso restringido"),
+        @ApiResponse(responseCode = "400", description = "Error en la edición")
+    })
+	@PutMapping("/edit/empresa")	
+	public ResponseEntity<MessageResponse> editEmpresa(@Valid @RequestBody EditRequestEmpresa editRequest) throws DataAccessException, IOException {
+        Usuario usuario = null;
+		try {
+			usuario = usuarioService.obtenerUsuarioActual();
+		} catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(
+                new MessageResponse("Debe iniciar sesión para editar su usuario."), 
+                HttpStatus.FORBIDDEN
+            );
+        }
+
+		if(!usuario.getAuthority().getAuthority().equals("EMPRESA")){
+			return new ResponseEntity<>(
+				new MessageResponse("Debe iniciar sesión con una empresa para editar su usuario."), 
+				HttpStatus.FORBIDDEN
+			);
+		}
+		Empresa empresa = empresaService.obtenerEmpresaPorUsuario(usuario.getId()).get();
+		
+		if (!usuario.getEmail().equals(editRequest.getEmail()) && usuarioService.existeUsuarioPorEmail(editRequest.getEmail()).equals(true)) {
+			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
+		}
+		if (!empresa.getNif().equals(editRequest.getNif()) && empresaService.obtenerEmpresaPorNif(editRequest.getNif()).isPresent()) {
+			return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' ya está registrado."));
+		}
+		authService.editEmpresa(editRequest, usuario, empresa);
+		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}
     
 }

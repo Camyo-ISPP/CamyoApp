@@ -159,7 +159,7 @@ const EmpresaRegisterScreen = () => {
       setErrorMessage("El campo numero de identificación es obligatorio.");
       return;
     }
-    if (!/^[A-Z]\d{7}[A-Z]$/.test(formData.nif)) {
+    if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
       setErrorMessage("El formato del número de identificación no es válido.");
       return;
     }

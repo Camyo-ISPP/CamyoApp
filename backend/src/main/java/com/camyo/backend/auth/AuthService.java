@@ -7,6 +7,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.camyo.backend.auth.payload.request.EditRequestEmpresa;
 import com.camyo.backend.auth.payload.request.SignupRequestCamionero;
 import com.camyo.backend.auth.payload.request.SignupRequestEmpresa;
 import com.camyo.backend.camionero.Camionero;
@@ -14,8 +15,6 @@ import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.suscripcion.PlanNivel;
-import com.camyo.backend.suscripcion.Suscripcion;
-import com.camyo.backend.suscripcion.SuscripcionRepository;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesService;
@@ -102,5 +101,22 @@ public class AuthService {
 		empresaService.guardarEmpresa(empresa);
 		suscripcionService.asignarSuscripcion(empresa.getId(), PlanNivel.GRATIS, null);
 	}
-    
+
+	@Transactional
+	public void editEmpresa(@Valid EditRequestEmpresa request, Usuario usuario, Empresa empresa) throws DataAccessException, IOException {
+		usuario.setEmail(request.getEmail());
+		usuario.setLocalizacion(request.getLocalizacion());
+		usuario.setTelefono(request.getTelefono());
+		usuario.setNombre(request.getNombre());
+		usuario.setFoto(request.getFoto());
+		if (request.getDescripcion() != null) {
+			usuario.setDescripcion(request.getDescripcion());
+		}
+		usuarioService.guardarUsuarioSinEncode(usuario);
+
+		empresa.setNif(request.getNif());
+		empresa.setWeb(request.getWeb());
+		empresaService.guardarEmpresa(empresa);
+	}
+
 }
