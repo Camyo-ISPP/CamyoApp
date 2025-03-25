@@ -71,7 +71,7 @@ const MiPerfilCamionero = () => {
         <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.rowContainer}>
-                <BackButton />
+                    <BackButton />
                     {/* Imagen de perfil */}
                     <View style={styles.profileContainer}>
                         <Image
