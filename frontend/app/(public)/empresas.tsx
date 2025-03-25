@@ -85,7 +85,7 @@ const EmpresasLista = () => {
                 onPress={async () => {
                   const chatId = await startChat(user.id, empresa.usuario.id);
                   if (chatId) {
-                    router.replace(`/chat?otherUserId=${empresa.usuario.id}`);
+                    router.push(`/chat?otherUserId=${empresa.usuario.id}`);
                   }
                 }}
               >
