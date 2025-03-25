@@ -14,12 +14,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function CamyoWebNavBar({ onSearch }) {
   const { user } = useAuth();
   const router = useRouter();
-  const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1300);
+  const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1600);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const updateSize = () => {
-      setIsCompact(Dimensions.get("window").width < 1300);
+      setIsCompact(Dimensions.get("window").width < 1600);
     };
     Dimensions.addEventListener("change", updateSize);
     return () => Dimensions.removeEventListener("change", updateSize);
@@ -49,13 +49,6 @@ export default function CamyoWebNavBar({ onSearch }) {
             <OptionsDropdown />
           ) : (
             <>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push("/buscar-ofertas")}
-              >
-                <Text style={styles.buttonText}>Explorar Ofertas</Text>
-              </TouchableOpacity>
-              <View style={styles.dot} />
               {user?.rol === "EMPRESA" && (
                   <>
                     <TouchableOpacity
@@ -76,13 +69,19 @@ export default function CamyoWebNavBar({ onSearch }) {
                     <View style={styles.dot} />
                     <TouchableOpacity style={styles.button} onPress={() => router.push('/misofertas')}>
                       <Text style={styles.buttonText}>Mis Ofertas</Text>
-
                     </TouchableOpacity>
                     <View style={styles.dot} />
                   </>
               )}
+                            <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/buscar-ofertas")}
+              >
+                <Text style={styles.buttonText}>Explorar Ofertas</Text>
+              </TouchableOpacity>
+              <View style={styles.dot} />
               <TouchableOpacity style={styles.button} onPress={() => router.push(routes.listcompanies)}>
-                <Text style={styles.buttonText}>Empresas</Text>
+                <Text style={styles.buttonText}>Explorar Empresas</Text>
               </TouchableOpacity>
             </>
           )}
