@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import { useState, useEffect } from 'react';
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
+import WebFooter from "./_components/WebFooter";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
@@ -40,46 +41,42 @@ function RootLayout() {
   }, [segments]);
 
   return (
-    <>
-    {!isMobile && 
-      <CamyoWebNavBar
-        onSearch={(query: string) => {
-          router.push(`/buscar-ofertas?query=${query}`);
-        }}
+      <>
+      {!isMobile && 
+        <CamyoWebNavBar
+          onSearch={(query: string) => {
+            router.push(`/buscar-ofertas?query=${query}`);
+          }}
       />}
-      
+  
       <SubscriptionProvider>
       
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(public)/index" />
-        <Stack.Screen name="(public)/login" />
-        <Stack.Screen name="(public)/registro" />
-        <Stack.Screen name="(public)/registro/camionero" />
-        <Stack.Screen name="(public)/registro/empresa" />
-        <Stack.Screen name="(public)/empresas" />
-
-        <Stack.Screen name="miperfil" />
-        <Stack.Screen name="miperfil/editar" />
-        
-        <Stack.Screen name="empresas" />
-        <Stack.Screen name="empresa/[empresaId]" />
-        <Stack.Screen name="camionero/[camioneroId]" />
-        
-        <Stack.Screen name="oferta/crear" />
-        <Stack.Screen name="oferta/editar/[ofertaId]" />
-        <Stack.Screen name="oferta/[ofertaId]" />
-        <Stack.Screen name="buscar-ofertas" />
-        <Stack.Screen name="chat" />
-        <Stack.Screen name="chat/list" />
-        
-        <Stack.Screen name="suscripcion" />
-
-        <Stack.Screen name="(admin)/workinprogress" />
-        <Stack.Screen name="(public)/forbidden" />
-
-        <Stack.Screen name="misofertas" />
-      </Stack>
-      {isMobile && <BottomBar />}
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(public)/index" />
+            <Stack.Screen name="(public)/login" />
+            <Stack.Screen name="(public)/registro" />
+            <Stack.Screen name="(public)/registro/camionero" />
+            <Stack.Screen name="(public)/registro/empresa" />
+            <Stack.Screen name="(public)/empresas" />
+            <Stack.Screen name="miperfil" />
+            <Stack.Screen name="miperfil/editar" />
+            <Stack.Screen name="empresas" />
+            <Stack.Screen name="empresa/[empresaId]" />
+            <Stack.Screen name="camionero/[camioneroId]" />
+            <Stack.Screen name="oferta/crear" />
+            <Stack.Screen name="oferta/editar/[ofertaId]" />
+            <Stack.Screen name="oferta/[ofertaId]" />
+            <Stack.Screen name="buscar-ofertas" />
+            <Stack.Screen name="chat" />
+            <Stack.Screen name="chat/list" />
+            <Stack.Screen name="suscripcion" />
+            <Stack.Screen name="(admin)/workinprogress" />
+            <Stack.Screen name="(public)/forbidden" />
+            <Stack.Screen name="misofertas" />
+          </Stack>
+        {!isMobile && <WebFooter />}
+  
+        {isMobile && <BottomBar />}
       </SubscriptionProvider>
     </>
 
