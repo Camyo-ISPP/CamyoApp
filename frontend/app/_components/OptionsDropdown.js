@@ -28,6 +28,11 @@ const OptionsDropdown = () => {
                 <Text style={styles.dropdownButtonText}>Empresas</Text>
               </TouchableOpacity>
 
+              <TouchableOpacity onPress={() => router.push('/buscar-ofertas')} style={styles.dropdownButton}>
+                <MaterialIcons name="search" size={20} style={styles.dropdownButtonIcon} />
+                <Text style={styles.dropdownButtonText}>Ofertas</Text>
+              </TouchableOpacity>
+
               {user && user.rol !== "ADMIN" && (
                 <TouchableOpacity onPress={() => router.push('/misofertas')} style={styles.dropdownButton}>
                   <MaterialIcons name="work" size={20} style={styles.dropdownButtonIcon} />
@@ -36,7 +41,7 @@ const OptionsDropdown = () => {
               )}
 
               {user && user.rol !== "ADMIN" && (
-                <TouchableOpacity onPress={() => router.push('/chat/list')} style={styles.dropdownButton}>
+                <TouchableOpacity onPress={() => router.push('/chat')} style={styles.dropdownButton}>
                   <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
                   <Text style={styles.dropdownButtonText}>Mis mensajes</Text>
                 </TouchableOpacity>

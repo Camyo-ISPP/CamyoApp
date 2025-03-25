@@ -78,14 +78,17 @@ const EmpresasLista = () => {
             )}
 
 
+
             {/* Botón "Contactar" solo si hay usuario autenticado */}
             {user && user.rol == "CAMIONERO" && (
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
-                  const chatId = await startChat(user.id, empresa.usuario.id);
+                  const chatId = await startChat(user.userId, empresa.usuario.id);
                   if (chatId) {
-                    router.push(`/chat?otherUserId=${empresa.usuario.id}`);
+
+                    router.replace(`/chat`);
+
                   }
                 }}
               >

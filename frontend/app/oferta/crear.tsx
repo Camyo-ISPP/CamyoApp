@@ -13,6 +13,7 @@ import EmpresaRoute from "../../security/EmpresaRoute";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
 import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import DatePicker from "@/app/_components/DatePicker";
 
 const CrearOfertaScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -481,7 +482,12 @@ const CrearOfertaScreen = () => {
             {/* Campos dinámicos según el tipo de oferta */}
             {tipoOferta === "TRABAJO" ? (
               <>
-                {renderInput("Fecha de incorporación", "fechaIncorporacion", <FontAwesome5 name="calendar-check" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
+                <DatePicker
+                  label="Expiración de incorporación"
+                  value={formData.fechaIncorporacion}
+                  onChange={(date) => handleInputChange("fechaIncorporacion", date)}
+                  iconName="calendar-check"
+                />
 
                 <View style={styles.inputContainer}>
                   <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
@@ -515,9 +521,27 @@ const CrearOfertaScreen = () => {
                 {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
                 {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
                 {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
-                {renderInput("Inicio", "inicio", <FontAwesome5 name="clock" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
-                {renderInput("Fin mínimo", "finMinimo", <FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
-                {renderInput("Fin máximo", "finMaximo", <FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />, "default", false, false, "dd-mm-aaaa")}
+                {/* Inicio */}
+                <DatePicker
+                  label="Inicio"
+                  value={formData.inicio}
+                  onChange={(date) => handleInputChange("inicio", date)}
+                  iconName="stopwatch"
+                />
+                {/* Fin mínimo */}
+                <DatePicker
+                  label="Fin mínimo"
+                  value={formData.finMinimo}
+                  onChange={(date) => handleInputChange("finMinimo", date)}
+                  iconName="calendar-minus"
+                />
+                {/* Fin máximo */}
+                <DatePicker
+                  label="Fin máximo"
+                  value={formData.finMaximo}
+                  onChange={(date) => handleInputChange("finMaximo", date)}
+                  iconName="calendar-plus"
+                />
               </>
             )}
 
@@ -587,6 +611,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 25,
+    marginTop: 25,
     width: "100%",
     alignItems: "center",
   },
