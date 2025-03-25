@@ -2,12 +2,13 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import { useState, useEffect } from "react";
 import axios from "axios";
 const { unifyUserData } = require("../../utils");
 import BackButton from "../_components/BackButton";
+import { startChat } from "../chat/services";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -19,7 +20,6 @@ const PublicCamionero = ({ userId }) => {
     const [user2, setUser2] = useState(null);
 
     useEffect(() => {
-        // Si el usuario autenticado es el mismo usuario, redirigir a su perfil
         if (user?.id == userId) {
           router.push("/miperfil");
           return;
@@ -36,13 +36,14 @@ const PublicCamionero = ({ userId }) => {
         };
     
         fetchUser();
-      }, [userId]);
+    }, [userId]);
+
 
     return (
         <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.rowContainer}>
-                <BackButton />
+                    <BackButton />
                     {/* Imagen de perfil */}
                     <View style={styles.profileContainer}>
                         <Image
@@ -54,7 +55,9 @@ const PublicCamionero = ({ userId }) => {
                     <View style={styles.infoContainer}>
                         <Text style={styles.name}>{user2?.nombre}</Text>
                         <Text style={styles.username}>@{user2?.username}</Text>
-                        <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
+                        <Text style={styles.info}>
+                            <MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}
+                        </Text>
                         <Text style={styles.description}>{user2?.descripcion}</Text>
                     </View>
                 </View>
@@ -68,10 +71,38 @@ const PublicCamionero = ({ userId }) => {
                         <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                         {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
                     </Text>
-                    <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user2?.disponibilidad}</Text>
-                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
-                    {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
-                    {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
+                    <Text style={styles.info}>
+                        <FontAwesome5 name="clock" size={18} color={colors.primary} /> Disponibilidad: {user2?.disponibilidad}
+                    </Text>
+                    <Text style={styles.info}>
+                        <FontAwesome5 name="briefcase" size={18} color={colors.primary} /> Experiencia: {user2?.experiencia} años
+                    </Text>
+                    {user2?.tieneCAP && (
+                        <Text style={styles.info}>
+                            <FontAwesome5 name="certificate" size={18} color={colors.primary} /> CAP hasta: {user2.expiracionCAP}
+                        </Text>
+                    )}
+                    {user2?.isAutonomo && (
+                        <Text style={styles.info}>
+                            <FontAwesome5 name="id-badge" size={18} color={colors.primary} /> Tarjetas: {user2.tarjetas.join(", ")}
+                        </Text>
+                    )}
+
+                    {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
+                    {user && user.rol == "EMPRESA" && (
+                    <TouchableOpacity
+                        style={styles.chatButton}
+                        onPress={async () => {
+                        const chatId = await startChat(user.userId, user2.userId);
+                            if (chatId) {
+                                router.replace(`/chat`);
+                            }
+                         }}
+                     >
+                     <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                     <Text style={styles.chatButtonText}>Contactar</Text>
+                     </TouchableOpacity>
+            )}
                 </View>
             </View>
         </View>
@@ -115,19 +146,6 @@ const styles = StyleSheet.create({
         borderColor: colors.primary,
         marginLeft: 30,
     },
-    editIcon: {
-        position: "absolute",
-        bottom: 10,
-        right: 10,
-        backgroundColor: colors.primary,
-        padding: 8,
-        borderRadius: 15,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 3,
-    },
     infoContainer: {
         flex: 1,
         justifyContent: "center",
@@ -161,20 +179,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.mediumGray,
         marginVertical: 20,
     },
-    infoCard: {
-        backgroundColor: colors.white,
-        paddingVertical: 25,
-        paddingHorizontal: 30,
-        borderRadius: 15,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 5,
-        alignSelf: "stretch",
-        maxWidth: 750,
-        alignItems: "center",
-    },
     sectionTitle: {
         fontSize: 22,
         fontWeight: "bold",
@@ -185,7 +189,21 @@ const styles = StyleSheet.create({
     downContainer: {
         paddingHorizontal: 30,
     },
+    chatButton: {
+        marginTop: 20,
+        backgroundColor: colors.primary,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: "flex-end",
+        width:"40%",
+        alignSelf:"flex-end"
+    },
+    chatButtonText: {
+        fontSize: 18,
+        color: colors.white,
+        fontWeight: "bold",
+    },
 });
-
 
 export default PublicCamionero;
