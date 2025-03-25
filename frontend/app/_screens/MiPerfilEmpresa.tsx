@@ -2,24 +2,25 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "rea
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import SuccessModal from "../_components/SuccessModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilEmpresa = () => {
-  const { user } = useAuth();
+  const { user,userToken } = useAuth();
   const router = useRouter();
 
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
-
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
   useEffect(() => {
     const fetchOffers = async () => {
       try {
@@ -43,6 +44,40 @@ const MiPerfilEmpresa = () => {
     return activeOffersCount < rules.maxActiveOffers;
   };
 
+  const canPromoteNewOffer = () => {
+    console.log("rules", rules);
+    console.log("offers", offers);
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+    console.log("activeOffersCount", activeOffersCount);
+    return activeOffersCount <= rules.maxSponsoredOffers;
+
+  }
+  const promoteOffer = async (Itemid: string | number) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/ofertas/patrocinadas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify({ ofertaId: Itemid, days: 7 })
+      });
+
+      setSuccessModalVisible(true);
+      setTimeout(() => {
+        setSuccessModalVisible(false);
+        router.replace("/miperfil");
+      }, 1000);
+    } catch (err) {
+      throw new Error(`Error al promocionar la oferta: ${err}`);
+    }
+
+
+
+  }
+  const unpromoteOffer = async (Itemid: string | number) => {
+
+  }
 
   return (
     <ScrollView>
@@ -88,14 +123,15 @@ const MiPerfilEmpresa = () => {
                   }}
                   disabled={!canCreateNewOffer()}
                 >
-                  {canCreateNewOffer() && 
+                  {canCreateNewOffer() &&
                     <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
                   }
-                  
+
                   <Text style={styles.publishButtonText}>
                     {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
                   </Text>
                 </TouchableOpacity>
+
               </View>
 
 
@@ -164,11 +200,31 @@ const MiPerfilEmpresa = () => {
                         <View />
                       </View>
                       <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                      <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
-                        <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
-                        <Text style={styles.buttonText}>Ver Detalles</Text>
+                      <View style={{ display: "flex", flexDirection: "column", marginLeft: '5%' }}>
+                        {item.promoted ? (
+                          <TouchableOpacity style={[styles.button, { backgroundColor: colors.secondary }]} onPress={() => unpromoteOffer(item.id)}>
+                            <AntDesign name="exclamationcircle" size={14} color={colors.white} style={styles.detailsIcon} />
+                            <Text style={styles.buttonText}>Dejar de Patrocinar</Text>
+                          </TouchableOpacity>
+                        ) : canPromoteNewOffer() ? (
+                          <TouchableOpacity style={[styles.button, { backgroundColor: colors.secondary }]} onPress={() => promoteOffer(item.id)}>
+                            <AntDesign name="exclamationcircle" size={14} color={colors.white} style={styles.detailsIcon} />
+                            <Text style={styles.buttonText}>Patrocinar Oferta</Text>
+                          </TouchableOpacity>
+                        ) : null}
+                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
+                          <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
+                          <Text style={styles.buttonText}>Ver Detalles</Text>
 
-                      </TouchableOpacity>
+                        </TouchableOpacity>
+
+                        {/* Modal de éxito */}
+                        <SuccessModal
+                          isVisible={successModalVisible}
+                          onClose={() => setSuccessModalVisible(false)}
+                          message="¡Oferta patrocinada con éxito!"
+                        />
+                      </View>
                     </View>
                   ))}
                 </View >
@@ -483,3 +539,5 @@ const styles = StyleSheet.create({
 });
 
 export default MiPerfilEmpresa;
+
+
