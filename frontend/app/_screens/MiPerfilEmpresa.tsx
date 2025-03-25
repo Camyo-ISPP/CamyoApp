@@ -72,14 +72,9 @@ const MiPerfilEmpresa = () => {
   }, []);
 
   const canCreateNewOffer = () => {
-    console.log("rules", rules);
-    console.log("offers", offers);
-
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
-    console.log("activeOffersCount", activeOffersCount);
     return activeOffersCount < rules.maxActiveOffers;
   };
-
 
   return (
     <ScrollView>
@@ -152,7 +147,6 @@ const MiPerfilEmpresa = () => {
                   style={styles.mejorarPlanButton}
                   onPress={() => router.push(`/suscripcion`)}
                 >
-                  {/** TODO: Add route to upgrade plan */}
                   <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
                   <Text style={styles.publishButtonText}>Mejora tu plan aquí</Text>
                 </TouchableOpacity>
@@ -257,6 +251,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     marginTop: 20,
     paddingTop: 70,
+    minHeight: "100%",
   },
   card: {
     backgroundColor: colors.white,

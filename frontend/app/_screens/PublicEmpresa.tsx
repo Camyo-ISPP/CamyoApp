@@ -5,7 +5,7 @@ import { FontAwesome, FontAwesome5, MaterialIcons, Feather, MaterialCommunityIco
 import { useState, useEffect } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
-const { unifyUserData } = require("../../utils");
+const { unifyUserData } = require("../../utils/unifyData");
 import defaultImage from "../../assets/images/empresa.jpg";
 import { useAuth } from "../../contexts/AuthContext";
 import BackButton from "../_components/BackButton";
@@ -17,8 +17,7 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const PublicEmpresa = ({ userId }) => {
   const router = useRouter();
 
-  // user2 es la empresa
-  const [user2, setUser2] = useState(null);
+  const [empresa, setEmpresa] = useState(null);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -39,11 +38,13 @@ const PublicEmpresa = ({ userId }) => {
 
   useEffect(() => {
     if (user?.id == userId) {
-      router.push("/miperfil");
-      return;
+      if (user.rol == "EMPRESA"){
+        router.push("/miperfil");
+        return;
+      }
     }
 
-    const fetchOffers = async () => {
+    const fetchOpenOffers = async () => {
       try {
         const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${userId}`);
         setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
@@ -58,25 +59,25 @@ const PublicEmpresa = ({ userId }) => {
       try {
         const response = await axios.get(`${BACKEND_URL}/empresas/${userId}`);
         const unifiedData = unifyUserData(response.data)
-        setUser2(unifiedData);
+        setEmpresa(unifiedData);
       } catch (error) {
         console.error("Error al cargar los datos de la empresa:", error);
       }
     };
 
-    fetchOffers();
+    fetchOpenOffers();
     fetchUser();
   }, [userId]);
 
   const fetchResenas = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
+      const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${empresa?.userId}`);
       setResenas(response.data);
 
       const yaExiste = response.data.some(res => res.comentador?.id === user?.userId);
       setYaEscribioResena(yaExiste);
 
-      const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user2?.userId}/valoracion`);
+      const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${empresa?.userId}/valoracion`);
       setValoracionMedia(mediaResponse.data);
     } catch (error) {
       console.error("Error al cargar las reseñas:", error);
@@ -84,10 +85,10 @@ const PublicEmpresa = ({ userId }) => {
   };
 
   useEffect(() => {
-    if (user2?.userId) {
+    if (empresa?.userId) {
       fetchResenas();
     }
-  }, [user2]);
+  }, [empresa]);
 
 
   return (
@@ -190,7 +191,7 @@ const PublicEmpresa = ({ userId }) => {
                       valoracion: resenaForm.valoracion,
                       comentarios: resenaForm.comentarios,
                       comentador: { id: user.userId },
-                      comentado: { id: user2?.userId },
+                      comentado: { id: empresa?.userId },
                     };
 
                     const headers = {
@@ -238,7 +239,7 @@ const PublicEmpresa = ({ userId }) => {
         </View>
       </Modal >
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
           <View style={styles.card}>
             <View style={styles.rowContainer}>
@@ -247,18 +248,18 @@ const PublicEmpresa = ({ userId }) => {
               {/* Logo de empresa */}
               <View style={styles.profileContainer}>
                 <Image
-                  source={user2?.foto ? { uri: user2.foto } : defaultImage}
+                  source={empresa?.foto ? { uri: empresa.foto } : defaultImage}
                   style={styles.profileImage}
                 />
               </View>
               {/* Información de la empresa */}
               <View style={styles.infoContainer}>
-                <Text style={styles.name}>{user2?.nombre}</Text>
-                <Text style={styles.username}>@{user2?.username}</Text>
-                <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user2?.email}</Text>
-                <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user2?.telefono}</Text>
-                <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
-                <Text style={styles.description}>{user2?.descripcion}</Text>
+                <Text style={styles.name}>{empresa?.nombre}</Text>
+                <Text style={styles.username}>@{empresa?.username}</Text>
+                <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {empresa?.email}</Text>
+                <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {empresa?.telefono}</Text>
+                <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {empresa?.localizacion}</Text>
+                <Text style={styles.description}>{empresa?.descripcion}</Text>
               </View>
 
               <View style={styles.buttonsWrapper}>
@@ -268,9 +269,9 @@ const PublicEmpresa = ({ userId }) => {
                     <TouchableOpacity
                       style={styles.publishButton}
                       onPress={async () => {
-                        const chatId = await startChat(user.id, user2?.userId);
+                        const chatId = await startChat(user.id, empresa?.userId);
                         if (chatId) {
-                          router.replace(`/chat?otherUserId=${user2?.userId}`);
+                          router.replace(`/chat?otherUserId=${empresa?.userId}`);
                         }
                       }}
                     >
@@ -303,7 +304,7 @@ const PublicEmpresa = ({ userId }) => {
             <View style={styles.downContainer}>
               {/* Información empresarial */}
               <Text style={styles.sectionTitle}>Información Empresarial</Text>
-              <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {user2?.web}</Text>
+              <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {empresa?.web}</Text>
             </View>
 
             <View style={styles.separator} />
@@ -314,7 +315,7 @@ const PublicEmpresa = ({ userId }) => {
               {offers.length === 0 ? (
                 <Text style={styles.info}>No hay ofertas abiertas</Text>
               ) : (
-                <ScrollView style={styles.scrollview}>
+                <ScrollView>
                   <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                     {offers && offers.map((item) => (
                       <View key={item.id} style={styles.card2}>
@@ -517,6 +518,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     marginTop: 20,
     paddingTop: 70,
+    minHeight: "90%",
   },
   card: {
     backgroundColor: colors.white,

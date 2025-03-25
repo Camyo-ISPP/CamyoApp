@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platfor
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
 import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
   companyLogo: {
     height: 90,
     width: 90,
-    marginRight:10,
+    marginRight: 10,
   },
   offerTitle: {
     fontSize: 16,
@@ -376,9 +377,9 @@ const styles = StyleSheet.create({
     alignItems:"center",
     justifyContent:"center"
   },
-  buttonText:{
-    color:colors.white,
-    fontWeight:"bold"
+  buttonText: {
+    color: colors.white,
+    fontWeight: "bold"
   },
   detailsIcon:{
     color:colors.white,

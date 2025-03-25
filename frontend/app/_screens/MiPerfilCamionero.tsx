@@ -18,7 +18,6 @@ const MiPerfilCamionero = () => {
 
     const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
 
-
     useEffect(() => {
         const fetchResenas = async () => {
             try {
@@ -39,7 +38,7 @@ const MiPerfilCamionero = () => {
     }, [user]);
 
     return (
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.container}>
                 <View style={styles.card}>
                     <View style={styles.rowContainer}>
@@ -123,6 +122,7 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         backgroundColor: colors.white,
         marginTop: 20,
+        minHeight: "90%",
     },
     card: {
         backgroundColor: colors.white,
