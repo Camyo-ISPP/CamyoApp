@@ -96,7 +96,7 @@ export default function Index() {
                   <Text style={styles.heroText}>Donde los camioneros y las empresas se encuentran.</Text>
                   <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/login")}>
                     <Text style={styles.registerButtonText}>Accede</Text>
-                    <Ionicons name="arrow-forward" size={25} color="white" style={styles.arrowIcon} />
+                    <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
                   </TouchableOpacity>
                 </View>
                 <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
@@ -151,9 +151,9 @@ export default function Index() {
             </View>
 
             <View style={styles.separator} />
-
           </ScrollView >
         </View >
+        
       ) : (
         <View style={styles.phone}>
           <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
