@@ -3,7 +3,6 @@ import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platfor
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
 import React, { useEffect, useState } from "react";
-import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -12,10 +11,12 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
 const truckImage = require("../../assets/images/camion.png");
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+  const { user } = useAuth();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,19 +61,19 @@ export default function Index() {
           <Text style={styles.offerTitle}>{item.titulo}</Text>
           <View style={{ display: "flex", flexDirection: "row", marginBottom: 8 }}>
             <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-            <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
+            <Text style={styles.offerDetailsTagExperience}>{"+"}{item.experiencia} años</Text>
             <View style={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
               <Text style={styles.localizacion}>|</Text>
               <MaterialIcons name="location-on" size={20} color="#696969" />
               <Text style={styles.localizacion}>{item.localizacion}</Text>
             </View>
           </View>
-          <Text style={styles.offerInfo}>{item.notas}</Text>
+          {/*<Text style={styles.offerInfo}>{item.notas}</Text>*/}
         </View>
-        <View>
+        <View style={{ marginLeft: 20, alignItems: "center", flexDirection: "column" }}>
           <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
           <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
-            <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
+            <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
             <Text style={styles.buttonText}>Ver Detalles</Text>
           </TouchableOpacity>
         </View>
@@ -87,6 +88,8 @@ export default function Index() {
           <CamyoWebNavBar onSearch={undefined}/>
           <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false} contentContainerStyle={{ scrollbarWidth: "none" }}>
 
+            {/* Hero sin login */}
+            {(!user || !user.rol) && (
             <View style={styles.heroContainer}>
               <View style={styles.heroBox}>
                 <View style={styles.textContainer}>
@@ -99,9 +102,27 @@ export default function Index() {
                 <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
               </View>
             </View>
+            )}
+            
+            {/* Hero con login */}
+            {!(!user || !user.rol) && (
+            <View style={styles.heroContainer}>
+              <View style={styles.heroBox}>
+                <View style={styles.textContainer}>
+                  <Text style={styles.heroText}>Nos alegra verte otra vez, {user.nombre}.</Text>
+                  <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/miperfil")}>
+                    <Text style={styles.registerButtonText}>Perfil</Text>
+                    <Ionicons name="arrow-forward" size={25} color="white" style={styles.arrowIcon} />
+                  </TouchableOpacity>
+                </View>
+                <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
+              </View>
+            </View>
+            )}
             
             <View style={styles.separator} />
 
+            {/* Sección ofertas */}
             <Text style={styles.title}> Lista de Ofertas </Text>
             <View style={styles.listaContainer}>
               {/* Columna de Carga */}
@@ -282,7 +303,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     padding: 25,
     marginVertical: 10,
-    width: "75%",
+    width: "85%",
     borderRadius: 12,
     flexWrap:"wrap",
     flexDirection: "row",
@@ -302,13 +323,14 @@ const styles = StyleSheet.create({
   companyLogo: {
     height: 90,
     width: 90,
-    marginRight: 10,
+    marginRight: 15,
+    marginLeft: -7,
   },
   offerTitle: {
     fontSize: 16,
     fontWeight: "bold",
     flexWrap: "wrap",
-    marginBottom: 2,
+    marginBottom: 7,
     color: colors.secondary
   },
   offerDate: {
@@ -359,7 +381,8 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   offerSueldo:{
-    fontSize:25,
+    fontSize:27,
+    marginBottom: 7,
     fontWeight:"bold",
     color: colors.secondary,
     textAlignVertical:"center",
