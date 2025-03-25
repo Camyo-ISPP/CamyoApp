@@ -94,97 +94,82 @@ const MiPerfilCamionero = () => {
                 {/* Separador */}
                 <View style={styles.separator} />
 
-                    <View style={styles.downContainer}>
-                        {/* Información profesional */}
-                        <Text style={styles.sectionTitle}>Información Profesional</Text>
-                        <Text style={styles.info}>
-                            <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
-                            {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
-                        </Text>
-                        <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user.disponibilidad}</Text>
-                        <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
-                        {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
-                        {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
-                    </View>
-                    <View style={styles.separator} />
-                    <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: 'center' }}>
-                        <View>  <Text style={styles.sectionTitle}>Empresas con las que has Trabajado</Text>
-                            <View style={{ justifyContent: "center", marginRight: 30, marginLeft: -30 }}>
-
-
-                                {ofertas && ofertas.length > 0 ? (
-                                    Array.from(new Set(ofertas.map((oferta: any) => oferta.empresa.usuario.nombre)))
-                                        .map((nombreEmpresa: string, index: number) => (
-                                            <View key={index} style={styles.ofertaCard}>
-                                                <View style={{ display: "flex", flexDirection: 'row', alignItems: 'baseline', justifyContent: "space-around" }} >
-
-                                                    <Text style={styles.ofertaTitulo}>  <FontAwesome5 name="user" size={14} color={colors.primary} />{nombreEmpresa}</Text>
-                                                </View>
-
-
-                                                <View>
-                                                    <TouchableOpacity style={styles.button} onPress={() => ""}>
-                                                        <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
-                                                        <Text style={styles.buttonText}>Ver Oferta</Text>
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity style={styles.button} onPress={() => ""}>
-
-                                                        <Text style={styles.buttonText}>  <AntDesign name="form" size={15} color="white" style={styles.detailsIcon} />Añadir Reseña</Text>
-                                                    </TouchableOpacity>
-
-                                                </View>
-
+                <View style={styles.downContainer}>
+                    {/* Información profesional */}
+                    <Text style={styles.sectionTitle}>Información Profesional</Text>
+                    <Text style={styles.info}>
+                        <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                        {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                    </Text>
+                    <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user.disponibilidad}</Text>
+                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
+                    {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
+                    {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+                </View>
+                <View style={styles.separator} />
+                <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: 'center' }}>
+                    <View>
+                        <Text style={styles.sectionTitle}>Empresas con las que has Trabajado</Text>
+                        <View style={{ justifyContent: "center", marginRight: 30, marginLeft: -30 }}>
+                            {ofertas && ofertas.length > 0 ? (
+                                Array.from(new Set(ofertas.map((oferta: any) => oferta.empresa.usuario.nombre)))
+                                    .map((nombreEmpresa: string, index: number) => (
+                                        <View key={index} style={styles.ofertaCard}>
+                                            <View style={{ display: "flex", flexDirection: 'row', alignItems: 'baseline', justifyContent: "space-around" }} >
+                                                <Text style={styles.ofertaTitulo}>  <FontAwesome5 name="user" size={14} color={colors.primary} />{nombreEmpresa}</Text>
                                             </View>
-                                        ))
-                                ) : (
-                                    <Text>No hay ofertas cerradas.</Text>
-                                )}
-                            </View>
-                        </View>
-
-
-                        <View style={styles.separatorVertical} />
-
-                        <View style={styles.reseñasContainer}>
-                            <Text style={styles.sectionTitle}>Reseñas</Text>
-                            {resenas.length > 0 ? (
-                                valoracionMedia !== null && (
-                                    <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
-                                        ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
-                                    </Text>
-                                )
+                                            <View>
+                                                <TouchableOpacity style={styles.button} onPress={() => ""}>
+                                                    <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
+                                                    <Text style={styles.buttonText}>Ver Oferta</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={styles.button} onPress={() => ""}>
+                                                    <Text style={styles.buttonText}>  <AntDesign name="form" size={15} color="white" style={styles.detailsIcon} />Añadir Reseña</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    ))
                             ) : (
-                                <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
-                                    Valoración media: No hay datos suficientes
-                                </Text>
-                            )}
-
-                            {resenas.length === 0 ? (
-                                <Text style={styles.info}>Todavía no tienes reseñas.</Text>
-                            ) : (
-                                resenas.map((resena) => (
-                                    <View key={resena.id} style={styles.reseñaCard}>
-                                        <Text style={styles.reseñaAutor}>
-                                            <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
-                                        </Text>
-                                        <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
-                                        <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
-                                    </View>
-                                ))
+                                <Text>No hay ofertas cerradas.</Text>
                             )}
                         </View>
                     </View>
 
+                    <View style={styles.separatorVertical} />
 
+                    <View style={styles.reseñasContainer}>
+                        <Text style={styles.sectionTitle}>Reseñas</Text>
+                        {resenas.length > 0 ? (
+                            valoracionMedia !== null && (
+                                <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                                </Text>
+                            )
+                        ) : (
+                            <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                                Valoración media: No hay datos suficientes
+                            </Text>
+                        )}
 
-
+                        {resenas.length === 0 ? (
+                            <Text style={styles.info}>Todavía no tienes reseñas.</Text>
+                        ) : (
+                            resenas.map((resena) => (
+                                <View key={resena.id} style={styles.reseñaCard}>
+                                    <Text style={styles.reseñaAutor}>
+                                        <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
+                                    </Text>
+                                    <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
+                                    <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
+                                </View>
+                            ))
+                        )}
+                    </View>
                 </View>
             </View>
         </View>
     );
 };
-
-const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
     container: {
