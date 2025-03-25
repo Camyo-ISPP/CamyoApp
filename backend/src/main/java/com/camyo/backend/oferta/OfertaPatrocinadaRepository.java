@@ -29,5 +29,9 @@ public interface OfertaPatrocinadaRepository extends JpaRepository<OfertaPatroci
            "WHERE p.status = 'ACTIVO' " +
            "AND p.fechaFin < :ahora")
     List<OfertaPatrocinada> findExpiredButActive(LocalDateTime ahora);
+
+    @Query("SELECT p FROM OfertaPatrocinada p WHERE p.status = com.camyo.backend.oferta.PatrocinioStatus.ACTIVO AND p.fechaFin < :ahora")
+    List<OfertaPatrocinada> findAllVencidos(LocalDateTime ahora);
+
 }
 

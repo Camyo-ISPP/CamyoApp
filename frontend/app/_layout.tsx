@@ -30,6 +30,7 @@ function RootLayout() {
         "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
+        suscripcion: "Planes de Suscripción",
         chat:"Mis Mensajes"
       };
 
@@ -69,9 +70,14 @@ function RootLayout() {
         <Stack.Screen name="oferta/[ofertaId]" />
         <Stack.Screen name="buscar-ofertas" />
         <Stack.Screen name="chat" />
+        <Stack.Screen name="chat/list" />
+        
+        <Stack.Screen name="suscripcion" />
 
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />
+
+        <Stack.Screen name="misofertas" />
       </Stack>
       {isMobile && <BottomBar />}
       </SubscriptionProvider>
