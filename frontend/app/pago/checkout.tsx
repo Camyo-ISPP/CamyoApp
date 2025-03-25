@@ -8,6 +8,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { usePayment } from "@/contexts/PaymentContext";
 import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
+import { Products } from "./productDetails";
 
 function IntegratedCheckout() {
     const { id, setId } = usePayment();
@@ -50,9 +51,11 @@ function IntegratedCheckout() {
         {id === 'BASICO' || id === 'PREMIUM' ?
             <View>
                 <View style={{ marginTop: '100px' }}>
-                    <Text>Integrated Checkout Example</Text>
-                    <Text>Plan elegido: {id === 'BASICO' ? 'Básico' : 'Premium'}</Text>
-                    <TotalFooter total={id === 'BASICO' ? 24.99 : 49.99} mode={"subscription"}/>
+                    <Text>Compra</Text>
+                    <Text>Vas a realizar la siguiente compra:</Text>
+                    <Text>{Products.get(id).name}</Text>
+                    <Text>{Products.get(id).description}</Text>
+                    <TotalFooter total={Products.get(id).price} mode={"subscription"}/>
                     <Button onPress={createTransactionSecret} title="Iniciar pago"/>
 
                     {(transactionClientSecret === "" ?
