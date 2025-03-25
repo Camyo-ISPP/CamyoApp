@@ -5,8 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.camyo.backend.oferta.Oferta;
+import com.camyo.backend.oferta.OfertaEstado;
+import com.camyo.backend.oferta.OfertaService;
 import com.camyo.backend.usuario.UsuarioService;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -17,6 +21,8 @@ public class ResenaController {
     private ResenaService resenaService;
     @Autowired
     private UsuarioService usuarioService;
+    @Autowired
+    private OfertaService ofertaService;
 
     @GetMapping("/comentado/{userId}")
     public ResponseEntity<List<Resena>> obtenerTodasResenasComentado(@PathVariable Integer userId) {
@@ -37,7 +43,49 @@ public class ResenaController {
     }
 
     @PostMapping
-    public ResponseEntity<Resena> crearResena(@RequestBody Resena resena) {
+    public ResponseEntity<?> crearResena(@RequestBody Resena resena) {
+        boolean isValid = false;
+    
+        if (usuarioService.obtenerUsuarioActual().hasAuthority("CAMIONERO")) {
+            List<List<Oferta>> ofertasPorCamioneroComentador = ofertaService.obtenerOfertasPorCamionero(
+                usuarioService.obtenerCamioneroIdPorUsuarioId(resena.getComentador().getId()));
+
+            List<Oferta> listaDeOfertasAceptadasComentador = ofertasPorCamioneroComentador.size() > 2 
+                    ? ofertasPorCamioneroComentador.get(2) 
+                    : Collections.emptyList();
+
+            List<Oferta> listaDeOfertasEmpresaComentado = ofertaService.obtenerOfertasPorEmpresa(
+                usuarioService.obtenerEmpresaIdPorUsuarioId(resena.getComentado().getId()));
+
+            isValid = listaDeOfertasAceptadasComentador.stream()
+                    .anyMatch(oferta -> oferta.getEmpresa().getUsuario().getId().equals(resena.getComentado().getId())) &&
+                    listaDeOfertasEmpresaComentado.stream()
+                    .filter(oferta -> oferta.getEstado().equals(OfertaEstado.CERRADA) && oferta.getCamionero() != null)
+                    .anyMatch(oferta -> oferta.getCamionero().getUsuario().getId().equals(resena.getComentador().getId()));
+        } 
+        
+        else if (usuarioService.obtenerUsuarioActual().hasAuthority("EMPRESA")) {
+            List<List<Oferta>> ofertasPorCamioneroComentado = ofertaService.obtenerOfertasPorCamionero(
+                usuarioService.obtenerCamioneroIdPorUsuarioId(resena.getComentado().getId()));
+
+            List<Oferta> listaDeOfertasAceptadasComentado = ofertasPorCamioneroComentado.size() > 2 
+                    ? ofertasPorCamioneroComentado.get(2) 
+                    : Collections.emptyList();
+
+            List<Oferta> listaDeOfertasEmpresaComentador = ofertaService.obtenerOfertasPorEmpresa(
+                usuarioService.obtenerEmpresaIdPorUsuarioId(resena.getComentador().getId()));
+
+            isValid = listaDeOfertasAceptadasComentado.stream()
+                    .anyMatch(oferta -> oferta.getEmpresa().getUsuario().getId().equals(resena.getComentador().getId())) &&
+                    listaDeOfertasEmpresaComentador.stream()
+                    .filter(oferta -> oferta.getEstado().equals(OfertaEstado.CERRADA) && oferta.getCamionero() != null)
+                    .anyMatch(oferta -> oferta.getCamionero().getUsuario().getId().equals(resena.getComentado().getId()));
+        }
+    
+        if (!isValid) {
+            return new ResponseEntity<>("No se encontró oferta común entre la empresa y el camionero.", HttpStatus.BAD_REQUEST);
+        }
+
         Resena nuevaResena = resenaService.crearResena(resena);
         return new ResponseEntity<>(nuevaResena, HttpStatus.CREATED);
     }

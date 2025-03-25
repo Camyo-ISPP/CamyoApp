@@ -13,6 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from "../../_components/SuccessModal";
 import defaultProfileImage from "../../../assets/images/defaultAvatar.png";
+import { terminosYCondiciones, politicaDePrivacidad } from "../../../assets/gdpr";
 
 const licencias = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "D1+E", "D"];
 const licencias_backend = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1_E", "C_E", "D1", "D_E", "D1_E", "D"];
@@ -25,6 +26,7 @@ const CamioneroRegisterScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const { login } = useAuth();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [legalModalVisible, setLegalModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -45,7 +47,8 @@ const CamioneroRegisterScreen = () => {
     tieneCAP: false,
     expiracionCAP: "",
     isAutonomo: false,
-    tarjetas: []
+    tarjetas: [],
+    aceptaTerminos: false,
   });
 
   const handleInputChange = (field: string, value: string | boolean | any[]) => {
@@ -108,6 +111,11 @@ const CamioneroRegisterScreen = () => {
       isAutonomo: formData.isAutonomo,
       tarjetasAutonomo: formData.tarjetas
     };
+
+    if (!formData.aceptaTerminos) {
+      setErrorMessage("Debes aceptar los términos y condiciones para registrarte.");
+      return;
+    }
 
     try {
       const response = await axios.post(`${BACKEND_URL}/auth/signup/camionero`, userData, {
@@ -319,6 +327,26 @@ const CamioneroRegisterScreen = () => {
             </Text>
           ) : null}
 
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity
+              onPress={() => handleInputChange("aceptaTerminos", !formData.aceptaTerminos)}
+              style={[
+                styles.checkbox,
+                { backgroundColor: formData.aceptaTerminos ? colors.primary : colors.white }]}
+            >
+              {formData.aceptaTerminos && (
+                <FontAwesome5 name="check" size={14} color="white" />
+              )}
+            </TouchableOpacity>
+
+            <Text style={styles.checkboxText}>
+              He leído y acepto los{' '}
+              <Text style={styles.linkText} onPress={() => setLegalModalVisible(true)}>
+                Términos y condiciones y la Política de privacidad
+              </Text>
+            </Text>
+          </View>
+
           {/* Botón de registro */}
           <TouchableOpacity style={[globalStyles.button, { width: "100%", borderRadius: 12, elevation: 5 }]}
             onPress={handleRegister}
@@ -332,6 +360,33 @@ const CamioneroRegisterScreen = () => {
             onClose={() => setSuccessModalVisible(false)}
             message="¡Registro exitoso!"
           />
+
+          {/* Modal de términos y condiciones */}
+          <Modal
+            visible={legalModalVisible}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => setLegalModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.legalModalContainer}>
+                <ScrollView contentContainerStyle={{ padding: 10 }}>
+                  <Text style={styles.modalTitle}>TÉRMINOS Y CONDICIONES</Text>
+                  <Text style={styles.modalParagraph}>{terminosYCondiciones}</Text>
+
+                  <Text style={styles.modalTitle}>POLÍTICA DE PRIVACIDAD</Text>
+                  <Text style={styles.modalParagraph}>{politicaDePrivacidad}</Text>
+                </ScrollView>
+                <TouchableOpacity
+                  style={[globalStyles.button, { marginTop: 10, backgroundColor: colors.primary }]}
+                  onPress={() => setLegalModalVisible(false)}
+                >
+                  <Text style={globalStyles.buttonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
 
         </View>
       </View>
@@ -444,6 +499,56 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 10,
   },
+  checkboxContainer: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  checkboxText: {
+    color: colors.secondary,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  linkText: {
+    color: colors.primary,
+    textDecorationLine: 'underline',
+  },
+  legalModalContainer: {
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    maxHeight: '80%',
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: colors.secondary,
+  },
+  modalParagraph: {
+    fontSize: 14,
+    color: colors.secondary,
+    marginBottom: 20,
+  },
+
 });
 
 export default CamioneroRegisterScreen;
