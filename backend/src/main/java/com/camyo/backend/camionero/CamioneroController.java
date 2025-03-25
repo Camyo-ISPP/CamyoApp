@@ -68,6 +68,12 @@ public class CamioneroController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+
+     /*
+    * Deprecated
+  */ 
+
      @Operation(summary = "Guardar camionero", 
                description = "Almacena un camionero en la BD. Se crea con el usuario que ha iniciado sesión.")
     @ApiResponses({
