@@ -60,10 +60,14 @@ export default function CamyoWebNavBar({ onSearch }) {
                     <View style={styles.dot} />
                   </>
               )}
-              {!(!user || !user.rol) && (
+              {user && user.rol !== "ADMIN" && (
                   <>
                     <TouchableOpacity style={styles.button} onPress={() => router.push('/chat/list')}>
-                          <Text style={styles.buttonText}>Mis Mensajes</Text>
+                      <Text style={styles.buttonText}>Mis Mensajes</Text>
+                    </TouchableOpacity>
+                    <View style={styles.dot} />
+                    <TouchableOpacity style={styles.button} onPress={() => router.push('/misofertas')}>
+                      <Text style={styles.buttonText}>Mis Ofertas</Text>
                     </TouchableOpacity>
                     <View style={styles.dot} />
                   </>
