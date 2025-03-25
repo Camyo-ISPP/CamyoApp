@@ -30,7 +30,7 @@ const ProfileDropdown = ({ user }) => {
       {/* Foto de perfil */}
       <TouchableOpacity onPress={() => setDropdownVisible(!dropdownVisible)}>
         <Image
-          source={user.foto ? { uri: user.foto } : defaultImage}
+          source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
           style={styles.avatar}
         />
       </TouchableOpacity>
@@ -46,7 +46,7 @@ const ProfileDropdown = ({ user }) => {
             onPress={() => setDropdownVisible(false)}
           />
           <Image
-            source={user.foto ? { uri: user.foto } : defaultImage}
+            source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
             style={styles.avatarDropdown}
           />
 

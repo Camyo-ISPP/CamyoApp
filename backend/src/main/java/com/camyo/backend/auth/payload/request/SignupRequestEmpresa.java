@@ -1,7 +1,6 @@
 package com.camyo.backend.auth.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,7 +26,6 @@ public class SignupRequestEmpresa {
 	@NotBlank
 	private String localizacion;
 
-	@NotNull
 	private byte[] foto;
 
 	private String descripcion;

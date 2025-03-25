@@ -172,7 +172,7 @@ const EmpresaRegisterScreen = () => {
       email: formData.email,
       localizacion: formData.localizacion,
       descripcion: formData.descripcion,
-      foto: formData.foto ? formData.foto : "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/57T3goAAAAASUVORK5CYII=",
+      foto: formData.foto ? formData.foto : null,
       password: formData.password,
 
       web: formData.web,
