@@ -562,26 +562,36 @@ public class OfertaController {
      * @return Lista de ofertas aplicadas filtradas y ordenadas.
      */
     @GetMapping("/camionero/{camioneroId}")
-    public ResponseEntity<List<List<Oferta>>> obtenerOfertasPorCamionero(
+    public ResponseEntity<List<List<OfertaCompletaDTO>>> obtenerOfertasPorCamionero(
             @PathVariable Integer camioneroId) {
         try {
-            List<List<Oferta>> ofertas = ofertaService.obtenerOfertasPorCamionero(camioneroId);
-            return ResponseEntity.ok(ofertas);
+            List<List<Oferta>> ofertasPorCategoria = ofertaService.obtenerOfertasPorCamionero(camioneroId);
+            List<List<OfertaCompletaDTO>> resultado = ofertasPorCategoria.stream()
+                .map(lista -> lista.stream()
+                    .map(ofertaService::mapearOfertaACompletaDTO)
+                    .toList())
+                .toList();
+            return ResponseEntity.ok(resultado);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
+    
 
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<Oferta>> obtenerOfertasPorEmpresa(
+    public ResponseEntity<List<OfertaCompletaDTO>> obtenerOfertasPorEmpresa(
             @PathVariable Integer empresaId) {
         try {
             List<Oferta> ofertas = ofertaService.obtenerOfertasPorEmpresa(empresaId);
-            return ResponseEntity.ok(ofertas);
+            List<OfertaCompletaDTO> dtos = ofertas.stream()
+                .map(ofertaService::mapearOfertaACompletaDTO)
+                .toList();
+            return ResponseEntity.ok(dtos);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
+    
 
 
 }
