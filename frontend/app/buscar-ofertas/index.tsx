@@ -9,9 +9,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+    
     const [data, setData] = useState<any[]>([]);
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     mainContent: {
-        width: '70%',
+        width: '80%',
         flexDirection: 'row',
     },
     filtersCard: {
@@ -325,27 +325,32 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        width: '100%',
+        gap: 10,
         marginBottom: '8%',
-        marginHorizontal: '2%',
-    },
+    },    
     searchInput: {
-        flex: 1,
-        height: '100%',
+        flexBasis: '70%',
+        flexGrow: 1,
+        flexShrink: 1,
+        minHeight: 40,
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
         paddingHorizontal: 10,
-        marginRight: 10,
         backgroundColor: '#fff',
-        flexShrink: 1,
-    },
+    },    
     searchButton: {
+        flexBasis: '25%',
+        minWidth: 80,
+        paddingVertical: 10,
         backgroundColor: colors.primary,
-        padding: 10,
         borderRadius: 5,
-        alignSelf: 'flex-start',
-        flexShrink: 1,
-    },
+        alignItems: 'center',
+        justifyContent: 'center',
+    },    
     searchButtonText: {
         color: colors.white,
         fontWeight: 'bold',

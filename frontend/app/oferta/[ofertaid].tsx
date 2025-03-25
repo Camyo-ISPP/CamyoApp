@@ -308,7 +308,7 @@ export default function OfertaDetalleScreen() {
                 <View style={styles.detailRow}>
                     <FontAwesome5 name="id-card" size={18} color="#0b4f6c" />
                     <Text style={styles.detalles}>
-                        <Text style={styles.detallesLabel}>Licencia Requerida:</Text> {offerData.licencia}
+                        <Text style={styles.detallesLabel}>Licencia(s) Requerida(s):</Text> {offerData.licencia}
                     </Text>
                 </View>
 

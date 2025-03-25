@@ -12,9 +12,9 @@ import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useFocusEffect } from '@react-navigation/native';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const MiPerfilEmpresa = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
   const { user } = useAuth();
   const router = useRouter();
 
