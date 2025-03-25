@@ -9,7 +9,10 @@ const routes = {
   createOffer: "/oferta/crear",
   editProfile: "/miperfil/editar",
   editProfileEmpresa: "/miperfil/editar",
-  chat:"/chat"
+  chat:"/chat",
+  chatList:"/chat/list",
+  myoffers: "/misofertas",
+  suscripcion: "/suscripcion",
 };
 
 export default routes;

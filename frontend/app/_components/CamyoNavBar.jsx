@@ -42,7 +42,7 @@ export default function CamyoWebNavBar({ onSearch }) {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const handleSearch = () => {
-    onSearch(searchQuery); 
+    onSearch(searchQuery);
   };
 
   return (
@@ -60,13 +60,13 @@ export default function CamyoWebNavBar({ onSearch }) {
                 <Ionicons name="menu" size={30} color="white" />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => router.push("/")}>
+            <TouchableOpacity onPress={() => router.replace("/")}>
               <Image source={ProyectoLogo} style={styles.logoZoomed} resizeMode="cover" />
             </TouchableOpacity>
           </View>
           <Animated.View style={[styles.sidebar, { transform: [{ translateX: sidebarAnim }] }]}>
             <ScrollView>
-              
+
               <View style={styles.searchWebZoom}>
                 <TextInput
                   style={styles.searchInputWebZoom}
@@ -75,15 +75,14 @@ export default function CamyoWebNavBar({ onSearch }) {
                 />
                 <TouchableOpacity><FontAwesome name="search" size={12} color="black" style={styles.searchIconZoom} /></TouchableOpacity>
               </View>
-              
+
 
               {user ? (
                 <TouchableOpacity style={styles.shareButtonZoomed2} onPress={() => logout()}><Text style={styles.shareTextZoom1}>Cerrar Sesión</Text></TouchableOpacity>
               ) : (
-                <>
-                  <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.push(routes.login)}><Text style={styles.shareTextZoom1}>Iniciar Sesión</Text></TouchableOpacity>
-    
-                </>
+                <TouchableOpacity style={styles.shareButtonZoomed1} onPress={() => router.push(routes.login)}>
+                  <Text style={styles.shareTextZoom1}>Iniciar Sesión</Text>
+                </TouchableOpacity>
               )}
 
 
@@ -94,41 +93,61 @@ export default function CamyoWebNavBar({ onSearch }) {
         <>
           <View style={styles.headerWeb}>
             <View style={[styles.leftSection, isZoomed && styles.centerSection]}>
-              <TouchableOpacity onPress={() => router.push("/")}>
+              <TouchableOpacity onPress={() => router.replace("/")}>
                 <Image source={ProyectoLogo} style={styles.logoZoomed} resizeMode="cover" />
               </TouchableOpacity>
             </View>
             <View style={styles.rightSection}>
-               
-               <TouchableOpacity onPress={() => router.replace('/chat/list')}>
-                  <Text style={styles.linkText}>Mis Mensajes</Text>
-               </TouchableOpacity>
-               <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.listcompanies)} ><Text style={styles.linkText}>Empresas</Text></TouchableOpacity>
-              
-              
-              <View style={styles.searchWeb}>
-              <TextInput
-                style={styles.searchInputWeb}
-                placeholder="Buscar Ofertas"
-                value={searchQuery}
-                onChangeText={setSearchQuery} // Solo actualiza el estado, sin activar la búsqueda
-                onSubmitEditing={handleSearch} // Activa la búsqueda cuando se presiona Enter
-              />
-              <TouchableOpacity onPress={handleSearch}>
-                <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
+
+              <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.listcompanies)} >
+                <Text style={styles.linkText}>Lista de empresas</Text>
               </TouchableOpacity>
-            </View>
-              
+
+              {user?.rol === "EMPRESA" && (
+                  <TouchableOpacity
+                    style={styles.buttonText}
+                    onPress={() => router.push("/suscripcion")}
+                  >
+                    <Text style={styles.linkText}>Suscripción</Text>
+                  </TouchableOpacity>
+                )}             
+
+              {user && (
+                <>
+                  <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.chatList)}>
+                    <Text style={styles.linkText}>Mis mensajes</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.buttonText} onPress={() => router.push(routes.myoffers)} >
+                    <Text style={styles.linkText}>Mis ofertas</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+
+              <View style={styles.searchWeb}>
+                <TextInput
+                  style={styles.searchInputWeb}
+                  placeholder="Buscar Ofertas"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery} // Solo actualiza el estado, sin activar la búsqueda
+                  onSubmitEditing={handleSearch} // Activa la búsqueda cuando se presiona Enter
+                />
+                <TouchableOpacity onPress={handleSearch}>
+                  <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
+                </TouchableOpacity>
+              </View>
+
 
               {user ? (
                 <>
-                   <PerfilDropdown user={user}/>
-                
+                  <PerfilDropdown user={user} />
+
                 </>
               ) : (
                 <>
                   <TouchableOpacity style={styles.shareButton} onPress={() => router.push(routes.login)}><Text style={styles.shareText}>Acceder</Text></TouchableOpacity>
-                
+
                 </>
               )}
 

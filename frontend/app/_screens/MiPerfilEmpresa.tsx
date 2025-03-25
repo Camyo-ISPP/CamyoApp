@@ -1,15 +1,17 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import SuccessModal from "../_components/SuccessModal";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { useFocusEffect } from '@react-navigation/native';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -21,6 +23,41 @@ const MiPerfilEmpresa = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const { refreshSubscriptionLevel } = useSubscription();
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshSubscriptionLevel();
+    }, [])
+  );
+
+
+  const [resenas, setResenas] = useState([]);
+
+  const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+
+
+  useEffect(() => {
+    const fetchResenas = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
+        setResenas(response.data);
+
+        // Obtener valoración media del backend
+        const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
+        setValoracionMedia(mediaResponse.data);
+      } catch (error) {
+        console.error("Error al cargar las reseñas o valoración:", error);
+      }
+    };
+
+    if (user?.id) {
+      fetchResenas();
+    }
+  }, [user]);
+
+
+
   useEffect(() => {
     const fetchOffers = async () => {
       try {
@@ -37,10 +74,7 @@ const MiPerfilEmpresa = () => {
   }, []);
 
   const canCreateNewOffer = () => {
-    console.log("rules", rules);
-    console.log("offers", offers);
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
-    console.log("activeOffersCount", activeOffersCount);
     return activeOffersCount < rules.maxActiveOffers;
   };
 
@@ -149,9 +183,8 @@ const MiPerfilEmpresa = () => {
 
                 <TouchableOpacity
                   style={styles.mejorarPlanButton}
-                  onPress={() => router.push(`/`)}
+                  onPress={() => router.push(`/suscripcion`)}
                 >
-                  {/** TODO: Add route to upgrade plan */}
                   <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
                   <Text style={styles.publishButtonText}>Mejora tu plan aquí</Text>
                 </TouchableOpacity>
@@ -231,7 +264,36 @@ const MiPerfilEmpresa = () => {
               </ScrollView >
             )}
           </View>
+          <View style={styles.separator} />
 
+          <View style={styles.reseñasContainer}>
+            <Text style={styles.sectionTitle}>Reseñas</Text>
+            {resenas.length > 0 ? (
+              valoracionMedia !== null && (
+                <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                  ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                </Text>
+              )
+            ) : (
+              <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                Valoración media: No hay datos suficientes
+              </Text>
+            )}
+
+            {resenas.length === 0 ? (
+              <Text style={styles.info}>Todavía no tienes reseñas.</Text>
+            ) : (
+              resenas.map((resena) => (
+                <View key={resena.id} style={styles.reseñaCard}>
+                  <Text style={styles.reseñaAutor}>
+                    <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
+                  </Text>
+                  <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
+                  <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
+                </View>
+              ))
+            )}
+          </View>
         </View>
       </View>
     </ScrollView >
@@ -247,6 +309,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     marginTop: 20,
     paddingTop: 70,
+    minHeight: "100%",
   },
   card: {
     backgroundColor: colors.white,
@@ -535,6 +598,30 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginBottom: 10,
+  },
+  reseñasContainer: {
+    paddingHorizontal: 30,
+    marginTop: 20,
+  },
+  reseñaCard: {
+    backgroundColor: colors.lightGray,
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  reseñaAutor: {
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: colors.secondary,
+  },
+  reseñaValoracion: {
+    fontSize: 14,
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  reseñaComentario: {
+    fontSize: 14,
+    color: colors.darkGray,
   },
 });
 
