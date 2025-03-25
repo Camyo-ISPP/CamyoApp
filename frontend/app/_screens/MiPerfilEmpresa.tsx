@@ -11,7 +11,6 @@ import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import SuccessModal from "../_components/SuccessModal";
 import { useSubscription } from "@/contexts/SubscriptionContext";
-import { useFocusEffect } from '@react-navigation/native';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -86,29 +85,35 @@ const MiPerfilEmpresa = () => {
     return activeOffersCount <= rules.maxSponsoredOffers;
 
   }
-  const promoteOffer = async (Itemid: string | number) => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/ofertas/patrocinadas`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': `Bearer ${userToken}`
-        },
-        body: JSON.stringify({ ofertaId: Itemid, days: 7 })
-      });
 
-      setSuccessModalVisible(true);
-      setTimeout(() => {
-        setSuccessModalVisible(false);
-        router.replace("/miperfil");
-      }, 1000);
-    } catch (err) {
-      throw new Error(`Error al promocionar la oferta: ${err}`);
-    }
+    const promoteOffer = async (ofertaId: number) => {
+      try {
+          const url = `${BACKEND_URL}/ofertas/patrocinadas?ofertaId=${ofertaId}&dias=30`;
+  
+          const response = await fetch(url, {
+              method: "POST",
+              headers: {
+                  'Accept': 'application/json',
+                  'Authorization': `Bearer ${userToken}`
+              }
+          });
 
-
-
-  }
+          if (!response.ok) {
+              const errorText = await response.text(); 
+              console.error("Error en promoteOffer:", errorText); 
+              throw new Error("La oferta no ha podido ser patrocinada");
+          }
+  
+          setSuccessModalVisible(true);
+          setTimeout(() => {
+              setSuccessModalVisible(false);
+              router.replace("/miperfil");
+          }, 1000);
+  
+      } catch (err) {
+          console.error("Error completo en promoteOffer:", err);
+      }
+  };
   const unpromoteOffer = async (Itemid: string | number) => {
 
   }
@@ -242,7 +247,7 @@ const MiPerfilEmpresa = () => {
                         ) : canPromoteNewOffer() ? (
                           <TouchableOpacity style={[styles.button, { backgroundColor: colors.secondary }]} onPress={() => promoteOffer(item.id)}>
                             <AntDesign name="exclamationcircle" size={14} color={colors.white} style={styles.detailsIcon} />
-                            <Text style={styles.buttonText}>Patrocinar Oferta</Text>
+                            <Text style={styles.buttonText}>Patrocinar</Text>
                           </TouchableOpacity>
                         ) : null}
                         <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
