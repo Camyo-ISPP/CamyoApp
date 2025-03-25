@@ -7,7 +7,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons } from "@expo/vector-icons";
-const CompanyLogo = require('../../assets/images/camyo.png');
+const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -262,7 +262,7 @@ return (
                 <View style={styles.offersSection}>
                     {filteredData.map((item) => (
                         <View key={item.id} style={styles.card}>
-                            <Image source={CompanyLogo} style={styles.companyLogo} resizeMode="contain"/>
+                            <Image source={DefaultLogo} style={styles.companyLogo} resizeMode="contain"/>
                             <View style={{ width: "30%" }}>
                                 <Text style={styles.offerTitle}>{item.titulo}</Text>
                                 <View style={{ flexDirection: "row" }}>
@@ -278,7 +278,7 @@ return (
                                 <Text style={styles.offerInfo}>{item.notas}</Text>
                             </View>
                             <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                            <TouchableOpacity style={styles.button} onPress={() => router.replace(`/oferta/${item.id}`)}>
+                            <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
                                 <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
                                 <Text style={styles.buttonText}>Ver Detalles</Text>
                             </TouchableOpacity>
@@ -294,7 +294,7 @@ return (
 const styles = StyleSheet.create({
     scrollViewContent: {
         flexGrow: 1,
-        paddingTop: '6%',
+        paddingTop: '8%',
         backgroundColor: colors.lightGray,
     },
     webContainer: {

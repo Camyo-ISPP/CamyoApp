@@ -1,7 +1,10 @@
 package com.camyo.backend.oferta;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,6 +249,9 @@ public class OfertaService {
     
         return dto;
     }
-    
+
+    public List<Oferta> obtenerUltimas10Ofertas() {
+        return ofertaRepository.findTopByOrderByFechaPublicacionDesc();
+    }
 
 }

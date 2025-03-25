@@ -271,7 +271,7 @@ const PublicEmpresa = ({ userId }) => {
                       onPress={async () => {
                         const chatId = await startChat(user.id, empresa?.userId);
                         if (chatId) {
-                          router.replace(`/chat?otherUserId=${empresa?.userId}`);
+                          router.push(`/chat?otherUserId=${empresa?.userId}`);
                         }
                       }}
                     >

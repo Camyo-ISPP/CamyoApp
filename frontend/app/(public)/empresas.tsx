@@ -50,8 +50,10 @@ const EmpresasLista = () => {
   if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-
+    <ScrollView contentContainerStyle={{ 
+      flexGrow: 1, 
+      paddingTop: 20
+    }}>
       {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
           <View>
@@ -84,7 +86,9 @@ const EmpresasLista = () => {
                 onPress={async () => {
                   const chatId = await startChat(user.userId, empresa.usuario.id);
                   if (chatId) {
+
                     router.replace(`/chat`);
+
                   }
                 }}
               >

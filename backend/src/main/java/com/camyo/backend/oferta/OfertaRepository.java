@@ -1,5 +1,6 @@
 package com.camyo.backend.oferta;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,4 +46,8 @@ public interface OfertaRepository extends JpaRepository<Oferta,Integer>{
 
     @Query("SELECT o FROM Oferta o WHERE empresa.id = :empId ORDER BY o.fechaPublicacion DESC")
     List<Oferta> encontrarOfertasPorEmpresa(Integer empId);
+
+    @Query("SELECT o FROM Oferta o ORDER BY o.fechaPublicacion DESC LIMIT 5")
+    List<Oferta> findTopByOrderByFechaPublicacionDesc();
+
 }

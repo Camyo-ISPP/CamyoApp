@@ -49,6 +49,13 @@ export default function CamyoWebNavBar({ onSearch }) {
             <OptionsDropdown />
           ) : (
             <>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/buscar-ofertas")}
+              >
+                <Text style={styles.buttonText}>Explorar Ofertas</Text>
+              </TouchableOpacity>
+              <View style={styles.dot} />
               {user?.rol === "EMPRESA" && (
                   <>
                     <TouchableOpacity

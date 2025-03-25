@@ -36,7 +36,7 @@ export default function Index() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/ofertas`);
+      const response = await axios.get(`${BACKEND_URL}/ofertas/recientes`);
       setData(response.data);
     } catch (error) {
       console.error('Error al cargar los datos:', error);
@@ -109,10 +109,14 @@ export default function Index() {
             <View style={styles.heroContainer}>
               <View style={styles.heroBox}>
                 <View style={styles.textContainer}>
-                  <Text style={styles.heroText}>Nos alegra verte otra vez, {user.nombre}</Text>
+                  <Text style={styles.heroText}>¡Nos alegra verte otra vez, {user.nombre}!</Text>
                   <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/miperfil")}>
                     <Text style={styles.registerButtonText}>Mi Perfil</Text>
-                    <Ionicons name="arrow-forward" size={25} color="white" style={styles.arrowIcon} />
+                    <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.registerButton]} onPress={() => router.push("/buscar-ofertas")}>
+                    <Text style={styles.registerButtonText}>Descubrir Vacantes</Text>
+                    <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
                   </TouchableOpacity>
                 </View>
                 <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
@@ -123,7 +127,7 @@ export default function Index() {
             <View style={styles.separator} />
 
             {/* Sección ofertas */}
-            <Text style={styles.title}> Lista de Ofertas </Text>
+            <Text style={styles.title}> Ofertas Recientes </Text>
             <View style={styles.listaContainer}>
               {/* Columna de Carga */}
               <View style={styles.columna}>
@@ -266,7 +270,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: "bold",
     color: colors.secondary,
-    marginBottom: 45,
+    marginBottom: 25,
     marginRight: 225,
     marginLeft: 10,
   },
@@ -274,7 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: colors.primary,
     width: 200,
-    paddingVertical: 16,
+    paddingVertical: 8,
     paddingHorizontal: 30,
     marginBottom: 10,
     marginLeft: 50,
@@ -284,7 +288,7 @@ const styles = StyleSheet.create({
   },
   registerButtonText: {
     color: "white",
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
   },
   arrowIcon: {
