@@ -127,5 +127,13 @@ public class UsuarioService {
         return toUpdate;
     }
     
-    
+    public Integer obtenerCamioneroIdPorUsuarioId(Integer camioneroId) {
+        return usuarioRepository.findCamioneroIdByUsuarioId(camioneroId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el camioneroId: " + camioneroId));
+    }
+
+    public Integer obtenerEmpresaIdPorUsuarioId(Integer empresaId) {
+        return usuarioRepository.findEmpresaIdByUsuarioId(empresaId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el empresaId: " + empresaId));
+    }  
 }
