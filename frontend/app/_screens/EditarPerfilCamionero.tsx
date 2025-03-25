@@ -311,7 +311,7 @@ const EditarPerfilCamionero = () => {
       <View style={styles.container}>
         <View style={styles.cardContainer}>
 
-          <TouchableOpacity style={styles.backButton} onPress={() => router.push('/registro')}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.push('/miperfil')}>
             <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
           </TouchableOpacity>
 
