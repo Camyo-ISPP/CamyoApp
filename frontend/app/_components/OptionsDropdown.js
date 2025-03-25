@@ -41,7 +41,7 @@ const OptionsDropdown = () => {
               )}
 
               {user && user.rol !== "ADMIN" && (
-                <TouchableOpacity onPress={() => router.push('/chat/list')} style={styles.dropdownButton}>
+                <TouchableOpacity onPress={() => router.push('/chat')} style={styles.dropdownButton}>
                   <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
                   <Text style={styles.dropdownButtonText}>Mis mensajes</Text>
                 </TouchableOpacity>
