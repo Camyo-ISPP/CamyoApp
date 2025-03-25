@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     marginBottom: 10,
     borderWidth: 2,
-    borderColor: "#ccc",
+    borderColor: colors.secondary,
   },
   dropdown: {
     position: 'absolute',
