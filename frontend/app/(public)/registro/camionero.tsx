@@ -226,9 +226,8 @@ const CamioneroRegisterScreen = () => {
       disponibilidad: formData.disponibilidad,
       experiencia: parseInt(formData.experiencia),
       tieneCAP: formData.tieneCAP,
-      expiracionCAP: formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-      isAutonomo: formData.isAutonomo,
-      tarjetasAutonomo: formData.tarjetas
+      expiracionCAP: formData.tieneCAP? formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'): null,
+      tarjetasAutonomo: formData.isAutonomo? formData.tarjetas: []
     };
 
     try {

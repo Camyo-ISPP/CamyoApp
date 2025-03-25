@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.camyo.backend.auth.payload.request.EditRequestCamionero;
 import com.camyo.backend.auth.payload.request.EditRequestEmpresa;
 import com.camyo.backend.auth.payload.request.LoginRequest;
 import com.camyo.backend.auth.payload.request.SignupRequestCamionero;
 import com.camyo.backend.auth.payload.request.SignupRequestEmpresa;
 import com.camyo.backend.auth.payload.response.JwtResponse;
 import com.camyo.backend.auth.payload.response.MessageResponse;
+import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.configuration.jwt.JwtUtils;
 import com.camyo.backend.configuration.services.UserDetailsImpl;
@@ -138,6 +140,42 @@ public class AuthController {
 		}
 		authService.createEmpresa(signUpRequest);
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
+	}
+
+	@Operation(summary = "Editar usuario camionero", description = "Edita los datos de un usuario y su camionero.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Edición existosa"),
+		@ApiResponse(responseCode = "403", description = "Acceso restringido"),
+        @ApiResponse(responseCode = "400", description = "Error en la edición")
+    })
+	@PutMapping("/edit/camionero")	
+	public ResponseEntity<MessageResponse> editCamionero(@Valid @RequestBody EditRequestCamionero editRequest) throws DataAccessException, IOException {
+        Usuario usuario = null;
+		try {
+			usuario = usuarioService.obtenerUsuarioActual();
+		} catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(
+                new MessageResponse("Debe iniciar sesión para editar su usuario."), 
+                HttpStatus.FORBIDDEN
+            );
+        }
+
+		if(!usuario.getAuthority().getAuthority().equals("CAMIONERO")){
+			return new ResponseEntity<>(
+				new MessageResponse("Debe iniciar sesión con un camionero para editar su usuario."), 
+				HttpStatus.FORBIDDEN
+			);
+		}
+		Camionero camionero = camioneroService.obtenerCamioneroPorUsuario(usuario.getId());
+
+		if (!usuario.getEmail().equals(editRequest.getEmail()) && usuarioService.existeUsuarioPorEmail(editRequest.getEmail()).equals(true)) {
+			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
+		}
+		if (!camionero.getDni().equals(editRequest.getDni()) && camioneroService.obtenerCamioneroPorDNI(editRequest.getDni()).isPresent()) {
+			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + editRequest.getDni() + "' ya está asociado a otra cuenta."));
+		}
+		authService.editCamionero(editRequest, usuario, camionero);
+		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}
 
 	@Operation(summary = "Editar usuario empresa", description = "Edita los datos de un usuario y su empresa.")
