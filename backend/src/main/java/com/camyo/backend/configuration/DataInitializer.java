@@ -259,12 +259,12 @@ public class DataInitializer {
 
                                 // Insert Reseñas
                                 statement.addBatch("INSERT IGNORE INTO reseñas (id, comentarios, valoracion, comentador_id, comentado_id) VALUES "
-                                        + "(201,'Excelente trabajo', 5, 201, 222),"
-                                        + "(202,'Muy bueno, aunque la carga sufrió problemas', 4, 201, 223),"
+                                        + "(201,'Excelente trabajo', 5, 222, 241),"
+                                        + "(202,'Muy bueno, aunque la carga sufrió problemas', 4, 201, 250),"
                                         + "(203,'No volvería a contratar', 1, 202, 224),"
                                         + "(204,'Horrible, no cumplió los plazos establecidos en ninguna de nuestras ofertas que le asignamos', 1, 201, 225),"
-                                        + "(205,'Mal', 2, 223, 202),"
-                                        + "(206,'Bien', 4, 223, 201)");
+                                        + "(205,'Mal', 2, 224, 202),"
+                                        + "(206,'Bien', 4, 250, 201)");
 
                                 // Insert Ofertas
                                 statement.addBatch(
@@ -291,7 +291,11 @@ public class DataInitializer {
                                         + "(220, 'Transportista en Cáceres', 3, 'C_E', 'Viajes limitados a la comunidad extremeña', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 220, 'Cáceres'),"
                                         + "(221, 'Transportista en Cataluña', 3, 'C_E', 'Viajes limitados a la comunidad catalana', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 221, 'Barcelona'),"
                                         + "(222, 'Transportista en Almería', 3, 'C', 'Viajes limitados a la comunidad andaluza', 'ABIERTA', '2025-05-03 10:45', 3250.00, NULL, 221, 'Andalucía'),"
-                                        + "(223, 'Carga de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de paquetes de Sevilla a Córdoba', 'ABIERTA', '2025-05-03 10:45', 3100.00, NULL, 221, 'Andalucía')");
+                                        + "(223, 'Carga de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de paquetes de Sevilla a Córdoba', 'ABIERTA', '2025-05-03 10:45', 3100.00, NULL, 221, 'Andalucía'),"
+                                        + "(224, 'Transporte urgente de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de documentos urgentes desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3200.00, 223, 201, 'Andalucía'),"
+                                        + "(225, 'Envío de mercancías de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de productos electrónicos desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3300.00, 201, 223, 'Andalucía'),"
+                                        + "(226, 'Distribución de paquetes de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de paquetes comerciales desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3400.00, 202, 203, 'Andalucía'),"
+                                        + "(227, 'Logística express de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de materiales médicos desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3500.00, 201, 205, 'Andalucía')");
 
                                 // Insert Trabajos
                                 statement.addBatch("INSERT IGNORE INTO trabajos (id, fecha_incorporacion, jornada, oferta_id) VALUES "
@@ -311,16 +315,20 @@ public class DataInitializer {
 
                                 // Insert Cargas
                                 statement.addBatch("INSERT IGNORE INTO cargas (id, mercancia, peso, origen, destino, distancia, inicio, fin_minimo, fin_maximo, oferta_id) VALUES "
-                                        + "(201, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10 09:30', '2025-05-11 08:00', '2025-05-12 09:30', 203),"
-                                        + "(202, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 204),"
-                                        + "(203, 'Alimentos', 10000.00 , 'Barcelona', 'Sevilla', 830, '2025-07-10 09:30', '2025-07-13 08:00', '2025-07-17 09:30', 207),"
-                                        + "(204, 'Muebles', 2000.00, 'Barcelona', 'Madrid', 620, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 208),"
-                                        + "(205, 'Pescado', 3500.50, 'Valencia', 'Vigo', 955, '2025-05-10 09:30', '2025-05-13 08:00', '2025-05-17 09:30', 211),"
-                                        + "(206, 'Conjunto de paquete pequeños', 300.00, 'Sevilla', 'Alicante', 595, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 212),"
-                                        + "(207, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10 09:30', '2025-05-11 08:00', '2025-05-12 09:30', 214),"
-                                        + "(208, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 215),"
-                                        + "(209, 'Conjunto de paquete pequeños', 300.00, 'Cáceres', 'Sevilla', 595, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 219),"
-                                        + "(210, 'Conjunto de paquete pequeños', 350.00, 'Sevilla', 'Córdoba', 580, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 223)");
+                                        + "(201, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10', '2025-05-11', '2025-05-12', 203),"
+                                        + "(202, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10', '2025-05-11', '2025-05-12', 204),"
+                                        + "(203, 'Alimentos', 10000.00 , 'Barcelona', 'Sevilla', 830, '2025-07-10', '2025-07-13', '2025-07-17', 207),"
+                                        + "(204, 'Muebles', 2000.00, 'Barcelona', 'Madrid', 620, '2025-05-10', '2025-05-11', '2025-05-12', 208),"
+                                        + "(205, 'Pescado', 3500.50, 'Valencia', 'Vigo', 955, '2025-05-10', '2025-05-13', '2025-05-17', 211),"
+                                        + "(206, 'Conjunto de paquete pequeños', 300.00, 'Sevilla', 'Alicante', 595, '2025-05-10', '2025-05-11', '2025-05-12', 212),"
+                                        + "(207, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10', '2025-05-11', '2025-05-12', 214),"
+                                        + "(208, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10', '2025-05-11', '2025-05-12', 215),"
+                                        + "(209, 'Conjunto de paquete pequeños', 300.00, 'Cáceres', 'Sevilla', 595, '2025-05-10', '2025-05-11', '2025-05-12', 219),"
+                                        + "(210, 'Conjunto de paquete pequeños', 350.00, 'Sevilla', 'Córdoba', 580, '2025-05-10', '2025-05-11', '2025-05-12', 223),"
+                                        + "(211, 'Conjunto de documentos urgentes', 350.00, 'Sevilla', 'Córdoba', 595, '2025-05-10', '2025-05-11', '2025-05-12', 224),"
+                                        + "(212, 'Conjunto de productos electrónicos', 350.00, 'Sevilla', 'Córdoba', 600, '2025-05-10', '2025-05-11', '2025-05-12', 225),"
+                                        + "(213, 'Conjunto de paquetes comerciales', 350.00, 'Sevilla', 'Córdoba', 605, '2025-05-10', '2025-05-11', '2025-05-12', 226),"
+                                        + "(214, 'Conjunto de materiales médicos', 350.00, 'Sevilla', 'Córdoba', 610, '2025-05-10', '2025-05-11', '2025-05-12', 227)");
 
                                 // Insert aplicados
                                 statement.addBatch("INSERT IGNORE INTO aplicados (oferta_id, camionero_id) VALUES "

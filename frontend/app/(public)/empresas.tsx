@@ -50,8 +50,10 @@ const EmpresasLista = () => {
   if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-
+    <ScrollView contentContainerStyle={{ 
+      flexGrow: 1, 
+      paddingTop: 20
+    }}>
       {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
           <View>
@@ -63,20 +65,30 @@ const EmpresasLista = () => {
           </View>
 
           <View>
-            {/* Botón "Ver Detalles" */}
-            <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
-              <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
-              <Text style={styles.buttonText}>Ver Detalles</Text>
-            </TouchableOpacity>
+            {user && user.rol == "EMPRESA" && empresa.id === user.id ? (
+              <TouchableOpacity style={styles.ownOfferBadge} onPress={() => router.push('/miperfil')}>
+                <MaterialCommunityIcons name="office-building" size={15} color="white" style={styles.detailsIcon} />
+                <Text style={styles.ownOfferText}>Tu Empresa</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.button} onPress={() => router.push(`/empresa/${empresa.id}`)}>
+                <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
+                <Text style={styles.buttonText}>Ver Detalles</Text>
+              </TouchableOpacity>
+            )}
+
+
 
             {/* Botón "Contactar" solo si hay usuario autenticado */}
             {user && user.rol == "CAMIONERO" && (
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
-                  const chatId = await startChat(user.id, empresa.usuario.id);
+                  const chatId = await startChat(user.userId, empresa.usuario.id);
                   if (chatId) {
-                    router.replace(`/chat?otherUserId=${empresa.usuario.id}`);
+
+                    router.replace(`/chat`);
+
                   }
                 }}
               >
@@ -167,6 +179,22 @@ const styles = StyleSheet.create({
   chatIcon: {
     marginRight: 8,
   },
+  ownOfferBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4A6572",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    marginRight: 30,
+  },
+  ownOfferText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 14,
+    marginLeft: 5
+  },
+
 });
 
 export default EmpresasLista;

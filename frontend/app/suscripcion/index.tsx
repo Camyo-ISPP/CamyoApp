@@ -1,9 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform, Animated, Easing, ActivityIndicator } from "react-native";
 import colors from "frontend/assets/styles/colors";
-import CamyoWebNavBar from "../_components/CamyoNavBar";
-import BottomBar from "../_components/BottomBar";
-import Titulo from "../_components/Titulo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
 import EmpresaRoute from "@/security/EmpresaRoute";
@@ -220,7 +217,6 @@ const SubscriptionPlans = () => {
         <EmpresaRoute>
             {Platform.OS === 'web' ? (
                 <View style={styles.webContainer}>
-                    <CamyoWebNavBar />
                     <ScrollView contentContainerStyle={styles.scrollview}>
                         <Text style={styles.sectionTitle}>Planes de suscripción</Text>
                         <View style={styles.cardsContainer}>
@@ -296,7 +292,6 @@ const SubscriptionPlans = () => {
                             />
                         </View>
                     </ScrollView>
-                    <BottomBar />
                 </View>
             )}
         </EmpresaRoute>

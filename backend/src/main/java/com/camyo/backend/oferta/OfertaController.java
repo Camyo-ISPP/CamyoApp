@@ -53,6 +53,7 @@ public class OfertaController {
             dto.setCamionero(oferta.getCamionero());
             dto.setAplicados(oferta.getAplicados());
             dto.setRechazados(oferta.getRechazados());
+            dto.setPromoted(oferta.getPromoted() != null ? oferta.getPromoted() : false);
             if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
                 dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
             }
@@ -71,9 +72,54 @@ public class OfertaController {
             } catch (ResourceNotFoundException ex) {
                 dto.setTipoOferta("DESCONOCIDO");
             }
-    
+        
             return dto;
         }).toList();
+        
+    }
+
+    @GetMapping("/recientes")
+    public List<OfertaCompletaDTO> obtenerUltimas10Ofertas() {
+        List<Oferta> ofertas = ofertaService.obtenerUltimas10Ofertas();
+        return ofertas.stream().map(this::convertirAOfertaDTO).toList();
+    }
+
+    private OfertaCompletaDTO convertirAOfertaDTO(Oferta oferta) {
+        OfertaCompletaDTO dto = new OfertaCompletaDTO();
+        dto.setId(oferta.getId());
+        dto.setTitulo(oferta.getTitulo());
+        dto.setExperiencia(oferta.getExperiencia());
+        dto.setLicencia(oferta.getLicencia());
+        dto.setNotas(oferta.getNotas());
+        dto.setEstado(oferta.getEstado());
+        dto.setFechaPublicacion(oferta.getFechaPublicacion());
+        dto.setSueldo(oferta.getSueldo());
+        dto.setLocalizacion(oferta.getLocalizacion());
+        dto.setCamionero(oferta.getCamionero());
+        dto.setAplicados(oferta.getAplicados());
+        dto.setRechazados(oferta.getRechazados());
+        
+        if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
+            dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
+        }
+        
+        try {
+            Carga c = ofertaService.obtenerCarga(oferta.getId());
+            if (c != null) {
+                dto.setTipoOferta("CARGA");
+            } else {
+                Trabajo t = ofertaService.obtenerTrabajo(oferta.getId());
+                if (t != null) {
+                    dto.setTipoOferta("TRABAJO");
+                } else {
+                    dto.setTipoOferta("DESCONOCIDO");
+                }
+            }
+        } catch (ResourceNotFoundException ex) {
+            dto.setTipoOferta("DESCONOCIDO");
+        }
+        
+        return dto;
     }
     
     /**
@@ -562,26 +608,36 @@ public class OfertaController {
      * @return Lista de ofertas aplicadas filtradas y ordenadas.
      */
     @GetMapping("/camionero/{camioneroId}")
-    public ResponseEntity<List<List<Oferta>>> obtenerOfertasPorCamionero(
+    public ResponseEntity<List<List<OfertaCompletaDTO>>> obtenerOfertasPorCamionero(
             @PathVariable Integer camioneroId) {
         try {
-            List<List<Oferta>> ofertas = ofertaService.obtenerOfertasPorCamionero(camioneroId);
-            return ResponseEntity.ok(ofertas);
+            List<List<Oferta>> ofertasPorCategoria = ofertaService.obtenerOfertasPorCamionero(camioneroId);
+            List<List<OfertaCompletaDTO>> resultado = ofertasPorCategoria.stream()
+                .map(lista -> lista.stream()
+                    .map(ofertaService::mapearOfertaACompletaDTO)
+                    .toList())
+                .toList();
+            return ResponseEntity.ok(resultado);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
+    
 
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<Oferta>> obtenerOfertasPorEmpresa(
+    public ResponseEntity<List<OfertaCompletaDTO>> obtenerOfertasPorEmpresa(
             @PathVariable Integer empresaId) {
         try {
             List<Oferta> ofertas = ofertaService.obtenerOfertasPorEmpresa(empresaId);
-            return ResponseEntity.ok(ofertas);
+            List<OfertaCompletaDTO> dtos = ofertas.stream()
+                .map(ofertaService::mapearOfertaACompletaDTO)
+                .toList();
+            return ResponseEntity.ok(dtos);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
+    
 
 
 }

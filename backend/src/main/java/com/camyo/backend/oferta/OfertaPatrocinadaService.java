@@ -48,19 +48,19 @@ public class OfertaPatrocinadaService {
     @Transactional
     public OfertaPatrocinada patrocinarOferta(Integer ofertaId, int duracionDias) {
         Integer empresaIdAuth = getEmpresaIdFromToken();
-        Empresa empresa = empresaService.obtenerEmpresaPorId(empresaIdAuth);
         Oferta oferta = ofertaService.obtenerOfertaPorId(ofertaId);
-
+        Empresa empresa = empresaService.obtenerEmpresaPorId(empresaIdAuth);
+    
         PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaIdAuth);
         long patrociniosActivos = ofertaPatrocinadaRepository.countActiveByEmpresa(empresaIdAuth);
-
+    
         switch (nivel) {
             case GRATIS:
                 if (patrociniosActivos >= 1) {
                     throw new RuntimeException("La cuenta gratuita solo puede patrocinar 1 oferta a la vez.");
                 }
                 break;
-            case BASIC:
+            case BASICO:
                 if (patrociniosActivos >= 5) {
                     throw new RuntimeException("El plan BASIC solo permite patrocinar 5 ofertas a la vez.");
                 }
@@ -68,37 +68,45 @@ public class OfertaPatrocinadaService {
             case PREMIUM:
                 break;
         }
-
         var existente = ofertaPatrocinadaRepository.findActiveByOferta(ofertaId);
         if (existente.isPresent()) {
             throw new RuntimeException("Esta oferta ya está patrocinada actualmente.");
         }
-
+    
         OfertaPatrocinada patrocinio = new OfertaPatrocinada();
         patrocinio.setOferta(oferta);
         patrocinio.setEmpresa(empresa);
         patrocinio.setFechaInicio(LocalDateTime.now());
         patrocinio.setFechaFin(LocalDateTime.now().plusDays(duracionDias));
         patrocinio.setStatus(PatrocinioStatus.ACTIVO);
-
+    
+        oferta.setPromoted(true);
+        ofertaService.guardarOferta(oferta);
+    
         return ofertaPatrocinadaRepository.save(patrocinio);
     }
+    
 
     @Transactional
     public void desactivarPatrocinio(Integer ofertaId) {
         OfertaPatrocinada patrocinada = ofertaPatrocinadaRepository
             .findActiveByOferta(ofertaId)
             .orElseThrow(() -> new ResourceNotFoundException("OfertaPatrocinada", "ofertaId", ofertaId));
-
+    
         Integer empresaIdAuth = getEmpresaIdFromToken();
-
+    
         if (!patrocinada.getEmpresa().getId().equals(empresaIdAuth)) {
             throw new RuntimeException("No tienes permiso para desactivar esta oferta patrocinada");
         }
-
+    
         patrocinada.setStatus(PatrocinioStatus.CANCELADO);
         ofertaPatrocinadaRepository.save(patrocinada);
+    
+        Oferta oferta = patrocinada.getOferta();
+        oferta.setPromoted(false);
+        ofertaService.guardarOferta(oferta);
     }
+    
     
 
     @Transactional(readOnly = true)
@@ -109,14 +117,18 @@ public class OfertaPatrocinadaService {
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void expirarPatrocinios() {
-        LocalDateTime ahora = LocalDateTime.now();
-        List<OfertaPatrocinada> vencidos = ofertaPatrocinadaRepository.findExpiredButActive(ahora);
-
+        List<OfertaPatrocinada> vencidos = ofertaPatrocinadaRepository.findAllVencidos(LocalDateTime.now());
+    
         for (OfertaPatrocinada p : vencidos) {
             p.setStatus(PatrocinioStatus.EXPIRADO);
+            Oferta oferta = p.getOferta();
+            oferta.setPromoted(false);
+            ofertaService.guardarOferta(oferta);
         }
+    
         ofertaPatrocinadaRepository.saveAll(vencidos);
     }
+    
 
 
     private Integer getEmpresaIdFromToken() {

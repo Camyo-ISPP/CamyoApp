@@ -26,4 +26,10 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Integer> {
   
     @Query("SELECT u.reseñas FROM Usuario u WHERE u.id = :userId")
     public List<Resena> obtenerReseñas(Integer userId);
+
+    @Query("SELECT c.id FROM Camionero c WHERE c.usuario.id = :userId")
+    Optional<Integer> findCamioneroIdByUsuarioId(Integer userId);
+
+    @Query("SELECT e.id FROM Empresa e WHERE e.usuario.id = :userId")
+    Optional<Integer> findEmpresaIdByUsuarioId(Integer userId);
 }

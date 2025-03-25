@@ -1,10 +1,9 @@
 package com.camyo.backend.oferta;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -51,17 +51,17 @@ public class Carga{
     @Min(value = 1, message="La distancia no puede ser negativa o cero")
     Integer distancia;
 
-    @Column(name="inicio", columnDefinition = "DATETIME")
-    @DateTimeFormat(pattern = "yyyy/MM/dd HH/mm")
-    LocalDateTime inicio;
+    @Column(name="inicio")
+    @NotNull
+    LocalDate inicio;
 
-    @Column(name="fin_minimo", columnDefinition = "DATETIME")
-    @DateTimeFormat(pattern = "yyyy/MM/dd HH/mm")
-    LocalDateTime finMinimo;
+    @Column(name="fin_minimo")
+    @NotNull
+    LocalDate finMinimo;
 
-    @Column(name="fin_maximo", columnDefinition = "DATETIME")
-    @DateTimeFormat(pattern = "yyyy/MM/dd HH/mm")
-    LocalDateTime finMaximo;
+    @Column(name="fin_maximo")
+    @NotNull
+    LocalDate finMaximo;
 
 
     @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST })

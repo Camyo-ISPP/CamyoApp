@@ -28,7 +28,6 @@ function RootLayout() {
         "oferta/[ofertaId]": "Detalles de la Oferta",
         "miperfilcamionero/editar": "Editar Perfil Camionero",
         "miperfilempresa/editar": "Editar Perfil Empresa",
-        "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
         chat:"Mis Mensajes",
@@ -69,7 +68,6 @@ function RootLayout() {
         <Stack.Screen name="camionero/[camioneroId]" />
         
         <Stack.Screen name="oferta/crear" />
-        <Stack.Screen name="oferta/editar/[ofertaId]" />
         <Stack.Screen name="oferta/[ofertaId]" />
         <Stack.Screen name="buscar-ofertas" />
         <Stack.Screen name="chat" />
@@ -81,6 +79,7 @@ function RootLayout() {
         <Stack.Screen name="(public)/forbidden" />
 
         <Stack.Screen name="pago/checkout" />
+        <Stack.Screen name="misofertas" />
       </Stack>
       {isMobile && <BottomBar />}
       </SubscriptionProvider>

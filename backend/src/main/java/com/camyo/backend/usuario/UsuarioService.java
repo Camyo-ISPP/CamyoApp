@@ -81,6 +81,11 @@ public class UsuarioService {
     }
 
     @Transactional
+    public Usuario guardarUsuarioSinEncode(Usuario usuario) throws DataAccessException {
+		return usuarioRepository.save(usuario);
+    }
+
+    @Transactional
     public void eliminarUsuario(Integer id) {
         Usuario usuarioABorrar = obtenerUsuarioPorId(id);
         this.usuarioRepository.delete(usuarioABorrar);
@@ -122,5 +127,13 @@ public class UsuarioService {
         return toUpdate;
     }
     
-    
+    public Integer obtenerCamioneroIdPorUsuarioId(Integer camioneroId) {
+        return usuarioRepository.findCamioneroIdByUsuarioId(camioneroId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el camioneroId: " + camioneroId));
+    }
+
+    public Integer obtenerEmpresaIdPorUsuarioId(Integer empresaId) {
+        return usuarioRepository.findEmpresaIdByUsuarioId(empresaId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el empresaId: " + empresaId));
+    }  
 }

@@ -11,6 +11,7 @@ const routes = {
   editProfileEmpresa: "/miperfil/editar",
   chat:"/chat",
   payment:"/pago/checkout",
+  myoffers: "/misofertas",
   suscripcion: "/suscripcion",
 };
 

@@ -7,11 +7,11 @@ import axios from 'axios';
 import React, { useEffect, useState } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons } from "@expo/vector-icons";
-const CompanyLogo = require('frontend/assets/images/camyo.png');
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+    
     const [data, setData] = useState<any[]>([]);
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -262,7 +262,7 @@ return (
                 <View style={styles.offersSection}>
                     {filteredData.map((item) => (
                         <View key={item.id} style={styles.card}>
-                            <Image source={CompanyLogo} style={styles.companyLogo} />
+                            <Image source={DefaultLogo} style={styles.companyLogo} resizeMode="contain"/>
                             <View style={{ width: "30%" }}>
                                 <Text style={styles.offerTitle}>{item.titulo}</Text>
                                 <View style={{ flexDirection: "row" }}>
@@ -278,7 +278,7 @@ return (
                                 <Text style={styles.offerInfo}>{item.notas}</Text>
                             </View>
                             <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                            <TouchableOpacity style={styles.button} onPress={() => router.replace(`/oferta/${item.id}`)}>
+                            <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
                                 <MaterialCommunityIcons name="details" size={15} color="white" style={styles.detailsIcon} />
                                 <Text style={styles.buttonText}>Ver Detalles</Text>
                             </TouchableOpacity>
@@ -294,7 +294,7 @@ return (
 const styles = StyleSheet.create({
     scrollViewContent: {
         flexGrow: 1,
-        paddingTop: '6%',
+        paddingTop: '8%',
         backgroundColor: colors.lightGray,
     },
     webContainer: {
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     mainContent: {
-        width: '70%',
+        width: '80%',
         flexDirection: 'row',
     },
     filtersCard: {
@@ -325,27 +325,32 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        width: '100%',
+        gap: 10,
         marginBottom: '8%',
-        marginHorizontal: '2%',
-    },
+    },    
     searchInput: {
-        flex: 1,
-        height: '100%',
+        flexBasis: '70%',
+        flexGrow: 1,
+        flexShrink: 1,
+        minHeight: 40,
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
         paddingHorizontal: 10,
-        marginRight: 10,
         backgroundColor: '#fff',
-        flexShrink: 1,
-    },
+    },    
     searchButton: {
+        flexBasis: '25%',
+        minWidth: 80,
+        paddingVertical: 10,
         backgroundColor: colors.primary,
-        padding: 10,
         borderRadius: 5,
-        alignSelf: 'flex-start',
-        flexShrink: 1,
-    },
+        alignItems: 'center',
+        justifyContent: 'center',
+    },    
     searchButtonText: {
         color: colors.white,
         fontWeight: 'bold',
@@ -412,8 +417,9 @@ const styles = StyleSheet.create({
     },
     companyLogo: {
         height: 90,
-        width: 90,
+        width: 120,
         marginRight: 10,
+        marginLeft: -10,
     },
     offerTitle: {
         fontSize: 16,
