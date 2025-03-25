@@ -109,9 +109,9 @@ export default function Index() {
             <View style={styles.heroContainer}>
               <View style={styles.heroBox}>
                 <View style={styles.textContainer}>
-                  <Text style={styles.heroText}>Nos alegra verte otra vez, {user.nombre}.</Text>
+                  <Text style={styles.heroText}>Nos alegra verte otra vez, {user.nombre}</Text>
                   <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/miperfil")}>
-                    <Text style={styles.registerButtonText}>Perfil</Text>
+                    <Text style={styles.registerButtonText}>Mi Perfil</Text>
                     <Ionicons name="arrow-forward" size={25} color="white" style={styles.arrowIcon} />
                   </TouchableOpacity>
                 </View>
@@ -198,6 +198,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 100,
     marginBottom: 20,
+    color: colors.secondary,
   },
 
   separator: {
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   heroBox: {
-    width: 700,
+    width: 750,
     height: 300,
     backgroundColor: "white",
     borderRadius: 15,
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
   heroText: {
     fontSize: 40,
     fontWeight: "bold",
-    color: colors.primary,
+    color: colors.secondary,
     marginBottom: 45,
     marginRight: 225,
     marginLeft: 10,
@@ -274,15 +275,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     width: 200,
     paddingVertical: 16,
-    paddingHorizontal: 55,
+    paddingHorizontal: 30,
     marginBottom: 10,
     marginLeft: 50,
     borderRadius: 10,
     alignItems: "center",
+    justifyContent: "space-between",
   },
   registerButtonText: {
     color: "white",
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
   },
   arrowIcon: {
