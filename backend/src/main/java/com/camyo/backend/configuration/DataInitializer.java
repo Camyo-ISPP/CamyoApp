@@ -8,10 +8,12 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import jakarta.annotation.PostConstruct;
 
 @Configuration
+@Profile("!test")
 public class DataInitializer {
 
         @Autowired
