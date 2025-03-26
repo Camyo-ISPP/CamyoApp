@@ -27,6 +27,6 @@ public class OfertaCompletaDTO {
     private String nombreEmpresa;
     private String tipoOferta;
 
-    private Boolean promoted=false;
+    private Boolean promoted;
 
 }
