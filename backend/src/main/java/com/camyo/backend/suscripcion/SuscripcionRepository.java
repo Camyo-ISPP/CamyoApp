@@ -14,7 +14,7 @@ import com.camyo.backend.empresa.Empresa;
 public interface SuscripcionRepository  extends  JpaRepository<Suscripcion, Integer>{
 /**
      * Ejemplo de método que obtiene todas las suscripciones activas
-     * de un plan específico (GRATIS, BASIC, PREMIUM).
+     * de un plan específico (GRATIS, BASICO, PREMIUM).
      */
     @Query("SELECT s FROM Suscripcion s WHERE s.nivel = :nivel AND s.activa = true")
     List<Suscripcion> findActiveByNivel(@Param("nivel") PlanNivel nivel);
