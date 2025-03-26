@@ -269,7 +269,7 @@ public class DataInitializer {
                                 // Insert Ofertas
                                 statement.addBatch(
                                 "INSERT IGNORE INTO ofertas (id, titulo, experiencia, licencia, notas, estado, fecha_publicacion, sueldo, camionero_id, empresa_id, localizacion, promoted) VALUES "
-                                        + "(201, 'Conductor de Carga Pesada', 5, 'C', 'Se requiere experiencia en cargas pesadas', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 201, 'Sevilla', true),"
+                                        + "(201, 'Conductor de Carga Pesada', 5, 'C', 'Se requiere experiencia en cargas pesadas', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 221, 'Sevilla', true),"
                                         + "(202, 'Transportista Nacional', 3, 'C', 'Viajes a nivel nacional', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 202, 'Barcelona', false),"
                                         + "(203, 'Carga de Sevilla a Madrid', 2, 'C', 'Transportar 1200 kg de electrodomesticos de Sevilla a Madrid', 'ABIERTA', '2025-05-02 20:30', 2500.00, NULL, 203, 'Sevilla', false),"
                                         + "(204, 'Carga de Sevilla a Murcia', 0, 'C', 'Transportar 500 kg de ropa de Sevilla a Murcia', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 204, 'Sevilla', false),"
@@ -383,6 +383,10 @@ public class DataInitializer {
                                 + "(1, 222, 'PREMIUM', '2025-03-16', '2025-04-16', true),"
                                 + "(2, 223, 'BASIC', '2025-03-16', '2025-04-16', true),"
                                 + "(3, 224, 'GRATIS', '2025-03-16', NULL, true)");
+
+                                // Insert Oferta Patrocinada
+                                statement.addBatch("INSERT IGNORE INTO ofertas_patrocinadas (id, oferta_id, empresa_id, fecha_inicio, fecha_fin, status) VALUES "
+                                + "(1, 201, 221, '2025-03-01 00:00:00', '2025-03-31 23:59:59', 'ACTIVO')");
 
                                 // Execute batch
                                 statement.executeBatch();
