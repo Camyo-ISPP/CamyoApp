@@ -94,9 +94,7 @@ const EmpresasLista = () => {
                 onPress={async () => {
                   const chatId = await startChat(user.userId, empresa.usuario.id);
                   if (chatId) {
-
-                    router.replace(`/chat`);
-
+                    router.push(`/chat`);
                   }
                 }}
               >

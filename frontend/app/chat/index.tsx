@@ -36,7 +36,7 @@ function ChatList() {
     if (!user || !user?.userId) return;
   
     const chatsRef = collection(database, 'chats');
-    const q = query(chatsRef, where('participants', 'array-contains', user.userId.toString()));
+    const q = query(chatsRef, where('participants', 'array-contains', user?.userId.toString()));
   
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       if (querySnapshot.empty) {
@@ -89,7 +89,7 @@ function ChatList() {
   
   
   const handleChatClick = (chat: Chat) => {
-    const otherUserId = chat.participants.find(participant => participant !== user.userId.toString());
+    const otherUserId = chat.participants.find(participant => participant !== user?.userId.toString());
     if (otherUserId && userDetails[otherUserId]) {
       setCurrentChat({
         ...chat,
@@ -115,7 +115,7 @@ function ChatList() {
     };
 
     chats.forEach(chat => {
-      const otherUserId = chat.participants.find(participant => participant !== user.userId.toString());
+      const otherUserId = chat.participants.find(participant => participant !== user?.userId.toString());
       if (otherUserId && !userDetails[otherUserId]) {
         fetchUserDetails(otherUserId);
       }
@@ -124,7 +124,7 @@ function ChatList() {
 
   const renderChatItem = ({ item }: { item: Chat }) => {
     if (!user?.userId) return;
-    const otherUserId = item.participants.find(participant => participant !== user.userId.toString());
+    const otherUserId = item.participants.find(participant => participant !== user?.userId.toString());
     const otherUser = otherUserId ? userDetails[otherUserId] : null;
 
     return (

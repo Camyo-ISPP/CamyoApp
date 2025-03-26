@@ -32,6 +32,14 @@ function ChatComponent({ chat }: ChatComponentProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const chatRef = useRef<any>();
 
+  if (!user || !chat) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Cargando chat...</Text>
+      </View>
+    );
+  }  
+
   useEffect(() => {
     if (chat) {
       const messagesRef = collection(database, `chats/${chat.id}/messages`);
@@ -63,7 +71,7 @@ function ChatComponent({ chat }: ChatComponentProps) {
         createdAt,
         text,
         seen: false,
-        user: { ...messageUser, _id: messageUser._id.toString() },
+        user: { ...messageUser, _id: messageUser?._id.toString() },
       });
     },
     [chat, user]
@@ -137,7 +145,6 @@ function ChatComponent({ chat }: ChatComponentProps) {
             )}
             locale={dayes} // Configuración para idioma español
             timeFormat="HH:mm" // Configura la hora en formato de 24 horas
-        ref={chatRef}
       />
     </View>
   );

@@ -269,9 +269,9 @@ const PublicEmpresa = ({ userId }) => {
                     <TouchableOpacity
                       style={styles.publishButton}
                       onPress={async () => {
-                        const chatId = await startChat(user.id, empresa?.userId);
+                        const chatId = await startChat(user.userId, empresa?.userId);
                         if (chatId) {
-                          router.push(`/chat?otherUserId=${empresa?.userId}`);
+                          router.push('/chat');
                         }
                       }}
                     >

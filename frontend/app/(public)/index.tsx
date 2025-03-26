@@ -85,45 +85,55 @@ export default function Index() {
     <>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
-          <CamyoWebNavBar onSearch={undefined}/>
+          <CamyoWebNavBar onSearch={undefined} />
           <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false} contentContainerStyle={{ scrollbarWidth: "none" }}>
 
             {/* Hero sin login */}
             {(!user || !user.rol) && (
-            <View style={styles.heroContainer}>
-              <View style={styles.heroBox}>
-                <View style={styles.textContainer}>
-                  <Text style={styles.heroText}>Donde los camioneros y las empresas se encuentran.</Text>
-                  <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/login")}>
-                    <Text style={styles.registerButtonText}>Accede</Text>
-                    <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
-                  </TouchableOpacity>
+              <View style={styles.heroContainer}>
+                <View style={styles.heroBox}>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.heroText}>Donde los camioneros y las empresas se encuentran.</Text>
+                    <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/login")}>
+                      <Text style={styles.registerButtonText}>Accede</Text>
+                      <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
+                    </TouchableOpacity>
+                  </View>
+                  <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
                 </View>
-                <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
               </View>
-            </View>
             )}
-            
+
             {/* Hero con login */}
             {!(!user || !user.rol) && (
-            <View style={styles.heroContainer}>
-              <View style={styles.heroBox}>
-                <View style={styles.textContainer}>
-                  <Text style={styles.heroText}>¡Nos alegra verte otra vez, {user.nombre}!</Text>
-                  <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/miperfil")}>
-                    <Text style={styles.registerButtonText}>Mi Perfil</Text>
-                    <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.registerButton]} onPress={() => router.push("/buscar-ofertas")}>
-                    <Text style={styles.registerButtonText}>Descubrir Vacantes</Text>
-                    <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
-                  </TouchableOpacity>
+              <View style={styles.heroContainer}>
+                <View style={styles.heroBox}>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.heroText}>¡Nos alegra verte otra vez, {user.nombre}!</Text>
+                    <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/miperfil")}>
+                      <Text style={styles.registerButtonText}>Mi Perfil</Text>
+                      <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
+                    </TouchableOpacity>
+
+                    {user && user.rol === "CAMIONERO" && (
+                      <TouchableOpacity style={[styles.registerButton]} onPress={() => router.push("/buscar-ofertas")}>
+                        <Text style={styles.registerButtonText}>Descubrir Vacantes</Text>
+                        <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
+                      </TouchableOpacity>
+                    )}
+                    {user && user.rol === "EMPRESA" && (
+                      <TouchableOpacity style={[styles.registerButton]} onPress={() => router.push("/misofertas")}>
+                        <Text style={styles.registerButtonText}>Ver mis Ofertas</Text>
+                        <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
+                      </TouchableOpacity>
+                    )}
+
+                  </View>
+                  <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
                 </View>
-                <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
               </View>
-            </View>
             )}
-            
+
             <View style={styles.separator} />
 
             {/* Sección ofertas */}
@@ -142,7 +152,7 @@ export default function Index() {
               <View style={styles.columna}>
                 <View style={styles.columnaTituloContainer}>
                   <MaterialIcons name="work-history" size={23
-                    
+
                   } color={colors.secondary} />
                   <Text style={styles.columnaTitulo}>Trabajo</Text>
                 </View>
@@ -153,7 +163,7 @@ export default function Index() {
             <View style={styles.separator} />
           </ScrollView >
         </View >
-        
+
       ) : (
         <View style={styles.phone}>
           <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
@@ -311,10 +321,10 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: "85%",
     borderRadius: 12,
-    flexWrap:"wrap",
+    flexWrap: "wrap",
     flexDirection: "row",
     alignContent: "center",
-    alignItems:"center",
+    alignItems: "center",
     borderLeftWidth: 5,
     borderColor: "red",
     shadowColor: "#000",
@@ -386,36 +396,36 @@ const styles = StyleSheet.create({
     paddingRight: 8,
     flexWrap: "wrap",
   },
-  offerSueldo:{
-    fontSize:27,
+  offerSueldo: {
+    fontSize: 27,
     marginBottom: 7,
-    fontWeight:"bold",
+    fontWeight: "bold",
     color: colors.secondary,
-    textAlignVertical:"center",
-    alignSelf:"center",
-    },
-  button:{
-    backgroundColor:colors.primary,
-    color:colors.white,
-    marginTop:4,
-    flexDirection:"row",
-    flexWrap:"nowrap",
-    height:40,
+    textAlignVertical: "center",
+    alignSelf: "center",
+  },
+  button: {
+    backgroundColor: colors.primary,
+    color: colors.white,
+    marginTop: 4,
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    height: 40,
     width: 150,
-    borderRadius:10,
-    alignItems:"center",
-    justifyContent:"center"
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
   },
   buttonText: {
     color: colors.white,
     fontWeight: "bold"
   },
-  detailsIcon:{
-    color:colors.white,
-    alignSelf:"center",
-    marginLeft:3,
-    marginTop:3,
-    marginRight:5,
+  detailsIcon: {
+    color: colors.white,
+    alignSelf: "center",
+    marginLeft: 3,
+    marginTop: 3,
+    marginRight: 5,
   },
   localizacion: {
     fontSize: 15,
