@@ -1,4 +1,4 @@
-import {Button, TextInput, View, Text} from "react-native";
+import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView} from "react-native";
 import {useContext, useEffect, useState} from "react";
 import CartItem, {ItemData} from "../_components/CartItem";
 import TotalFooter from "../_components/TotalFooter";
@@ -8,7 +8,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import { usePayment } from "@/contexts/PaymentContext";
 import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
-import { Products } from "./productDetails";
+import { Products } from "../../utils/productDetails";
+import colors from "@/assets/styles/colors";
 
 function IntegratedCheckout() {
     const { id, setId } = usePayment();
@@ -49,14 +50,33 @@ function IntegratedCheckout() {
 
     return <>
         {id === 'BASICO' || id === 'PREMIUM' ?
-            <View>
-                <View style={{ marginTop: '100px' }}>
-                    <Text>Compra</Text>
-                    <Text>Vas a realizar la siguiente compra:</Text>
-                    <Text>{Products.get(id).name}</Text>
-                    <Text>{Products.get(id).description}</Text>
-                    <TotalFooter total={Products.get(id).price} mode={"subscription"}/>
-                    <Button onPress={createTransactionSecret} title="Iniciar pago"/>
+            <View style={styles.container}>
+                <Text style={styles.sectionTitle}>Finalizar compra</Text>
+                <View style={styles.card}>
+                    <Text style={styles.username}>Vas a realizar la siguiente compra:</Text>
+                    <Text style={styles.info}>{Products.get(id).name}</Text>
+                    <Text style={styles.info}>{Products.get(id).description}</Text>
+                    <Text style={styles.info}>Precio: {Products.get(id).price}€</Text>
+                    <View style={styles.contentWrapper}>
+                        <View style={styles.tabContainer}>
+                            <TouchableOpacity
+                                onPress={createTransactionSecret}
+                                style={[styles.startButton]}
+                            >
+                                <Text style={styles.buttonText}>
+                                    Iniciar pago
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={handleCancel}
+                                style={[styles.button]}
+                            >
+                                <Text style={styles.buttonText}>
+                                    Cancelar
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     {(transactionClientSecret === "" ?
                         <></>
@@ -64,14 +84,13 @@ function IntegratedCheckout() {
                             <CheckoutForm transactionClientSecret={transactionClientSecret} plan={id}/>
                         </Elements>)}
                     
-                    <Button onPress={handleCancel} title="Cancelar"/>
                 </View>
             </View>
 
             :
 
             <View>
-                <Text>Plan no válido</Text>
+                <Text>Compra no válida</Text>
                 <Text>Se ha producido un error intentando realizar la compra.</Text>
             </View>
         }
@@ -86,6 +105,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
     const elements = useElements();
     const [loading, setLoading] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [error, setError] = useState(null)
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -105,7 +125,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
             setLoading(false);
         }
         stripe.retrievePaymentIntent(transactionClientSecret.transactionClientSecret)
-        .then(function(result) {
+        .then(function(result: any) {
             fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/pago/apply_subscription", {
                 method: "POST",
                 headers: {
@@ -125,7 +145,9 @@ const CheckoutForm = (transactionClientSecret: any) => {
                                 router.replace("/");
                             }, 1000);
                     } else {
-                        alert(res.body)
+                        const data = res.json();
+                        console.log(res);
+                        setError(data.message);
                     }
                 })
                 .then(() => setLoading(false))
@@ -136,15 +158,139 @@ const CheckoutForm = (transactionClientSecret: any) => {
 
     return <>
         <View>
-            <PaymentElement/>
-            <Button disabled={!stripe || loading} onPress={handleSubmit} title="Pagar"/>
-            <SuccessModal
-                isVisible={successModalVisible}
-                onClose={() => setSuccessModalVisible(false)}
-                message="¡Pago exitoso! Redirigiendo..."
-            />
+          <View style={styles.separator} />
+          <PaymentElement/>
+          <View style={styles.separator} />
+          <View style={styles.buttonWrapper}>
+            <TouchableOpacity
+              disabled={!stripe || loading}
+              onPress={handleSubmit}
+              style={styles.payButton}
+            >
+              <Text style={styles.buttonText}>
+                  Pagar
+              </Text>
+            </TouchableOpacity>
         </View>
+        <Text>{error}</Text>
+        <SuccessModal
+          isVisible={successModalVisible}
+          onClose={() => setSuccessModalVisible(false)}
+          message="¡Pago exitoso! Redirigiendo..."
+        />
+      </View>
     </>
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+    backgroundColor: colors.white,
+    marginTop: 20,
+    paddingTop: 70,
+    minHeight: "100%",
+  },
+  card: {
+    backgroundColor: colors.white,
+    padding: 30,
+    borderRadius: 15,
+    elevation: 6,
+    width: "80%",
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+  },
+  buttonWrapper: {
+    width: "45%",
+    alignSelf: "center",
+  },
+  username: {
+    fontSize: 18,
+    color: colors.darkGray,
+    fontWeight: "bold",
+    marginBottom: 10,
+    marginTop: 6,
+  },
+  info: {
+    fontSize: 16,
+    color: colors.darkGray,
+    marginVertical: 4,
+  },
+  description: {
+    fontSize: 15,
+    color: colors.darkGray,
+    marginTop: 6,
+  },
+  separator: {
+    width: "100%",
+    height: 1,
+    backgroundColor: colors.mediumGray,
+    marginVertical: 20,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  button: {
+    backgroundColor: colors.primary,
+    color: colors.white,
+    paddingLeft: 5,
+    paddingRight: 5,
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    height: 40,
+    width: "50%",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  startButton: {
+    backgroundColor: colors.secondary,
+    color: colors.white,
+    paddingLeft: 5,
+    paddingRight: 5,
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    height: 40,
+    width: "50%",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  payButton: {
+    backgroundColor: colors.secondary,
+    color: colors.white,
+    marginTop: 20,
+    paddingLeft: 5,
+    paddingRight: 5,
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  buttonText: {
+    color: colors.white,
+    fontWeight: "bold"
+  },
+  contentWrapper: {
+      width: "90%",
+      alignSelf: "center",
+  },
+  tabContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      alignContent: "center",
+      marginTop: 30,
+      marginBottom: 20,
+      gap: 10
+  },
+});
 
 export default IntegratedCheckout
