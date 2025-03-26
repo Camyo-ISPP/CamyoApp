@@ -196,7 +196,7 @@ public class CamioneroController {
                 // Si el Camionero no pertenece al usuario, retornamos 403 (Forbidden)
                 return new ResponseEntity<>(
                     new MessageResponse("No puede eliminar un camionero que no es suyo."),
-                    HttpStatus.METHOD_NOT_ALLOWED
+                    HttpStatus.FORBIDDEN
                 );
             }
     

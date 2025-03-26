@@ -1,6 +1,7 @@
 package com.camyo.backend.Camionero;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -54,6 +55,9 @@ class CamioneroServiceTests {
     @Autowired
     protected AuthoritiesService authoritiesService;
 
+     /*
+    * Declaramos las variables que vayamos a usar fuera del setup 
+  */ 
     static List<Integer> camioneroIds = List.of();
     static List<Integer> usuarioIds = List.of(); 
 
@@ -61,6 +65,9 @@ class CamioneroServiceTests {
     @Transactional
     void setup(){
      
+         /*
+        * Creamos las authorities para camioneros y empresas 
+      */ 
         Authorities authCam = new Authorities();
         authCam.setAuthority("Camionero");
         authoritiesService.saveAuthorities(authCam);
@@ -69,6 +76,9 @@ class CamioneroServiceTests {
         authCam.setAuthority("Empresa");
         authoritiesService.saveAuthorities(authEmp);
 
+         /*
+        * Creamos 2 usuarios camioneros y 2 empresas 
+      */ 
         Usuario u1 = new Usuario();
         u1.setNombre("Manolo");
         u1.setTelefono("123456879");
@@ -105,6 +115,10 @@ class CamioneroServiceTests {
         u4.setAuthority(authEmp);
         usuarioService.guardarUsuario(u4);
 
+         /*
+        * Creamos las reseñas y se las asignamos al primer usuario camionero 
+      */ 
+
         Resena resena1 = new Resena();
         resena1.setValoracion(5);
         resena1.setComentado(u1);
@@ -117,7 +131,10 @@ class CamioneroServiceTests {
         resena2.setComentador(u4);
         resenaService.crearResena(resena2);
 
-        
+
+         /*
+        * Creamos los usuarios camioneros 
+      */ 
 
         Camionero c1 = new Camionero();
         c1.setExperiencia(10);
@@ -138,6 +155,10 @@ class CamioneroServiceTests {
         c2.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c2.setUsuario(u2);
         camioneroService.guardarCamionero(c2);
+
+         /*
+        * Guardamos los ids de los camioneros y de sus usuarios 
+      */ 
 
         usuarioIds = List.of(u1.getId(), u2.getId());
         camioneroIds = List.of(c1.getId(), c2.getId());
@@ -224,7 +245,9 @@ class CamioneroServiceTests {
         LocalDate newDate = LocalDate.of(2026, 12, 01);
         camNuevo.setExpiracionCAP(newDate);
 
-        Set<Licencia> newLicencias = Set.of(Licencia.C, Licencia.C_E);
+        //Para poder ser actualizarse, las licencias deben ser mutables
+        //es decir, no pueden crearse solamente con un Set.of() porque eso crea un Set inmutable
+        Set<Licencia> newLicencias = new HashSet<Licencia>(Set.of(Licencia.C, Licencia.C_E));
         camNuevo.setLicencias(newLicencias);
 
         Camionero camioneroActualizado = camioneroService.actualizarCamionero(id, camNuevo);
