@@ -128,7 +128,7 @@ const MiPerfilEmpresa = () => {
             {/* Logo de empresa */}
             <View style={styles.profileContainer}>
               <Image
-                source={user.foto ? { uri: user.foto } : defaultImage}
+                source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
                 style={styles.profileImage}
               />
               {/* Botón de edición */}

@@ -8,12 +8,12 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 const { unifyUserData } = require("../../utils/unifyData");
 import BackButton from "../_components/BackButton";
+import { startChat } from "../chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const PublicCamionero = ({ userId }) => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const { user, userToken } = useAuth();
     const router = useRouter();
 
@@ -53,6 +53,7 @@ const PublicCamionero = ({ userId }) => {
 
         fetchUser();
     }, [userId]);
+
 
     const fetchResenas = async () => {
         try {
@@ -227,7 +228,7 @@ const PublicCamionero = ({ userId }) => {
                             {/* Imagen de perfil */}
                             <View style={styles.profileContainer}>
                                 <Image
-                                    source={user2?.foto ? { uri: user2?.foto } : defaultImage}
+                                    source={user2?.foto ? { uri: `data:image/png;base64,${user2.foto}` } : defaultImage}
                                     style={styles.profileImage}
                                 />
                             </View>
@@ -249,7 +250,24 @@ const PublicCamionero = ({ userId }) => {
                                         <FontAwesome name="star" size={16} color="white" style={styles.plusIcon} />
                                         <Text style={styles.publishButtonText}>Escribir Reseña</Text>
                                     </TouchableOpacity>
+
                                 )}
+                                {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
+                    {user && user.rol == "EMPRESA" && (
+                    <TouchableOpacity
+                        style={styles.chatButton}
+                        onPress={async () => {
+                        const chatId = await startChat(user.userId, user2.userId);
+                            if (chatId) {
+                                router.replace(`/chat`);
+                            }
+                         }}
+                     >
+                     <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                     <Text style={styles.chatButtonText}>Contactar</Text>
+                     </TouchableOpacity>
+            )}
+                                
                             </View>
                         </View>
                         {/* Separador */}
@@ -262,7 +280,6 @@ const PublicCamionero = ({ userId }) => {
                                 <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                                 {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
                             </Text>
-                            <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user2?.disponibilidad}</Text>
                             <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
                             {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
                             {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
@@ -459,19 +476,6 @@ const styles = StyleSheet.create({
         borderColor: colors.primary,
         marginLeft: 30,
     },
-    editIcon: {
-        position: "absolute",
-        bottom: 10,
-        right: 10,
-        backgroundColor: colors.primary,
-        padding: 8,
-        borderRadius: 15,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 3,
-    },
     infoContainer: {
         flex: 1,
         justifyContent: "center",
@@ -505,20 +509,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.mediumGray,
         marginVertical: 20,
     },
-    infoCard: {
-        backgroundColor: colors.white,
-        paddingVertical: 25,
-        paddingHorizontal: 30,
-        borderRadius: 15,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 5,
-        alignSelf: "stretch",
-        maxWidth: 750,
-        alignItems: "center",
-    },
     sectionTitle: {
         fontSize: 22,
         fontWeight: "bold",
@@ -529,6 +519,26 @@ const styles = StyleSheet.create({
     downContainer: {
         paddingHorizontal: 30,
     },
+    chatButton: {
+        marginTop: 20,
+        backgroundColor: colors.primary,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: "flex-end",
+        width:"50%",
+        alignSelf:"flex-end",
+        flexDirection: "row",
+    },
+    chatButtonText: {
+        fontSize: 18,
+        color: colors.white,
+        fontWeight: "bold",
+    },
+    chatIcon: {
+        marginRight: 8,
+        marginBottom: 4,
+      },
     reseñasContainer: {
         paddingHorizontal: 30,
         marginTop: 20,
@@ -596,6 +606,5 @@ const styles = StyleSheet.create({
         fontWeight: "bold"
     },
 });
-
 
 export default PublicCamionero;

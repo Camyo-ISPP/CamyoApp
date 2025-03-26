@@ -30,7 +30,7 @@ const ProfileDropdown = ({ user }) => {
       {/* Foto de perfil */}
       <TouchableOpacity onPress={() => setDropdownVisible(!dropdownVisible)}>
         <Image
-          source={user.foto ? { uri: user.foto } : defaultImage}
+          source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
           style={styles.avatar}
         />
       </TouchableOpacity>
@@ -46,7 +46,7 @@ const ProfileDropdown = ({ user }) => {
             onPress={() => setDropdownVisible(false)}
           />
           <Image
-            source={user.foto ? { uri: user.foto } : defaultImage}
+            source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
             style={styles.avatarDropdown}
           />
 
@@ -111,17 +111,16 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginLeft: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderWidth: 2,
+    borderColor: colors.secondary,
   },
   avatarDropdown: {
     width: 100,
     height: 100,
     borderRadius: 60,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderWidth: 2,
+    borderColor: colors.secondary,
   },
   dropdown: {
     position: 'absolute',
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     display: 'flex',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 3 },
@@ -146,7 +145,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
     textAlign: 'center',
-    color: '#202124',
     marginBottom: 2,
   },
   dropdownEmail: {

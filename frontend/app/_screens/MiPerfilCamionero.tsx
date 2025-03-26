@@ -13,6 +13,8 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilCamionero = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+    
     const { user } = useAuth();
     const router = useRouter();
     const [camionero, setCamionero] = useState(null);
@@ -117,7 +119,7 @@ const MiPerfilCamionero = () => {
                         {/* Imagen de perfil */}
                         <View style={styles.profileContainer}>
                             <Image
-                                source={user?.foto ? { uri: user.foto } : defaultImage}
+                                source={user?.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
                                 style={styles.profileImage}
                             />
                             {/* Botón de edición */}

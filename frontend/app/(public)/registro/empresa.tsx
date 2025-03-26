@@ -10,6 +10,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from "../../_components/SuccessModal";
+import { terminosYCondiciones, politicaDePrivacidad } from "../../../assets/gdpr";
 
 const EmpresaRegisterScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -19,6 +20,7 @@ const EmpresaRegisterScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const { login } = useAuth();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [legalModalVisible, setLegalModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -34,6 +36,8 @@ const EmpresaRegisterScreen = () => {
     // Empresa
     web: "",
     nif: "",
+    aceptaTerminos: false,
+
   });
 
   const handleInputChange = (field: string, value: string | boolean | any[]) => {
@@ -75,19 +79,93 @@ const EmpresaRegisterScreen = () => {
 
 
   const handleRegister = async () => {
+    // Validación de nombre de empresa
+    if (!formData.nombre){
+      setErrorMessage("El campo nombre de empresa es obligatorio.");
+      return;
+    }
+    if (formData.nombre.length > 100){
+      setErrorMessage("El campo nombre de empresa es demasiado largo.");
+      return;
+    }
+
+    // Validación de nombre de usuario
+    if (!formData.username){
+      setErrorMessage("El campo nombre de usuario es obligatorio.");
+      return;
+    }
+    if (formData.username.length > 30){
+      setErrorMessage("El campo nombre de usuario es demasiado largo.");
+      return;
+    }
+
+    // Validación de correo electrónico
+    if (!formData.email){
+      setErrorMessage("El campo correo electrónico es obligatorio.");
+      return;
+    }
+    if (formData.email.length > 255){
+      setErrorMessage("El campo correo electrónico es demasiado largo.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setErrorMessage("El formato del correo electrónico no es válido.");
+      return;
+    }
+
+    // Validación de contraseña
+    if (!formData.password){
+      setErrorMessage("El campo contraseña es obligatorio.");
+      return;
+    }
+
     // Validación de número de teléfono
+    if (!formData.telefono){
+      setErrorMessage("El campo teléfono es obligatorio.");
+      return;
+    }
     if (!/^\d{9}$/.test(formData.telefono)) {
       setErrorMessage("El número de teléfono debe tener 9 dígitos.");
       return;
     }
 
+    // Validación de la localización
+    if (!formData.localizacion){
+      setErrorMessage("El campo localización es obligatorio.");
+      return;
+    }
+    if (formData.localizacion.length > 200){
+      setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+
+    // Validación de la descripción
+    if (formData.descripcion && formData.descripcion.length > 500){
+      setErrorMessage("El campo descripción es demasiado largo.");
+      return;
+    }
+
     // Validación y corrección de la URL
-    if (formData.web && !formData.web.startsWith('http://') && !formData.web.startsWith('https://')) {
+    if (!formData.web){
+      setErrorMessage("El campo página web es obligatorio.");
+      return;
+    }
+    if (!formData.web.startsWith('http://') && !formData.web.startsWith('https://')) {
       if (!/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(formData.web)) {
-        setErrorMessage('La URL de la web no es válida');
+        setErrorMessage('El formato de la URL de la página web no es válido.');
         return;
       }
       formData.web = 'https://' + formData.web; // Añadir https:// si no tiene esquema
+    }
+
+    // Validación del NIF
+    if (!formData.nif){
+      setErrorMessage("El campo numero de identificación es obligatorio.");
+      return;
+    }
+    if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
+      setErrorMessage("El formato del número de identificación no es válido.");
+      return;
     }
 
     // Datos del usuario
@@ -98,12 +176,17 @@ const EmpresaRegisterScreen = () => {
       email: formData.email,
       localizacion: formData.localizacion,
       descripcion: formData.descripcion,
-      foto: formData.foto ? formData.foto : "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/57T3goAAAAASUVORK5CYII=",
+      foto: formData.foto ? formData.foto : null,
       password: formData.password,
 
       web: formData.web,
       nif: formData.nif
     };
+
+    if (!formData.aceptaTerminos) {
+      setErrorMessage("Debes aceptar los términos y condiciones para registrarte.");
+      return;
+    }
 
     try {
       const response = await axios.post(`${BACKEND_URL}/auth/signup/empresa`, userData, {
@@ -146,7 +229,7 @@ const EmpresaRegisterScreen = () => {
   };
 
   // Render input function
-  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false) => (
+  const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "") => (
     <View style={{ width: '90%', marginBottom: 15 }}>
       <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
       <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
@@ -158,6 +241,8 @@ const EmpresaRegisterScreen = () => {
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
           onChangeText={(value) => handleInputChange(field, value)}
+          placeholder={placeholder}
+          placeholderTextColor="gray"
         />
       </View>
     </View>
@@ -212,7 +297,7 @@ const EmpresaRegisterScreen = () => {
                   <Text style={globalStyles.buttonText}>Cambiar</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setFormData({ ...formData, fotoUri: null })} style={[globalStyles.button, { backgroundColor: colors.red, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
+                <TouchableOpacity onPress={() => setFormData({ ...formData, fotoUri: null, foto: null })} style={[globalStyles.button, { backgroundColor: colors.red, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
                   <FontAwesome5 name="trash" size={18} color={colors.white} style={{ marginRight: 8 }} />
                   <Text style={globalStyles.buttonText}>Borrar</Text>
                 </TouchableOpacity>
@@ -221,23 +306,41 @@ const EmpresaRegisterScreen = () => {
           </View>
 
           {/* Campos del formulario */}
-          {renderInput("Nombre de Empresa", "nombre", <FontAwesome5 name="user" size={20} color={colors.primary} />)}
-          {renderInput("Nombre de Usuario", "username", <FontAwesome5 name="user-alt" size={20} color={colors.primary} />)}
-          {renderInput("Email", "email", <MaterialIcons name="email" size={20} color={colors.primary} />, "email-address")}
+          {renderInput("Nombre de empresa", "nombre", <FontAwesome5 name="user" size={20} color={colors.primary} />)}
+          {renderInput("Nombre de usuario", "username", <FontAwesome5 name="user-alt" size={20} color={colors.primary} />)}
+          {renderInput("Correo electrónico", "email", <MaterialIcons name="email" size={20} color={colors.primary} />, "email-address", false, false, "usuario@ejemplo.com")}
           {renderPasswordInput()}
-          {renderInput("Teléfono", "telefono", <MaterialIcons name="phone" size={20} color={colors.primary} />, "phone-pad")}
+          {renderInput("Teléfono", "telefono", <MaterialIcons name="phone" size={20} color={colors.primary} />, "phone-pad", false, false, "987654321")}
           {renderInput("Localización", "localizacion", <MaterialIcons name="location-pin" size={20} color={colors.primary} />)}
           {renderInput("Descripción", "descripcion", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
 
           {/* Campos del formulario específicos de la empresa */}
-          {renderInput("Página web", "web", <FontAwesome5 name="globe" size={20} color={colors.primary} />, "url")}
-          {renderInput("Número de Identificación (A12345678)", "nif", <FontAwesome5 name="id-card" size={20} color={colors.primary} />, "default")}
+          {renderInput("Página web", "web", <FontAwesome5 name="globe" size={20} color={colors.primary} />, "url", false, false, "ejemplo.com")}
+          {renderInput("Número de identificación", "nif", <FontAwesome5 name="id-card" size={20} color={colors.primary} />, "default", false, false, "A12345678")}
 
           {errorMessage ? (
             <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
               {errorMessage}
             </Text>
           ) : null}
+
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity
+              onPress={() => handleInputChange("aceptaTerminos", !formData.aceptaTerminos)}
+              style={[
+                styles.checkbox,
+                { backgroundColor: formData.aceptaTerminos ? colors.primary : colors.white }]}>
+              {formData.aceptaTerminos && (
+                <FontAwesome5 name="check" size={14} color="white" />)}
+            </TouchableOpacity>
+
+            <Text style={styles.checkboxText}>
+              He leído y acepto los{' '}
+              <Text style={styles.linkText} onPress={() => setLegalModalVisible(true)}>
+                Términos y condiciones y la Política de privacidad
+              </Text>{' '}
+            </Text>
+          </View>
 
           {/* Botón de registro */}
           <TouchableOpacity style={[globalStyles.button, { width: "100%", borderRadius: 12, elevation: 5 }]}
@@ -252,6 +355,33 @@ const EmpresaRegisterScreen = () => {
             onClose={() => setSuccessModalVisible(false)}
             message="¡Registro exitoso!"
           />
+
+          {/* Modal de términos y condiciones */}
+          <Modal
+            visible={legalModalVisible}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => setLegalModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.legalModalContainer}>
+                <ScrollView contentContainerStyle={{ padding: 10 }}>
+                  <Text style={styles.modalTitle}>TÉRMINOS Y CONDICIONES</Text>
+                  <Text style={styles.modalParagraph}>{terminosYCondiciones}</Text>
+
+                  <Text style={styles.modalTitle}>POLÍTICA DE PRIVACIDAD</Text>
+                  <Text style={styles.modalParagraph}>{politicaDePrivacidad}</Text>
+                </ScrollView>
+                <TouchableOpacity
+                  style={[globalStyles.button, { marginTop: 10, backgroundColor: colors.primary }]}
+                  onPress={() => setLegalModalVisible(false)}
+                >
+                  <Text style={globalStyles.buttonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
 
         </View>
       </View>
@@ -364,6 +494,62 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 10,
   },
+  checkboxContainer: {
+    width: '90%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+
+  checkboxText: {
+    color: colors.secondary,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+
+  linkText: {
+    color: colors.primary,
+    textDecorationLine: 'underline',
+  },
+
+  legalModalContainer: {
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    maxHeight: '80%',
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: colors.secondary,
+  },
+
+  modalParagraph: {
+    fontSize: 14,
+    color: colors.secondary,
+    marginBottom: 20,
+  },
+
 });
 
 export default EmpresaRegisterScreen;

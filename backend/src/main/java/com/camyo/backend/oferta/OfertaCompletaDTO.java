@@ -26,4 +26,7 @@ public class OfertaCompletaDTO {
     private Set<Camionero> rechazados;
     private String nombreEmpresa;
     private String tipoOferta;
+
+    private Boolean promoted=false;
+
 }

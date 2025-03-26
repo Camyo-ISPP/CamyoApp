@@ -12,9 +12,9 @@ import BackButton from "../_components/BackButton";
 import { startChat } from "../chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const PublicEmpresa = ({ userId }) => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  
   const router = useRouter();
 
   const [empresa, setEmpresa] = useState(null);
@@ -248,7 +248,7 @@ const PublicEmpresa = ({ userId }) => {
               {/* Logo de empresa */}
               <View style={styles.profileContainer}>
                 <Image
-                  source={empresa?.foto ? { uri: empresa.foto } : defaultImage}
+                  source={empresa?.foto ? { uri: `data:image/png;base64,${empresa.foto}` } : defaultImage}
                   style={styles.profileImage}
                 />
               </View>
@@ -271,7 +271,7 @@ const PublicEmpresa = ({ userId }) => {
                       onPress={async () => {
                         const chatId = await startChat(user.id, empresa?.userId);
                         if (chatId) {
-                          router.replace(`/chat?otherUserId=${empresa?.userId}`);
+                          router.push(`/chat?otherUserId=${empresa?.userId}`);
                         }
                       }}
                     >
