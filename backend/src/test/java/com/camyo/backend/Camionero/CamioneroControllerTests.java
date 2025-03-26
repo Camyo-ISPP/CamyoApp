@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 @WebMvcTest(
     value = { CamioneroController.class},
-    properties = {"security.basic.enabled=false"})
+    properties = {"security.BASICO.enabled=false"})
 @TestInstance(Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc(addFilters =  false)
 public class CamioneroControllerTests {

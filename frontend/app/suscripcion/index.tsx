@@ -109,7 +109,7 @@ const SubscriptionPlans = () => {
         switch (plan.toUpperCase()) {
             case "GRATIS":
                 return "GRATIS";
-            case "BASIC":
+            case "BASICO":
                 return "BÁSICO";
             case "PREMIUM":
                 return "PREMIUM";
@@ -122,7 +122,7 @@ const SubscriptionPlans = () => {
         switch (planLevel) {
             case "GRATIS":
                 return <Ionicons name="pricetag-outline" size={24} color={colors.primary} />;
-            case "BASIC":
+            case "BASICO":
                 return <Ionicons name="layers-outline" size={24} color={colors.primary} />;
             case "PREMIUM":
                 return <Ionicons name="diamond-outline" size={24} color={colors.primary} />;
@@ -218,7 +218,7 @@ const SubscriptionPlans = () => {
                                 price="24.99€"
                                 description="Permite publicar hasta 10 ofertas de empleo con datos completos."
                                 borderColor={colors.primary}
-                                planLevel="BASIC"
+                                planLevel="BASICO"
                                 currentPlan={currentPlan}
                                 onChangePlan={handleChangePlan}
                             />
@@ -261,7 +261,7 @@ const SubscriptionPlans = () => {
                                 price="24.99€"
                                 description="Permite publicar hasta 10 ofertas de empleo con datos completos."
                                 borderColor={colors.primary}
-                                planLevel="BASIC"
+                                planLevel="BASICO"
                                 currentPlan={currentPlan}
                                 onChangePlan={handleChangePlan}
                             />
