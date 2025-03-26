@@ -33,6 +33,7 @@ function RootLayout() {
         chat:"Mis Mensajes",
         "pago/checkout": "Pago",
         suscripcion: "Planes de Suscripción",
+        misofertas: "Mis Ofertas"
       };
 
       const currentSegment = segments.join("/");

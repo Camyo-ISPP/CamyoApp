@@ -374,7 +374,7 @@ const CrearOfertaScreen = () => {
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
-          placeholder={disabled ? "Solo disponible para clientes BASIC y PREMIUM." : placeholder}
+          placeholder={disabled ? "Solo disponible para clientes BASICO y PREMIUM." : placeholder}
           placeholderTextColor={colors.mediumGray}
           onChangeText={(value) => !disabled && handleInputChange(field, value)}
           editable={!disabled}

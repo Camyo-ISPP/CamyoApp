@@ -130,20 +130,20 @@ public class OfertaController {
     @GetMapping("/info")
     public List<OfertaConTodaInformacionDTO> obtenerOfertasConInformacion() {
         List<Oferta> ofertas = ofertaService.obtenerOfertas();
-        return ofertas.stream().map(oferta -> {
+        return ofertas.stream().filter(o -> o.getEstado().equals(OfertaEstado.ABIERTA)).map(oferta -> {
             OfertaConTodaInformacionDTO dto = new OfertaConTodaInformacionDTO();
             dto.setId(oferta.getId());
             dto.setTitulo(oferta.getTitulo());
             dto.setExperiencia(oferta.getExperiencia());
             dto.setLicencia(oferta.getLicencia());
             dto.setNotas(oferta.getNotas());
-            dto.setEstado(oferta.getEstado());
             dto.setFechaPublicacion(oferta.getFechaPublicacion());
             dto.setSueldo(oferta.getSueldo());
             dto.setLocalizacion(oferta.getLocalizacion());
-            dto.setCamionero(oferta.getCamionero());
-            dto.setAplicados(oferta.getAplicados());
-            dto.setRechazados(oferta.getRechazados());
+            dto.setPromoted(oferta.getPromoted() != null ? oferta.getPromoted() : false);
+            if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
+                dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
+            }
             if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
                 dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
             }

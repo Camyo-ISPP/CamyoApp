@@ -11,10 +11,9 @@ import BackButton from "../_components/BackButton";
 import { startChat } from "../chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const PublicCamionero = ({ userId }) => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const { user, userToken } = useAuth();
     const router = useRouter();
 
@@ -281,7 +280,6 @@ const PublicCamionero = ({ userId }) => {
                                 <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                                 {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
                             </Text>
-                            <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user2?.disponibilidad}</Text>
                             <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
                             {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
                             {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}

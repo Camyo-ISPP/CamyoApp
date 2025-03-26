@@ -35,7 +35,6 @@ const EditarPerfilCamionero = () => {
 
     // Camionero
     licencias: [],
-    disponibilidad: "",
     experiencia: null,
     dni: "",
     tieneCAP: false,
@@ -55,7 +54,7 @@ const EditarPerfilCamionero = () => {
         foto: user.foto || null,
         fotoUri: user.foto ? `data:image/png;base64,${user.foto}` : null,
         licencias: user.licencias.map((licencia) => licencias[licencias_backend.indexOf(licencia)]),
-        disponibilidad: user.disponibilidad,
+        disponibilidad: "NACIONAL",
         experiencia: user.experiencia,
         dni: user.dni,
         tieneCAP: user.tieneCAP,
@@ -172,12 +171,6 @@ const EditarPerfilCamionero = () => {
       return;
     }
 
-    // Validación de disponibilidad
-    if (!formData.disponibilidad){
-      setErrorMessage("El campo disponibilidad es obligatorio.");
-      return;
-    }
-
     // Validación de experiencia
     if (!formData.experiencia){
       setErrorMessage("El campo años de experiencia es obligatorio.");
@@ -223,7 +216,7 @@ const EditarPerfilCamionero = () => {
 
       dni: formData.dni,
       licencias: licenciasBackend,
-      disponibilidad: formData.disponibilidad,
+      disponibilidad: "NACIONAL",
       experiencia: parseInt(formData.experiencia),
       tieneCAP: formData.tieneCAP,
       expiracionCAP: formData.tieneCAP? formData.expiracionCAP.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'): null,
@@ -243,7 +236,7 @@ const EditarPerfilCamionero = () => {
 
         const usuarioData = {
           descripcion: userData.descripcion,
-          disponibilidad: userData.disponibilidad,
+          disponibilidad: "NACIONAL",
           dni: userData.dni,
           email: userData.email,
           experiencia: userData.experiencia,
@@ -362,19 +355,6 @@ const EditarPerfilCamionero = () => {
               onChange={(value) => handleInputChange("licencias", value)}
               options={licencias}
               colors={colors}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={{ color: colors.secondary, fontSize: 16, marginRight: 10, flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-              Disponibilidad:
-            </Text>
-            <Selector
-              value={formData.disponibilidad}
-              onChange={(value) => handleInputChange("disponibilidad", value)}
-              options={["NACIONAL", "INTERNACIONAL"]}
-              colors={colors}
-              globalStyles={globalStyles}
             />
           </View>
 

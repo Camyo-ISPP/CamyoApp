@@ -46,7 +46,7 @@ public class SuscripcionController {
      * POST /suscripciones/{empresaId}?nivel=PREMIUM&duracion=30
      */
     @Operation(summary = "Asignar o cambiar suscripción de una empresa",
-               description = "Establece el plan (GRATIS, BASIC, PREMIUM) y la duración (días). Por defecto 30 si es BASIC/PREMIUM y no se pasa.")
+               description = "Establece el plan (GRATIS, BASICO, PREMIUM) y la duración (días). Por defecto 30 si es BASICO/PREMIUM y no se pasa.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Suscripción asignada o modificada con éxito"),
         @ApiResponse(responseCode = "404", description = "Empresa no encontrada")
@@ -70,7 +70,7 @@ public class SuscripcionController {
      * GET /suscripciones/nivel/{empresaId}
      */
     @Operation(summary = "Consultar nivel de suscripción de una empresa",
-               description = "Retorna si la empresa está en plan GRATIS, BASIC o PREMIUM (mira la suscripción activa).")
+               description = "Retorna si la empresa está en plan GRATIS, BASICO o PREMIUM (mira la suscripción activa).")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Nivel encontrado y devuelto"),
         @ApiResponse(responseCode = "404", description = "Empresa no encontrada o sin suscripción activa")

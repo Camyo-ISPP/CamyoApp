@@ -8,9 +8,9 @@ import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const MiPerfilCamionero = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+    
     const { user } = useAuth();
     const router = useRouter();
 
@@ -72,7 +72,6 @@ const MiPerfilCamionero = () => {
                             <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                             {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
                         </Text>
-                        <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user.disponibilidad}</Text>
                         <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
                         {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
                         {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
