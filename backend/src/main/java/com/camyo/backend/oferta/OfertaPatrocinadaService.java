@@ -61,7 +61,7 @@ public class OfertaPatrocinadaService {
                 }
                 break;
             case BASICO:
-                if (patrociniosActivos >= 5) {
+                if (patrociniosActivos >= 2) {
                     throw new RuntimeException("El plan Basico solo permite patrocinar 5 ofertas a la vez.");
                 }
                 break;
