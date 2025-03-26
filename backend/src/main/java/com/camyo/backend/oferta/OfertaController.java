@@ -130,7 +130,7 @@ public class OfertaController {
     @GetMapping("/info")
     public List<OfertaConTodaInformacionDTO> obtenerOfertasConInformacion() {
         List<Oferta> ofertas = ofertaService.obtenerOfertas();
-        return ofertas.stream().map(oferta -> {
+        return ofertas.stream().filter(o -> o.getEstado().equals(OfertaEstado.ABIERTA)).map(oferta -> {
             OfertaConTodaInformacionDTO dto = new OfertaConTodaInformacionDTO();
             dto.setId(oferta.getId());
             dto.setTitulo(oferta.getTitulo());
