@@ -28,6 +28,7 @@ public class OfertaConTodaInformacionDTO {
     private OfertaEstado estado;
     private LocalDateTime fechaPublicacion;
     private Double sueldo;
+    private Boolean promoted;
 
     private LocalDate fechaIncorporacion;
     private Jornada jornada;
@@ -37,9 +38,9 @@ public class OfertaConTodaInformacionDTO {
     private String origen;
     private String destino;
     private Integer distancia;
-    private LocalDateTime inicio;
-    private LocalDateTime finMinimo;
-    private LocalDateTime finMaximo;
+    private LocalDate inicio;
+    private LocalDate finMinimo;
+    private LocalDate finMaximo;
 
 
 }

@@ -261,39 +261,43 @@ public class DataInitializer {
 
                                 // Insert Reseñas
                                 statement.addBatch("INSERT IGNORE INTO reseñas (id, comentarios, valoracion, comentador_id, comentado_id) VALUES "
-                                        + "(201,'Excelente trabajo', 5, 201, 222),"
-                                        + "(202,'Muy bueno, aunque la carga sufrió problemas', 4, 201, 223),"
+                                        + "(201,'Excelente trabajo', 5, 222, 241),"
+                                        + "(202,'Muy bueno, aunque la carga sufrió problemas', 4, 201, 250),"
                                         + "(203,'No volvería a contratar', 1, 202, 224),"
                                         + "(204,'Horrible, no cumplió los plazos establecidos en ninguna de nuestras ofertas que le asignamos', 1, 201, 225),"
-                                        + "(205,'Mal', 2, 223, 202),"
-                                        + "(206,'Bien', 4, 223, 201)");
+                                        + "(205,'Mal', 2, 224, 202),"
+                                        + "(206,'Bien', 4, 250, 201)");
 
                                 // Insert Ofertas
                                 statement.addBatch(
-                                "INSERT IGNORE INTO ofertas (id, titulo, experiencia, licencia, notas, estado, fecha_publicacion, sueldo, camionero_id, empresa_id, localizacion) VALUES "
-                                        + "(201, 'Conductor de Carga Pesada', 5, 'C', 'Se requiere experiencia en cargas pesadas', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 201, 'Sevilla'),"
-                                        + "(202, 'Transportista Nacional', 3, 'C', 'Viajes a nivel nacional', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 202, 'Barcelona'),"
-                                        + "(203, 'Carga de Sevilla a Madrid', 2, 'C', 'Transportar 1200 kg de electrodomesticos de Sevilla a Madrid', 'ABIERTA', '2025-05-02 20:30', 2500.00, NULL, 203, 'Sevilla'),"
-                                        + "(204, 'Carga de Sevilla a Murcia', 0, 'C', 'Transportar 500 kg de ropa de Sevilla a Murcia', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 204, 'Sevilla'),"
-                                        + "(205, 'Conductor Nocturna', 4, 'C', 'Buscamos trabajador para mover cargas en horario nocturno', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 205, 'Valencia'),"
-                                        + "(206, 'Transportista en Valencia', 3, 'C', 'Viajes limitados a la comunidad valenciana', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 206, 'Valencia'),"
-                                        + "(207, 'Carga de Barcelona a Sevilla', 2, 'C', 'Transportar 10 t de alimentos de Barcelona a Sevilla', 'ABIERTA', '2025-07-02 09:30', 5000.00, NULL, 207, 'Barcelona'),"
-                                        + "(208, 'Carga de Barcelona a Madrid', 2, 'C', 'Transportar 500 kg de ropa de Sevilla a Murcia', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 208, 'Barcelona'),"
-                                        + "(209, 'Conductor de Multiples cargas', 5, 'C', 'Se requiere experiencia, tanto para cargas pesadas como frágiles', 'ABIERTA', '2025-02-10 08:00', 2500.00, NULL, 209, 'Sevilla'),"
-                                        + "(210, 'Transportista en Andalucía', 3, 'C', 'Viajes limitados a la comunidad andaluza', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 210, 'Sevilla'),"
-                                        + "(211, 'Carga de Valencia a Vigo', 2, 'C', 'Transportar 3.5 t de pescado de Valencia a Vigo', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 211, 'Valencia'),"
-                                        + "(212, 'Carga de Sevilla a Alicante', 2, 'C', 'Transportar 300 kg de paquetes de Sevilla a Murcia', 'ABIERTA', '2025-05-02 18:00', 2500.00, NULL, 212, 'Sevilla'),"
-                                        + "(213, 'Transportista Nacional', 1, 'C', 'Viajes a nivel nacional', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 213, 'Barcelona'),"
-                                        + "(214, 'Carga de Sevilla a Madrid', 2, 'C', 'Transportar 1200 kg de electrodomesticos de Sevilla a Madrid', 'ABIERTA', '2025-05-02 20:30', 2500.00, NULL, 214, 'Sevilla'),"
-                                        + "(215, 'Carga de Sevilla a Murcia', 0, 'C', 'Transportar 500 kg de ropa de Sevilla a Murcia', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 215, 'Sevilla'),"
-                                        + "(216, 'Conductor Nocturna', 4, 'C', 'Buscamos trabajador para mover cargas en horario nocturno', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 216, 'Valencia'),"
-                                        + "(217, 'Transportista en Valencia', 3, 'C', 'Viajes limitados a la comunidad valenciana', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 217, 'Valencia'),"
-                                        + "(218, 'Transportista en Huelva', 3, 'C', 'Viajes limitados a la comunidad andaluza', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 218, 'Huelva'),"
-                                        + "(219, 'Carga de Cáceres a Sevilla', 2, 'C', 'Transportar 300 kg de paquetes de Cáceres a Sevilla', 'ABIERTA', '2025-05-02 18:00', 2500.00, NULL, 219, 'Cáceres'),"
-                                        + "(220, 'Transportista en Cáceres', 3, 'C_E', 'Viajes limitados a la comunidad extremeña', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 220, 'Cáceres'),"
-                                        + "(221, 'Transportista en Cataluña', 3, 'C_E', 'Viajes limitados a la comunidad catalana', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 221, 'Barcelona'),"
-                                        + "(222, 'Transportista en Almería', 3, 'C', 'Viajes limitados a la comunidad andaluza', 'ABIERTA', '2025-05-03 10:45', 3250.00, NULL, 221, 'Andalucía'),"
-                                        + "(223, 'Carga de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de paquetes de Sevilla a Córdoba', 'ABIERTA', '2025-05-03 10:45', 3100.00, NULL, 221, 'Andalucía')");
+                                "INSERT IGNORE INTO ofertas (id, titulo, experiencia, licencia, notas, estado, fecha_publicacion, sueldo, camionero_id, empresa_id, localizacion, promoted) VALUES "
+                                        + "(201, 'Conductor de Carga Pesada', 5, 'C', 'Se requiere experiencia en cargas pesadas', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 221, 'Sevilla', true),"
+                                        + "(202, 'Transportista Nacional', 3, 'C', 'Viajes a nivel nacional', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 202, 'Barcelona', false),"
+                                        + "(203, 'Carga de Sevilla a Madrid', 2, 'C', 'Transportar 1200 kg de electrodomesticos de Sevilla a Madrid', 'ABIERTA', '2025-05-02 20:30', 2500.00, NULL, 203, 'Sevilla', false),"
+                                        + "(204, 'Carga de Sevilla a Murcia', 0, 'C', 'Transportar 500 kg de ropa de Sevilla a Murcia', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 204, 'Sevilla', false),"
+                                        + "(205, 'Conductor Nocturna', 4, 'C', 'Buscamos trabajador para mover cargas en horario nocturno', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 205, 'Valencia', false),"
+                                        + "(206, 'Transportista en Valencia', 3, 'C', 'Viajes limitados a la comunidad valenciana', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 206, 'Valencia', false),"
+                                        + "(207, 'Carga de Barcelona a Sevilla', 2, 'C', 'Transportar 10 t de alimentos de Barcelona a Sevilla', 'ABIERTA', '2025-07-02 09:30', 5000.00, NULL, 207, 'Barcelona', false),"
+                                        + "(208, 'Carga de Barcelona a Madrid', 2, 'C', 'Transportar 500 kg de ropa de Sevilla a Murcia', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 208, 'Barcelona', false),"
+                                        + "(209, 'Conductor de Multiples cargas', 5, 'C', 'Se requiere experiencia, tanto para cargas pesadas como frágiles', 'ABIERTA', '2025-02-10 08:00', 2500.00, NULL, 209, 'Sevilla', false),"
+                                        + "(210, 'Transportista en Andalucía', 3, 'C', 'Viajes limitados a la comunidad andaluza', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 210, 'Sevilla', false),"
+                                        + "(211, 'Carga de Valencia a Vigo', 2, 'C', 'Transportar 3.5 t de pescado de Valencia a Vigo', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 211, 'Valencia', false),"
+                                        + "(212, 'Carga de Sevilla a Alicante', 2, 'C', 'Transportar 300 kg de paquetes de Sevilla a Murcia', 'ABIERTA', '2025-05-02 18:00', 2500.00, NULL, 212, 'Sevilla', false),"
+                                        + "(213, 'Transportista Nacional', 1, 'C', 'Viajes a nivel nacional', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 213, 'Barcelona', false),"
+                                        + "(214, 'Carga de Sevilla a Madrid', 2, 'C', 'Transportar 1200 kg de electrodomesticos de Sevilla a Madrid', 'ABIERTA', '2025-05-02 20:30', 2500.00, NULL, 214, 'Sevilla', false),"
+                                        + "(215, 'Carga de Sevilla a Murcia', 0, 'C', 'Transportar 500 kg de ropa de Sevilla a Murcia', 'ABIERTA', '2025-05-02 09:30', 2500.00, NULL, 215, 'Sevilla', false),"
+                                        + "(216, 'Conductor Nocturna', 4, 'C', 'Buscamos trabajador para mover cargas en horario nocturno', 'ABIERTA', '2025-05-05 08:00', 2500.00, NULL, 216, 'Valencia', false),"
+                                        + "(217, 'Transportista en Valencia', 3, 'C', 'Viajes limitados a la comunidad valenciana', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 217, 'Valencia', false),"
+                                        + "(218, 'Transportista en Huelva', 3, 'C', 'Viajes limitados a la comunidad andaluza', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 218, 'Huelva', false),"
+                                        + "(219, 'Carga de Cáceres a Sevilla', 2, 'C', 'Transportar 300 kg de paquetes de Cáceres a Sevilla', 'ABIERTA', '2025-05-02 18:00', 2500.00, NULL, 219, 'Cáceres', false),"
+                                        + "(220, 'Transportista en Cáceres', 3, 'C_E', 'Viajes limitados a la comunidad extremeña', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 220, 'Cáceres', false),"
+                                        + "(221, 'Transportista en Cataluña', 3, 'C_E', 'Viajes limitados a la comunidad catalana', 'ABIERTA', '2025-05-03 10:45', 3200.00, NULL, 221, 'Barcelona', false),"
+                                        + "(222, 'Transportista en Almería', 3, 'C', 'Viajes limitados a la comunidad andaluza', 'ABIERTA', '2025-05-03 10:45', 3250.00, NULL, 221, 'Andalucía', false),"
+                                        + "(223, 'Carga de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de paquetes de Sevilla a Córdoba', 'ABIERTA', '2025-05-03 10:45', 3100.00, NULL, 221, 'Andalucía', false),"
+                                        + "(224, 'Transporte urgente de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de documentos urgentes desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3200.00, 223, 201, 'Andalucía', false),"
+                                        + "(225, 'Envío de mercancías de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de productos electrónicos desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3300.00, 201, 223, 'Andalucía', false),"
+                                        + "(226, 'Distribución de paquetes de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de paquetes comerciales desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3400.00, 202, 203, 'Andalucía', false),"
+                                        + "(227, 'Logística express de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de materiales médicos desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3500.00, 201, 205, 'Andalucía', false)");
 
                                 // Insert Trabajos
                                 statement.addBatch("INSERT IGNORE INTO trabajos (id, fecha_incorporacion, jornada, oferta_id) VALUES "
@@ -313,16 +317,20 @@ public class DataInitializer {
 
                                 // Insert Cargas
                                 statement.addBatch("INSERT IGNORE INTO cargas (id, mercancia, peso, origen, destino, distancia, inicio, fin_minimo, fin_maximo, oferta_id) VALUES "
-                                        + "(201, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10 09:30', '2025-05-11 08:00', '2025-05-12 09:30', 203),"
-                                        + "(202, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 204),"
-                                        + "(203, 'Alimentos', 10000.00 , 'Barcelona', 'Sevilla', 830, '2025-07-10 09:30', '2025-07-13 08:00', '2025-07-17 09:30', 207),"
-                                        + "(204, 'Muebles', 2000.00, 'Barcelona', 'Madrid', 620, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 208),"
-                                        + "(205, 'Pescado', 3500.50, 'Valencia', 'Vigo', 955, '2025-05-10 09:30', '2025-05-13 08:00', '2025-05-17 09:30', 211),"
-                                        + "(206, 'Conjunto de paquete pequeños', 300.00, 'Sevilla', 'Alicante', 595, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 212),"
-                                        + "(207, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10 09:30', '2025-05-11 08:00', '2025-05-12 09:30', 214),"
-                                        + "(208, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 215),"
-                                        + "(209, 'Conjunto de paquete pequeños', 300.00, 'Cáceres', 'Sevilla', 595, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 219),"
-                                        + "(210, 'Conjunto de paquete pequeños', 350.00, 'Sevilla', 'Córdoba', 580, '2025-05-10 09:30', '2025-05-11 09:30', '2025-05-12 09:30', 223)");
+                                        + "(201, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10', '2025-05-11', '2025-05-12', 203),"
+                                        + "(202, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10', '2025-05-11', '2025-05-12', 204),"
+                                        + "(203, 'Alimentos', 10000.00 , 'Barcelona', 'Sevilla', 830, '2025-07-10', '2025-07-13', '2025-07-17', 207),"
+                                        + "(204, 'Muebles', 2000.00, 'Barcelona', 'Madrid', 620, '2025-05-10', '2025-05-11', '2025-05-12', 208),"
+                                        + "(205, 'Pescado', 3500.50, 'Valencia', 'Vigo', 955, '2025-05-10', '2025-05-13', '2025-05-17', 211),"
+                                        + "(206, 'Conjunto de paquete pequeños', 300.00, 'Sevilla', 'Alicante', 595, '2025-05-10', '2025-05-11', '2025-05-12', 212),"
+                                        + "(207, 'Electrodomésticos', 1200.50, 'Sevilla', 'Madrid', 530, '2025-05-10', '2025-05-11', '2025-05-12', 214),"
+                                        + "(208, 'Ropa', 500.00, 'Sevilla', 'Murcia', 520, '2025-05-10', '2025-05-11', '2025-05-12', 215),"
+                                        + "(209, 'Conjunto de paquete pequeños', 300.00, 'Cáceres', 'Sevilla', 595, '2025-05-10', '2025-05-11', '2025-05-12', 219),"
+                                        + "(210, 'Conjunto de paquete pequeños', 350.00, 'Sevilla', 'Córdoba', 580, '2025-05-10', '2025-05-11', '2025-05-12', 223),"
+                                        + "(211, 'Conjunto de documentos urgentes', 350.00, 'Sevilla', 'Córdoba', 595, '2025-05-10', '2025-05-11', '2025-05-12', 224),"
+                                        + "(212, 'Conjunto de productos electrónicos', 350.00, 'Sevilla', 'Córdoba', 600, '2025-05-10', '2025-05-11', '2025-05-12', 225),"
+                                        + "(213, 'Conjunto de paquetes comerciales', 350.00, 'Sevilla', 'Córdoba', 605, '2025-05-10', '2025-05-11', '2025-05-12', 226),"
+                                        + "(214, 'Conjunto de materiales médicos', 350.00, 'Sevilla', 'Córdoba', 610, '2025-05-10', '2025-05-11', '2025-05-12', 227)");
 
                                 // Insert aplicados
                                 statement.addBatch("INSERT IGNORE INTO aplicados (oferta_id, camionero_id) VALUES "
@@ -377,6 +385,10 @@ public class DataInitializer {
                                 + "(1, 222, 'PREMIUM', '2025-03-16', '2025-04-16', true),"
                                 + "(2, 223, 'BASIC', '2025-03-16', '2025-04-16', true),"
                                 + "(3, 224, 'GRATIS', '2025-03-16', NULL, true)");
+
+                                // Insert Oferta Patrocinada
+                                statement.addBatch("INSERT IGNORE INTO ofertas_patrocinadas (id, oferta_id, empresa_id, fecha_inicio, fecha_fin, status) VALUES "
+                                + "(1, 201, 221, '2025-03-01 00:00:00', '2025-03-31 23:59:59', 'ACTIVO')");
 
                                 // Execute batch
                                 statement.executeBatch();

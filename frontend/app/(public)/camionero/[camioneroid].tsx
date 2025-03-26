@@ -1,12 +1,14 @@
 import { useLocalSearchParams } from "expo-router";
-
+import ProtectedRoute from "@/security/ProtectedRoute";
 import PublicCamionero from "../../_screens/PublicCamionero";
 
 const CamioneroScreen = () => {
   const { camioneroid } = useLocalSearchParams();
 
   return (
-    <PublicCamionero userId={camioneroid}></PublicCamionero>
+    <ProtectedRoute>
+      <PublicCamionero userId={camioneroid}></PublicCamionero>
+    </ProtectedRoute>
   );
 };
 
