@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, StyleSheet } from "react-native";
 import { Entypo, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
@@ -19,12 +19,6 @@ const LoginScreen = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      router.replace("/miperfil");
-    }
-  }, [user]);
 
   const handleLogin = async () => {
     try {
