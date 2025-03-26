@@ -28,6 +28,7 @@ public class OfertaConTodaInformacionDTO {
     private OfertaEstado estado;
     private LocalDateTime fechaPublicacion;
     private Double sueldo;
+    private Boolean promoted;
 
     private LocalDate fechaIncorporacion;
     private Jornada jornada;
