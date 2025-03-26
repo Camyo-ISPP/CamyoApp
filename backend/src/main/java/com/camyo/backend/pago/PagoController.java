@@ -153,7 +153,7 @@ public class PagoController {
         }
 
         @PostMapping("/apply_compra")
-        public ResponseEntity<String> applySubscription(@RequestBody RequestDTO requestDto) throws StripeException {
+        public ResponseEntity<String> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
 
                 Stripe.apiKey = STRIPE_API_KEY;
                 PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
