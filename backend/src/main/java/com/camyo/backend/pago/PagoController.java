@@ -1,6 +1,7 @@
 package com.camyo.backend.pago;
 
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.oferta.OfertaPatrocinadaService;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Usuario;
@@ -25,8 +26,10 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,16 +50,23 @@ public class PagoController {
         private SuscripcionService suscripcionService;
 
         @Autowired
+        private OfertaPatrocinadaService patrocinioService;
+
+        @Autowired
         private EmpresaService empresaService;
 
         String STRIPE_API_KEY = System.getenv().get("STRIPE_API_KEY");
 
+        Set<Compra> suscripciones = Set.of(Compra.BASICO, Compra.PREMIUM);
+
         @PostMapping("/integrated")
-        String integratedCheckout(@RequestBody Pago pago) throws StripeException {
+        public ResponseEntity<String> integratedCheckout(@RequestBody Pago pago) throws StripeException {
 
                 Stripe.apiKey = STRIPE_API_KEY;
 
                 String clientBaseURL = "http://localhost:8081";
+
+                String secret = null;
 
                 // Start by finding an existing customer record from Stripe or creating a new
                 // one if needed
@@ -81,45 +91,50 @@ public class PagoController {
                         }
                 };
 
-                // Create a PaymentIntent and send its client secret to the client
-                PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                                .setAmount(planPrecio)
+                if (pago.getCompra()==Compra.PATROCINAR) {
+                        // Create a PaymentIntent and send its client secret to the client
+                        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+                                .setAmount(500L)
                                 .setCurrency("eur")
                                 .setCustomer(clienteStripe.getId())
                                 .setAutomaticPaymentMethods(
-                                                PaymentIntentCreateParams.AutomaticPaymentMethods
-                                                                .builder()
-                                                                .setEnabled(true)
-                                                                .build())
+                                        PaymentIntentCreateParams.AutomaticPaymentMethods
+                                                .builder()
+                                                .setEnabled(true)
+                                                .build())
                                 .build();
 
- /* TODO: BASICAMENTE LA PARTE DE SUBSCRIPCION (No necesita lo de arriba, creo)
-                SubscriptionCreateParams.PaymentSettings paymentSettings = SubscriptionCreateParams.PaymentSettings
-                        .builder()
-                        .setSaveDefaultPaymentMethod(SaveDefaultPaymentMethod.ON_SUBSCRIPTION)
-                        .build();
+                        PaymentIntent paymentIntent = PaymentIntent.create(params);
 
-                SubscriptionCreateParams subCreateParams = SubscriptionCreateParams
-                        .builder()
-                        .setCustomer(clienteStripe.getId())
-                        .addItem(SubscriptionCreateParams
-                                .Item.builder()
-                                .setPrice(precio_id)
-                                .build()
-                                )
+                        secret = paymentIntent.getClientSecret();
+
+                } else if (suscripciones.contains(pago.getCompra())){
+
+                        SubscriptionCreateParams.PaymentSettings paymentSettings = SubscriptionCreateParams.PaymentSettings
+                                .builder()
+                                .setSaveDefaultPaymentMethod(SaveDefaultPaymentMethod.ON_SUBSCRIPTION)
+                                .build();
+
+                        SubscriptionCreateParams subCreateParams = SubscriptionCreateParams
+                                .builder()
+                                .setCustomer(clienteStripe.getId())
+                                .addItem(SubscriptionCreateParams
+                                        .Item.builder()
+                                        .setPrice(precio_id)
+                                        .build())
                                 .setPaymentSettings(paymentSettings)
                                 .setPaymentBehavior(SubscriptionCreateParams.PaymentBehavior.DEFAULT_INCOMPLETE)
                                 .addAllExpand(Arrays.asList("latest_invoice.payment_intent"))
                                 .build();
                           
-                Subscription subscription = Subscription.create(subCreateParams);
+                        Subscription subscription = Subscription.create(subCreateParams);
 
-                String secret = subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret();
- */
-                PaymentIntent paymentIntent = PaymentIntent.create(params);
+                        secret = subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret();
 
-                // Send the client secret from the payment intent to the client
-                return paymentIntent.getClientSecret();
+                } else {
+                        return new ResponseEntity<>("Este tipo de compra no existe", HttpStatus.FORBIDDEN);
+                }
+                return new ResponseEntity<>(secret, HttpStatus.OK);
         }
 
         @PostMapping("/apply_subscription")
@@ -132,6 +147,28 @@ public class PagoController {
                         Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
                 suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), null);
                         return ResponseEntity.ok("Suscripción aplicada con éxito");
+                } else {
+                        return ResponseEntity.badRequest().build();
+                }
+        }
+
+        @PostMapping("/apply_compra")
+        public ResponseEntity<String> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
+
+                Stripe.apiKey = STRIPE_API_KEY;
+                PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
+
+                if (paymentIntent.getStatus().equals("succeeded") || suscripciones.contains(requestDto.getCompra())) {
+
+                        Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
+                        suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), 9999);
+                        return ResponseEntity.ok("Suscripción aplicada con éxito");
+
+                } else if (paymentIntent.getStatus().equals("succeeded") || Compra.PATROCINAR == requestDto.getCompra()){
+
+                        //patrocinioService.patrocinarOferta(ofertaId, 99999);
+                        return ResponseEntity.ok("Compra aplicada con éxito");
+                
                 } else {
                         return ResponseEntity.badRequest().build();
                 }
