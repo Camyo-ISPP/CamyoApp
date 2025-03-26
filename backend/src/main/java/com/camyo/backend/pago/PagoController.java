@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @RestController
 @RequestMapping("/pago")
 @CrossOrigin(origins = "http://localhost:8081")
@@ -55,24 +57,20 @@ public class PagoController {
         @Autowired
         private EmpresaService empresaService;
 
-        String STRIPE_API_KEY = System.getenv().get("STRIPE_API_KEY");
+        Dotenv dotenv = Dotenv.load();
 
         Set<Compra> suscripciones = Set.of(Compra.BASICO, Compra.PREMIUM);
 
         @PostMapping("/integrated")
         public ResponseEntity<String> integratedCheckout(@RequestBody Pago pago) throws StripeException {
-
-                Stripe.apiKey = STRIPE_API_KEY;
-
+                Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 String clientBaseURL = "http://localhost:8081";
-
                 String secret = null;
 
                 // Start by finding an existing customer record from Stripe or creating a new
                 // one if needed
-                // Usuario cliente = usuarioService.obtenerUsuarioActual();
-        // Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
-                Customer clienteStripe = CustomerUtil.findOrCreateCustomer("emp.piloto1@example.com", "Empresa Piloto");
+                Usuario cliente = usuarioService.obtenerUsuarioActual();
+                Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
 
                 Long planPrecio = 0L;
                 String precio_id = null;
@@ -139,8 +137,7 @@ public class PagoController {
 
         @PostMapping("/apply_subscription")
         public ResponseEntity<String> applySubscription(@RequestBody RequestDTO requestDto) throws StripeException {
-                System.out.println(requestDto);
-                Stripe.apiKey = Stripe.apiKey = STRIPE_API_KEY;
+                Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
 
                 PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
                 if (paymentIntent.getStatus().equals("succeeded")) {
@@ -155,7 +152,7 @@ public class PagoController {
         @PostMapping("/apply_compra")
         public ResponseEntity<String> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
 
-                Stripe.apiKey = STRIPE_API_KEY;
+                Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
 
                 if (paymentIntent.getStatus().equals("succeeded") || suscripciones.contains(requestDto.getCompra())) {
@@ -177,8 +174,8 @@ public class PagoController {
         @PostMapping("/create-checkout-session")
         String hostedCheckout() throws StripeException {
 
-                Stripe.apiKey = STRIPE_API_KEY;
-                String clientBaseURL = System.getenv().get("CLIENT_BASE_URL");
+                Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
+                String clientBaseURL = dotenv.get("CLIENT_BASE_URL");
 
                 // Usuario cliente = usuarioService.obtenerUsuarioActual();
                 Customer clienteStripe = CustomerUtil.findOrCreateCustomer("test@example.com", "Dane Joe");
@@ -247,8 +244,7 @@ public class PagoController {
         @PostMapping("/subscripcion")
         String newSubscription(@RequestBody PaymentRequest PaymentRequest) throws StripeException {
 
-                Stripe.apiKey = STRIPE_API_KEY;
-
+                Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 String clientBaseURL = "http://localhost:8081";
 
                 Usuario cliente = usuarioService.obtenerUsuarioActual();
