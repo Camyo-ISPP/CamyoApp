@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, StyleSheet } from "react-native";
 import { Entypo, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import colors from "../../assets/styles/colors";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
+import withNavigationGuard from "@/hoc/withNavigationGuard";
 
 const LoginScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -18,6 +19,12 @@ const LoginScreen = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/miperfil");
+    }
+  }, [user]);
 
   const handleLogin = async () => {
     try {
@@ -123,4 +130,4 @@ const LoginScreen = () => {
   );
 };
 
-export default LoginScreen;
+export default withNavigationGuard(LoginScreen);
