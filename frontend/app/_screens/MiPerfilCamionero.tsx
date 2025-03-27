@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
@@ -6,17 +6,21 @@ import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
+
 import axios from "axios";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-    
+
     const { user } = useAuth();
     const router = useRouter();
 
     const [resenas, setResenas] = useState([]);
-
     const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+    const [ofertas, setOfertas] = useState([]);
 
     useEffect(() => {
         const fetchResenas = async () => {
@@ -32,7 +36,16 @@ const MiPerfilCamionero = () => {
             }
         };
 
-        if (user?.id) {
+        const fetchCamionero = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
+                setCamionero(response.data);
+            } catch (error) {
+                console.error("Error al cargar el camionero:", error);
+            }
+        };
+
+        if (user?.userId) {
             fetchResenas();
         }
     }, [user]);

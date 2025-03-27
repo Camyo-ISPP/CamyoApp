@@ -1,27 +1,32 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TouchableWithoutFeedback, Modal } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
-import { useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect, useRouter } from "expo-router";
+import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
-import { useSubscription } from '@/contexts/SubscriptionContext';
-import { useFocusEffect } from '@react-navigation/native';
+import SuccessModal from "../_components/SuccessModal";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { LinearGradient } from "expo-linear-gradient";
 
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+
+// queda arreglar pk no va el delete offer que sale server 500 y añadir patrocinado
 const MiPerfilEmpresa = () => {
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-  const { user } = useAuth();
+  const { user, userToken } = useAuth();
   const router = useRouter();
 
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
   const { refreshSubscriptionLevel } = useSubscription();
+  const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,18 +60,18 @@ const MiPerfilEmpresa = () => {
   }, [user]);
 
 
-
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+    } catch (error) {
+      console.error("Error al cargar las ofertas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-        setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-      } catch (error) {
-        console.error("Error al cargar las ofertas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+
 
     fetchOffers();
   }, []);
@@ -76,6 +81,69 @@ const MiPerfilEmpresa = () => {
     return activeOffersCount < rules.maxActiveOffers;
   };
 
+  const canPromoteNewOffer = () => {
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
+    return activeOffersCount < rules.maxSponsoredOffers;
+
+  }
+
+  const promoteOffer = async (ofertaId: number) => {
+    try {
+      const url = `${BACKEND_URL}/ofertas/patrocinadas?ofertaId=${ofertaId}&dias=30`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Error en promoteOffer:", errorText);
+        throw new Error("La oferta no ha podido ser patrocinada");
+      }
+
+      setSuccessModalVisible(true);
+ setTimeout(() => {
+        setSuccessModalVisible(false);
+      }, 1000);
+
+      fetchOffers();
+
+    } catch (err) {
+      console.error("Error completo en promoteOffer:", err);
+    }
+  };
+  const unpromoteOffer = async (ofertaId: number) => {
+    try {
+      const response = await axios.put(
+        `${BACKEND_URL}/ofertas/patrocinadas/desactivar/${ofertaId}`,
+        {},
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${userToken}`
+          }
+        }
+      );
+      setIsModalVisibleCancelar(false);
+
+      fetchOffers();
+
+    } catch (err) {
+      console.error("Error en unpromoteOffer:", err);
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("Detalles del error:", {
+          status: err.response.status,
+          data: err.response.data,
+          headers: err.response.headers
+        });
+      }
+
+    }
+  }
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -128,20 +196,41 @@ const MiPerfilEmpresa = () => {
                     {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
                   </Text>
                 </TouchableOpacity>
+
               </View>
 
 
               {/* Botón de mejorar plan */}
               <View>
-                {!canCreateNewOffer() && (
-                  <>
-                    <Text style={styles.limitMessage}>
-                      Has alcanzado tu límite de{'\n'}
-                      ofertas abiertas ({rules.maxActiveOffers}).{'\n'}
-                      ¿Quieres más opciones? {'\n'}
-                    </Text>
-                  </>
-                )}
+                {(() => {
+                  if (!canCreateNewOffer() && !canPromoteNewOffer()) {
+                    return (
+                      <Text style={styles.limitMessage}>
+                        Has alcanzado tu límite de{'\n'}
+                        ofertas abiertas ({rules.maxActiveOffers}) y patrocinadas ({rules.maxSponsoredOffers}).{'\n'}
+                        ¿Quieres más opciones?
+                      </Text>
+                    );
+                  } else if (!canCreateNewOffer()) {
+                    return (
+                      <Text style={styles.limitMessage}>
+                        Has alcanzado tu límite de{'\n'}
+                        ofertas abiertas ({rules.maxActiveOffers}).{'\n'}
+                        ¿Quieres más opciones?
+                      </Text>
+                    );
+                  } else if (!canPromoteNewOffer()) {
+                    return (
+                      <Text style={styles.limitMessage}>
+                        Has alcanzado tu límite de{'\n'}
+                        ofertas patrocinadas ({rules.maxSponsoredOffers}).{'\n'}
+                        ¿Quieres más opciones?
+                      </Text>
+                    );
+                  }
+                  return null;
+                })()}
+
 
                 <TouchableOpacity
                   style={styles.mejorarPlanButton}
@@ -166,46 +255,138 @@ const MiPerfilEmpresa = () => {
           <View style={styles.separator} />
 
           <View style={styles.offersContainer}>
-            <Text style={styles.sectionTitle}>Mis Ofertas Abiertas</Text>
+            <Text style={styles.sectionTitle}>Ofertas Activas</Text>
             {offers.length === 0 ? (
-              <Text style={styles.info}>No hay ofertas abiertas</Text>
+              <Text style={styles.noOffersText}>No hay ofertas activas en este momento</Text>
             ) : (
-              <ScrollView>
-                <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  {offers && offers.map((item) => (
-                    <View key={item.id} style={styles.card2}>
-                      <Image source={defaultCompanyLogo} style={styles.companyLogo} />
-                      <View style={{ width: "30%" }}>
-                        <Text style={styles.offerTitle}>{item.titulo}</Text>
+              <View style={styles.offersList}>
+                {offers.map((item: any) => (
+                  <View key={item.id} style={[
+                    styles.offerCard
+                  ]}>
+                    {/* Encabezado con estado de patrocinio */}
 
-                        <View style={{ display: "flex", flexDirection: "row" }}>
-                          <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
-                          <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-                          <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
 
-                          <View style={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
-                            <Text style={styles.localizacion}>|</Text>
-                            <MaterialIcons name="location-on" size={20} color="#696969" />
-                            <Text style={styles.localizacion}>{item.localizacion}</Text>
+                    {/* Contenido principal */}
+                    <View style={styles.offerContent}>
+                      <View style={styles.offerHeader}>
+                        <Image source={defaultCompanyLogo} style={styles.companyLogo} />
+                        <View style={styles.offerMainInfo}>
+                          <Text style={styles.offerPosition}>{item.titulo}</Text>
+                          <View style={styles.companyInfo}>
+                            <FontAwesome5 name="building" size={14} color={colors.primary} />
+                            <Text style={{ ...styles.companyName, fontSize: 15, fontWeight: 700 }}>{user.nombre}</Text>
+                            <Text style={{ color: colors.secondary }}>  |  </Text>
+                            <MaterialIcons name="location-on" size={16} color={colors.secondary} />
+                            <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{item.localizacion}</Text>
+                          </View>
+                          <View style={styles.detailRow}>
+                            <View style={styles.offerDetailsTagType}>
+                              <MaterialIcons name="work-outline" size={12} color={colors.white} />
+                              <Text style={styles.detailText}>{item.tipoOferta}</Text>
+                            </View>
+                            <View style={styles.offerDetailsTagLicense}>
+                              <AntDesign name="idcard" size={12} color={colors.white} />
+                              <Text style={styles.detailText}>{item.licencia.replace(/_/g, '+')}</Text>
+                            </View>
+                            <View style={styles.offerDetailsTagExperience}>
+                              <MaterialIcons name="timelapse" size={12} color={colors.white} />
+                              <Text style={styles.detailText}>{'>' + item.experiencia} años</Text>
+                            </View>
+                          </View>
+
+                        </View>
+                        <View style={{ display: "flex", alignItems: "flex-end" }}>
+                          {item.promoted && (
+                            <View style={styles.promotedBadge}>
+                              <AntDesign name="star" size={14} color="#FFD700" />
+                              <Text style={styles.promotedText}>PATROCINADA</Text>
+                            </View>
+                          )}
+                          <View style={{ display: "flex", flexDirection: "row", gap: 30, alignItems: "center" }}>
+                            <Text style={styles.offerSalary}>{item.sueldo}€</Text>
+                            <View style={styles.offerActions}>
+                              {
+                                item.promoted ? (
+                                  <TouchableOpacity
+                                    style={[styles.actionButton, styles.unpromoteButton]}
+                                    onPress={() => setIsModalVisibleCancelar(true)}
+                                  >
+                                    <AntDesign name="closecircleo" size={14} color={colors.white} style={{ paddingRight: 19 }} />
+                                    <Text style={styles.actionButtonText}>Cancelar</Text>
+                                  </TouchableOpacity>
+                                ) : canPromoteNewOffer() ? (
+                                  <TouchableOpacity
+                                    style={[styles.actionButton,]}
+                                    onPress={() => promoteOffer(item.id)}
+                                  >
+
+                                    <LinearGradient
+                                      colors={['#D4AF37', '#F0C674', '#B8860B', '#F0C674']}
+                                      start={{ x: 0, y: 0 }}
+                                      end={{ x: 1, y: 1 }}
+                                      style={[styles.actionButton]}
+                                    >
+                                      <AntDesign name="star" size={14} color={colors.white} style={{ paddingRight: 9 }} />
+                                      <Text style={styles.actionButtonText}>Patrocinar</Text>
+
+                                    </LinearGradient>
+                                  </TouchableOpacity>
+
+                                ) : null}
+                              <SuccessModal
+                                isVisible={successModalVisible}
+                                onClose={() => setSuccessModalVisible(false)}
+                                message="¡Oferta patrocinada con éxito!"
+                              />
+                              <Modal
+                                animationType="fade"
+                                transparent={true}
+                                visible={isModalVisibleCancelar}
+                                onRequestClose={() => setIsModalVisibleCancelar(false)}
+                              >
+                                <TouchableWithoutFeedback onPress={() => setIsModalVisibleCancelar(false)}>
+                                  <View style={styles.modalBackground}>
+                                    <TouchableWithoutFeedback>
+                                      <View style={styles.modalContainer}>
+                                        <Text style={styles.modalText}>¿Estás seguro/a de que quieres dejar de patrocinar la oferta?</Text>
+                                        <View style={styles.modalButtons}>
+                                          <TouchableOpacity onPress={() => setIsModalVisibleCancelar(false)} style={styles.modalButton}>
+                                            <Text style={styles.modalButtonText}>Cancelar</Text>
+                                          </TouchableOpacity>
+                                          <TouchableOpacity onPress={() => unpromoteOffer(item.id)} style={styles.modalButton}>
+                                            <Text style={styles.modalButtonText}>Confirmar</Text>
+                                          </TouchableOpacity>
+                                        </View>
+                                      </View>
+                                    </TouchableWithoutFeedback>
+                                  </View>
+                                </TouchableWithoutFeedback>
+                              </Modal>
+
+                              <TouchableOpacity
+                                style={[styles.actionButton, styles.detailsButton]}
+                                onPress={() => router.push(`/oferta/${item.id}`)}
+                              >
+                                <MaterialCommunityIcons name="eye-outline" size={14} color={colors.white} />
+                                <Text style={styles.actionButtonText}>Ver detalles</Text>
+                              </TouchableOpacity>
+                            </View>
                           </View>
                         </View>
-
-                        <Text style={styles.offerInfo}>{item.notas}</Text>
-
-                        <View />
                       </View>
-                      <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                      <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
-                        <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
-                        <Text style={styles.buttonText}>Ver Detalles</Text>
 
-                      </TouchableOpacity>
+
+
                     </View>
-                  ))}
-                </View >
-              </ScrollView >
+
+
+                  </View>
+                ))}
+              </View>
             )}
           </View>
+
           <View style={styles.separator} />
 
           <View style={styles.reseñasContainer}>
@@ -236,8 +417,8 @@ const MiPerfilEmpresa = () => {
               ))
             )}
           </View>
-        </View>
-      </View>
+        </View >
+      </View >
     </ScrollView >
   );
 };
@@ -315,6 +496,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
   mejorarPlanButton: {
     backgroundColor: '#0993A8FF',
     padding: 10,
@@ -343,7 +527,7 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 18,
-    color: colors.darkGray,
+    color: colors.mediumGray,
     fontWeight: "bold",
     marginBottom: 10,
     marginTop: 6,
@@ -379,8 +563,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   companyLogo: {
-    height: 90,
-    width: 90,
+    height: 120,
+    width: 120,
     marginRight: 10,
   },
   offerTitle: {
@@ -394,45 +578,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "gray", flexWrap: "wrap",
   },
-  offerDetails: {
-    fontSize: 12,
-    fontWeight: "bold",
-    flexWrap: "wrap",
-  },
   offerDetailsTagLicense: {
-    fontSize: 9,
-    backgroundColor: colors.secondary,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    display: "flex",
+    flexDirection: "row",
     color: colors.white,
+    borderRadius: 10,
     paddingTop: 2,
+    alignItems: "center",
     textAlign: "center",
     textAlignVertical: "center",
-    paddingBottom: 3,
+    paddingBottom: 2,
     paddingLeft: 5,
-    paddingRight: 6,
-    marginRight: 3,
-    fontWeight: "bold",
-    flexWrap: "wrap",
+    marginRight: 5,
   },
   offerDetailsTagExperience: {
-    fontSize: 9,
-    borderColor: colors.primary,
-    borderWidth: 2,
+    backgroundColor: colors.green,
+    display: "flex",
+    flexDirection: "row",
+    color: colors.white,
     borderRadius: 10,
-    color: colors.primary,
     paddingTop: 2,
+    alignItems: "center",
     textAlign: "center",
     textAlignVertical: "center",
     paddingBottom: 2,
     paddingLeft: 5,
-    paddingRight: 6,
-    marginRight: 3,
-    fontWeight: "bold",
-    flexWrap: "wrap",
+    marginRight: 5,
   },
   offerDetailsTagType: {
-    fontSize: 9,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.secondary,
+    display: "flex",
+    flexDirection: "row",
     color: colors.white,
     borderRadius: 10,
     paddingTop: 2,
@@ -440,14 +617,11 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     paddingBottom: 2,
     paddingLeft: 5,
-    paddingRight: 6,
-    marginRight: 3,
-    fontWeight: "700",
-    flexWrap: "wrap",
+    marginRight: 5,
   },
   offerInfo: {
     fontSize: 12,
-    color: "gray",
+    color: colors.secondary,
     marginTop: 5,
     flexWrap: "wrap",
   },
@@ -564,7 +738,448 @@ const styles = StyleSheet.create({
   reseñaComentario: {
     fontSize: 14,
     color: colors.darkGray,
+  }, offersContainer: {
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  noOffersText: {
+    textAlign: 'center',
+    color: colors.mediumGray,
+    marginVertical: 20,
+    fontSize: 16,
+  },
+  offersList: {
+    width: '100%',
+  },
+  offerCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  promotedOfferCard: {
+    borderLeftColor: colors.secondary,
+    backgroundColor: '#F8F9FF',
+  },
+  offerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  offerTitleContainer: {
+    flex: 1,
+  },
+  offerMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  offerLocation: {
+    fontSize: 14,
+    color: colors.mediumGray,
+    marginLeft: 4,
+  },
+  offerSalary: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.secondary,
+  },
+  offerTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+    gap: 8,
+  },
+  offerTagType: {
+    backgroundColor: colors.primary,
+    color: colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  offerTagLicense: {
+    backgroundColor: colors.secondary,
+    color: colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  offerTagExperience: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    color: colors.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  offerDescription: {
+    fontSize: 14,
+    color: colors.darkGray,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  offerActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 6,
+  },
+  promoteButton: {
+    backgroundColor: colors.secondary,
+  },
+  unpromoteButton: {
+    backgroundColor: '#6c757d',
+  },
+  detailsButton: {
+    backgroundColor: colors.primary,
+  },
+  actionButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  companyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 4,
+    backgroundColor: '#F5F7FF',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  offerCompany: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 6,
+  }, promotedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9E6',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 4,
+    marginBottom: 10,
+    alignSelf: 'flex-start',
+  },
+  promotedText: {
+    color: '#D4A017',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 5,
+  },
+  offerContent: {
+    paddingHorizontal: 5,
+  },
+  offerMainInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  offerPosition: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.secondary,
+    marginBottom: 5,
+  },
+  companyInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F7FF',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  companyName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 6,
+  },
+  offerDetails: {
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 6,
+  },
+  detailText: {
+    fontSize: 13,
+    color: colors.darkGray,
+    marginRight: 15,
+    marginLeft: 4,
+  },
+  offersContainer: {
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  noOffersText: {
+    textAlign: 'center',
+    color: colors.mediumGray,
+    marginVertical: 20,
+    fontSize: 16,
+  },
+  offersList: {
+    width: '100%',
+  },
+  offerCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  promotedOfferCard: {
+    borderLeftColor: colors.secondary,
+    backgroundColor: '#F8F9FF',
+  },
+  offerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  offerTitleContainer: {
+    flex: 1,
+  },
+  offerMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  offerLocation: {
+    fontSize: 14,
+    color: colors.mediumGray,
+    marginLeft: 4,
+  },
+  offerSalary: {
+    fontSize: 30,
+    fontWeight: '700',
+    color: colors.secondary,
+  },
+  offerTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+    gap: 8,
+  },
+  offerTagType: {
+    backgroundColor: colors.primary,
+    color: colors.white,
+    paddingHorizontal: 10,
+    display: "flex",
+    flexDirection: "row",
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  offerTagLicense: {
+    backgroundColor: colors.secondary,
+    color: colors.white,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  offerTagExperience: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    color: colors.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  offerDescription: {
+    fontSize: 14,
+    color: colors.darkGray,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  offerActions: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: "center",
+    width: 150, // Ancho fijo para todos los botones
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 6,
+  },
+  promoteButton: {
+    backgroundColor: '#D4AF37',
+  },
+  unpromoteButton: {
+    backgroundColor: colors.red,
+  },
+  detailsButton: {
+    backgroundColor: colors.primary,
+  },
+  actionButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    textAlign: "left",
+    fontWeight: '500',
+  },
+  companyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 4,
+    backgroundColor: '#F5F7FF',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  offerCompany: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 6,
+  },
+  promotedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9E6',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 4,
+    marginBottom: 10,
+    alignSelf: 'flex-end',
+  },
+  promotedText: {
+    color: '#D4A017',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 5,
+  },
+  offerContent: {
+    paddingHorizontal: 5,
+  },
+  offerMainInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  offerPosition: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.secondary,
+    marginBottom: 5,
+  },
+  companyInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  companyName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+    marginLeft: 6,
+  },
+  offerDetails: {
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 6,
+  },
+  detailText: {
+    fontSize: 9,
+    color: colors.white,
+    fontWeight: 700,
+    marginRight: 10,
+    marginLeft: 4,
+  },
+  // Estilos del Modal
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 
+
 export default MiPerfilEmpresa;
+
+
