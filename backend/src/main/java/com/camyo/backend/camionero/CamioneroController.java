@@ -68,6 +68,12 @@ public class CamioneroController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+
+     /*
+    * Deprecated
+  */ 
+
      @Operation(summary = "Guardar camionero", 
                description = "Almacena un camionero en la BD. Se crea con el usuario que ha iniciado sesión.")
     @ApiResponses({
@@ -190,7 +196,7 @@ public class CamioneroController {
                 // Si el Camionero no pertenece al usuario, retornamos 403 (Forbidden)
                 return new ResponseEntity<>(
                     new MessageResponse("No puede eliminar un camionero que no es suyo."),
-                    HttpStatus.METHOD_NOT_ALLOWED
+                    HttpStatus.FORBIDDEN
                 );
             }
     

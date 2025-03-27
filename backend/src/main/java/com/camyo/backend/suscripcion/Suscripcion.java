@@ -25,7 +25,7 @@ public class Suscripcion {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PlanNivel nivel;      // GRATIS, BASIC, PREMIUM
+    private PlanNivel nivel;      // GRATIS, BASICO, PREMIUM
 
     @NotNull
     @Column(name="fecha_inicio", nullable = false)

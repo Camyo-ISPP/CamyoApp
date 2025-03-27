@@ -76,6 +76,7 @@ public class SecurityConfiguration {
 			.requestMatchers(HttpMethod.DELETE, "/camioneros/**").hasAuthority("CAMIONERO")
 			.requestMatchers(HttpMethod.PUT, "/empresas/**").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.DELETE, "/empresas/**").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.POST, "/pago/**").hasAuthority("EMPRESA")
 
 			.anyRequest().permitAll()
 			)

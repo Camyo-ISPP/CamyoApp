@@ -60,9 +60,9 @@ public class OfertaPatrocinadaService {
                     throw new RuntimeException("La cuenta gratuita solo puede patrocinar 1 oferta a la vez.");
                 }
                 break;
-            case BASIC:
-                if (patrociniosActivos >= 5) {
-                    throw new RuntimeException("El plan BASIC solo permite patrocinar 5 ofertas a la vez.");
+            case BASICO:
+                if (patrociniosActivos >= 2) {
+                    throw new RuntimeException("El plan Basico solo permite patrocinar 5 ofertas a la vez.");
                 }
                 break;
             case PREMIUM:
