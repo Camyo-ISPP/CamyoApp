@@ -29,7 +29,7 @@ public class SuscripcionService {
      * 
      * Reglas:
      * - Plan GRATIS => fechaFin = null.
-     * - Plan BASIC/PREMIUM => si duracionDias == null, se pone 30 por defecto.
+     * - Plan BASICO/PREMIUM => si duracionDias == null, se pone 30 por defecto.
      */
     @Transactional
     public Suscripcion asignarSuscripcion(Integer empresaId, PlanNivel nivel, Integer duracionDias) {
@@ -44,7 +44,7 @@ public class SuscripcionService {
             // Suscripción Gratis: Sin fecha fin
             fechaFin = null;
         } else {
-            // BASIC o PREMIUM: si no se pasa duración => 30 días por defecto
+            // BASICO o PREMIUM: si no se pasa duración => 30 días por defecto
             if (duracionDias == null) {
                 duracionDias = 30;
             }

@@ -1,21 +1,19 @@
 import React, { useRef, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform, Animated, Easing, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform, Animated, Easing, ActivityIndicator, Image } from "react-native";
 import colors from "frontend/assets/styles/colors";
-import CamyoWebNavBar from "../_components/CamyoNavBar";
-import BottomBar from "../_components/BottomBar";
-import Titulo from "../_components/Titulo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
 import EmpresaRoute from "@/security/EmpresaRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePayment } from "@/contexts/PaymentContext";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import axios from "axios";
 import SuccessModal from "../_components/SuccessModal";
 
 const SubscriptionPlans = () => {
-
     const { user, userToken } = useAuth();
+    const { id, setId } = usePayment();
     const router = useRouter();
     const [isAuthLoaded, setIsAuthLoaded] = useState(false);
     const [isUserLoading, setIsUserLoading] = useState(true);
@@ -25,22 +23,13 @@ const SubscriptionPlans = () => {
     const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     useEffect(() => {
-        if (user === undefined) {
-            return;
-        }
-
+        if (user === undefined) return;
         setIsAuthLoaded(true);
-
     }, [user]);
 
     useEffect(() => {
-        if (!isAuthLoaded) {
-            return;
-        }
-
-        if (user === undefined) {
-            return;
-        }
+        if (!isAuthLoaded) return;
+        if (user === undefined) return;
         setIsUserLoading(false);
     }, [isAuthLoaded]);
 
@@ -54,7 +43,6 @@ const SubscriptionPlans = () => {
                         Authorization: `Bearer ${userToken}`,
                     },
                 });
-
                 setCurrentPlan(response.data);
             } catch (error) {
                 console.error("Error al obtener el plan de suscripción:", error);
@@ -67,9 +55,19 @@ const SubscriptionPlans = () => {
         fetchPlan();
     }, [user?.id, userToken]);
 
+
+    useEffect(() => {
+        if (id === "BASICO" || id === "PREMIUM") {
+            router.replace("/pago/checkout");
+        }
+        
+    }, [id])
+
+    
+
     if (!isAuthLoaded) {
         return (
-            <View>
+            <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
@@ -80,7 +78,6 @@ const SubscriptionPlans = () => {
 
         try {
             setLoadingPlan(true);
-
             const response = await axios.post(
                 `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
                 {},
@@ -96,11 +93,10 @@ const SubscriptionPlans = () => {
                 setSuccessModalVisible(true);
                 setTimeout(() => {
                     setSuccessModalVisible(false);
-                }, 1000);
+                }, 2000);
             } else {
                 alert("No se pudo cambiar el plan.");
             }
-
         } catch (error) {
             alert("Ocurrió un error al cambiar el plan.");
         } finally {
@@ -110,39 +106,37 @@ const SubscriptionPlans = () => {
 
     const formatPlanLevel = (plan: string): string => {
         switch (plan.toUpperCase()) {
-            case "GRATIS":
-                return "GRATIS";
-            case "BASIC":
-                return "BÁSICO";
-            case "PREMIUM":
-                return "PREMIUM";
-            default:
-                return plan;
+            case "GRATIS": return "GRATIS";
+            case "BASICO": return "BÁSICO";
+            case "PREMIUM": return "PREMIUM";
+            default: return plan;
         }
     };
 
+    const handleGoToCheckout = (planId: string) => {
+        setId(planId)
+    }
+
     const getPlanIcon = (planLevel: string) => {
         switch (planLevel) {
-            case "GRATIS":
-                return <Ionicons name="pricetag-outline" size={24} color={colors.primary} />;
-            case "BASIC":
-                return <Ionicons name="layers-outline" size={24} color={colors.primary} />;
-            case "PREMIUM":
-                return <Ionicons name="diamond-outline" size={24} color={colors.primary} />;
-            default:
-                return null;
+            case "GRATIS": return <Ionicons name="pricetag-outline" size={28} color={colors.primary} />;
+            case "BASICO": return <Ionicons name="layers-outline" size={28} color={colors.primary} />;
+            case "PREMIUM": return <Ionicons name="diamond-outline" size={28} color={colors.primary} />;
+            default: return null;
         }
     };
 
     const PlanCard: React.FC<{
         title: string;
         price: string;
-        description: string;
+        features: string[];
+        popular?: boolean;
         borderColor: string;
+        backgroundColor: string;
         planLevel: string;
         currentPlan: string;
         onChangePlan: (planLevel: string) => void;
-    }> = ({ title, price, description, borderColor, planLevel, currentPlan, onChangePlan }) => {
+    }> = ({ title, price, features, popular, borderColor, backgroundColor, planLevel, currentPlan, onChangePlan }) => {
 
         const isCurrentPlan = planLevel === currentPlan;
         const buttonText = isCurrentPlan ? "Plan actual" : "Cambiar a este plan";
@@ -151,7 +145,7 @@ const SubscriptionPlans = () => {
         const handleMouseEnter = () => {
             if (Platform.OS === "web") {
                 Animated.timing(scaleValue, {
-                    toValue: 1.05,
+                    toValue: 1.03,
                     duration: 200,
                     useNativeDriver: true,
                     easing: Easing.out(Easing.quad),
@@ -174,210 +168,363 @@ const SubscriptionPlans = () => {
             <Animated.View
                 style={[
                     styles.card,
-                    { borderLeftColor: borderColor, transform: [{ scale: scaleValue }] },
+                    { 
+                        borderColor: borderColor, 
+                        backgroundColor: backgroundColor,
+                        transform: [{ scale: scaleValue }],
+                        marginTop: popular ? 0 : 20,
+                    },
                 ]}
                 {...(Platform.OS === "web"
                     ? ({ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave } as any)
                     : {})}
             >
-                <View style={styles.planTitleContainer}>
-                    {getPlanIcon(planLevel)}
-                    <Text style={styles.planTitle}>{title}</Text>
+                {popular && (
+                    <View style={styles.popularBadge}>
+                        <Text style={styles.popularBadgeText}>RECOMENDADO</Text>
+                    </View>
+                )}
+                
+                <View style={styles.planHeader}>
+                    <View style={styles.planTitleContainer}>
+                        {getPlanIcon(planLevel)}
+                        <Text style={styles.planTitle}>{title}</Text>
+                    </View>
+                    <Text style={styles.planPrice}>{price}</Text>
+                    <Text style={styles.billingText}>al mes</Text>
                 </View>
-                <Text style={styles.planPrice}>{price}</Text>
-                <Text style={styles.planDescription}>{description}</Text>
+
+                <View style={styles.featuresContainer}>
+                    {features.map((feature, index) => (
+                        <View key={index} style={styles.featureItem}>
+                            <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                            <Text style={styles.featureText}>{feature}</Text>
+                        </View>
+                    ))}
+                </View>
+
                 <TouchableOpacity
                     style={[
                         styles.button,
-                        isCurrentPlan ? styles.disabledButton : styles.button
+                        isCurrentPlan ? styles.currentPlanButton : styles.changePlanButton,
+                        popular ? styles.popularButton : {}
                     ]}
-                    disabled={isCurrentPlan}
+                    disabled={isCurrentPlan || loadingPlan}
                     onPress={() => onChangePlan(planLevel)}
                 >
-                    <Text style={styles.buttonText}>{buttonText}</Text>
+                    {loadingPlan && isCurrentPlan ? (
+                        <ActivityIndicator size="small" color={colors.white} />
+                    ) : (
+                        <Text style={styles.buttonText}>{buttonText}</Text>
+                    )}
                 </TouchableOpacity>
             </Animated.View>
         );
     };
 
+    const plans = [
+        {
+            level: "GRATIS",
+            title: "Plan Gratis",
+            price: "0€",
+            features: [
+                "1 oferta activa simultánea",
+                "No se pueden patrocinar ofertas",
+                "Personalización limitada de ofertas",
+                "Soporte estándar"
+            ],
+            borderColor: "#ccc",
+            backgroundColor: colors.white
+        },
+        {
+            level: "PREMIUM",
+            title: "Plan Premium",
+            price: "49,99€",
+            popular: true,
+            features: [
+                "Ofertas ilimitadas activas",
+                "Ofertas patrocinadas ilimitadas",
+                "Personalización completa de ofertas",
+                "Soporte prioritario 24/7",
+            ],
+            borderColor: colors.secondary,
+            backgroundColor: colors.white
+        },
+        {
+            level: "BASICO",
+            title: "Plan Básico",
+            price: "24,99€",
+            features: [
+                "3 ofertas activas simultáneas",
+                "1 oferta patrocinada simultánea",
+                "Visibilidad mejorada",
+                "Personalización completa de ofertas",
+                "Soporte prioritario por email"
+            ],
+            borderColor: colors.primary,
+            backgroundColor: colors.white
+        }
+    ];
+
     return (
         <EmpresaRoute>
-            {Platform.OS === 'web' ? (
-                <View style={styles.webContainer}>
-                    <CamyoWebNavBar />
-                    <ScrollView contentContainerStyle={styles.scrollview}>
-                        <Text style={styles.sectionTitle}>Planes de suscripción</Text>
-                        <View style={styles.cardsContainer}>
-                            <PlanCard
-                                title="GRATIS"
-                                price="0€"
-                                description="Ofertas limitadas con datos incompletos."
-                                borderColor={colors.primary}
-                                planLevel="GRATIS"
-                                currentPlan={currentPlan}
-                                onChangePlan={handleChangePlan}
-                            />
-                            <PlanCard
-                                title="BÁSICO"
-                                price="24.99€"
-                                description="Permite publicar hasta 10 ofertas de empleo con datos completos."
-                                borderColor={colors.primary}
-                                planLevel="BASIC"
-                                currentPlan={currentPlan}
-                                onChangePlan={handleChangePlan}
-                            />
-                            <PlanCard
-                                title="PREMIUM"
-                                price="49.99€"
-                                description="Permite publicar un número ilimitado de ofertas con datos completos."
-                                borderColor={colors.primary}
-                                planLevel="PREMIUM"
-                                currentPlan={currentPlan}
-                                onChangePlan={handleChangePlan}
-                            />
+            <View style={styles.container}>
+                <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                    <View style={styles.whiteTransition} />
+                    {Platform.OS === 'web' && (
+                        <View style={styles.heroSection}>
+                            <Text style={styles.heroTitle}>Encuentra al mejor talento para tu empresa</Text>
+                            <Text style={styles.heroSubtitle}>Elige el plan que mejor se adapte a tus necesidades de contratación</Text>
+                        </View>
+                    )}
+                    <View style={styles.contentContainer}>
+                        <Text style={styles.sectionTitle}>Planes de Suscripción</Text>
+                        <Text style={styles.sectionDescription}>
+                            Actualmente tienes el plan: <Text style={styles.currentPlanHighlight}>{formatPlanLevel(currentPlan || "GRATIS")}</Text>
+                        </Text>
+                        
+                        <View style={styles.plansContainer}>
+                            {plans.map((plan) => (
+                                <PlanCard
+                                    key={plan.level}
+                                    title={plan.title}
+                                    price={plan.price}
+                                    features={plan.features}
+                                    popular={plan.popular}
+                                    borderColor={plan.borderColor}
+                                    backgroundColor={plan.backgroundColor}
+                                    planLevel={plan.level}
+                                    currentPlan={currentPlan || "GRATIS"}
+                                    onChangePlan={plan.level === "GRATIS" ? handleChangePlan : handleGoToCheckout}
+                                />
+                            ))}
+                        </View>
 
-                            {/* Modal de éxito */}
-                            <SuccessModal
-                                isVisible={successModalVisible}
-                                onClose={() => setSuccessModalVisible(false)}
-                                message="¡Cambio de plan exitoso!"
-                            />
+                        <View style={styles.faqSection}>
+                            <Text style={styles.faqTitle}>Preguntas Frecuentes</Text>
+                            <View style={styles.faqItem}>
+                                <Text style={styles.faqQuestion}>¿Puedo cambiar de plan en cualquier momento?</Text>
+                                <Text style={styles.faqAnswer}>Sí, puedes cambiar de plan cuando quieras. El cambio será efectivo inmediatamente.</Text>
+                            </View>
+                            <View style={styles.faqItem}>
+                                <Text style={styles.faqQuestion}>¿Hay un período de prueba?</Text>
+                                <Text style={styles.faqAnswer}>Actualmente no ofrecemos periodos de pruebas gratuitos. Contacta con el equipo de soporte para más información.</Text>
+                            </View>
+                            <View style={styles.faqItem}>
+                            <Text style={styles.faqQuestion}>¿Cómo se procesan los pagos?</Text>
+                            <Text style={styles.faqAnswer}>
+                                Usamos <Text style={{fontWeight: 'bold'}}>Stripe</Text>, la plataforma de pagos líder mundial. 
+                                Aceptamos todas las tarjetas principales (Visa, Mastercard, etc.) de forma segura. 
+                                Tus datos de pago están encriptados y nunca se almacenan en nuestros servidores. 
+                                Los pagos son recurrentes cada mes con facturación automática.
+                            </Text>
+                            </View>
                         </View>
-                    </ScrollView>
-                </View>
-            ) : (
-                <View style={styles.phoneContainer}>
-                    <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-                    <ScrollView contentContainerStyle={styles.scrollview}>
-                        <Text style={styles.pageTitle}>Planes de Suscripción</Text>
-                        <View style={styles.cardsContainer}>
-                            <PlanCard
-                                title="GRATIS"
-                                price="0€"
-                                description="Ofertas limitadas con datos incompletos."
-                                borderColor={colors.primary}
-                                planLevel="GRATIS"
-                                currentPlan={currentPlan}
-                                onChangePlan={handleChangePlan}
-                            />
-                            <PlanCard
-                                title="BÁSICO"
-                                price="24.99€"
-                                description="Permite publicar hasta 10 ofertas de empleo con datos completos."
-                                borderColor={colors.primary}
-                                planLevel="BASIC"
-                                currentPlan={currentPlan}
-                                onChangePlan={handleChangePlan}
-                            />
-                            <PlanCard
-                                title="PREMIUM"
-                                price="49.99€"
-                                description="Permite publicar un número ilimitado de ofertas con datos completos."
-                                borderColor={colors.primary}
-                                planLevel="PREMIUM"
-                                currentPlan={currentPlan}
-                                onChangePlan={handleChangePlan}
-                            />
-                        </View>
-                    </ScrollView>
-                    <BottomBar />
-                </View>
-            )}
+                    </View>
+                </ScrollView>
+
+                <SuccessModal
+                    isVisible={successModalVisible}
+                    onClose={() => setSuccessModalVisible(false)}
+                    message="¡Plan actualizado con éxito!"
+                />
+            </View>
         </EmpresaRoute>
     );
 };
 
 const styles = StyleSheet.create({
-    webContainer: {
+    loadingContainer: {
         flex: 1,
-        backgroundColor: colors.lightGray,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    phoneContainer: {
+    container: {
         flex: 1,
-        backgroundColor: colors.mediumGray,
     },
-    scrollview: {
-        flex: 1,
-        padding: 10,
-        marginVertical: 40,
-        position: 'absolute',
-        top: 20,
-        left: 0,
-        right: 0,
-        bottom: -40,
+    heroSection: {
+        backgroundColor: colors.primary,
+        paddingVertical: 40,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    pageTitle: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: colors.secondary,
-        marginVertical: 20,
+    heroTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: colors.white,
+        textAlign: 'center',
+        marginBottom: 10,
     },
-    cardsContainer: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "flex-start",
+    heroSubtitle: {
+        fontSize: 16,
+        color: colors.white,
+        textAlign: 'center',
+        opacity: 0.9,
+    },
+    scrollViewContent: {
+        flexGrow: 1,
+        paddingBottom: 40,
+    },
+    contentContainer: {
+        maxWidth: 1200,
+        width: '100%',
+        alignSelf: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 30,
+    },
+    sectionTitle: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: colors.primary,
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+    sectionDescription: {
+        fontSize: 16,
+        color: colors.darkGray,
+        textAlign: 'center',
+        marginBottom: 30,
+    },
+    currentPlanHighlight: {
+        fontWeight: 'bold',
+        color: colors.primary,
+    },
+    plansContainer: {
+        flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+        justifyContent: 'center',
+        alignItems: Platform.OS === 'web' ? 'flex-start' : 'center',
+        flexWrap: 'wrap',
+        marginBottom: 40,
     },
     card: {
-        backgroundColor: colors.white,
-        padding: 20,
-        marginVertical: 10,
-        width: "28%",
-        borderRadius: 10,
-        borderLeftWidth: 4,
+        width: Platform.OS === 'web' ? '30%' : '90%',
+        minWidth: 280,
+        borderRadius: 12,
+        borderWidth: 2,
+        padding: 25,
+        marginHorizontal: Platform.OS === 'web' ? 10 : 0,
+        marginBottom: Platform.OS === 'web' ? 0 : 20,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
         elevation: 5,
-        height: 230,
-        justifyContent: "space-between",
-        alignItems: "center",
+        position: 'relative',
+        justifyContent: 'space-between',
+        minHeight: 550,
+    },
+    popularBadge: {
+        position: 'absolute',
+        top: -15,
+        right: 20,
+        backgroundColor: colors.secondary,
+        paddingVertical: 5,
+        paddingHorizontal: 15,
+        borderRadius: 20,
+    },
+    popularBadgeText: {
+        color: colors.white,
+        fontWeight: 'bold',
+        fontSize: 12,
+    },
+    planHeader: {
+        alignItems: 'center',
+        marginBottom: 20,
     },
     planTitleContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
     },
     planTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
+        fontSize: 22,
+        fontWeight: 'bold',
         color: colors.primary,
-        marginLeft: 8,
+        marginLeft: 10,
     },
     planPrice: {
-        fontSize: 22,
-        fontWeight: "bold",
-        color: colors.secondary,
+        fontSize: 36,
+        fontWeight: 'bold',
+        color: colors.darkGray,
         marginBottom: 5,
     },
-    planDescription: {
+    billingText: {
         fontSize: 14,
-        color: "gray",
-        marginBottom: 10,
-        textAlign: "center",
+        color: colors.darkGray,
+    },
+    featuresContainer: {
+        marginVertical: 20,
+    },
+    featureItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    whiteTransition: {
+        height: '9%',
+        backgroundColor: colors.white,
+        width: '100%',
+    },
+    featureText: {
+        fontSize: 15,
+        color: colors.darkGray,
+        marginLeft: 10,
     },
     button: {
+        paddingVertical: 14,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 20,
+        width: '100%',
+    },
+    changePlanButton: {
         backgroundColor: colors.primary,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 10,
+    },
+    currentPlanButton: {
+        backgroundColor: colors.mediumGray,
+    },
+    popularButton: {
+        backgroundColor: colors.secondary,
     },
     buttonText: {
         color: colors.white,
-        fontWeight: "bold",
+        fontWeight: 'bold',
+        fontSize: 16,
     },
-    disabledButton: {
-        backgroundColor: "gray",
+    faqSection: {
+        marginTop: 40,
+        paddingHorizontal: 20,
     },
-    sectionTitle: {
-        fontSize: 22,
-        fontWeight: "bold",
-        color: colors.secondary,
-        marginBottom: 15,
-        marginTop: 15,
-        textAlign: "center",
+    faqTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: colors.primary,
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    faqItem: {
+        marginBottom: 20,
+        backgroundColor: colors.white,
+        padding: 20,
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    faqQuestion: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.primary,
+        marginBottom: 10,
+    },
+    faqAnswer: {
+        fontSize: 15,
+        color: colors.darkGray,
+        lineHeight: 22,
     },
 });
 

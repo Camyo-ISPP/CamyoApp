@@ -4,7 +4,7 @@ import { View, TouchableOpacity, Text } from "react-native";
 // Selector de opciones Sí / No para formularios que requieran una respuesta booleana
 const BooleanSelector = ({ value, onChange, colors, globalStyles }) => {
   return (
-    <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 23, width: '100%' }}>
+    <View style={{ flexDirection: "row", justifyContent: "space-between", width: '100%' }}>
       {[true, false].map((opcion) => (
         <TouchableOpacity
           key={opcion.toString()}

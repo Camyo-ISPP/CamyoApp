@@ -1,10 +1,9 @@
-import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, Platform, ScrollView, Linking, Alert, Modal } from "react-native";
+import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, Platform, ScrollView, Alert, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
-import { Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import defaultCamImage from "../../assets/images/defaultAvatar.png";
@@ -179,9 +178,24 @@ export default function OfertaDetalleScreen() {
         router.push("/login")
     };
 
-    const handleEditarOferta = () => {
-        router.push(`/oferta/editar/${ofertaid}`);
-    }
+    const handleDeleteOffer = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`, {
+                method: "DELETE",
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+
+            if (response.ok) {
+                router.replace("/miperfil");
+            } else {
+                Alert.alert("Error", "No se pudo eliminar la oferta.");
+            }
+        } catch (error) {
+            console.error("Error al eliminar la oferta:", error);
+        }
+    };
 
     const renderOfferCard = () => {
         return (
@@ -235,10 +249,6 @@ export default function OfertaDetalleScreen() {
                                     </TouchableOpacity>
                                 )
                             ) : <></>
-                        ) : user.rol === 'EMPRESA' && user.id === offerData.empresa.id ? (
-                            <TouchableOpacity style={styles.solicitarButton} onPress={handleEditarOferta}>
-                                <Text style={styles.solicitarButtonText}>Editar Oferta</Text>
-                            </TouchableOpacity>
                         ) : <></>
                     ) : (
                         <TouchableOpacity style={styles.solicitarButton} onPress={handleLoginRedirect}>
@@ -298,7 +308,7 @@ export default function OfertaDetalleScreen() {
                 <View style={styles.detailRow}>
                     <FontAwesome5 name="id-card" size={18} color="#0b4f6c" />
                     <Text style={styles.detalles}>
-                        <Text style={styles.detallesLabel}>Licencia Requerida:</Text> {offerData.licencia}
+                        <Text style={styles.detallesLabel}>Licencia(s) Requerida(s):</Text> {offerData.licencia}
                     </Text>
                 </View>
 
@@ -401,7 +411,11 @@ export default function OfertaDetalleScreen() {
                             <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                                 {offerData && offerData.aplicados.map((item) => (
                                     <View key={item.id} style={styles.camCard}>
-                                        <Image source={defaultCamImage} style={styles.logo} />
+                                        <Image
+                                            source={item?.usuario.foto ? { uri: `data:image/png;base64,${item.usuario.foto}` } : defaultCamImage}
+                                            style={styles.logo}
+                                        />
+
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
                                         </View>
@@ -422,6 +436,15 @@ export default function OfertaDetalleScreen() {
                                     </View>
                                 ))}
                             </View>
+                            <View style={styles.separator} />
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TouchableOpacity
+                                    style={styles.deleteButton}
+                                    onPress={handleDeleteOffer}
+                                >
+                                    <Text style={styles.deleteButtonText}>Eliminar Oferta</Text>
+                                </TouchableOpacity>
+                            </View>
                         </>
                     ) : (
                         <>
@@ -429,7 +452,10 @@ export default function OfertaDetalleScreen() {
                             <Text style={styles.subTitulo}>Camionero asignado</Text>
                             <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                                 <View key={offerData.camionero.id} style={styles.camCard}>
-                                    <Image source={defaultCamImage} style={styles.logo} />
+                                    <Image
+                                        source={offerData.camionero?.usuario.foto ? { uri: `data:image/png;base64,${offerData.camionero.usuario.foto}` } : defaultCamImage}
+                                        style={styles.logo}
+                                    />
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.camTitle}>{offerData.camionero.usuario.nombre}</Text>
                                     </View>
@@ -668,6 +694,19 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginTop: Platform.OS === 'ios' ? 30 : 10,
     },
+    deleteButton: {
+        flex: 1,
+        paddingVertical: 12,
+        marginRight: 10,
+        borderRadius: 12,
+        alignItems: "center",
+        backgroundColor: "#D14F45",
+    },
+    deleteButtonText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
     ownOfferBadgeAlt: {
         flexDirection: "row",
         alignItems: "center",
@@ -682,5 +721,5 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 14,
         marginLeft: 5
-    },
+    }
 });

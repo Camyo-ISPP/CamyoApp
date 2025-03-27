@@ -68,7 +68,7 @@ public class Camionero{
     // @JsonIgnore
     private Set<Tarjetas> tarjetasAutonomo;
 
-    @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST })
+    @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE })
 	@JoinColumn(name = "usuario_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Usuario usuario;

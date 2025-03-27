@@ -47,7 +47,7 @@ public interface OfertaRepository extends JpaRepository<Oferta,Integer>{
     @Query("SELECT o FROM Oferta o WHERE empresa.id = :empId ORDER BY o.fechaPublicacion DESC")
     List<Oferta> encontrarOfertasPorEmpresa(Integer empId);
 
-    @Query("SELECT o FROM Oferta o ORDER BY o.fechaPublicacion DESC LIMIT 5")
+    @Query("SELECT o FROM Oferta o WHERE o.estado = 'ABIERTA' ORDER BY o.promoted DESC, o.fechaPublicacion DESC LIMIT 10")
     List<Oferta> findTopByOrderByFechaPublicacionDesc();
 
 }

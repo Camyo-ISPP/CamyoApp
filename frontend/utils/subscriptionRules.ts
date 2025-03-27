@@ -7,10 +7,10 @@ export interface SubscriptionRule {
   export const subscriptionRules: Record<string, SubscriptionRule> = {
     GRATIS: {
       maxActiveOffers: 1,
-      maxSponsoredOffers: 1,
+      maxSponsoredOffers: 0,
       fullFormFields: false,
     },
-    BASIC: {
+    BASICO: {
       maxActiveOffers: 3,
       maxSponsoredOffers: 2,
       fullFormFields: true,

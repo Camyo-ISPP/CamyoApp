@@ -5,6 +5,8 @@ import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
 import { startChat } from "../chat/services";
 import { useAuth } from "@/contexts/AuthContext";
+import { Image } from "react-native";
+import defaultImage from "@/assets/images/empresa.jpg";
 
 interface Usuario {
   id: number;
@@ -50,18 +52,24 @@ const EmpresasLista = () => {
   if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   return (
-    <ScrollView contentContainerStyle={{ 
-      flexGrow: 1, 
+    <ScrollView contentContainerStyle={{
+      flexGrow: 1,
       paddingTop: 20
     }}>
       {empresas.map((empresa, index) => (
         <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
-          <View>
-            <Text style={styles.name}>{empresa.usuario.nombre}</Text>
-            <DetailItem icon="globe" text={empresa.web} link />
-            <DetailItem icon="building" text={empresa.nif} />
-            <DetailItem icon="map-marker" text={empresa.usuario.localizacion} />
-            <DetailItem icon="phone" text={empresa.usuario.telefono} />
+          <View style={styles.contentRow}>
+            <Image
+              source={empresa.usuario.foto ? { uri: `data:image/png;base64,${empresa.usuario.foto}` } : defaultImage}
+              style={styles.profileImage}
+            />
+            <View style={styles.infoContainer}>
+              <Text style={styles.name}>{empresa.usuario.nombre}</Text>
+              <DetailItem icon="globe" text={empresa.web} link />
+              <DetailItem icon="building" text={empresa.nif} />
+              <DetailItem icon="map-marker" text={empresa.usuario.localizacion} />
+              <DetailItem icon="phone" text={empresa.usuario.telefono} />
+            </View>
           </View>
 
           <View>
@@ -78,14 +86,17 @@ const EmpresasLista = () => {
             )}
 
 
+
             {/* Botón "Contactar" solo si hay usuario autenticado */}
             {user && user.rol == "CAMIONERO" && (
               <TouchableOpacity
                 style={styles.button}
                 onPress={async () => {
-                  const chatId = await startChat(user.id, empresa.usuario.id);
+                  const chatId = await startChat(user.userId, empresa.usuario.id);
                   if (chatId) {
-                    router.push(`/chat?otherUserId=${empresa.usuario.id}`);
+
+                    router.push(`/chat`);
+
                   }
                 }}
               >
@@ -191,7 +202,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 5
   },
-
+  infoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    marginHorizontal: 20,
+  },
+  contentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  }
 });
 
 export default EmpresasLista;

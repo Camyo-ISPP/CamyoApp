@@ -23,20 +23,32 @@ const OptionsDropdown = () => {
                 <Entypo name="cross" size={20} color={colors.primary} />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => router.replace('/empresas')} style={styles.dropdownButton}>
+              <TouchableOpacity onPress={() => router.push('/empresas')} style={styles.dropdownButton}>
                 <MaterialIcons name="domain" size={20} style={styles.dropdownButtonIcon} />
                 <Text style={styles.dropdownButtonText}>Empresas</Text>
               </TouchableOpacity>
 
-              {!(!user || !user.rol) && (
-                <TouchableOpacity onPress={() => router.push('/chat/list')} style={styles.dropdownButton}>
+              <TouchableOpacity onPress={() => router.push('/buscar-ofertas')} style={styles.dropdownButton}>
+                <MaterialIcons name="search" size={20} style={styles.dropdownButtonIcon} />
+                <Text style={styles.dropdownButtonText}>Ofertas</Text>
+              </TouchableOpacity>
+
+              {user && user.rol !== "ADMIN" && (
+                <TouchableOpacity onPress={() => router.push('/misofertas')} style={styles.dropdownButton}>
+                  <MaterialIcons name="work" size={20} style={styles.dropdownButtonIcon} />
+                  <Text style={styles.dropdownButtonText}>Mis ofertas</Text>
+                </TouchableOpacity>
+              )}
+
+              {user && user.rol !== "ADMIN" && (
+                <TouchableOpacity onPress={() => router.push('/chat')} style={styles.dropdownButton}>
                   <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
-                  <Text style={styles.dropdownButtonText}>Mensajes</Text>
+                  <Text style={styles.dropdownButtonText}>Mis mensajes</Text>
                 </TouchableOpacity>
               )}
 
               {user?.rol === "EMPRESA" && (
-                <TouchableOpacity onPress={() => router.replace('/suscripcion')} style={styles.dropdownButton}>
+                <TouchableOpacity onPress={() => router.push('/suscripcion')} style={styles.dropdownButton}>
                   <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
                   <Text style={styles.dropdownButtonText}>Suscripción</Text>
                 </TouchableOpacity>
@@ -67,7 +79,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    width: 140,
+    width: 160,
     marginTop: 15,
   },
   dropdownButton: {

@@ -6,6 +6,7 @@ import BottomBar from "./_components/BottomBar";
 import WebFooter from "./_components/WebFooter";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { PaymentProvider } from "@/contexts/PaymentContext";
 
 function RootLayout() {
   const segments = useSegments();
@@ -28,11 +29,12 @@ function RootLayout() {
         "oferta/[ofertaId]": "Detalles de la Oferta",
         "miperfilcamionero/editar": "Editar Perfil Camionero",
         "miperfilempresa/editar": "Editar Perfil Empresa",
-        "oferta/editar/[ofertaId]": "Editar Oferta",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
+        chat:"Mis Mensajes",
+        "pago/checkout": "Pago",
         suscripcion: "Planes de Suscripción",
-        chat:"Mis Mensajes"
+        misofertas: "Mis Ofertas"
       };
 
       const currentSegment = segments.join("/");
@@ -48,36 +50,42 @@ function RootLayout() {
             router.push(`/buscar-ofertas?query=${query}`);
           }}
       />}
-  
+      
+      <PaymentProvider>
       <SubscriptionProvider>
       
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(public)/index" />
-            <Stack.Screen name="(public)/login" />
-            <Stack.Screen name="(public)/registro" />
-            <Stack.Screen name="(public)/registro/camionero" />
-            <Stack.Screen name="(public)/registro/empresa" />
-            <Stack.Screen name="(public)/empresas" />
-            <Stack.Screen name="miperfil" />
-            <Stack.Screen name="miperfil/editar" />
-            <Stack.Screen name="empresas" />
-            <Stack.Screen name="empresa/[empresaId]" />
-            <Stack.Screen name="camionero/[camioneroId]" />
-            <Stack.Screen name="oferta/crear" />
-            <Stack.Screen name="oferta/editar/[ofertaId]" />
-            <Stack.Screen name="oferta/[ofertaId]" />
-            <Stack.Screen name="buscar-ofertas" />
-            <Stack.Screen name="chat" />
-            <Stack.Screen name="chat/list" />
-            <Stack.Screen name="suscripcion" />
-            <Stack.Screen name="(admin)/workinprogress" />
-            <Stack.Screen name="(public)/forbidden" />
-            <Stack.Screen name="misofertas" />
-          </Stack>
-        {!isMobile && <WebFooter />}
-  
-        {isMobile && <BottomBar />}
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(public)/index" />
+        <Stack.Screen name="(public)/login" />
+        <Stack.Screen name="(public)/registro" />
+        <Stack.Screen name="(public)/registro/camionero" />
+        <Stack.Screen name="(public)/registro/empresa" />
+        <Stack.Screen name="(public)/empresas" />
+
+        <Stack.Screen name="miperfil" />
+        <Stack.Screen name="miperfil/editar" />
+        
+        <Stack.Screen name="empresas" />
+        <Stack.Screen name="empresa/[empresaId]" />
+        <Stack.Screen name="camionero/[camioneroId]" />
+        
+        <Stack.Screen name="oferta/crear" />
+        <Stack.Screen name="oferta/[ofertaId]" />
+        <Stack.Screen name="buscar-ofertas" />
+        <Stack.Screen name="chat" />
+        <Stack.Screen name="chat/list" />
+        
+        <Stack.Screen name="suscripcion" />
+
+        <Stack.Screen name="(admin)/workinprogress" />
+        <Stack.Screen name="(public)/forbidden" />
+
+        <Stack.Screen name="pago/checkout" />
+        <Stack.Screen name="misofertas" />
+      </Stack>
+      {isMobile && <BottomBar />}
       </SubscriptionProvider>
+      </PaymentProvider>
     </>
 
   );
