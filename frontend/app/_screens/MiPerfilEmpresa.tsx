@@ -63,19 +63,18 @@ const MiPerfilEmpresa = () => {
     }
   }, [user]);
 
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+    } catch (error) {
+      console.error("Error al cargar las ofertas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-        setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-      } catch (error) {
-        console.error("Error al cargar las ofertas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-
     fetchOffers();
   }, []);
 
@@ -109,16 +108,14 @@ const MiPerfilEmpresa = () => {
         }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Error en promoteOffer:", errorText);
-        throw new Error("La oferta no ha podido ser patrocinada");
-      }
+      if (response.ok) {
+        setSuccessModalVisible(true);
+        fetchOffers();
 
-      setSuccessModalVisible(true);
- setTimeout(() => {
-        setSuccessModalVisible(false);
-      }, 1000);
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+        }, 1000);
+      }
 
     } catch (err) {
       console.error("Error completo en promoteOffer:", err);
@@ -136,9 +133,11 @@ const MiPerfilEmpresa = () => {
           }
         }
       );
-      setIsModalVisibleCancelar(false);
 
-      fetchOffers();
+      if (response.status === 200) {
+        fetchOffers();
+      }
+      setIsModalVisibleCancelar(false);
 
     } catch (err) {
       console.error("Error en unpromoteOffer:", err);
