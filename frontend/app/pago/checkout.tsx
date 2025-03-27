@@ -108,10 +108,11 @@ const CheckoutForm = (transactionClientSecret: any) => {
     const elements = useElements();
     const [loading, setLoading] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
-    const [error, setError] = useState(null)
+    const [error, setError] = useState("")
 
     const handleSubmit = async () => {
         setLoading(true);
+        setError("");
         if (!stripe || !elements) {
             return;
         }
@@ -125,6 +126,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
         })
         if (result.error) {
             console.log(result.error.message);
+            setError(result.error.message);
             setLoading(false);
         }
         stripe.retrievePaymentIntent(transactionClientSecret.transactionClientSecret)
@@ -148,13 +150,10 @@ const CheckoutForm = (transactionClientSecret: any) => {
                                 router.replace("/");
                             }, 1000);
                     } else {
-                        const data = res.json();
-                        console.log(res);
-                        setError(data.message);
+                        setError("Pago fallado. Revisa los detalles de pago e inténtalo de nuevo.")
                     }
                 })
                 .then(() => setLoading(false))
-                .then(() => setId(""))
         });
         
     };
@@ -162,27 +161,27 @@ const CheckoutForm = (transactionClientSecret: any) => {
     return <>
         <View>
           <View style={styles.separator} />
-          <PaymentElement/>
-          <View style={styles.separator} />
-          <View style={styles.buttonWrapper}>
-            <TouchableOpacity
-              disabled={!stripe || loading}
-              onPress={handleSubmit}
-              style={styles.payButton}
-            >
-              <Text style={styles.buttonText}>
-                  Pagar
-              </Text>
-            </TouchableOpacity>
+            <PaymentElement/>
+            <View style={styles.separator} />
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity
+                disabled={!stripe || loading}
+                onPress={handleSubmit}
+                style={styles.payButton}
+              >
+                <Text style={styles.buttonText}>
+                    Pagar
+                </Text>
+              </TouchableOpacity>
+          </View>
+          <SuccessModal
+            isVisible={successModalVisible}
+            onClose={() => setSuccessModalVisible(false)}
+            message="¡Pago exitoso! Redirigiendo..."
+          />
+          <Text style={{textAlign: "center", marginTop: "20px", color: "red"}}>{error}</Text>
         </View>
-        <Text>{error}</Text>
-        <SuccessModal
-          isVisible={successModalVisible}
-          onClose={() => setSuccessModalVisible(false)}
-          message="¡Pago exitoso! Redirigiendo..."
-        />
-      </View>
-    </>
+      </>
 }
 
 const styles = StyleSheet.create({
