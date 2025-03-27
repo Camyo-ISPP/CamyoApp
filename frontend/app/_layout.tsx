@@ -83,8 +83,9 @@ function RootLayout() {
         <Stack.Screen name="pago/checkout" />
         <Stack.Screen name="misofertas" />
       </Stack>
+      
       {isMobile && <BottomBar />}
-      {!isMobile && <WebFooter />}
+
       </SubscriptionProvider>
       </PaymentProvider>
     </>

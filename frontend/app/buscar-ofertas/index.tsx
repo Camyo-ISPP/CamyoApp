@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
+import WebFooter from "../_components/WebFooter";
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -297,6 +298,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
                 </View>
             </View>
+            <WebFooter />
         </ScrollView>
     );
 }
@@ -311,6 +313,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.lightGray,
         alignItems: 'center',
+        marginBottom: 20,
     },
     mainContent: {
         width: '80%',
