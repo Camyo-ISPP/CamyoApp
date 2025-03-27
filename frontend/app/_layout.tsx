@@ -84,6 +84,7 @@ function RootLayout() {
         <Stack.Screen name="misofertas" />
       </Stack>
       {isMobile && <BottomBar />}
+      {!isMobile && <WebFooter />}
       </SubscriptionProvider>
       </PaymentProvider>
     </>
