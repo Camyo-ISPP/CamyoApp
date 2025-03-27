@@ -51,7 +51,7 @@ const MisOfertasCamionero = () => {
                         <Text style={styles.emptySubtitle}>
                             Aún no has solicitado ninguna oferta. Vuelve a la página principal y empieza a explorar oportunidades.
                         </Text>
-                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/")}>
+                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/buscar-ofertas")}>
                             <Text style={styles.emptyButtonText}>Buscar Ofertas</Text>
                         </TouchableOpacity>
                     </View>
@@ -77,7 +77,7 @@ const MisOfertasCamionero = () => {
                         <Text style={styles.emptySubtitle}>
                             Vuelve a la página principal para buscar ofertas.
                         </Text>
-                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/")}>
+                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/buscar-ofertas")}>
                             <Text style={styles.emptyButtonText}>Buscar Ofertas</Text>
                         </TouchableOpacity>
                     </View>

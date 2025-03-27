@@ -48,7 +48,7 @@ const OptionsDropdown = () => {
               )}
 
               {user?.rol === "EMPRESA" && (
-                <TouchableOpacity onPress={() => router.replace('/suscripcion')} style={styles.dropdownButton}>
+                <TouchableOpacity onPress={() => router.push('/suscripcion')} style={styles.dropdownButton}>
                   <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
                   <Text style={styles.dropdownButtonText}>Suscripción</Text>
                 </TouchableOpacity>

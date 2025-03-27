@@ -259,7 +259,7 @@ const PublicCamionero = ({ userId }) => {
                         onPress={async () => {
                         const chatId = await startChat(user.userId, user2.userId);
                             if (chatId) {
-                                router.replace(`/chat`);
+                                router.push(`/chat`);
                             }
                          }}
                      >
