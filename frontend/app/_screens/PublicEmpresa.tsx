@@ -33,6 +33,7 @@ const PublicEmpresa = ({ userId }) => {
   const [resenas, setResenas] = useState([]);
   const [editResenaId, setEditResenaId] = useState(null);
   const [yaEscribioResena, setYaEscribioResena] = useState(false);
+  const [fueAsignado, setFueAsignado] = useState(false);
   const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
 
 
@@ -48,6 +49,9 @@ const PublicEmpresa = ({ userId }) => {
       try {
         const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${userId}`);
         setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+        if(user && user.rol === 'CAMIONERO'){
+          setFueAsignado(response.data.filter((offer: any) => offer.estado === "CERRADA").some((offer: any) => offer.camionero.id === user.id))
+        }
       } catch (error) {
         console.error("Error al cargar las ofertas:", error);
       } finally {
@@ -278,7 +282,7 @@ const PublicEmpresa = ({ userId }) => {
                       <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
                       <Text style={styles.publishButtonText}>Contactar</Text>
                     </TouchableOpacity>
-                    {user && user.rol === "CAMIONERO" && !yaEscribioResena && (
+                    {user && user.rol === "CAMIONERO" && fueAsignado && !yaEscribioResena && (
                       <TouchableOpacity
                         style={[styles.publishButton, { marginTop: 10 }]}
                         onPress={() => {
