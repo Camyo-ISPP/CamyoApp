@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import { useState, useEffect } from 'react';
 import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
+import WebFooter from "./_components/WebFooter";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
@@ -42,12 +43,12 @@ function RootLayout() {
   }, [segments]);
 
   return (
-    <>
-    {!isMobile && 
-      <CamyoWebNavBar
-        onSearch={(query: string) => {
-          router.push(`/buscar-ofertas?query=${query}`);
-        }}
+      <>
+      {!isMobile && 
+        <CamyoWebNavBar
+          onSearch={(query: string) => {
+            router.push(`/buscar-ofertas?query=${query}`);
+          }}
       />}
       
       <PaymentProvider>
@@ -82,7 +83,9 @@ function RootLayout() {
         <Stack.Screen name="pago/checkout" />
         <Stack.Screen name="misofertas" />
       </Stack>
+      
       {isMobile && <BottomBar />}
+
       </SubscriptionProvider>
       </PaymentProvider>
     </>

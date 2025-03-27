@@ -7,6 +7,7 @@ import { startChat } from "../chat/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { Image } from "react-native";
 import defaultImage from "@/assets/images/empresa.jpg";
+import WebFooter from "../_components/WebFooter";
 
 interface Usuario {
   id: number;
@@ -108,6 +109,7 @@ const EmpresasLista = () => {
           </View>
         </View>
       ))}
+      <WebFooter />
     </ScrollView>
   );
 };
