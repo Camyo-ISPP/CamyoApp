@@ -238,6 +238,8 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
       padding: 20,
+      paddingRight: 50,
+      paddingLeft: 50,
   },
   summaryCard: {
       backgroundColor: colors.white,
