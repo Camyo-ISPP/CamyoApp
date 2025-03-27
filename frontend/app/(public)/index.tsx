@@ -1,8 +1,8 @@
 import { router } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, ScrollView, ActivityIndicator, Dimensions } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, ScrollView, ActivityIndicator, Dimensions, Animated, Easing } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -11,22 +11,30 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import CamyoWebNavBar from "../_components/CamyoNavBar";
 const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
 const truckImage = require("../../assets/images/camion.png");
+const heroBackground = require("../../assets/images/lonely-road.jpg");
 import { useAuth } from "../../contexts/AuthContext";
+import Testimonios from "../_components/Testimonios";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1040);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const updateSize = () => {
-      setIsCompact(Dimensions.get("window").width < 1040);
-    };
+    const updateSize = () => setIsCompact(Dimensions.get("window").width < 1040);
     Dimensions.addEventListener("change", updateSize);
+
+    // Animación de entrada
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.quad)
+    }).start();
+
     return () => Dimensions.removeEventListener("change", updateSize);
   }, []);
 
@@ -47,126 +55,237 @@ export default function Index() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.secondary} />
       </View>
     );
   }
 
   const CardOferta = ({ item }) => {
+    const scaleValue = useRef(new Animated.Value(1)).current;
+
+    const handleHover = (toValue) => {
+      if (Platform.OS === "web") {
+        Animated.spring(scaleValue, {
+          toValue,
+          friction: 3,
+          useNativeDriver: true,
+        }).start();
+      }
+    };
+
     return (
-      <View
-        key={item.id}
+      <Animated.View
         style={[
           styles.card,
-          item.promoted && styles.promotedCard,
+          { transform: [{ scale: scaleValue }] },
+          item.promoted && styles.promotedCard
         ]}
+        onMouseEnter={() => handleHover(1.03)}
+        onMouseLeave={() => handleHover(1)}
       >
         {item.promoted && (
           <View style={styles.patrocinadoBadge}>
             <Text style={styles.patrocinadoText}>PATROCINADO</Text>
           </View>
         )}
-        <Image source={defaultCompanyLogo} style={styles.companyLogo} />
-        <View style={{ width: "45%" }}>
+        <Image
+          source={item.empresa?.logo ? { uri: item.empresa.logo } : defaultCompanyLogo}
+          style={styles.companyLogo}
+        />
+        <View style={styles.offerContent}>
           <Text style={styles.offerTitle}>{item.titulo}</Text>
-          <View style={{ display: "flex", flexDirection: "row", marginBottom: 8 }}>
+          <View style={styles.tagsContainer}>
             <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-            <Text style={styles.offerDetailsTagExperience}>{"+"}{item.experiencia} años</Text>
-            <View style={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
-              <Text style={styles.localizacion}>|</Text>
-              <MaterialIcons name="location-on" size={20} color="#696969" />
+            <Text style={styles.offerDetailsTagExperience}>+{item.experiencia} años</Text>
+            <View style={styles.locationContainer}>
+              <MaterialIcons name="location-on" size={16} color="#696969" />
               <Text style={styles.localizacion}>{item.localizacion}</Text>
             </View>
           </View>
-          {/*<Text style={styles.offerInfo}>{item.notas}</Text>*/}
         </View>
-        <View style={{ marginLeft: 20, alignItems: "center", flexDirection: "column" }}>
+        <View style={styles.offerActions}>
           <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-          <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
-            <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push(`/oferta/${item.id}`)}
+          >
+            <MaterialCommunityIcons name="eye" size={16} color="white" />
             <Text style={styles.buttonText}>Ver Detalles</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </Animated.View>
     );
   };
 
+  const StatsSection = () => (
+    <View style={styles.statsContainer}>
+      <View style={styles.statItem}>
+        <FontAwesome name="comments" size={32} color={colors.primary} />
+        <Text style={styles.statNumber}>100%</Text>
+        <Text style={styles.statLabel}>Feedback Real</Text>
+      </View>
+      <View style={styles.statItem}>
+        <Ionicons name="chatbubbles" size={32} color={colors.primary} />
+        <Text style={styles.statNumber}>Contacto</Text>
+        <Text style={styles.statLabel}>Directo</Text>
+      </View>
+      <View style={styles.statItem}>
+        <MaterialIcons name="local-shipping" size={32} color={colors.primary} />
+        <Text style={styles.statNumber}>24/7</Text>
+        <Text style={styles.statLabel}>Disponibilidad</Text>
+      </View>
+    </View>
+  );
+
   return (
-    <>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       {Platform.OS === 'web' ? (
         <View style={styles.webContainer}>
           <CamyoWebNavBar onSearch={undefined} />
-          <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false} contentContainerStyle={{ scrollbarWidth: "none" }}>
+          <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
+            <View style={styles.whiteTransition} />
+            {/* Hero Section */}
+            <View style={styles.heroContainer}>
+              <Image source={heroBackground} style={styles.heroBackground} blurRadius={2} />
+              <View style={styles.heroOverlay} />
+              <View style={styles.heroContent}>
+                <Text style={styles.heroTitle}>
+                  {(!user || !user.rol)
+                    ? "Donde los profesionales del transporte y las empresas se encuentran"
+                    : `¡Bienvenido de nuevo, ${user.nombre}!`}
+                </Text>
+                <Text style={styles.heroSubtitle}>
+                  Conectamos el talento con las mejores oportunidades del sector
+                </Text>
 
-            {/* Hero sin login */}
-            {(!user || !user.rol) && (
-              <View style={styles.heroContainer}>
-                <View style={styles.heroBox}>
-                  <View style={styles.textContainer}>
-                    <Text style={styles.heroText}>Donde los camioneros y las empresas se encuentran.</Text>
-                    <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/login")}>
-                      <Text style={styles.registerButtonText}>Accede</Text>
-                      <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
+                <View style={styles.heroButtons}>
+                  {(!user || !user.rol) ? (
+                    <>
+                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/login")}>
+                        <MaterialIcons name="login" size={20} color="white" style={{ marginRight: 8 }} />
+                        <Text style={styles.buttonText}>Iniciar sesión</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                        <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : user.rol === "CAMIONERO" ? (
+                    <>
+                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
+                        <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
+                        <Text style={styles.buttonText}>Mis ofertas</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                        <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : user.rol === "EMPRESA" ? (
+                    <>
+                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
+                        <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
+                        <Text style={styles.buttonText}>Mis ofertas</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
+                        <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
+                      <MaterialIcons name="logout" size={20} color="white" style={{ marginRight: 8 }} />
+                      <Text style={styles.buttonText}>Cerrar sesión</Text>
                     </TouchableOpacity>
-                  </View>
-                  <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
+                  )}
+
                 </View>
-              </View>
-            )}
-
-            {/* Hero con login */}
-            {!(!user || !user.rol) && (
-              <View style={styles.heroContainer}>
-                <View style={styles.heroBox}>
-                  <View style={styles.textContainer}>
-                    <Text style={styles.heroText}>¡Nos alegra verte otra vez, {user.nombre}!</Text>
-                    <TouchableOpacity style={styles.registerButton} onPress={() => router.push("/miperfil")}>
-                      <Text style={styles.registerButtonText}>Mi Perfil</Text>
-                      <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.registerButton]} onPress={() => router.push("/buscar-ofertas")}>
-                      <Text style={styles.registerButtonText}>Descubrir Vacantes</Text>
-                      <Ionicons name="arrow-forward-circle-outline" size={30} color="white" style={styles.arrowIcon} />
-                    </TouchableOpacity>
-                  </View>
-                  <Image source={truckImage} style={styles.truckImage} resizeMode="contain" />
-                </View>
-              </View>
-            )}
-
-            <View style={styles.separator} />
-
-            {/* Sección ofertas */}
-            <Text style={styles.title}> Ofertas Recientes </Text>
-            <View style={styles.listaContainer}>
-              {/* Columna de Carga */}
-              <View style={styles.columna}>
-                <View style={styles.columnaTituloContainer}>
-                  <FontAwesome5 name="route" size={23} color={colors.secondary} />
-                  <Text style={styles.columnaTitulo}>Carga</Text>
-                </View>
-                {data.filter(item => item.tipoOferta === "CARGA").map(item => <CardOferta key={item.id} item={item} />)}
-              </View>
-
-              {/* Columna de Trabajo */}
-              <View style={styles.columna}>
-                <View style={styles.columnaTituloContainer}>
-                  <MaterialIcons name="work-history" size={23
-
-                  } color={colors.secondary} />
-                  <Text style={styles.columnaTitulo}>Trabajo</Text>
-                </View>
-                {data.filter(item => item.tipoOferta === "TRABAJO").map(item => <CardOferta key={item.id} item={item} />)}
               </View>
             </View>
 
-            <View style={styles.separator} />
-          </ScrollView >
-        </View >
+            {/* Stats Section */}
+            <StatsSection />
 
+            {/* Ofertas Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Ofertas Recientes</Text>
+              <Text style={styles.sectionSubtitle}>Las mejores oportunidades del mercado</Text>
+
+              <View style={styles.listaContainer}>
+                {/* Columna de Carga */}
+                <View style={styles.columna}>
+                  <View style={styles.columnaHeader}>
+                    <FontAwesome5 name="route" size={24} color={colors.secondary} />
+                    <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
+                  </View>
+                  {data.filter(item => item.tipoOferta === "CARGA").map(item => (
+                    <CardOferta key={item.id} item={item} />
+                  ))}
+                </View>
+
+                {/* Columna de Trabajo */}
+                <View style={styles.columna}>
+                  <View style={styles.columnaHeader}>
+                    <MaterialIcons name="work" size={24} color={colors.secondary} />
+                    <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
+                  </View>
+                  {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
+                    <CardOferta key={item.id} item={item} />
+                  ))}
+                </View>
+              </View>
+            </View>
+
+            {/* Testimonios */}
+            <section style={{ fontFamily: 'inherit' }}>
+              <Testimonios />
+            </section>
+
+
+
+            {/* CTA Section */}
+            <View style={styles.ctaSection}>
+              <Text style={styles.ctaTitle}>¿Listo para encontrar tu próxima oportunidad?</Text>
+
+              {user ? (
+                <Text style={styles.ctaSubtitle}>¡Bienvenido de nuevo, {user.nombre}!</Text>
+              ) : (
+                <Text style={styles.ctaSubtitle}>Regístrate ahora y accede a las mejores ofertas del sector</Text>
+              )}
+
+              <TouchableOpacity
+                style={styles.ctaButton}
+                onPress={() => {
+                  if (!user) {
+                    router.push("/login");
+                  } else if (user.rol === "CAMIONERO") {
+                    router.push("/buscar-ofertas");
+                  } else if (user.rol === "EMPRESA") {
+                    router.push("/misofertas");
+                  } else if (user.rol === "ADMIN") {
+                    logout();
+                  }
+                }}
+              >
+                <Text style={styles.ctaButtonText}>
+                  {!user
+                    ? "Regístrate Gratis"
+                    : user.rol === "CAMIONERO"
+                      ? "Explorar Ofertas"
+                      : user.rol === "EMPRESA"
+                        ? "Ver Mis Ofertas"
+                        : user.rol === "ADMIN"
+                          ? "Cerrar Sesión"
+                          : "Continuar"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+          </ScrollView>
+        </View >
       ) : (
-        <View style={styles.phone}>
+        <View style={styles.phoneContainer}>
           <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
           <View style={styles.searchView}>
             <Ionicons name="menu" size={30} color="black" style={styles.menuIcon} />
@@ -185,276 +304,210 @@ export default function Index() {
         </View>
       )
       }
-    </>
+    </Animated.View >
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white
+  },
   webContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: "center",
-    alignContent: "center",
     flex: 1,
   },
   scrollview: {
     flex: 1,
-    padding: 10,
-    position: 'static',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 40,
   },
 
-  title: {
-    fontSize: 40,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 100,
-    marginBottom: 20,
-    color: colors.secondary,
-  },
-
-  separator: {
-    width: "80%",
-    height: 2,
-    backgroundColor: colors.lightGray,
-    alignSelf: "center",
-    marginTop: 60,
-    marginBottom: -40,
-  },
-
-  listaContainer: {
-    flexDirection: "row",
-    alignSelf: "center",
-    width: "90%",
-    marginTop: 20,
-  },
-  columna: {
-    width: "50%",
-    alignItems: "center",
-  },
-  columnaTituloContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  columnaTitulo: {
-    fontSize: 25,
-    fontWeight: "bold",
-    marginBottom: 10,
-    marginLeft: 8,
-    alignSelf: "center",
-    color: colors.secondary,
-  },
-
-  promotedCard: {
-    borderWidth: 2,
-    borderColor: colors.secondary, // Blue border for promoted offers
-  },
-  patrocinadoBadge: {
-      position: "absolute",
-      top: 0,
-      right: 0,
-      backgroundColor: colors.secondary,
-      paddingVertical: 3,
-      paddingHorizontal: 8,
-      borderRadius: 5,
-  },
-  patrocinadoText: {
-      color: "white",
-      fontWeight: "bold",
-      fontSize: 12,
-  },
-
-  /* Estilos Hero */
+  /* Hero Section */
   heroContainer: {
-    width: "100%",
-    height: 400,
-    marginTop: 100,
-    justifyContent: "center",
-    alignItems: "center",
+    height: 550,
+    width: '100%',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  heroBox: {
-    width: 750,
-    height: 300,
-    backgroundColor: "white",
-    borderRadius: 15,
+  heroBackground: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  heroOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  heroContent: {
+    width: '80%',
+    maxWidth: 1200,
+    zIndex: 2,
     padding: 20,
-    marginRight: 60,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  },
+  heroTitle: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: colors.white,
+    marginBottom: 15,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  heroSubtitle: {
+    fontSize: 22,
+    color: colors.white,
+    marginBottom: 30,
+    opacity: 0.9,
+    maxWidth: 600,
+  },
+  heroButtons: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  primaryButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 6,
   },
-  textContainer: {
-    flex: 1,
-    zIndex: 2,
-  },
-  heroText: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: colors.secondary,
-    marginBottom: 25,
-    marginRight: 225,
-    marginLeft: 10,
-  },
-  registerButton: {
-    flexDirection: "row",
-    backgroundColor: colors.primary,
-    width: 200,
-    paddingVertical: 8,
-    paddingHorizontal: 30,
-    marginBottom: 10,
-    marginLeft: 50,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  registerButtonText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  arrowIcon: {
-    marginLeft: 10,
-  },
-  truckImage: {
-    position: "absolute",
-    marginLeft: "45%",
-    marginTop: "15%",
-    width: 450,
-    height: 300,
-    borderRadius: 10,
-    alignSelf: "center",
-  },
-
-  /* Estilos Ofertas */
-  card: {
+  secondaryButton: {
     backgroundColor: colors.white,
-    padding: 25,
-    marginVertical: 10,
-    width: "85%",
-    borderRadius: 12,
-    flexWrap: "wrap",
-    flexDirection: "row",
-    alignContent: "center",
-    alignItems: "center",
-    borderLeftWidth: 5,
-    borderColor: "red",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  companyLogo: {
-    height: 90,
-    width: 90,
-    marginRight: 15,
-    marginLeft: -7,
-  },
-  offerTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    flexWrap: "wrap",
-    marginBottom: 7,
-    color: colors.secondary
-  },
-  offerDate: {
-    fontSize: 12,
-    color: "gray", flexWrap: "wrap",
-  },
-  offerDetails: {
-    fontSize: 12,
-    fontWeight: "bold",
-    flexWrap: "wrap",
-  },
-  offerDetailsTagLicense: {
-    fontSize: 9,
-    backgroundColor: colors.secondary,
-    borderRadius: 10,
-    color: colors.white,
-    paddingTop: 2,
-    textAlign: "center",
-    textAlignVertical: "center",
-    paddingBottom: 3,
-    paddingLeft: 5,
-    paddingRight: 6,
-    marginRight: 3,
-    fontWeight: "bold",
-    flexWrap: "wrap",
-  },
-  offerDetailsTagExperience: {
-    fontSize: 9,
-    borderColor: colors.primary,
-    borderWidth: 2,
-    borderRadius: 10,
-    color: colors.primary,
-    paddingTop: 2,
-    textAlign: "center",
-    textAlignVertical: "center",
-    paddingBottom: 2,
-    paddingLeft: 5,
-    paddingRight: 6,
-    marginRight: 3,
-    fontWeight: "bold",
-    flexWrap: "wrap",
-  },
-  offerInfo: {
-    fontSize: 12,
-    color: "gray",
-    marginTop: 5,
-    paddingRight: 8,
-    flexWrap: "wrap",
-  },
-  offerSueldo: {
-    fontSize: 27,
-    marginBottom: 7,
-    fontWeight: "bold",
-    color: colors.secondary,
-    textAlignVertical: "center",
-    alignSelf: "center",
-  },
-  button: {
-    backgroundColor: colors.primary,
-    color: colors.white,
-    marginTop: 4,
-    flexDirection: "row",
-    flexWrap: "nowrap",
-    height: 40,
-    width: 150,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center"
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 6,
   },
   buttonText: {
     color: colors.white,
-    fontWeight: "bold"
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  detailsIcon: {
-    color: colors.white,
-    alignSelf: "center",
-    marginLeft: 3,
-    marginTop: 3,
-    marginRight: 5,
-  },
-  localizacion: {
-    fontSize: 15,
-    color: "#696969",
+  secondaryButtonText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 
+  /* Stats Section */
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 50,
+    backgroundColor: colors.white,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
+    marginTop: -50,
+    marginHorizontal: 40,
+    borderRadius: 12,
+    zIndex: 3,
+  },
+  statItem: {
+    alignItems: 'center',
+    padding: 15,
+  },
+  statNumber: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: colors.secondary,
+    marginVertical: 5,
+  },
+  statLabel: {
+    fontSize: 16,
+    color: colors.darkGray,
+    textAlign: 'center',
+  },
+
+  /* General Section */
+  section: {
+    paddingVertical: 60,
+    paddingHorizontal: 40,
+    backgroundColor: colors.white,
+  },
+  sectionTitle: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: colors.secondary,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  sectionSubtitle: {
+    fontSize: 18,
+    color: colors.darkGray,
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+
+  /* Ofertas Section */
+  listaContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+    flexWrap: 'wrap',
+  },
+  columna: {
+    width: Platform.OS === 'web' ? '45%' : '100%',
+    minWidth: 350,
+  },
+  columnaHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.lightGray,
+  },
+  columnaTitulo: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginLeft: 10,
+    color: colors.secondary,
+  },
+
+  /* Card Oferta */
+  card: {
+    backgroundColor: colors.white,
+    padding: 20,
+    marginBottom: 20,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+    transition: 'transform 0.3s ease',
+    position: 'relative', // Para el badge de patrocinado
+  },
   promotedCard: {
     borderWidth: 2,
-    borderColor: colors.secondary, // Blue border for promoted offers
+    borderColor: colors.secondary,
   },
   patrocinadoBadge: {
     position: "absolute",
@@ -470,21 +523,167 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 12,
   },
+  companyLogo: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 15,
+  },
+  offerContent: {
+    flex: 1,
+  },
+  offerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 8,
+  },
+  offerCompany: {
+    fontSize: 14,
+    color: colors.mediumGray,
+    marginTop: 5,
+  },
+  whiteTransition: {
+    height: '4%',
+    backgroundColor: colors.white,
+    width: '100%',
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 8,
+  },
+  offerDetailsTagLicense: {
+    fontSize: 12,
+    backgroundColor: colors.secondary,
+    color: colors.white,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    fontWeight: "bold",
+    overflow: 'hidden',
+  },
+  offerDetailsTagExperience: {
+    fontSize: 12,
+    borderColor: colors.primary,
+    borderWidth: 1,
+    color: colors.primary,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    fontWeight: "bold",
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  localizacion: {
+    fontSize: 14,
+    color: "#696969",
+    marginLeft: 5,
+  },
+  offerActions: {
+    alignItems: 'center',
+    marginLeft: 15,
+  },
+  offerSueldo: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 15,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
 
-  /* Estilos móvil */
-  phone: { //
+  /* Testimonials */
+  testimonialsSection: {
+    backgroundColor: '#f5f7fa',
+  },
+  testimonialsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: 20,
+    marginHorizontal: 30,
+  },
+  testimonialCard: {
+    backgroundColor: colors.white,
+    padding: 25,
+    borderRadius: 12,
+    width: Platform.OS === 'web' ? '30%' : '100%',
+    minWidth: 300,
+    maxWidth: 400,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  testimonialText: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    color: colors.darkGray,
+    lineHeight: 24,
+    marginBottom: 15,
+  },
+  testimonialAuthor: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: colors.secondary,
+  },
+
+  /* CTA Section */
+  ctaSection: {
+    paddingVertical: 80,
+    paddingHorizontal: 20,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+  },
+  ctaTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: colors.white,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  ctaSubtitle: {
+    fontSize: 18,
+    color: colors.white,
+    textAlign: 'center',
+    marginBottom: 30,
+    opacity: 0.9,
+    maxWidth: 600,
+  },
+  ctaButton: {
+    backgroundColor: colors.white,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+  },
+  ctaButtonText: {
+    color: colors.primary,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  /* Mobile Styles */
+  phoneContainer: {
     flex: 1,
     flexDirection: "column",
     justifyContent: "space-between",
-    alignContent: "center",
-    alignItems: "center",
     backgroundColor: colors.mediumGray,
   },
-  searchIcon: { //
-    color: colors.primary,
-    marginRight: 10,
-  },
-  searchView: { //
+  searchView: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -494,10 +693,10 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     marginBottom: 20,
   },
-  menuIcon: { //
+  menuIcon: {
     marginRight: 10,
   },
-  barraSuperior: { //
+  barraSuperior: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -507,21 +706,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
-  searchInput: { //
+  searchInput: {
     backgroundColor: "transparent",
     padding: 10,
     borderRadius: 50,
     borderColor: "transparent",
     marginRight: 3,
     outlineStyle: "none",
+    flex: 1,
   },
-
+  searchIcon: {
+    color: colors.primary,
+    marginRight: 10,
+  },
 });
