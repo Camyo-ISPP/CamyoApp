@@ -135,7 +135,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
         const result = await stripe.confirmPayment({
             elements,
             confirmParams: {
-                return_url: process.env.EXPO_PUBLIC_FRONTEND_URL +"/miperfil",
+                return_url: process.env.EXPO_PUBLIC_FRONTEND_URL +"/suscripcion",
             },
             redirect: "if_required",
         })
