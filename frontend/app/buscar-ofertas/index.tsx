@@ -49,15 +49,12 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         fetchData();
     }, [selectedOfertaType]);
 
-    useEffect(() => {
-        console.log("selectedOfertaType cambió a:", selectedOfertaType);
-    }, [selectedOfertaType]);
 
     const fetchData = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/ofertas/info`);
             setData(response.data);
-            setFilteredData(response.data);
+            setFilteredData(response.data.sort((a: { promoted: any; }, b: { promoted: any; }) => (b.promoted ? 1 : 0) - (a.promoted ? 1 : 0)));
             console.log('Datos cargados:', response.data);
         } catch (error) {
             console.error('Error al cargar los datos:', error);
@@ -129,9 +126,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             }
         }
 
-        // Sort: Promoted items come first
-        filteredResults.sort((a, b) => (b.promoted ? 1 : 0) - (a.promoted ? 1 : 0));
-
         setFilteredData(filteredResults);
         console.log('Datos filtrados:', filteredResults);
 
@@ -167,7 +161,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                 ]}
                                 onPress={() => setSelectedOfertaType('trabajos')}
                             >
-                                <Text style={styles.ofertaTypeButtonText}>Generales</Text>
+                                <Text style={styles.ofertaTypeButtonText}>Trabajos</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
