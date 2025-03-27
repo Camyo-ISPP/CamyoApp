@@ -109,7 +109,7 @@ const MiPerfilEmpresa = () => {
       }
 
       setSuccessModalVisible(true);
-      setTimeout(() => {
+ setTimeout(() => {
         setSuccessModalVisible(false);
       }, 1000);
 
@@ -131,8 +131,8 @@ const MiPerfilEmpresa = () => {
           }
         }
       );
-      setSuccessModalVisible(false);
-      
+      setIsModalVisibleCancelar(false);
+
       fetchOffers();
 
     } catch (err) {
@@ -354,11 +354,11 @@ const MiPerfilEmpresa = () => {
                                       <View style={styles.modalContainer}>
                                         <Text style={styles.modalText}>¿Estás seguro/a de que quieres dejar de patrocinar la oferta?</Text>
                                         <View style={styles.modalButtons}>
-                                          <TouchableOpacity onPress={() => unpromoteOffer(item.id)} style={[styles.modalButton,{backgroundColor:colors.green}]}>
-                                            <Text style={styles.modalButtonText}>Confirmar</Text>
-                                          </TouchableOpacity>
-                                          <TouchableOpacity onPress={() => setIsModalVisibleCancelar(false)} style={[styles.modalButton,{backgroundColor:colors.red}]}>
+                                          <TouchableOpacity onPress={() => setIsModalVisibleCancelar(false)} style={styles.modalButton}>
                                             <Text style={styles.modalButtonText}>Cancelar</Text>
+                                          </TouchableOpacity>
+                                          <TouchableOpacity onPress={() => unpromoteOffer(item.id)} style={styles.modalButton}>
+                                            <Text style={styles.modalButtonText}>Confirmar</Text>
                                           </TouchableOpacity>
                                         </View>
                                       </View>
