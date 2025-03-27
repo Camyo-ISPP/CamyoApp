@@ -75,10 +75,19 @@ export default function Index() {
 
     return (
       <Animated.View 
-        style={[styles.card, { transform: [{ scale: scaleValue }] }]}
+        style={[
+          styles.card, 
+          { transform: [{ scale: scaleValue }] },
+          item.promoted && styles.promotedCard
+        ]}
         onMouseEnter={() => handleHover(1.03)}
         onMouseLeave={() => handleHover(1)}
       >
+        {item.promoted && (
+          <View style={styles.patrocinadoBadge}>
+            <Text style={styles.patrocinadoText}>PATROCINADO</Text>
+          </View>
+        )}
         <Image 
           source={item.empresa?.logo ? { uri: item.empresa.logo } : defaultCompanyLogo} 
           style={styles.companyLogo} 
@@ -134,7 +143,7 @@ export default function Index() {
         <View style={styles.webContainer}>
           <CamyoWebNavBar onSearch={undefined} />
           <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
-          <View style={styles.whiteTransition} />
+            <View style={styles.whiteTransition} />
             {/* Hero Section */}
             <View style={styles.heroContainer}>
               <Image source={heroBackground} style={styles.heroBackground} blurRadius={2} />
@@ -459,6 +468,25 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
     transition: 'transform 0.3s ease',
+    position: 'relative', // Para el badge de patrocinado
+  },
+  promotedCard: {
+    borderWidth: 2,
+    borderColor: colors.secondary,
+  },
+  patrocinadoBadge: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    backgroundColor: colors.secondary,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+  },
+  patrocinadoText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 12,
   },
   companyLogo: {
     width: 80,
@@ -481,7 +509,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   whiteTransition: {
-    height: '5%', // Altura del espacio blanco
+    height: '5%',
     backgroundColor: colors.white,
     width: '100%',
   },
