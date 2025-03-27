@@ -262,7 +262,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                 key={item.id}
                                 style={[
                                     styles.card,
-                                    item.promoted && styles.promotedCard // Add blue border if promoted
+                                    item.promoted && styles.promotedCard 
                                 ]}
                             >
                                 {item.promoted && (
