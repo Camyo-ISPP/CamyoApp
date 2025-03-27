@@ -14,6 +14,7 @@ const truckImage = require("../../assets/images/camion.png");
 const heroBackground = require("../../assets/images/lonely-road.jpg");
 import { useAuth } from "../../contexts/AuthContext";
 import Testimonios from "../_components/Testimonios";
+import WebFooter from "../_components/WebFooter";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -282,6 +283,8 @@ export default function Index() {
               </TouchableOpacity>
             </View>
 
+            <WebFooter />
+
           </ScrollView>
         </View >
       ) : (
@@ -304,6 +307,7 @@ export default function Index() {
         </View>
       )
       }
+
     </Animated.View >
   );
 }
