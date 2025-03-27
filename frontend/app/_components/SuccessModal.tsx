@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   iconContainer: {
-    backgroundColor: "rgba(116, 227, 129, 0.1)", // Azul claro de fondo
+    backgroundColor: "rgba(116, 227, 129, 0.1)",
     width: 80,
     height: 80,
     borderRadius: 40,
@@ -91,13 +91,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: colors.green, // Usar color primario de tu paleta
+    color: colors.green,
     marginBottom: 5,
     textAlign: "center",
   },
   modalText: {
     fontSize: 16,
-    color: "#555", // Gris oscuro para mejor legibilidad
+    color: "#555",
     textAlign: "center",
     marginBottom: 20,
     lineHeight: 22,
