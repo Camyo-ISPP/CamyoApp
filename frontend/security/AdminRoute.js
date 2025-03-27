@@ -7,15 +7,19 @@ export default function AdminRoute({ children }) {
     const router = useRouter();
     const { user, userToken } = useAuth();
     const segments = useSegments();
-    if (user == null) {
-        router.replace("/login");
+    
+    useEffect(() => {
+        if (user == null) {
+            router.replace("/login");
+        } else if (user.rol !== "ADMIN") {
+            router.replace("/forbidden");
+        }
+    }, [user, router]);
+
+    if (user == null || user.rol !== "ADMIN") {
         return null;
     }
 
-    if (user.rol !== "ADMIN") {
-        router.replace("/forbidden");
-        return null;
-    }
 
     return children;
 }

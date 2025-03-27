@@ -16,7 +16,7 @@ import { useAuth } from "../../contexts/AuthContext";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1040);
@@ -25,7 +25,7 @@ export default function Index() {
   useEffect(() => {
     const updateSize = () => setIsCompact(Dimensions.get("window").width < 1040);
     Dimensions.addEventListener("change", updateSize);
-    
+
     // Animación de entrada
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -62,7 +62,7 @@ export default function Index() {
 
   const CardOferta = ({ item }) => {
     const scaleValue = useRef(new Animated.Value(1)).current;
-    
+
     const handleHover = (toValue) => {
       if (Platform.OS === "web") {
         Animated.spring(scaleValue, {
@@ -74,9 +74,9 @@ export default function Index() {
     };
 
     return (
-      <Animated.View 
+      <Animated.View
         style={[
-          styles.card, 
+          styles.card,
           { transform: [{ scale: scaleValue }] },
           item.promoted && styles.promotedCard
         ]}
@@ -88,9 +88,9 @@ export default function Index() {
             <Text style={styles.patrocinadoText}>PATROCINADO</Text>
           </View>
         )}
-        <Image 
-          source={item.empresa?.logo ? { uri: item.empresa.logo } : defaultCompanyLogo} 
-          style={styles.companyLogo} 
+        <Image
+          source={item.empresa?.logo ? { uri: item.empresa.logo } : defaultCompanyLogo}
+          style={styles.companyLogo}
         />
         <View style={styles.offerContent}>
           <Text style={styles.offerTitle}>{item.titulo}</Text>
@@ -105,8 +105,8 @@ export default function Index() {
         </View>
         <View style={styles.offerActions}>
           <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-          <TouchableOpacity 
-            style={styles.button} 
+          <TouchableOpacity
+            style={styles.button}
             onPress={() => router.push(`/oferta/${item.id}`)}
           >
             <MaterialCommunityIcons name="eye" size={16} color="white" />
@@ -150,126 +150,149 @@ export default function Index() {
               <View style={styles.heroOverlay} />
               <View style={styles.heroContent}>
                 <Text style={styles.heroTitle}>
-                  {(!user || !user.rol) 
-                    ? "Donde los profesionales del transporte y las empresas se encuentran" 
+                  {(!user || !user.rol)
+                    ? "Donde los profesionales del transporte y las empresas se encuentran"
                     : `¡Bienvenido de nuevo, ${user.nombre}!`}
                 </Text>
                 <Text style={styles.heroSubtitle}>
                   Conectamos el talento con las mejores oportunidades del sector
                 </Text>
+
                 <View style={styles.heroButtons}>
                   {(!user || !user.rol) ? (
                     <>
                       <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/login")}>
-                        <Text style={styles.buttonText}>Iniciar Sesión</Text>
+                        <MaterialIcons name="login" size={20} color="white" style={{ marginRight: 8 }} />
+                        <Text style={styles.buttonText}>Iniciar sesión</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/registro")}>
-                        <Text style={styles.secondaryButtonText}>Registrarse</Text>
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                        <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : user.rol === "CAMIONERO" ? (
+                    <>
+                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
+                        <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
+                        <Text style={styles.buttonText}>Mis ofertas</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                        <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : user.rol === "EMPRESA" ? (
+                    <>
+                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
+                        <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
+                        <Text style={styles.buttonText}>Mis ofertas</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
+                        <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
                       </TouchableOpacity>
                     </>
                   ) : (
-                    <>
-                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/miperfil")}>
-                        <Text style={styles.buttonText}>Mi Perfil</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
-                        <Text style={styles.secondaryButtonText}>Explorar Ofertas</Text>
-                      </TouchableOpacity>
-                    </>
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
+                      <MaterialIcons name="logout" size={20} color="white" style={{ marginRight: 8 }} />
+                      <Text style={styles.buttonText}>Cerrar sesión</Text>
+                    </TouchableOpacity>
                   )}
-                </View>
+
               </View>
             </View>
+        </View>
 
             {/* Stats Section */}
-            <StatsSection />
+      <StatsSection />
 
-            {/* Ofertas Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ofertas Recientes</Text>
-              <Text style={styles.sectionSubtitle}>Las mejores oportunidades del mercado</Text>
-              
-              <View style={styles.listaContainer}>
-                {/* Columna de Carga */}
-                <View style={styles.columna}>
-                  <View style={styles.columnaHeader}>
-                    <FontAwesome5 name="route" size={24} color={colors.secondary} />
-                    <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
-                  </View>
-                  {data.filter(item => item.tipoOferta === "CARGA").map(item => (
-                    <CardOferta key={item.id} item={item} />
-                  ))}
-                </View>
+      {/* Ofertas Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Ofertas Recientes</Text>
+        <Text style={styles.sectionSubtitle}>Las mejores oportunidades del mercado</Text>
 
-                {/* Columna de Trabajo */}
-                <View style={styles.columna}>
-                  <View style={styles.columnaHeader}>
-                    <MaterialIcons name="work" size={24} color={colors.secondary} />
-                    <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
-                  </View>
-                  {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
-                    <CardOferta key={item.id} item={item} />
-                  ))}
-                </View>
-              </View>
+        <View style={styles.listaContainer}>
+          {/* Columna de Carga */}
+          <View style={styles.columna}>
+            <View style={styles.columnaHeader}>
+              <FontAwesome5 name="route" size={24} color={colors.secondary} />
+              <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
             </View>
-
-            {/* Testimonios */}
-            <View style={[styles.section, styles.testimonialsSection]}>
-              <Text style={styles.sectionTitle}>Testimonios</Text>
-              <Text style={styles.sectionSubtitle}>¿Quieres ser el primero en compartir tu experiencia?</Text>
-              
-              <View style={styles.testimonialsContainer}>
-                <View style={styles.testimonialCard}>
-                  <Text style={styles.testimonialText}>
-                  ¡Sé el primero en dejar tu testimonio! Cuéntanos cómo ha sido tu experiencia y aparecerás aquí.
-                  </Text>
-                  <Text style={styles.testimonialAuthor}>- Tu Nombre</Text>
-                </View>
-                <View style={styles.testimonialCard}>
-                  <Text style={styles.testimonialText}>
-                  ¡Sé el primero en dejar tu testimonio! Cuéntanos cómo ha sido tu experiencia y aparecerás aquí.
-                  </Text>
-                  <Text style={styles.testimonialAuthor}>- Tu Nombre</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* CTA Section */}
-            <View style={styles.ctaSection}>
-              <Text style={styles.ctaTitle}>¿Listo para encontrar tu próxima oportunidad?</Text>
-              <Text style={styles.ctaSubtitle}>Regístrate ahora y accede a las mejores ofertas del sector</Text>
-              <TouchableOpacity 
-                style={styles.ctaButton} 
-                onPress={() => router.push(!user ? "/registro" : "/buscar-ofertas")}
-              >
-                <Text style={styles.ctaButtonText}>
-                  {!user ? "Regístrate Gratis" : "Explorar Ofertas"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </View>
-      ) : (
-        <View style={styles.phoneContainer}>
-          <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-          <View style={styles.searchView}>
-            <Ionicons name="menu" size={30} color="black" style={styles.menuIcon} />
-            <View style={styles.barraSuperior}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar Ofertas"
-                placeholderTextColor={colors.secondary}
-              />
-              <TouchableOpacity>
-                <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
-              </TouchableOpacity>
-            </View>
+            {data.filter(item => item.tipoOferta === "CARGA").map(item => (
+              <CardOferta key={item.id} item={item} />
+            ))}
           </View>
-          <BottomBar />
+
+          {/* Columna de Trabajo */}
+          <View style={styles.columna}>
+            <View style={styles.columnaHeader}>
+              <MaterialIcons name="work" size={24} color={colors.secondary} />
+              <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
+            </View>
+            {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
+              <CardOferta key={item.id} item={item} />
+            ))}
+          </View>
         </View>
-      )}
-    </Animated.View>
+      </View>
+
+      {/* Testimonios */}
+      <View style={[styles.section, styles.testimonialsSection]}>
+        <Text style={styles.sectionTitle}>Testimonios</Text>
+        <Text style={styles.sectionSubtitle}>¿Quieres ser el primero en compartir tu experiencia?</Text>
+
+        <View style={styles.testimonialsContainer}>
+          <View style={styles.testimonialCard}>
+            <Text style={styles.testimonialText}>
+              ¡Sé el primero en dejar tu testimonio! Cuéntanos cómo ha sido tu experiencia y aparecerás aquí.
+            </Text>
+            <Text style={styles.testimonialAuthor}>- Tu Nombre</Text>
+          </View>
+          <View style={styles.testimonialCard}>
+            <Text style={styles.testimonialText}>
+              ¡Sé el primero en dejar tu testimonio! Cuéntanos cómo ha sido tu experiencia y aparecerás aquí.
+            </Text>
+            <Text style={styles.testimonialAuthor}>- Tu Nombre</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* CTA Section */}
+      <View style={styles.ctaSection}>
+        <Text style={styles.ctaTitle}>¿Listo para encontrar tu próxima oportunidad?</Text>
+        <Text style={styles.ctaSubtitle}>Regístrate ahora y accede a las mejores ofertas del sector</Text>
+        <TouchableOpacity
+          style={styles.ctaButton}
+          onPress={() => router.push(!user ? "/registro" : "/buscar-ofertas")}
+        >
+          <Text style={styles.ctaButtonText}>
+            {!user ? "Regístrate Gratis" : "Explorar Ofertas"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+        </View >
+      ) : (
+    <View style={styles.phoneContainer}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <View style={styles.searchView}>
+        <Ionicons name="menu" size={30} color="black" style={styles.menuIcon} />
+        <View style={styles.barraSuperior}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar Ofertas"
+            placeholderTextColor={colors.secondary}
+          />
+          <TouchableOpacity>
+            <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
+          </TouchableOpacity>
+        </View>
+      </View>
+      <BottomBar />
+    </View>
+  )
+}
+    </Animated.View >
   );
 }
 
