@@ -9,8 +9,9 @@ import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
 import defaultImage from "../../assets/images/empresa.jpg";
 import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import { usePayment } from "../../contexts/PaymentContext";
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import SuccessModal from "../_components/SuccessModal";
-import { useSubscription } from "@/contexts/SubscriptionContext";
 import { LinearGradient } from "expo-linear-gradient";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -18,6 +19,9 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 // queda arreglar pk no va el delete offer que sale server 500 y añadir patrocinado
 const MiPerfilEmpresa = () => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+  const { setId } = usePayment();
   const { user, userToken } = useAuth();
   const router = useRouter();
 
@@ -59,22 +63,28 @@ const MiPerfilEmpresa = () => {
     }
   }, [user]);
 
-
-  const fetchOffers = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-    } catch (error) {
-      console.error("Error al cargar las ofertas:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
   useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+        setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+      } catch (error) {
+        console.error("Error al cargar las ofertas:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
 
     fetchOffers();
   }, []);
+
+  useEffect(() => {
+    // If the user goes to the checkout page, does not subscribe and clicks on their profile, 
+    // the subscription they wanted will remain saved.
+    // This will reset the subscription ID chosen.
+    setId("");
+  }, [])
 
   const canCreateNewOffer = () => {
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
@@ -109,8 +119,6 @@ const MiPerfilEmpresa = () => {
  setTimeout(() => {
         setSuccessModalVisible(false);
       }, 1000);
-
-      fetchOffers();
 
     } catch (err) {
       console.error("Error completo en promoteOffer:", err);

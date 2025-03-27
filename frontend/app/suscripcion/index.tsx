@@ -5,6 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
 import EmpresaRoute from "@/security/EmpresaRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePayment } from "@/contexts/PaymentContext";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import axios from "axios";
@@ -12,6 +13,7 @@ import SuccessModal from "../_components/SuccessModal";
 
 const SubscriptionPlans = () => {
     const { user, userToken } = useAuth();
+    const { id, setId } = usePayment();
     const router = useRouter();
     const [isAuthLoaded, setIsAuthLoaded] = useState(false);
     const [isUserLoading, setIsUserLoading] = useState(true);
@@ -52,6 +54,16 @@ const SubscriptionPlans = () => {
 
         fetchPlan();
     }, [user?.id, userToken]);
+
+
+    useEffect(() => {
+        if (id === "BASICO" || id === "PREMIUM") {
+            router.replace("/pago/checkout");
+        }
+        
+    }, [id])
+
+    
 
     if (!isAuthLoaded) {
         return (
@@ -100,6 +112,10 @@ const SubscriptionPlans = () => {
             default: return plan;
         }
     };
+
+    const handleGoToCheckout = (planId: string) => {
+        setId(planId)
+    }
 
     const getPlanIcon = (planLevel: string) => {
         switch (planLevel) {
@@ -279,7 +295,7 @@ const SubscriptionPlans = () => {
                                     backgroundColor={plan.backgroundColor}
                                     planLevel={plan.level}
                                     currentPlan={currentPlan || "GRATIS"}
-                                    onChangePlan={handleChangePlan}
+                                    onChangePlan={plan.level === "GRATIS" ? handleChangePlan : handleGoToCheckout}
                                 />
                             ))}
                         </View>

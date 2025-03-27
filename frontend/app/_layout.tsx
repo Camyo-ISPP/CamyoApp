@@ -5,6 +5,7 @@ import CamyoWebNavBar from "./_components/CamyoNavBar";
 import BottomBar from "./_components/BottomBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { PaymentProvider } from "@/contexts/PaymentContext";
 
 function RootLayout() {
   const segments = useSegments();
@@ -29,8 +30,9 @@ function RootLayout() {
         "miperfilempresa/editar": "Editar Perfil Empresa",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
-        suscripcion: "Planes de Suscripción",
         chat:"Mis Mensajes",
+        "pago/checkout": "Pago",
+        suscripcion: "Planes de Suscripción",
         misofertas: "Mis Ofertas"
       };
 
@@ -48,6 +50,7 @@ function RootLayout() {
         }}
       />}
       
+      <PaymentProvider>
       <SubscriptionProvider>
       
       <Stack screenOptions={{ headerShown: false }}>
@@ -76,10 +79,12 @@ function RootLayout() {
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />
 
+        <Stack.Screen name="pago/checkout" />
         <Stack.Screen name="misofertas" />
       </Stack>
       {isMobile && <BottomBar />}
       </SubscriptionProvider>
+      </PaymentProvider>
     </>
 
   );
