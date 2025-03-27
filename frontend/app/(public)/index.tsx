@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   whiteTransition: {
-    height: '5%',
+    height: '4%',
     backgroundColor: colors.white,
     width: '100%',
   },
