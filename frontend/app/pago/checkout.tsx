@@ -20,7 +20,7 @@ function IntegratedCheckout() {
     useEffect(() => {
         // Make sure to call `loadStripe` outside of a component’s render to avoid
         // recreating the `Stripe` object on every render.
-        setStripePromise(loadStripe(process.env.STRIPE_API_KEY || "pk_test_51R1s9PC8z1doGFyHZ51UNEI7OrBTwMv1qCYeJp8WTdeTsroq1ARp16l16jc3eYBKCo9F0e0RECGQrV7dLDlvedST00xEdKOpRl",
+        setStripePromise(loadStripe(process.env.STRIPE_API_KEY || "pk_test_51R7E5pIRKHnhkuSfOzrm7E0goTdINnhhfLIARgpTqlr7eRzMFQD4RBvnI3qutHpKyVJCjXORTbLYYnkZq7pcub3y00GuI1VjNP",
             { locale: 'es' }
         ));
 
