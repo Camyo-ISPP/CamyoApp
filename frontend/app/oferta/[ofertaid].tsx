@@ -6,7 +6,7 @@ import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
-import defaultCamImage from "../../assets/images/defaultAvatar.png";
+import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 
 const formatDate = (fecha: string) => {
