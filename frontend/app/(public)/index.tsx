@@ -248,10 +248,6 @@ export default function Index() {
             <View style={styles.ctaSection}>
               <Text style={styles.ctaTitle}>¿Listo para encontrar tu próxima oportunidad?</Text>
 
-              {!user &&
-                <Text style={styles.ctaSubtitle}>Regístrate ahora y accede a las mejores ofertas del sector</Text>
-              }
-
               {user ? (
                 <Text style={styles.ctaSubtitle}>¡Bienvenido de nuevo, {user.nombre}!</Text>
               ) : (
