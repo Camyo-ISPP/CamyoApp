@@ -10,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
 import { Products } from "../../utils/productDetails";
 import colors from "@/assets/styles/colors";
+import globalStyles from "@/assets/styles/globalStyles";
 
 function IntegratedCheckout() {
     const { id, setId } = usePayment();
@@ -50,6 +51,7 @@ function IntegratedCheckout() {
 
     return <>
         {id === 'BASICO' || id === 'PREMIUM' ?
+          <ScrollView contentContainerStyle={globalStyles.container}> 
             <View style={styles.container}>
                 <Text style={styles.sectionTitle}>Finalizar compra</Text>
                 <View style={styles.card}>
@@ -86,6 +88,7 @@ function IntegratedCheckout() {
                     
                 </View>
             </View>
+          </ScrollView>
 
             :
 
