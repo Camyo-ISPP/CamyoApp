@@ -1,10 +1,12 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import ListadoOfertas from "../_components/ListadoOfertas";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 const MisOfertasCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -18,24 +20,26 @@ const MisOfertasCamionero = () => {
     const [rejectedOffers, setRejectedOffers] = useState<any[]>([]);
 
     const noOffersInAllCategories =
-            aceptedOffers.length === 0 &&
-            pendingOffers.length === 0 &&
-            rejectedOffers.length === 0;
+        aceptedOffers.length === 0 &&
+        pendingOffers.length === 0 &&
+        rejectedOffers.length === 0;
 
-    useEffect(() => {
-        const fetchOffers = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
-                setAceptedOffers(response.data[2]);
-                setPendingOffers(response.data[0]);
-                setRejectedOffers(response.data[1]);
-            } catch (error) {
-                console.error("Error al cargar las ofertas:", error);
-            }
-        };
+    useFocusEffect(
+        useCallback(() => {
+            const fetchOffers = async () => {
+                try {
+                    const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
+                    setAceptedOffers(response.data[2]);
+                    setPendingOffers(response.data[0]);
+                    setRejectedOffers(response.data[1]);
+                } catch (error) {
+                    console.error("Error al cargar las ofertas:", error);
+                }
+            };
 
-        fetchOffers();
-    }, [tab]);
+            fetchOffers();
+        }, [])
+    );
 
     const renderOfferList = () => {
 
