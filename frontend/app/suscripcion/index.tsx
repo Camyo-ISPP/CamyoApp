@@ -254,6 +254,7 @@ const SubscriptionPlans = () => {
         <EmpresaRoute>
             <View style={styles.container}>
                 <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                    <View style={styles.whiteTransition} />
                     {Platform.OS === 'web' && (
                         <View style={styles.heroSection}>
                             <Text style={styles.heroTitle}>Encuentra al mejor talento para tu empresa</Text>
@@ -331,7 +332,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingTop: '8%'
     },
     heroTitle: {
         fontSize: 28,
@@ -444,6 +444,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
+    },
+    whiteTransition: {
+        height: '9%',
+        backgroundColor: colors.white,
+        width: '100%',
     },
     featureText: {
         fontSize: 15,
