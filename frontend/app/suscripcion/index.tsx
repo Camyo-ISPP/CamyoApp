@@ -58,7 +58,7 @@ const SubscriptionPlans = () => {
 
     useEffect(() => {
         if (id === "BASICO" || id === "PREMIUM") {
-            router.replace("/pago/checkout");
+            router.push("/pago/checkout");
         }
         
     }, [id])
