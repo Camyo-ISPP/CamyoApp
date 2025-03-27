@@ -298,7 +298,18 @@ public class DataInitializer {
                                         + "(225, 'Envío de mercancías de Sevilla a Córdoba', 0, 'C_E', 'Transportar 350 kg de productos electrónicos desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3300.00, 201, 223, 'Andalucía', false),"
                                         + "(226, 'Distribución de paquetes de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de paquetes comerciales desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3400.00, 202, 203, 'Andalucía', false),"
                                         + "(227, 'Logística express de Sevilla a Córdoba', 3, 'C_E', 'Transportar 350 kg de materiales médicos desde Sevilla hasta Córdoba', 'CERRADA', '2025-05-03 10:45', 3500.00, 201, 205, 'Andalucía', false),"
-                                        + "(228, 'Conductor a toda velocidad', 5, 'C', 'Se requiere experiencia en trabajos rápidos', 'ABIERTA', '2025-05-05 08:00', 2200.00, NULL, 201, 'Sevilla', false)");
+                                        + "(228, 'Conductor a toda velocidad', 5, 'C', 'Se requiere experiencia en trabajos rápidos', 'ABIERTA', '2025-05-05 08:00', 2200.00, NULL, 201, 'Sevilla', false),"
+                                        + "(229, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 201, 220, 'BADAJOZ', false),"
+                                        + "(230, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 202, 220, 'BADAJOZ', false),"
+                                        + "(231, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 203, 220, 'BADAJOZ', false),"
+                                        + "(232, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 204, 220, 'BADAJOZ', false),"
+                                        + "(233, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 205, 220, 'BADAJOZ', false),"
+                                        + "(234, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 206, 220, 'BADAJOZ', false),"
+                                        + "(235, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 207, 220, 'BADAJOZ', false),"
+                                        + "(236, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 208, 220, 'BADAJOZ', false),"
+                                        + "(237, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 209, 220, 'BADAJOZ', false),"
+                                        + "(238, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 210, 220, 'BADAJOZ', false),"
+                                        + "(239, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 225, 220, 'BADAJOZ', false)");
 
                                 // Insert Trabajos
                                 statement.addBatch("INSERT IGNORE INTO trabajos (id, fecha_incorporacion, jornada, oferta_id) VALUES "
@@ -315,7 +326,19 @@ public class DataInitializer {
                                         + "(211,'2025-05-15', 'MIXTA', 220),"
                                         + "(212,'2025-05-15', 'FLEXIBLE', 221),"
                                         + "(213,'2025-05-15', 'FLEXIBLE', 222),"
-                                        + "(214,'2025-05-10', 'REGULAR', 228)");
+                                        + "(214,'2025-05-10', 'REGULAR', 228),"
+                                        + "(215,'2025-05-15', 'MIXTA', 229),"
+                                        + "(216,'2025-05-15', 'MIXTA', 230),"
+                                        + "(217,'2025-05-15', 'MIXTA', 231),"
+                                        + "(218,'2025-05-15', 'MIXTA', 232),"
+                                        + "(219,'2025-05-15', 'MIXTA', 233),"
+                                        + "(220,'2025-05-15', 'MIXTA', 234),"
+                                        + "(221,'2025-05-15', 'MIXTA', 235),"
+                                        + "(222,'2025-05-15', 'MIXTA', 236),"
+                                        + "(223,'2025-05-15', 'MIXTA', 237),"
+                                        + "(224,'2025-05-15', 'MIXTA', 238),"
+                                        + "(225,'2025-05-15', 'MIXTA', 239)"
+                                        );
 
                                 // Insert Cargas
                                 statement.addBatch("INSERT IGNORE INTO cargas (id, mercancia, peso, origen, destino, distancia, inicio, fin_minimo, fin_maximo, oferta_id) VALUES "
