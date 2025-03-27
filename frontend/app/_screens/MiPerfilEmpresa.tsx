@@ -82,10 +82,7 @@ const MiPerfilEmpresa = () => {
   };
 
   const canPromoteNewOffer = () => {
-    console.log("rules", rules);
-    console.log("offers", offers);
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
-    console.log("activeOffersCount", activeOffersCount);
     return activeOffersCount < rules.maxSponsoredOffers;
 
   }
