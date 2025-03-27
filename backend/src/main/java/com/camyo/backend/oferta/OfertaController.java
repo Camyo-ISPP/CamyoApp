@@ -98,6 +98,7 @@ public class OfertaController {
         dto.setCamionero(oferta.getCamionero());
         dto.setAplicados(oferta.getAplicados());
         dto.setRechazados(oferta.getRechazados());
+        dto.setPromoted(oferta.getPromoted());
         
         if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
             dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
