@@ -162,7 +162,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
                         setSuccessModalVisible(true);
                         setTimeout(() => {
                                 setSuccessModalVisible(false);
-                                router.replace("/");
+                                router.push("/");
                             }, 1000);
                     } else {
                         setError("Pago fallado. Revisa los detalles de pago e inténtalo de nuevo.")
