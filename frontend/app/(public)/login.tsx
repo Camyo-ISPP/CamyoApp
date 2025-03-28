@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, ImageBackground } from "react-native";
 import { Entypo, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import globalStyles from "../../assets/styles/globalStyles";
 import colors from "../../assets/styles/colors";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
@@ -20,6 +19,10 @@ const LoginScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isUsernameFocused, setIsUsernameFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
 
   const handleLogin = async () => {
     setIsSubmitting(true);
@@ -68,7 +71,7 @@ const LoginScreen = () => {
       resizeMode="cover"
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={"height"}
         style={{ flex: 1 }}
       >
         <ScrollView
@@ -85,7 +88,7 @@ const LoginScreen = () => {
 
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Nombre de Usuario</Text>
-              <View style={styles.inputWrapper}>
+              <View style={[styles.inputWrapper, isUsernameFocused && styles.inputWrapperFocused]}>
                 <MaterialIcons name="person" size={20} color={colors.mediumGray} />
                 <TextInput
                   style={styles.input}
@@ -95,6 +98,8 @@ const LoginScreen = () => {
                   placeholderTextColor={colors.mediumGray}
                   autoCapitalize="none"
                   autoCorrect={false}
+                  onFocus={() => setIsUsernameFocused(true)}
+                  onBlur={() => setIsUsernameFocused(false)}
                   accessibilityLabel="Campo para escribir nombre de usuario"
                   selectionColor={colors.primary} // Color del cursor
                 />
@@ -103,7 +108,7 @@ const LoginScreen = () => {
 
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Contraseña</Text>
-              <View style={styles.inputWrapper}>
+              <View style={[styles.inputWrapper, isPasswordFocused && styles.inputWrapperFocused]}>
                 <Entypo name="lock" size={20} color={colors.mediumGray} />
                 <TextInput
                   style={styles.input}
@@ -113,6 +118,8 @@ const LoginScreen = () => {
                   placeholder="Escribe tu contraseña"
                   placeholderTextColor={colors.mediumGray}
                   onSubmitEditing={handleLogin}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
                   accessibilityLabel="Campo para escribir contraseña"
                   selectionColor={colors.primary} // Color del cursor
                 />
@@ -128,6 +135,7 @@ const LoginScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
+
 
             {errorMessage ? (
               <View style={styles.errorContainer}>
@@ -319,6 +327,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
   },
+  inputWrapperFocused: {
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 2,
+  },  
 });
 
 export default withNavigationGuard(LoginScreen);
