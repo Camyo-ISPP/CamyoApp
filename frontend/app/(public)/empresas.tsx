@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Linking, StyleSheet, ActivityIndicator, Touchab
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
-import { startChat } from "../chat/services";
+import { startChat } from "../(protected)/chat/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { Image } from "react-native";
 import defaultImage from "@/assets/images/empresa.jpg";

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import ChatComponent from './chat';  // Componente de chat
-import { database } from '../../firebase';
+import { database } from '../../../firebase';
 import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import colors from '@/assets/styles/colors';
 import { useRouter } from 'expo-router';
 import ProtectedRoute from '@/security/ProtectedRoute';
-import defaultImage from "../../assets/images/camionero.png";
-import defaultEmpImage from "../../assets/images/empresa.jpg";
+import defaultImage from "../../../assets/images/camionero.png";
+import defaultEmpImage from "../../../assets/images/empresa.jpg";
 
 interface Chat {
   id: string;

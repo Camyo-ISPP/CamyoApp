@@ -1,5 +1,5 @@
 import { collection, query, where, getDocs, addDoc, orderBy, onSnapshot } from 'firebase/firestore';
-import { database } from '../../firebase';
+import { database } from '../../../firebase';
 
 // Function to get or create a chat between two users
 export const getOrCreateChat = async (userId1: string | number, userId2: string | number) => {

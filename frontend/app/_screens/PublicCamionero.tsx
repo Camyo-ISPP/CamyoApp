@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 const { unifyUserData } = require("../../utils/unifyData");
 import BackButton from "../_components/BackButton";
-import { startChat } from "../chat/services";
+import { startChat } from "../(protected)/chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
 const PublicCamionero = ({ userId }) => {

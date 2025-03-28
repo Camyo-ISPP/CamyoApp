@@ -9,7 +9,7 @@ const { unifyUserData } = require("../../utils/unifyData");
 import defaultImage from "../../assets/images/empresa.jpg";
 import { useAuth } from "../../contexts/AuthContext";
 import BackButton from "../_components/BackButton";
-import { startChat } from "../chat/services";
+import { startChat } from "../(protected)/chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
 const PublicEmpresa = ({ userId }) => {

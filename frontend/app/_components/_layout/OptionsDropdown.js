@@ -28,7 +28,7 @@ const OptionsDropdown = () => {
                 <Text style={styles.dropdownButtonText}>Empresas</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => router.push('/buscar-ofertas')} style={styles.dropdownButton}>
+              <TouchableOpacity onPress={() => router.push('/explorar')} style={styles.dropdownButton}>
                 <MaterialIcons name="search" size={20} style={styles.dropdownButtonIcon} />
                 <Text style={styles.dropdownButtonText}>Ofertas</Text>
               </TouchableOpacity>

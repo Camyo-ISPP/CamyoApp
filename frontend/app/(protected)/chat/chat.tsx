@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar, Send } from 'react-native-gifted-chat';
 import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc } from 'firebase/firestore';
-import { database } from '../../firebase';
-import { useAuth } from '../../contexts/AuthContext';
+import { database } from '../../../firebase';
+import { useAuth } from '../../../contexts/AuthContext';
 import colors from '@/assets/styles/colors';
-import defaultImage from "../../assets/images/camionero.png";
+import defaultImage from "../../../assets/images/camionero.png";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import dayes from 'dayjs/locale/es'
-import defaultEmpImage from "../../assets/images/empresa.jpg";
+import defaultEmpImage from "../../../assets/images/empresa.jpg";
 
 interface Message {
   _id: string;

@@ -16,7 +16,7 @@ function RootLayout() {
         miperfil: "Mi Perfil",
         miperfilempresa: "Mi Perfil Empresa",
         miperfilcamionero: "Mi Perfil Camionero",
-        "buscar-ofertas": "Buscar Ofertas",
+        "explorar": "Explorar Ofertas",
         "camionero/[camioneroId]": "Perfil Camionero",
         "oferta/crear": "Publicar Nueva Oferta",
         empresas: "Lista de Empresas",
@@ -41,7 +41,7 @@ function RootLayout() {
       <>
         <CamyoWebNavBar
           onSearch={(query: string) => {
-            router.push(`/buscar-ofertas?query=${query}`);
+            router.push(`/explorar?query=${query}`);
           }}/>
       
       <PaymentProvider>
@@ -64,7 +64,7 @@ function RootLayout() {
         
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/[ofertaId]" />
-        <Stack.Screen name="buscar-ofertas" />
+        <Stack.Screen name="explorar" />
         <Stack.Screen name="chat" />
         <Stack.Screen name="chat/list" />
         

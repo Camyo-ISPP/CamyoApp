@@ -164,7 +164,7 @@ export default function Index() {
                       <MaterialIcons name="login" size={20} color="white" style={{ marginRight: 8 }} />
                       <Text style={styles.buttonText}>Iniciar sesión</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/explorar")}>
                       <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
                       <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
                     </TouchableOpacity>
@@ -175,7 +175,7 @@ export default function Index() {
                       <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
                       <Text style={styles.buttonText}>Mis ofertas</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/explorar")}>
                       <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
                       <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
                     </TouchableOpacity>
@@ -258,7 +258,7 @@ export default function Index() {
                 if (!user) {
                   router.push("/login");
                 } else if (user.rol === "CAMIONERO") {
-                  router.push("/buscar-ofertas");
+                  router.push("/explorar");
                 } else if (user.rol === "EMPRESA") {
                   router.push("/misofertas");
                 } else if (user.rol === "ADMIN") {

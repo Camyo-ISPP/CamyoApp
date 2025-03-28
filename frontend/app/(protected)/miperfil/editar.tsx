@@ -1,8 +1,8 @@
-import { useAuth } from '../../contexts/AuthContext';
-import EditarPerfilCamionero from '../_screens/EditarPerfilCamionero';
-import EditarPerfilEmpresa from '../_screens/EditarPerfilEmpresa';
-import WIP from '../_screens/WIP';
-import ProtectedRoute from '../../security/ProtectedRoute';
+import { useAuth } from '../../../contexts/AuthContext';
+import EditarPerfilCamionero from '../../_screens/EditarPerfilCamionero';
+import EditarPerfilEmpresa from '../../_screens/EditarPerfilEmpresa';
+import WIP from '../../_screens/WIP';
+import ProtectedRoute from '../../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
 import withNavigationGuard from '@/hoc/withNavigationGuard';
 import { useEffect } from "react";

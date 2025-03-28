@@ -9,7 +9,7 @@ import { usePayment } from "@/contexts/PaymentContext";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import SuccessModal from "../_components/SuccessModal";
+import SuccessModal from "../../_components/SuccessModal";
 
 const SubscriptionPlans = () => {
     const { user, userToken } = useAuth();

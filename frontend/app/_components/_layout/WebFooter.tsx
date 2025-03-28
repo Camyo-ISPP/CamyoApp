@@ -58,7 +58,7 @@ export default function WebFooter() {
                 <TouchableOpacity onPress={() => router.push("/")}>
                   <Text style={styles.linkText}>Inicio</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push("/buscar-ofertas")}>
+                <TouchableOpacity onPress={() => router.push("/explorar")}>
                   <Text style={styles.linkText}>Explorar ofertas</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => router.push("/empresas")}>
