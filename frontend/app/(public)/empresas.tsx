@@ -7,7 +7,7 @@ import { startChat } from "../chat/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { Image } from "react-native";
 import defaultImage from "@/assets/images/empresa.jpg";
-import WebFooter from "../_components/WebFooter";
+import WebFooter from "../_components/_layout/WebFooter";
 
 interface Usuario {
   id: number;

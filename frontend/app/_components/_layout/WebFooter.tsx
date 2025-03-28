@@ -2,12 +2,11 @@ import { useRouter } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, TextInput, Image, Dimensions, Linking } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import React, { useEffect, useState } from "react";
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const CamyoLogo = require('../../assets/images/camyoV2.png');
+const CamyoLogo = require('../../../assets/images/camyoV2.png');
 
 export default function WebFooter() {
   const router = useRouter();

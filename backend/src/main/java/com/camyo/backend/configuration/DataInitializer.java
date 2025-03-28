@@ -74,7 +74,7 @@ public class DataInitializer {
                                         + "(238, 'Trans-Andalus', '233212111', 'emp_piloto17', 'transandalus@ejemplo.com', 'Córdoba, España', 'Expandiendo el transporte desde Córdoba al resto de la península', NULL, '$2a$10$rR8QzJaetgIk0m1ry6tWae.t6zb8uJ6WsSZyNO16FN.K6ILD4SIBq',202),"
                                         
                                         + "(239, 'Isabel', '777666555', 'isabel', 'isabel@ejemplo.com', 'Badajoz, España', 'La mejor camionera autónoma', NULL, '$2a$10$Kgkh3hHPPmPeu4TxhzC1DeYbZq.spo9FqHNDcPHiKxXgprBSZznF2',201),"
-                                        + "(240, 'OPAM', '777666555', 'mopa', 'opam@ejemplo.com', 'Badajoz, España', 'Empresa extremeña buscando trabajadores por la península', NULL, '$2a$10$Kgkh3hHPPmPeu4TxhzC1DeYbZq.spo9FqHNDcPHiKxXgprBSZznF2',202),"
+                                        + "(240, 'MOPA', '777666555', 'mopa', 'mopa@ejemplo.com', 'Badajoz, España', 'Empresa pacense buscando trabajadores por la península', NULL, '$2a$10$Kgkh3hHPPmPeu4TxhzC1DeYbZq.spo9FqHNDcPHiKxXgprBSZznF2',202),"
                                         // contraseñas: 12
                                         + "(241, 'Manuel Jesús López', '333222111', 'manuel', 'manuel@gmail.com', 'Almería, España', 'Soy un experto en el sector desde hace muchos años, siempre estoy dispuesto a hacer un trabajo', NULL, '$2a$10$Kgkh3hHPPmPeu4TxhzC1DeYbZq.spo9FqHNDcPHiKxXgprBSZznF2',201),"
                                         + "(242, 'José Luis Martinez', '777666555', 'joseluis', 'josel@gmail.com', 'Badajoz, España', 'Soy muy eficaz en tanto cargas como trabajos por contrato, soy el más veloz en todo', NULL, '$2a$10$Kgkh3hHPPmPeu4TxhzC1DeYbZq.spo9FqHNDcPHiKxXgprBSZznF2',201),"

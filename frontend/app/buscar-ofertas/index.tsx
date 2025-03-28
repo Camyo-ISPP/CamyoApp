@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, Animated, Dimensions, ScrollView, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, Animated, Dimensions, ScrollView, ActivityIndicator } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Picker } from '@react-native-picker/picker';
 import colors from "frontend/assets/styles/colors";
@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
-import WebFooter from "../_components/WebFooter";
+import WebFooter from "../_components/_layout/WebFooter";
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;

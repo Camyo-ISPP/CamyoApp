@@ -1,20 +1,19 @@
 import { router } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Platform, Image, ScrollView, ActivityIndicator, Dimensions, Animated, Easing } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, ScrollView, ActivityIndicator, Dimensions, Animated, Easing } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import BottomBar from '../_components/BottomBar';
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import CamyoWebNavBar from "../_components/CamyoNavBar";
 const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
 const truckImage = require("../../assets/images/camion.png");
 const heroBackground = require("../../assets/images/lonely-road.jpg");
 import { useAuth } from "../../contexts/AuthContext";
 import Testimonios from "../_components/Testimonios";
-import WebFooter from "../_components/WebFooter";
+import WebFooter from "../_components/_layout/WebFooter";
+import CamyoNavBar from "../_components/_layout/CamyoNavBar";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -66,13 +65,11 @@ export default function Index() {
     const scaleValue = useRef(new Animated.Value(1)).current;
 
     const handleHover = (toValue) => {
-      if (Platform.OS === "web") {
-        Animated.spring(scaleValue, {
-          toValue,
-          friction: 3,
-          useNativeDriver: true,
-        }).start();
-      }
+      Animated.spring(scaleValue, {
+        toValue,
+        friction: 3,
+        useNativeDriver: true,
+      }).start();
     };
 
     return (
@@ -141,172 +138,153 @@ export default function Index() {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      {Platform.OS === 'web' ? (
-        <View style={styles.webContainer}>
-          <CamyoWebNavBar onSearch={undefined} />
-          <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
-            <View style={styles.whiteTransition} />
-            {/* Hero Section */}
-            <View style={styles.heroContainer}>
-              <Image source={heroBackground} style={styles.heroBackground} blurRadius={2} />
-              <View style={styles.heroOverlay} />
-              <View style={styles.heroContent}>
-                <Text style={styles.heroTitle}>
-                  {(!user || !user.rol)
-                    ? "Donde los profesionales del transporte y las empresas se encuentran"
-                    : `¡Bienvenido de nuevo, ${user.nombre}!`}
-                </Text>
-                <Text style={styles.heroSubtitle}>
-                  Conectamos el talento con las mejores oportunidades del sector
-                </Text>
 
-                <View style={styles.heroButtons}>
-                  {(!user || !user.rol) ? (
-                    <>
-                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/login")}>
-                        <MaterialIcons name="login" size={20} color="white" style={{ marginRight: 8 }} />
-                        <Text style={styles.buttonText}>Iniciar sesión</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
-                        <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
-                        <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
-                      </TouchableOpacity>
-                    </>
-                  ) : user.rol === "CAMIONERO" ? (
-                    <>
-                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
-                        <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
-                        <Text style={styles.buttonText}>Mis ofertas</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
-                        <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
-                        <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
-                      </TouchableOpacity>
-                    </>
-                  ) : user.rol === "EMPRESA" ? (
-                    <>
-                      <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
-                        <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
-                        <Text style={styles.buttonText}>Mis ofertas</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
-                        <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
-                        <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
-                      </TouchableOpacity>
-                    </>
-                  ) : (
-                    <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
-                      <MaterialIcons name="logout" size={20} color="white" style={{ marginRight: 8 }} />
-                      <Text style={styles.buttonText}>Cerrar sesión</Text>
+      <View style={styles.webContainer}>
+        <CamyoNavBar onSearch={undefined} />
+        <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
+          <View style={styles.whiteTransition} />
+          {/* Hero Section */}
+          <View style={styles.heroContainer}>
+            <Image source={heroBackground} style={styles.heroBackground} blurRadius={2} />
+            <View style={styles.heroOverlay} />
+            <View style={styles.heroContent}>
+              <Text style={styles.heroTitle}>
+                {(!user || !user.rol)
+                  ? "Donde los profesionales del transporte y las empresas se encuentran"
+                  : `¡Bienvenido de nuevo, ${user.nombre}!`}
+              </Text>
+              <Text style={styles.heroSubtitle}>
+                Conectamos el talento con las mejores oportunidades del sector
+              </Text>
+
+              <View style={styles.heroButtons}>
+                {(!user || !user.rol) ? (
+                  <>
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/login")}>
+                      <MaterialIcons name="login" size={20} color="white" style={{ marginRight: 8 }} />
+                      <Text style={styles.buttonText}>Iniciar sesión</Text>
                     </TouchableOpacity>
-                  )}
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                      <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
+                      <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : user.rol === "CAMIONERO" ? (
+                  <>
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
+                      <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
+                      <Text style={styles.buttonText}>Mis ofertas</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/buscar-ofertas")}>
+                      <FontAwesome5 name="search" size={18} color="#f15025" style={{ marginRight: 8 }} />
+                      <Text style={styles.secondaryButtonText}>Explorar ofertas</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : user.rol === "EMPRESA" ? (
+                  <>
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/misofertas")}>
+                      <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
+                      <Text style={styles.buttonText}>Mis ofertas</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
+                      <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
+                      <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
+                    <MaterialIcons name="logout" size={20} color="white" style={{ marginRight: 8 }} />
+                    <Text style={styles.buttonText}>Cerrar sesión</Text>
+                  </TouchableOpacity>
+                )}
 
-                </View>
               </View>
-            </View>
-
-            {/* Stats Section */}
-            <StatsSection />
-
-            {/* Ofertas Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Ofertas Recientes</Text>
-              <Text style={styles.sectionSubtitle}>Las mejores oportunidades del mercado</Text>
-
-              <View style={styles.listaContainer}>
-                {/* Columna de Carga */}
-                <View style={styles.columna}>
-                  <View style={styles.columnaHeader}>
-                    <FontAwesome5 name="route" size={24} color={colors.secondary} />
-                    <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
-                  </View>
-                  {data.filter(item => item.tipoOferta === "CARGA").map(item => (
-                    <CardOferta key={item.id} item={item} />
-                  ))}
-                </View>
-
-                {/* Columna de Trabajo */}
-                <View style={styles.columna}>
-                  <View style={styles.columnaHeader}>
-                    <MaterialIcons name="work" size={24} color={colors.secondary} />
-                    <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
-                  </View>
-                  {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
-                    <CardOferta key={item.id} item={item} />
-                  ))}
-                </View>
-              </View>
-            </View>
-
-            {/* Testimonios */}
-            <section style={{ fontFamily: 'inherit' }}>
-              <Testimonios />
-            </section>
-
-
-
-            {/* CTA Section */}
-            <View style={styles.ctaSection}>
-              <Text style={styles.ctaTitle}>¿Listo para encontrar tu próxima oportunidad?</Text>
-
-              {user ? (
-                <Text style={styles.ctaSubtitle}>¡Bienvenido de nuevo, {user.nombre}!</Text>
-              ) : (
-                <Text style={styles.ctaSubtitle}>Regístrate ahora y accede a las mejores ofertas del sector</Text>
-              )}
-
-              <TouchableOpacity
-                style={styles.ctaButton}
-                onPress={() => {
-                  if (!user) {
-                    router.push("/login");
-                  } else if (user.rol === "CAMIONERO") {
-                    router.push("/buscar-ofertas");
-                  } else if (user.rol === "EMPRESA") {
-                    router.push("/misofertas");
-                  } else if (user.rol === "ADMIN") {
-                    logout();
-                  }
-                }}
-              >
-                <Text style={styles.ctaButtonText}>
-                  {!user
-                    ? "Regístrate Gratis"
-                    : user.rol === "CAMIONERO"
-                      ? "Explorar Ofertas"
-                      : user.rol === "EMPRESA"
-                        ? "Ver Mis Ofertas"
-                        : user.rol === "ADMIN"
-                          ? "Cerrar Sesión"
-                          : "Continuar"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <WebFooter />
-
-          </ScrollView>
-        </View >
-      ) : (
-        <View style={styles.phoneContainer}>
-          <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-          <View style={styles.searchView}>
-            <Ionicons name="menu" size={30} color="black" style={styles.menuIcon} />
-            <View style={styles.barraSuperior}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Buscar Ofertas"
-                placeholderTextColor={colors.secondary}
-              />
-              <TouchableOpacity>
-                <FontAwesome name="search" size={24} color="black" style={styles.searchIcon} />
-              </TouchableOpacity>
             </View>
           </View>
-          <BottomBar />
-        </View>
-      )
-      }
+
+          {/* Stats Section */}
+          <StatsSection />
+
+          {/* Ofertas Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ofertas Recientes</Text>
+            <Text style={styles.sectionSubtitle}>Las mejores oportunidades del mercado</Text>
+
+            <View style={styles.listaContainer}>
+              {/* Columna de Carga */}
+              <View style={styles.columna}>
+                <View style={styles.columnaHeader}>
+                  <FontAwesome5 name="route" size={24} color={colors.secondary} />
+                  <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
+                </View>
+                {data.filter(item => item.tipoOferta === "CARGA").map(item => (
+                  <CardOferta key={item.id} item={item} />
+                ))}
+              </View>
+
+              {/* Columna de Trabajo */}
+              <View style={styles.columna}>
+                <View style={styles.columnaHeader}>
+                  <MaterialIcons name="work" size={24} color={colors.secondary} />
+                  <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
+                </View>
+                {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
+                  <CardOferta key={item.id} item={item} />
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Testimonios */}
+          <section style={{ fontFamily: 'inherit' }}>
+            <Testimonios />
+          </section>
+
+
+
+          {/* CTA Section */}
+          <View style={styles.ctaSection}>
+            <Text style={styles.ctaTitle}>¿Listo para encontrar tu próxima oportunidad?</Text>
+
+            {user ? (
+              <Text style={styles.ctaSubtitle}>¡Bienvenido de nuevo, {user.nombre}!</Text>
+            ) : (
+              <Text style={styles.ctaSubtitle}>Regístrate ahora y accede a las mejores ofertas del sector</Text>
+            )}
+
+            <TouchableOpacity
+              style={styles.ctaButton}
+              onPress={() => {
+                if (!user) {
+                  router.push("/login");
+                } else if (user.rol === "CAMIONERO") {
+                  router.push("/buscar-ofertas");
+                } else if (user.rol === "EMPRESA") {
+                  router.push("/misofertas");
+                } else if (user.rol === "ADMIN") {
+                  logout();
+                }
+              }}
+            >
+              <Text style={styles.ctaButtonText}>
+                {!user
+                  ? "Regístrate Gratis"
+                  : user.rol === "CAMIONERO"
+                    ? "Explorar Ofertas"
+                    : user.rol === "EMPRESA"
+                      ? "Ver Mis Ofertas"
+                      : user.rol === "ADMIN"
+                        ? "Cerrar Sesión"
+                        : "Continuar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <WebFooter />
+
+        </ScrollView>
+      </View >
+
 
     </Animated.View >
   );
@@ -473,7 +451,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   columna: {
-    width: Platform.OS === 'web' ? '45%' : '100%',
+    width: '45%',
     minWidth: 350,
   },
   columnaHeader: {
@@ -624,7 +602,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     padding: 25,
     borderRadius: 12,
-    width: Platform.OS === 'web' ? '30%' : '100%',
+    width: '30%',
     minWidth: 300,
     maxWidth: 400,
     shadowColor: "#000",

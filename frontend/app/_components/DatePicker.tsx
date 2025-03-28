@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Platform, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker"; // Móvil
 import DatePickerWeb from "react-datepicker"; // Navegador
 import "react-datepicker/dist/react-datepicker.css";
@@ -12,14 +12,11 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
   const [showPicker, setShowPicker] = useState(false);
 
   const openDatePicker = () => {
-    if (Platform.OS !== "web") {
-      setShowPicker(true);
-    }
+    setShowPicker(true);
   };
 
-  const handleDateChange = (event, selectedDate) => {
+  const handleDateChange = (event, finalDate) => {
     setShowPicker(false);
-    const finalDate = Platform.OS === 'android' ? new Date(event.nativeEvent.timestamp) : selectedDate;
     if (finalDate) {
       onChange(format(finalDate, "dd-MM-yyyy", { locale: es }));
     }
@@ -33,37 +30,33 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
 
   const parseDate = (dateString) => {
     if (!dateString) return new Date();
-  
+
     const parts = dateString.split("-");
     if (parts.length === 3) {
       return new Date(parts[2], parts[1] - 1, parts[0]);
     }
-  
+
     return new Date(dateString);
   };
-  
+
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <FontAwesome5 name={iconName} size={20} style={styles.icon} />
-        {Platform.OS === "web" ? (
-          <DatePickerWeb
-            selected={value ? parseDate(value) : new Date()}
-            onChange={(date) => onChange(format(date, "dd-MM-yyyy", { locale: es }))} 
-            dateFormat="dd-MM-yyyy"
-            locale={es}
-            className="react-datepicker"
-            popperPlacement="top-start"
-            portalId="root-portal"
-            customInput={<Text style={styles.dateText}>{value || "Selecciona una fecha"}</Text>}
-          />
-        ) : (
-          <TouchableOpacity onPress={openDatePicker} style={styles.datePickerButton}>
-            <Text style={styles.dateText}>{formatDate(value) || "Selecciona una fecha"}</Text>
-          </TouchableOpacity>
-        )}
+
+        <DatePickerWeb
+          selected={value ? parseDate(value) : new Date()}
+          onChange={(date) => onChange(format(date, "dd-MM-yyyy", { locale: es }))}
+          dateFormat="dd-MM-yyyy"
+          locale={es}
+          className="react-datepicker"
+          popperPlacement="top-start"
+          portalId="root-portal"
+          customInput={<Text style={styles.dateText}>{value || "Selecciona una fecha"}</Text>}
+        />
+
         {showPicker && (
           <DateTimePicker
             value={value && !isNaN(new Date(value).getTime()) ? new Date(value) : new Date()}

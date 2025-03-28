@@ -3,11 +3,10 @@ import { Text, View, StyleSheet, TouchableOpacity, TextInput, Image, Dimensions 
 import colors from "frontend/assets/styles/colors";
 import React, { useEffect, useState } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-const ProyectoLogo = require('../../assets/images/camyoV1.png');
-import routes from "./routes";
+const ProyectoLogo = require('../../../assets/images/camyoV1.png');
 import PerfilDropdown from "./ProfileDropdown";
 import OptionsDropdown from "./OptionsDropdown";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
 
@@ -80,7 +79,7 @@ export default function CamyoWebNavBar({ onSearch }) {
                 <Text style={styles.buttonText}>Explorar Ofertas</Text>
               </TouchableOpacity>
               <View style={styles.dot} />
-              <TouchableOpacity style={styles.button} onPress={() => router.push(routes.listcompanies)}>
+              <TouchableOpacity style={styles.button} onPress={() => router.push("/empresas")}>
                 <Text style={styles.buttonText}>Explorar Empresas</Text>
               </TouchableOpacity>
             </>
@@ -89,7 +88,7 @@ export default function CamyoWebNavBar({ onSearch }) {
           {user ? (
             <PerfilDropdown user={user} />
           ) : (
-            <TouchableOpacity style={styles.button} onPress={() => router.push(routes.login)}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push("/login")}>
               <Text style={styles.buttonText}>Iniciar Sesión</Text>
             </TouchableOpacity>
           )}

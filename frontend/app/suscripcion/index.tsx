@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform, Animated, Easing, ActivityIndicator, Image } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Animated, Easing, ActivityIndicator, Image } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
@@ -60,10 +60,10 @@ const SubscriptionPlans = () => {
         if (id === "BASICO" || id === "PREMIUM") {
             router.push("/pago/checkout");
         }
-        
+
     }, [id])
 
-    
+
 
     if (!isAuthLoaded) {
         return (
@@ -143,48 +143,42 @@ const SubscriptionPlans = () => {
         const scaleValue = useRef(new Animated.Value(1)).current;
 
         const handleMouseEnter = () => {
-            if (Platform.OS === "web") {
-                Animated.timing(scaleValue, {
-                    toValue: 1.03,
-                    duration: 200,
-                    useNativeDriver: true,
-                    easing: Easing.out(Easing.quad),
-                }).start();
-            }
+            Animated.timing(scaleValue, {
+                toValue: 1.03,
+                duration: 200,
+                useNativeDriver: true,
+                easing: Easing.out(Easing.quad),
+            }).start();
         };
 
         const handleMouseLeave = () => {
-            if (Platform.OS === "web") {
-                Animated.timing(scaleValue, {
-                    toValue: 1,
-                    duration: 200,
-                    useNativeDriver: true,
-                    easing: Easing.out(Easing.quad),
-                }).start();
-            }
+            Animated.timing(scaleValue, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true,
+                easing: Easing.out(Easing.quad),
+            }).start();
         };
 
         return (
             <Animated.View
                 style={[
                     styles.card,
-                    { 
-                        borderColor: borderColor, 
+                    {
+                        borderColor: borderColor,
                         backgroundColor: backgroundColor,
                         transform: [{ scale: scaleValue }],
                         marginTop: popular ? 0 : 20,
                     },
                 ]}
-                {...(Platform.OS === "web"
-                    ? ({ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave } as any)
-                    : {})}
+                {...({ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave } as any)}
             >
                 {popular && (
                     <View style={styles.popularBadge}>
                         <Text style={styles.popularBadgeText}>RECOMENDADO</Text>
                     </View>
                 )}
-                
+
                 <View style={styles.planHeader}>
                     <View style={styles.planTitleContainer}>
                         {getPlanIcon(planLevel)}
@@ -271,18 +265,16 @@ const SubscriptionPlans = () => {
             <View style={styles.container}>
                 <ScrollView contentContainerStyle={styles.scrollViewContent}>
                     <View style={styles.whiteTransition} />
-                    {Platform.OS === 'web' && (
-                        <View style={styles.heroSection}>
-                            <Text style={styles.heroTitle}>Encuentra al mejor talento para tu empresa</Text>
-                            <Text style={styles.heroSubtitle}>Elige el plan que mejor se adapte a tus necesidades de contratación</Text>
-                        </View>
-                    )}
+                    <View style={styles.heroSection}>
+                        <Text style={styles.heroTitle}>Encuentra al mejor talento para tu empresa</Text>
+                        <Text style={styles.heroSubtitle}>Elige el plan que mejor se adapte a tus necesidades de contratación</Text>
+                    </View>
                     <View style={styles.contentContainer}>
                         <Text style={styles.sectionTitle}>Planes de Suscripción</Text>
                         <Text style={styles.sectionDescription}>
                             Actualmente tienes el plan: <Text style={styles.currentPlanHighlight}>{formatPlanLevel(currentPlan || "GRATIS")}</Text>
                         </Text>
-                        
+
                         <View style={styles.plansContainer}>
                             {plans.map((plan) => (
                                 <PlanCard
@@ -311,13 +303,13 @@ const SubscriptionPlans = () => {
                                 <Text style={styles.faqAnswer}>Actualmente no ofrecemos periodos de pruebas gratuitos. Contacta con el equipo de soporte para más información.</Text>
                             </View>
                             <View style={styles.faqItem}>
-                            <Text style={styles.faqQuestion}>¿Cómo se procesan los pagos?</Text>
-                            <Text style={styles.faqAnswer}>
-                                Usamos <Text style={{fontWeight: 'bold'}}>Stripe</Text>, la plataforma de pagos líder mundial. 
-                                Aceptamos todas las tarjetas principales (Visa, Mastercard, etc.) de forma segura. 
-                                Tus datos de pago están encriptados y nunca se almacenan en nuestros servidores. 
-                                Los pagos son recurrentes cada mes con facturación automática.
-                            </Text>
+                                <Text style={styles.faqQuestion}>¿Cómo se procesan los pagos?</Text>
+                                <Text style={styles.faqAnswer}>
+                                    Usamos <Text style={{ fontWeight: 'bold' }}>Stripe</Text>, la plataforma de pagos líder mundial.
+                                    Aceptamos todas las tarjetas principales (Visa, Mastercard, etc.) de forma segura.
+                                    Tus datos de pago están encriptados y nunca se almacenan en nuestros servidores.
+                                    Los pagos son recurrentes cada mes con facturación automática.
+                                </Text>
                             </View>
                         </View>
                     </View>
@@ -391,20 +383,20 @@ const styles = StyleSheet.create({
         color: colors.primary,
     },
     plansContainer: {
-        flexDirection: Platform.OS === 'web' ? 'row' : 'column',
+        flexDirection: 'row',
         justifyContent: 'center',
-        alignItems: Platform.OS === 'web' ? 'flex-start' : 'center',
+        alignItems: 'flex-start',
         flexWrap: 'wrap',
         marginBottom: 40,
     },
     card: {
-        width: Platform.OS === 'web' ? '30%' : '90%',
+        width: '30%',
         minWidth: 280,
         borderRadius: 12,
         borderWidth: 2,
         padding: 25,
-        marginHorizontal: Platform.OS === 'web' ? 10 : 0,
-        marginBottom: Platform.OS === 'web' ? 0 : 20,
+        marginHorizontal: 10,
+        marginBottom: 0,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,

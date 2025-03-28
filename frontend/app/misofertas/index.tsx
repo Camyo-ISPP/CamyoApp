@@ -1,7 +1,7 @@
 import { useAuth } from '../../contexts/AuthContext';
 import MisOfertasCamionero from '../_screens/MisOfertasCamionero';
 import MisOfertasEmpresa from '../_screens/MisOfertasEmpresa';
-import WIP from '../_components/WIP';
+import WIP from '../_screens/WIP';
 import ProtectedRoute from '../../security/ProtectedRoute';
 import { useRouter } from "expo-router";
 import withNavigationGuard from '@/hoc/withNavigationGuard';

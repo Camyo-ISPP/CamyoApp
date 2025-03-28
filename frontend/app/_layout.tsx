@@ -1,19 +1,14 @@
 import { Stack, useSegments, useRouter, usePathname, router } from "expo-router";
-import { Platform } from "react-native";
 import { useState, useEffect } from 'react';
-import CamyoWebNavBar from "./_components/CamyoNavBar";
-import BottomBar from "./_components/BottomBar";
-import WebFooter from "./_components/WebFooter";
+import CamyoWebNavBar from "./_components/_layout/CamyoNavBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 
 function RootLayout() {
   const segments = useSegments();
-  const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
  
   useEffect(() => {
-    if (Platform.OS === "web") {
       const pageTitles: Record<string, string> = {
         index: "Inicio",
         login: "Iniciar Sesión",
@@ -39,17 +34,15 @@ function RootLayout() {
 
       const currentSegment = segments.join("/");
       document.title = pageTitles[currentSegment] || "Camyo";
-    }
+
   }, [segments]);
 
   return (
       <>
-      {!isMobile && 
         <CamyoWebNavBar
           onSearch={(query: string) => {
             router.push(`/buscar-ofertas?query=${query}`);
-          }}
-      />}
+          }}/>
       
       <PaymentProvider>
       <SubscriptionProvider>
@@ -84,8 +77,6 @@ function RootLayout() {
         <Stack.Screen name="misofertas" />
       </Stack>
       
-      {isMobile && <BottomBar />}
-
       </SubscriptionProvider>
       </PaymentProvider>
     </>

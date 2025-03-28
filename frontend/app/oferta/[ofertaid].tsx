@@ -1,4 +1,4 @@
-import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, Platform, ScrollView, Alert, Modal } from "react-native";
+import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: colors.white,
         paddingVertical: 20,
-        paddingTop: Platform.OS === "web" ? '5.8%' : '0%',
+        paddingTop: '5.8%',
         marginTop: 20,
     },
     scrollContainer: {
@@ -504,9 +504,9 @@ const styles = StyleSheet.create({
         paddingVertical: 0,
     },
     card: {
-        width: Platform.OS === "web" ? '60%' : '100%',
+        width: '60%',
         marginHorizontal: '15%',
-        padding: Platform.OS === "web" ? 20 : 10,
+        padding: 20,
         backgroundColor: colors.white,
         borderRadius: 10,
         shadowColor: "#000",
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     title: {
-        paddingTop: Platform.OS === "web" ? 0 : 10,
+        paddingTop: 0,
         fontSize: 34,
         fontWeight: 'bold',
     },
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
     },
     backIcon: {
         marginLeft: 10,
-        marginTop: Platform.OS === 'ios' ? 30 : 10,
+        marginTop: 10,
     },
     deleteButton: {
         flex: 1,

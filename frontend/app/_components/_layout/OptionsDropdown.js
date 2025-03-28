@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Entypo, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
 import { router } from 'expo-router';
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext"
 
 const OptionsDropdown = () => {
   const { user } = useAuth();

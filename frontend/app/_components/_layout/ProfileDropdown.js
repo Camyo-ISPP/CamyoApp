@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { Entypo } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
 import { useRouter } from 'expo-router';
-import SuccessModal from './SuccessModal';
-import routes from './routes';
-import defaultImageEmpresa from "../../assets/images/empresa.jpg";
-import defaultImageCamionero from "../../assets/images/camionero.png";
+import SuccessModal from '../SuccessModal';
+import defaultImageEmpresa from "../../../assets/images/empresa.jpg";
+import defaultImageCamionero from "../../../assets/images/camionero.png";
 
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -55,7 +54,7 @@ const ProfileDropdown = ({ user }) => {
           <Text style={styles.dropdownEmail}>{user.email}</Text>
 
           {user.rol !== 'ADMIN' && (
-            <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push(routes.profile)} >
+            <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push("/miperfil")} >
               <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
             </TouchableOpacity>
           )}
