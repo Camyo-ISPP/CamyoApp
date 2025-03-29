@@ -49,8 +49,8 @@ const MiPerfilCamionero = () => {
     
             const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${camionero.id}`);
             
-            console.log("Ofertas recibidas:", response.data);
-            setOfertasCamionero(response.data || []);
+            console.log("Ofertas recibidas:", response.data[2]);
+            setOfertasCamionero(response.data[2]);
             
         } catch (error) {
             if (axios.isAxiosError(error)) {
