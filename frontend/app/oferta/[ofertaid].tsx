@@ -8,6 +8,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
+import { RouteMap } from "../_components/Maps";
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
@@ -26,6 +27,10 @@ export default function OfertaDetalleScreen() {
     const { user, userToken, login, logout } = useAuth();
     const [successModalVisibleCam, setSuccessModalVisibleCam] = useState(false);
     const [successModalVisibleEmp, setSuccessModalVisibleEmp] = useState(false);
+
+    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const openCageKey = process.env.EXPO_PUBLIC_OPENCAGE_API_KEY;
+
 
     useEffect(() => {
         if (ofertaid) {
@@ -376,6 +381,12 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.detallesLabel}>Fin máximo:</Text> {formatDate(offerCargaData.finMaximo)}
                             </Text>
                         </View>
+                        <RouteMap
+                            origin={offerCargaData.origen}
+                            destination={offerCargaData.destino}
+                            openCageKey={openCageKey}
+                            googleMapsApiKey={googleApiKey}
+                            />
                     </>
                 ) : (
                     offerTrabajoData !== null ? (
