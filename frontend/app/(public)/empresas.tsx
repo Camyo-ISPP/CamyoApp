@@ -55,10 +55,9 @@ const EmpresasLista = () => {
   return (
     <ScrollView contentContainerStyle={{
       flexGrow: 1,
-      paddingTop: 20
     }}>
       {empresas.map((empresa, index) => (
-        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
+        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 40 }]}>
           <View style={styles.contentRow}>
             <Image
               source={empresa.usuario.foto ? { uri: `data:image/png;base64,${empresa.usuario.foto}` } : defaultImage}
