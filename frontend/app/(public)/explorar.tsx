@@ -306,7 +306,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 const styles = StyleSheet.create({
     scrollViewContent: {
         flexGrow: 1,
-        paddingTop: '8%',
+        paddingTop: '3%',
         backgroundColor: colors.lightGray,
     },
     webContainer: {

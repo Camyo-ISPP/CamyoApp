@@ -140,12 +140,10 @@ export default function Index() {
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
 
       <View style={styles.webContainer}>
-        <CamyoNavBar onSearch={undefined} />
         <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
-          <View style={styles.whiteTransition} />
           {/* Hero Section */}
           <View style={styles.heroContainer}>
-            <Image source={heroBackground} style={styles.heroBackground} blurRadius={2} />
+            <Image source={heroBackground} style={styles.heroBackground} blurRadius={5} />
             <View style={styles.heroOverlay} />
             <View style={styles.heroContent}>
               <Text style={styles.heroTitle}>
@@ -310,7 +308,7 @@ const styles = StyleSheet.create({
 
   /* Hero Section */
   heroContainer: {
-    height: 550,
+    height: 600,
     width: '100%',
     position: 'relative',
     justifyContent: 'center',
