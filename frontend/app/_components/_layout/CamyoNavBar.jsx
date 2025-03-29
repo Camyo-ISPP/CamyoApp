@@ -13,7 +13,6 @@ export default function CamyoWebNavBar({ onSearch }) {
   const router = useRouter();
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1600);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const updateSize = () => {
