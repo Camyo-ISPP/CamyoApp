@@ -50,13 +50,4 @@ public class OfertaPatrocinadaController {
         }
     }
 
-    @PutMapping("/expirar")
-    public ResponseEntity<?> expirarPatrocinios() {
-        try {
-            ofertaPatrocinadaService.expirarPatrocinios();
-            return ResponseEntity.ok("Patrocinios expirados exitosamente.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 }

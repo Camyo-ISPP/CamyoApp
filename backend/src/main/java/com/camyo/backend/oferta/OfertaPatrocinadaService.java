@@ -76,8 +76,6 @@ public class OfertaPatrocinadaService {
         OfertaPatrocinada patrocinio = new OfertaPatrocinada();
         patrocinio.setOferta(oferta);
         patrocinio.setEmpresa(empresa);
-        patrocinio.setFechaInicio(LocalDateTime.now());
-        patrocinio.setFechaFin(LocalDateTime.now().plusDays(duracionDias));
         patrocinio.setStatus(PatrocinioStatus.ACTIVO);
     
         oferta.setPromoted(true);
@@ -112,21 +110,6 @@ public class OfertaPatrocinadaService {
     @Transactional(readOnly = true)
     public List<OfertaPatrocinada> listarPatrociniosActivosDeEmpresa(Integer empresaId) {
         return ofertaPatrocinadaRepository.findByEmpresaActivos(empresaId);
-    }
-
-    @Scheduled(cron = "0 0 0 * * ?")
-    @Transactional
-    public void expirarPatrocinios() {
-        List<OfertaPatrocinada> vencidos = ofertaPatrocinadaRepository.findAllVencidos(LocalDateTime.now());
-    
-        for (OfertaPatrocinada p : vencidos) {
-            p.setStatus(PatrocinioStatus.EXPIRADO);
-            Oferta oferta = p.getOferta();
-            oferta.setPromoted(false);
-            ofertaService.guardarOferta(oferta);
-        }
-    
-        ofertaPatrocinadaRepository.saveAll(vencidos);
     }
     
 

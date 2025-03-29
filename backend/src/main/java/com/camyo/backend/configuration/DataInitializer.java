@@ -480,8 +480,8 @@ public class DataInitializer {
                                 );
 
                                 // Insert Oferta Patrocinada
-                                statement.addBatch("INSERT IGNORE INTO ofertas_patrocinadas (id, oferta_id, empresa_id, fecha_inicio, fecha_fin, status) VALUES "
-                                + "(1, 201, 221, '2025-03-01 00:00:00', '2025-03-31 23:59:59', 'ACTIVO')");
+                                statement.addBatch("INSERT IGNORE INTO ofertas_patrocinadas (id, oferta_id, empresa_id, status) VALUES "
+                                + "(1, 201, 221, 'ACTIVO')");
 
                                 // Execute batch
                                 statement.executeBatch();

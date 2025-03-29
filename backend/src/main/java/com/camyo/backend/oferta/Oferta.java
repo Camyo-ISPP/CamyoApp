@@ -87,7 +87,6 @@ public class Oferta {
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
 
-
     @Column(nullable = false)
     private Boolean promoted = false;
     

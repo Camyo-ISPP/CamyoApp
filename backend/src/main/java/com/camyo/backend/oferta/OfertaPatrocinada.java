@@ -25,12 +25,6 @@ public class OfertaPatrocinada {
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
 
-    @Column(name = "fecha_inicio")
-    private LocalDateTime fechaInicio;
-
-    @Column(name = "fecha_fin")
-    private LocalDateTime fechaFin;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private PatrocinioStatus status;
