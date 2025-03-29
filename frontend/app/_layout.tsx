@@ -54,6 +54,8 @@ function RootLayout() {
         <Stack.Screen name="(public)/registro/camionero" />
         <Stack.Screen name="(public)/registro/empresa" />
         <Stack.Screen name="(public)/empresas" />
+        <Stack.Screen name="(public)/terminos" />
+        <Stack.Screen name="(public)/privacidad" />
 
         <Stack.Screen name="miperfil" />
         <Stack.Screen name="miperfil/editar" />

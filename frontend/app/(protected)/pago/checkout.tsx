@@ -48,7 +48,11 @@ function IntegratedCheckout() {
     }
 
     const openTermsLink = () => {
-        Linking.openURL(process.env.EXPO_PUBLIC_FRONTEND_URL + '/terminos-y-condiciones');
+        Linking.openURL(process.env.EXPO_PUBLIC_FRONTEND_URL + '/terminos');
+    }
+
+    const openPrivacyLink = () => {
+        Linking.openURL(process.env.EXPO_PUBLIC_FRONTEND_URL + '/privacidad');
     }
 
     return <>
@@ -116,7 +120,7 @@ function IntegratedCheckout() {
                         Al realizar el pago, aceptas nuestros{' '}
                         <Text style={styles.legalLink} onPress={openTermsLink}>Términos y Condiciones</Text>{' '}
                         y nuestra{' '}
-                        <Text style={styles.legalLink} onPress={openTermsLink}>Política de Privacidad</Text>.
+                        <Text style={styles.legalLink} onPress={openPrivacyLink}>Política de Privacidad</Text>.
                         El pago se renovará automáticamente cada mes hasta que canceles tu suscripción.
                     </Text>
                 </View>

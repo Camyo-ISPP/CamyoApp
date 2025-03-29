@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Modal, ImageBackground } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Modal, ImageBackground, Linking } from "react-native";
 import colors from "../../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons, Entypo, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
@@ -8,7 +8,6 @@ import defaultProfileImage from "../../../assets/images/image.png";
 import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from 'expo-image-picker';
 import SuccessModal from "../../_components/SuccessModal";
-import { terminosYCondiciones, politicaDePrivacidad } from "../../../assets/gdpr";
 
 const EmpresaRegisterScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -17,7 +16,6 @@ const EmpresaRegisterScreen = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [legalModalVisible, setLegalModalVisible] = useState(false);
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -271,6 +269,10 @@ const EmpresaRegisterScreen = () => {
     </View>
   );
 
+  const navigateToTerms = () => {
+    Linking.openURL(process.env.EXPO_PUBLIC_FRONTEND_URL + '/terminos');
+  };
+
   return (
     <ImageBackground
       source={require('../../../assets/images/auth-bg.png')}
@@ -369,7 +371,7 @@ const EmpresaRegisterScreen = () => {
               Acepto los{' '}
               <Text
                 style={styles.termsLink}
-                onPress={() => setLegalModalVisible(true)}
+                onPress={navigateToTerms}
               >
                 Términos y Condiciones
               </Text>
@@ -389,32 +391,6 @@ const EmpresaRegisterScreen = () => {
             onClose={() => setSuccessModalVisible(false)}
             message="¡Registro exitoso!"
           />
-
-          <Modal
-            visible={legalModalVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setLegalModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.legalModal}>
-                <ScrollView contentContainerStyle={styles.legalModalContent}>
-                  <Text style={styles.modalTitle}>Términos y Condiciones</Text>
-                  <Text style={styles.modalText}>{terminosYCondiciones}</Text>
-
-                  <Text style={styles.modalTitle}>Política de Privacidad</Text>
-                  <Text style={styles.modalText}>{politicaDePrivacidad}</Text>
-                </ScrollView>
-                <TouchableOpacity
-                  style={styles.modalCloseButton}
-                  onPress={() => setLegalModalVisible(false)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.modalCloseButtonText}>Cerrar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
         </View>
       </ScrollView>
     </ImageBackground>
