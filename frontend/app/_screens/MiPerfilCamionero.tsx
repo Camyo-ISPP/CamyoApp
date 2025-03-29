@@ -14,41 +14,88 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
     const { user } = useAuth();
     const router = useRouter();
 
     const [resenas, setResenas] = useState([]);
     const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
-    const [ofertas, setOfertas] = useState([]);
+    const [ofertasCamionero, setOfertasCamionero] = useState([]);
+    const [camionero, setCamionero] = useState<{ id: string } | null>(null);
+
+ 
+    const fetchCamionero = async () => {
+        try {
+            if (!user?.userId) return;
+           
+            const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
+            
+            if (response.data) {
+                setCamionero(response.data);
+                console.log("Datos del camionero:", response.data);
+            }
+        } catch (error) {
+            console.error("Error al cargar el camionero:", error);
+        }
+    };
+
+
+    const fetchOfertasCamionero = async () => {
+        try {
+            if (!camionero?.id) {
+                console.log("No hay ID de camionero disponible");
+                return;
+            }
+
+    
+            const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${camionero.id}`);
+            
+            console.log("Ofertas recibidas:", response.data);
+            setOfertasCamionero(response.data || []);
+            
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 404) {
+                    console.log("No hay ofertas para este camionero");
+                    setOfertasCamionero([]);
+                } else {
+                    console.error("Error al cargar ofertas:", error.message);
+                }
+            } else {
+                console.error("Error desconocido:", error);
+            }
+        }
+    };
+
+
+    const fetchResenas = async () => {
+        try {
+            if (!user?.userId) return;
+            
+            const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
+            setResenas(response.data);
+
+            const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
+            setValoracionMedia(mediaResponse.data);
+        } catch (error) {
+            console.error("Error al cargar reseñas:", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchResenas = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
-                setResenas(response.data);
-
-                // Obtener valoración media del backend
-                const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
-                setValoracionMedia(mediaResponse.data);
-            } catch (error) {
-                console.error("Error al cargar las reseñas o valoración:", error);
-            }
-        };
-
-        const fetchCamionero = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
-                setCamionero(response.data);
-            } catch (error) {
-                console.error("Error al cargar el camionero:", error);
-            }
-        };
-
         if (user?.userId) {
+    
+            fetchCamionero();
+        
             fetchResenas();
         }
     }, [user]);
+
+    useEffect(() => {
+ 
+        if (camionero?.id) {
+            fetchOfertasCamionero();
+        }
+    }, [camionero]);
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -90,6 +137,13 @@ const MiPerfilCamionero = () => {
                         {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
                     </View>
                     <View style={styles.separator} />
+
+                    {/*Empresas recienntes */}
+                    {
+
+                    }
+
+
 
                     <View style={styles.reseñasContainer}>
                         <Text style={styles.sectionTitle}>Reseñas</Text>
