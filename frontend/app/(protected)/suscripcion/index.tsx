@@ -264,7 +264,6 @@ const SubscriptionPlans = () => {
         <EmpresaRoute>
             <View style={styles.container}>
                 <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                    <View style={styles.whiteTransition} />
                     <View style={styles.heroSection}>
                         <Text style={styles.heroTitle}>Encuentra al mejor talento para tu empresa</Text>
                         <Text style={styles.heroSubtitle}>Elige el plan que mejor se adapte a tus necesidades de contratación</Text>

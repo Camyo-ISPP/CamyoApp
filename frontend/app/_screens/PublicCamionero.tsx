@@ -451,10 +451,9 @@ const PublicCamionero = ({ userId }) => {
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
-        paddingVertical: 20,
+        paddingVertical: 60,
         backgroundColor: colors.white,
         minHeight: "100%",
-        marginTop: 80,
     },    
     card: {
         backgroundColor: colors.white,

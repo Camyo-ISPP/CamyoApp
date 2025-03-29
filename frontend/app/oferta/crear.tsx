@@ -575,8 +575,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.white,
-    paddingVertical: 20,
-    paddingTop: 80,
+    paddingVertical: 50,
   },
   container: {
     width: "100%",

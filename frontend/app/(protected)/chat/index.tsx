@@ -180,7 +180,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',  // Para mostrar los chats y el chat en paralelo
-    paddingTop: 80,
     backgroundColor: '#fff',
     marginRight: 0,
   },

@@ -7,7 +7,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 const PrivacyScreen = () => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-    <View style={styles.whiteTransition} />
       <View style={styles.header}>
         <Icon name="privacy-tip" size={30} color="#0b4f6c" style={styles.headerIcon} />
         <Text style={styles.title}>Política de Privacidad</Text>
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 50,
-    paddingVertical: 90,
+    paddingVertical: 50,
   },
   header: {
     flexDirection: 'row',

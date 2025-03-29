@@ -131,9 +131,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        paddingVertical: 20,
         backgroundColor: colors.white,
-        marginTop: 20,
         minHeight: "90%",
     },
     card: {

@@ -490,12 +490,9 @@ export default function OfertaDetalleScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        //justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.white,
         paddingVertical: 20,
-        paddingTop: '5.8%',
-        marginTop: 20,
     },
     scrollContainer: {
         flex: 1,

@@ -7,14 +7,13 @@ const ProyectoLogo = require('../../../assets/images/camyoV1.png');
 import PerfilDropdown from "./ProfileDropdown";
 import OptionsDropdown from "./OptionsDropdown";
 import { useAuth } from "../../../contexts/AuthContext";
-import { LinearGradient } from 'expo-linear-gradient';
-
 
 export default function CamyoWebNavBar({ onSearch }) {
   const { user } = useAuth();
   const router = useRouter();
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1600);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const updateSize = () => {
@@ -30,7 +29,7 @@ export default function CamyoWebNavBar({ onSearch }) {
   };
 
   return (
-    <LinearGradient colors={["rgba(220, 220, 220, 1)", "rgba(0, 0, 0, 0)"]}  style={styles.headerWeb}>
+    <View style={styles.headerWeb}>
       <View style={styles.contentContainer}>
         <View style={styles.leftSection}>
           <TouchableOpacity onPress={() => router.push("/")}>
@@ -38,65 +37,90 @@ export default function CamyoWebNavBar({ onSearch }) {
           </TouchableOpacity>
           <View style={styles.separator} />
           <View style={styles.searchContainer}>
-            <TextInput style={styles.searchInput} placeholder="Buscar ofertas..." placeholderTextColor={colors.lightGray} value={searchQuery} onChangeText={setSearchQuery} onSubmitEditing={handleSearch}/>
-            <TouchableOpacity onPress={handleSearch}><FontAwesome name="search" size={20} color="black" style={styles.searchIcon} /></TouchableOpacity>
+          <TextInput 
+              style={styles.searchInput} 
+              placeholder="Buscar ofertas..." 
+              placeholderTextColor={colors.lightGray} 
+              value={searchQuery} 
+              onChangeText={setSearchQuery} 
+              onSubmitEditing={handleSearch}
+              selectionColor={colors.primary}
+              cursorColor={colors.primary} 
+            />
+            <TouchableOpacity onPress={handleSearch} style={styles.searchButton}>
+              <FontAwesome name="search" size={18} color={colors.white} />
+            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.rightSection}>
-        {isCompact ? (
+          {isCompact ? (
             <OptionsDropdown />
           ) : (
             <>
               {user?.rol === "EMPRESA" && (
-                  <>
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={() => router.push("/suscripcion")}
-                    >
-                      <Text style={styles.buttonText}>Suscripción</Text>
-                    </TouchableOpacity>
-                    <View style={styles.dot} />
-                  </>
+                <>
+                  <NavButton 
+                    text="Suscripción" 
+                    onPress={() => router.push("/suscripcion")} 
+                  />
+                  <NavSeparator />
+                </>
               )}
               {user && user.rol !== "ADMIN" && (
-                  <>
-
-                    <TouchableOpacity style={styles.button} onPress={() => router.push('/chat')}>
-                          <Text style={styles.buttonText}>Mis Mensajes</Text>
-                    </TouchableOpacity>
-                    <View style={styles.dot} />
-                    <TouchableOpacity style={styles.button} onPress={() => router.push('/misofertas')}>
-                      <Text style={styles.buttonText}>Mis Ofertas</Text>
-                    </TouchableOpacity>
-                    <View style={styles.dot} />
-                  </>
+                <>
+                  <NavButton 
+                    text="Mis Mensajes" 
+                    onPress={() => router.push('/chat')} 
+                  />
+                  <NavSeparator />
+                  <NavButton 
+                    text="Mis Ofertas" 
+                    onPress={() => router.push('/misofertas')} 
+                  />
+                  <NavSeparator />
+                </>
               )}
-                            <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push("/explorar")}
-              >
-                <Text style={styles.buttonText}>Explorar Ofertas</Text>
-              </TouchableOpacity>
-              <View style={styles.dot} />
-              <TouchableOpacity style={styles.button} onPress={() => router.push("/empresas")}>
-                <Text style={styles.buttonText}>Explorar Empresas</Text>
-              </TouchableOpacity>
+              <NavButton 
+                text="Explorar Ofertas" 
+                onPress={() => router.push("/explorar")} 
+              />
+              <NavSeparator />
+              <NavButton 
+                text="Explorar Empresas" 
+                onPress={() => router.push("/empresas")} 
+              />
             </>
           )}
-          <View style={styles.dot} />
+          <NavSeparator />
           {user ? (
             <PerfilDropdown user={user} />
           ) : (
-            <TouchableOpacity style={styles.button} onPress={() => router.push("/login")}>
-              <Text style={styles.buttonText}>Iniciar Sesión</Text>
-            </TouchableOpacity>
+            <NavButton 
+              text="Iniciar Sesión" 
+              onPress={() => router.push("/login")} 
+              isPrimary
+            />
           )}
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 };
+
+// Helper components for cleaner code
+const NavButton = ({ text, onPress, isPrimary = false }) => (
+  <TouchableOpacity 
+    style={[styles.button, isPrimary && styles.primaryButton]} 
+    onPress={onPress}
+  >
+    <Text style={[styles.buttonText, isPrimary && styles.primaryButtonText]}>
+      {text}
+    </Text>
+  </TouchableOpacity>
+);
+
+const NavSeparator = () => <View style={styles.dot} />;
 
 const styles = StyleSheet.create({
   headerWeb: {
@@ -104,9 +128,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    paddingVertical: 20,
-    paddingBottom: 30,
-    position: "absolute",
+    paddingVertical: 15,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightGray,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
     top: 0,
     left: 0,
     right: 0,
@@ -116,63 +149,75 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: "70%",
-    paddingBottom:10,
+    width: "85%",
+    maxWidth: 1400,
   },
   leftSection: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
   rightSection: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-end",
   },
   separator: {
-    width: 3,
-    height: 50,
-    backgroundColor: colors.primary,
+    width: 2,
+    height: 40,
+    backgroundColor: colors.lightGray,
     marginHorizontal: 20,
   },
   dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 25,
-    backgroundColor: colors.primary,
-    marginHorizontal: 20,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.lightGray,
+    marginHorizontal: 15,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: colors.primary,
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
     backgroundColor: colors.white,
-    paddingHorizontal: 5,
-    margin: 3
+    overflow: "hidden",
   },
   searchInput: {
     flex: 1,
-    padding: 7,
-    borderRadius: 50,
-    outlineStyle: "none",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    fontSize: 14,
+    outlineStyle: 'none',
   },
-  searchIcon: {
-    color: colors.primary,
-    marginRight: 7,
+  searchButton: {
+    padding: 10,
+    backgroundColor: colors.primary,
+    borderRadius: 0,
   },
   button: {
-    paddingVertical: 10,
-    marginVertical: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  primaryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
   },
   buttonText: {
     color: colors.secondary,
-    fontWeight: "bold",
-    fontSize: 15,
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  primaryButtonText: {
+    color: colors.white,
   },
   logo: {
-    width: 80,
-    height: 60,
+    width: 90,
+    height: 50,
     aspectRatio: 1,
   }
 });
