@@ -43,8 +43,8 @@ function IntegratedCheckout() {
     }
 
     const handleCancel = () => {
-        router.back();
         setId("");
+        router.back();
     }
 
     const openTermsLink = () => {
