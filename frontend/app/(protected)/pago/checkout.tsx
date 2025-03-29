@@ -1,4 +1,4 @@
-import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator} from "react-native";
+import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Linking} from "react-native";
 import {useContext, useEffect, useState} from "react";
 import CartItem, {ItemData} from "../../_components/CartItem";
 import TotalFooter from "../../_components/TotalFooter";
@@ -20,12 +20,9 @@ function IntegratedCheckout() {
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
 
     useEffect(() => {
-        // Make sure to call `loadStripe` outside of a component’s render to avoid
-        // recreating the `Stripe` object on every render.
         setStripePromise(loadStripe(process.env.STRIPE_API_KEY || "pk_test_51R7E5pIRKHnhkuSfOzrm7E0goTdINnhhfLIARgpTqlr7eRzMFQD4RBvnI3qutHpKyVJCjXORTbLYYnkZq7pcub3y00GuI1VjNP",
             { locale: 'es' }
         ));
-
     }, [])
 
     const createTransactionSecret = () => {
@@ -50,8 +47,16 @@ function IntegratedCheckout() {
         router.back();
     }
 
+    const openTermsLink = () => {
+        Linking.openURL(process.env.EXPO_PUBLIC_FRONTEND_URL + '/terminos');
+    }
+
+    const openPrivacyLink = () => {
+        Linking.openURL(process.env.EXPO_PUBLIC_FRONTEND_URL + '/privacidad');
+    }
+
     return <>
-    <View style={styles.whiteTransition} />
+        <View style={styles.whiteTransition} />
         {id === 'BASICO' || id === 'PREMIUM' ?
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>
@@ -61,43 +66,63 @@ function IntegratedCheckout() {
                     <Text style={styles.headerTitle}>Finalizar compra</Text>
                 </View>
 
-                <View style={styles.mainContainer}>
-                    <View style={styles.summaryCard}>
-                        <Text style={styles.summaryTitle}>Resumen de tu compra</Text>
-                        
-                        <View style={styles.planInfo}>
-                            <Text style={styles.planName}>{Products.get(id).name}</Text>
-                            <Text style={styles.planPrice}>{Products.get(id).price}€/mes</Text>
-                        </View>
+                <View style={styles.twoColumnContainer}>
+                    {/* Columna izquierda - Resumen del producto */}
+                    <View style={styles.leftColumn}>
+                        <View style={styles.summaryCard}>
+                            <Text style={styles.summaryTitle}>Resumen de tu compra</Text>
+                            
+                            <View style={styles.planInfo}>
+                                <Text style={styles.planName}>{Products.get(id).name}</Text>
+                                <Text style={styles.planPrice}>{Products.get(id).price}€/mes</Text>
+                            </View>
 
-                        <View style={styles.featuresList}>
-                            {Products.get(id).description.split('. ').map((feature, index) => (
-                                feature && (
-                                    <View key={index} style={styles.featureItem}>
-                                        <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-                                        <Text style={styles.featureText}>{feature.trim()}</Text>
-                                    </View>
-                                )
-                            ))}
-                        </View>
+                            <View style={styles.featuresList}>
+                                {Products.get(id).description.split('. ').map((feature, index) => (
+                                    feature && (
+                                        <View key={index} style={styles.featureItem}>
+                                            <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
+                                            <Text style={styles.featureText}>{feature.trim()}</Text>
+                                        </View>
+                                    )
+                                ))}
+                            </View>
 
-                        <TouchableOpacity
-                            onPress={createTransactionSecret}
-                            style={styles.initPaymentButton}
-                        >
-                            <Text style={styles.initPaymentButtonText}>Continuar al pago</Text>
-                            <Ionicons name="arrow-forward" size={20} color={colors.white} />
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={createTransactionSecret}
+                                style={styles.initPaymentButton}
+                            >
+                                <Text style={styles.initPaymentButtonText}>Continuar al pago</Text>
+                                <Ionicons name="arrow-forward" size={20} color={colors.white} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
-                    {(transactionClientSecret === "" ?
-                        null
-                        : <View style={styles.paymentSection}>
-                            <Elements stripe={stripePromise} options={{ clientSecret: transactionClientSecret }}>
-                                <CheckoutForm transactionClientSecret={transactionClientSecret} plan={id} />
-                            </Elements>
-                        </View>
-                    )}
+                    {/* Columna derecha - Pasarela de pago */}
+                    <View style={styles.rightColumn}>
+                        {(transactionClientSecret === "" ?
+                            <View style={styles.paymentPlaceholder}>
+                                <Ionicons name="card" size={40} color={colors.lightGray} />
+                            </View>
+                            : 
+                            <View style={styles.paymentSection}>
+                                <Elements stripe={stripePromise} options={{ clientSecret: transactionClientSecret }}>
+                                    <CheckoutForm transactionClientSecret={transactionClientSecret} plan={id} />
+                                </Elements>
+                            </View>
+                        )}
+                    </View>
+                </View>
+
+                {/* Disclaimer legal */}
+                <View style={styles.legalDisclaimer}>
+                    <Text style={styles.legalText}>
+                        Al realizar el pago, aceptas nuestros{' '}
+                        <Text style={styles.legalLink} onPress={openTermsLink}>Términos y Condiciones</Text>{' '}
+                        y nuestra{' '}
+                        <Text style={styles.legalLink} onPress={openPrivacyLink}>Política de Privacidad</Text>.
+                        El pago se renovará automáticamente cada mes hasta que canceles tu suscripción.
+                    </Text>
                 </View>
             </ScrollView>
             :
@@ -170,7 +195,6 @@ const CheckoutForm = (transactionClientSecret: any) => {
                 })
                 .then(() => setLoading(false))
         });
-        
     };
 
     return (
@@ -215,184 +239,226 @@ const CheckoutForm = (transactionClientSecret: any) => {
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-      flexGrow: 1,
-      backgroundColor: colors.white,
-  },
-  header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 20,
-      paddingTop: 50,
-      backgroundColor: colors.white,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.lightGray,
-  },
-  backButton: {
-      marginRight: 15,
-  },
-  headerTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: colors.secondary,
-  },
-  mainContainer: {
-      padding: 20,
-      paddingRight: 50,
-      paddingLeft: 50,
-  },
-  summaryCard: {
-      backgroundColor: colors.white,
-      borderRadius: 12,
-      padding: 25,
-      marginBottom: 20,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 3,
-      borderWidth: 1,
-      borderColor: colors.lightGray,
-  },
-  summaryTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: colors.secondary,
-      marginBottom: 20,
-  },
-  planInfo: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 15,
-      paddingBottom: 15,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.lightGray,
-  },
-  planName: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.darkGray,
-  },
-  planPrice: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: colors.primary,
-  },
-  featuresList: {
-      marginVertical: 10,
-  },
-  featureItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 10,
-  },
-  featureText: {
-      fontSize: 14,
-      color: colors.darkGray,
-      marginLeft: 10,
-  },
-  initPaymentButton: {
-      backgroundColor: colors.primary,
-      borderRadius: 8,
-      padding: 15,
-      marginTop: 20,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-  },
-  initPaymentButtonText: {
-      color: colors.white,
-      fontWeight: 'bold',
-      marginRight: 10,
-  },
-  paymentSection: {
-      marginTop: 20,
-  },
-  paymentFormContainer: {
-      backgroundColor: colors.white,
-      borderRadius: 12,
-      padding: 25,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 3,
-      borderWidth: 1,
-      borderColor: colors.lightGray,
-  },
-  paymentTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: colors.secondary,
-      marginBottom: 15,
-  },
-  paymentElementContainer: {
-      marginVertical: 15,
-  },
-  paymentActions: {
-      marginTop: 20,
-  },
-  payButton: {
-      backgroundColor: colors.secondary,
-      borderRadius: 8,
-      padding: 15,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-  },
-  payButtonDisabled: {
-      opacity: 0.7,
-  },
-  payButtonText: {
-      color: colors.white,
-      fontWeight: 'bold',
-      marginRight: 10,
-  },
-  whiteTransition: {
-    height: '9%',
-    backgroundColor: colors.white,
-    width: '100%',
-},
-  errorMessage: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 15,
-      padding: 10,
-      backgroundColor: colors.lightError,
-      borderRadius: 6,
-  },
-  errorText: {
-      color: colors.error,
-      fontSize: 14,
-      marginLeft: 5,
-  },
-  errorContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 30,
-      backgroundColor: colors.white,
-  },
-  errorTitle: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      color: colors.secondary,
-      marginTop: 20,
-      marginBottom: 10,
-  },
-  errorButton: {
-      backgroundColor: colors.primary,
-      borderRadius: 8,
-      padding: 15,
-      marginTop: 30,
-      width: '80%',
-      alignItems: 'center',
-  },
-  errorButtonText: {
-      color: colors.white,
-      fontWeight: 'bold',
-  },
+    scrollContainer: {
+        flexGrow: 1,
+        backgroundColor: colors.white,
+        paddingBottom: 30,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 20,
+        paddingTop: 50,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.lightGray,
+    },
+    backButton: {
+        marginRight: 15,
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: colors.secondary,
+    },
+    twoColumnContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 20,
+        marginTop: 20,
+    },
+    leftColumn: {
+        flex: 1,
+        paddingRight: 10,
+    },
+    rightColumn: {
+        flex: 1,
+        paddingLeft: 10,
+    },
+    summaryCard: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 25,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: colors.lightGray,
+    },
+    summaryTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.secondary,
+        marginBottom: 20,
+    },
+    planInfo: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+        paddingBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.lightGray,
+    },
+    planName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.darkGray,
+    },
+    planPrice: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.primary,
+    },
+    featuresList: {
+        marginVertical: 10,
+    },
+    featureItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    featureText: {
+        fontSize: 14,
+        color: colors.darkGray,
+        marginLeft: 10,
+    },
+    initPaymentButton: {
+        backgroundColor: colors.primary,
+        borderRadius: 8,
+        padding: 15,
+        marginTop: 20,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    initPaymentButtonText: {
+        color: colors.white,
+        fontWeight: 'bold',
+        marginRight: 10,
+    },
+    paymentPlaceholder: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        borderWidth: 1,
+        borderColor: colors.lightGray,
+    },
+    paymentPlaceholderText: {
+        marginTop: 15,
+        color: colors.lightGray,
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    paymentSection: {
+        flex: 1,
+    },
+    paymentFormContainer: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 25,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: colors.lightGray,
+        minHeight: 400,
+    },
+    paymentTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.secondary,
+        marginBottom: 15,
+    },
+    paymentElementContainer: {
+        marginVertical: 15,
+    },
+    paymentActions: {
+        marginTop: 20,
+    },
+    payButton: {
+        backgroundColor: colors.secondary,
+        borderRadius: 8,
+        padding: 15,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    payButtonDisabled: {
+        opacity: 0.7,
+    },
+    payButtonText: {
+        color: colors.white,
+        fontWeight: 'bold',
+        marginRight: 10,
+    },
+    whiteTransition: {
+        height: '9%',
+        backgroundColor: colors.white,
+        width: '100%',
+    },
+    errorMessage: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 15,
+        padding: 10,
+        backgroundColor: colors.lightError,
+        borderRadius: 6,
+    },
+    errorText: {
+        color: colors.error,
+        fontSize: 14,
+        marginLeft: 5,
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 30,
+        backgroundColor: colors.white,
+    },
+    errorTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: colors.secondary,
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    errorButton: {
+        backgroundColor: colors.primary,
+        borderRadius: 8,
+        padding: 15,
+        marginTop: 30,
+        width: '80%',
+        alignItems: 'center',
+    },
+    errorButtonText: {
+        color: colors.white,
+        fontWeight: 'bold',
+    },
+    legalDisclaimer: {
+        paddingHorizontal: 30,
+        paddingVertical: 20,
+        marginTop: 30,
+        borderTopWidth: 1,
+        borderTopColor: colors.lightGray,
+    },
+    legalText: {
+        fontSize: 12,
+        color: colors.darkGray,
+        textAlign: 'center',
+        lineHeight: 18,
+    },
+    legalLink: {
+        color: colors.primary,
+        textDecorationLine: 'underline',
+    },
 });
 
-export default IntegratedCheckout
+export default IntegratedCheckout;

@@ -66,6 +66,16 @@ export default function WebFooter() {
                 </TouchableOpacity>
               </View>
 
+              <View style={styles.linksSection}>
+              <Text style={styles.sectionTitle}>Legal</Text>
+                <TouchableOpacity onPress={() => router.push("/terminos")}>
+                  <Text style={styles.linkText}>Términos y condiciones</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/privacidad")}>
+                  <Text style={styles.linkText}>Política de privacidad</Text>
+                </TouchableOpacity>
+              </View>
+
               {/* Contacto */}
               <View style={styles.contactSection}>
                 <Text style={styles.sectionTitle}>Contacto</Text>
@@ -87,17 +97,6 @@ export default function WebFooter() {
           <Text style={styles.copyright}>
             © {currentYear} Camyo. Todos los derechos reservados.
           </Text>
-          {isMobile && (
-            <View style={styles.mobileLinks}>
-              <TouchableOpacity onPress={() => router.push("/terminos")}>
-                <Text style={styles.mobileLinkText}>Términos</Text>
-              </TouchableOpacity>
-              <Text style={styles.mobileSeparator}>|</Text>
-              <TouchableOpacity onPress={() => router.push("/privacidad")}>
-                <Text style={styles.mobileLinkText}>Privacidad</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
       </View>
     </LinearGradient>

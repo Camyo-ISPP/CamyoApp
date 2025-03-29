@@ -223,7 +223,7 @@ const SubscriptionPlans = () => {
             price: "0€",
             features: [
                 "1 oferta activa simultánea",
-                "No se pueden patrocinar ofertas",
+                "1 oferta patrocinada simultánea",
                 "Personalización limitada de ofertas",
                 "Soporte estándar"
             ],
@@ -250,7 +250,7 @@ const SubscriptionPlans = () => {
             price: "24,99€",
             features: [
                 "3 ofertas activas simultáneas",
-                "1 oferta patrocinada simultánea",
+                "2 ofertas patrocinadas simultáneas",
                 "Visibilidad mejorada",
                 "Personalización completa de ofertas",
                 "Soporte prioritario por email"
