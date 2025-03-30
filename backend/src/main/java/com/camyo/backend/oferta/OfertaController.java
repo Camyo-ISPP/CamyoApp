@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.camyo.backend.auth.payload.response.MessageResponse;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
@@ -383,77 +381,6 @@ public class OfertaController {
         }
     }
 
-    /**
-     * POST: Crear un 'Trabajo' y asociarlo a una oferta existente
-     * 
-     * Permite crear un nuevo trabajo y asignarlo a una oferta específica.
-     * 
-     * @param ofertaId ID de la oferta a la que se asociará el trabajo
-     * @param trabajo  Datos del trabajo a crear
-     * @return Trabajo creado correctamente o error si la oferta no existe.
-     */
-    @PostMapping("/{ofertaId}/trabajo")
-    public ResponseEntity<Trabajo> crearTrabajoParaOferta(@PathVariable Integer ofertaId,
-                                                          @RequestBody Trabajo trabajo) {
-        try {
-            Oferta oferta = ofertaService.obtenerOfertaPorId(ofertaId);
-
-            trabajo.setOferta(oferta);
-
-            Trabajo trabajoGuardado = trabajoService.guardarTrabajo(trabajo);
-            return ResponseEntity.ok(trabajoGuardado);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
-     * PUT: Actualizar un 'Trabajo' asociado a una oferta
-     * 
-     * Modifica los detalles de un trabajo vinculado a una oferta.
-     * 
-     * @param ofertaId       ID de la oferta con el trabajo a actualizar
-     * @param trabajoDetalles Nuevos datos del trabajo
-     * @return Trabajo actualizado o error si no existe.
-     */
-    @PutMapping("/{ofertaId}/trabajo")
-    public ResponseEntity<Trabajo> actualizarTrabajoDeOferta(@PathVariable Integer ofertaId,
-                                                             @RequestBody Trabajo trabajoDetalles) {
-        try {
-
-            Trabajo trabajoActual = ofertaService.obtenerTrabajo(ofertaId); 
-            trabajoActual.setFechaIncorporacion(trabajoDetalles.getFechaIncorporacion());
-            trabajoActual.setJornada(trabajoDetalles.getJornada());
-
-            Trabajo trabajoActualizado = trabajoService.guardarTrabajo(trabajoActual);
-            return ResponseEntity.ok(trabajoActualizado);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
-     * DELETE: Eliminar el 'Trabajo' asociado a una oferta
-     * 
-     * Borra el trabajo vinculado a una oferta específica.
-     * 
-     * @param ofertaId ID de la oferta cuyo trabajo será eliminado
-     * @return Respuesta sin contenido si se eliminó correctamente o error si no existe.
-     */
-    @DeleteMapping("/{ofertaId}/trabajo")
-    public ResponseEntity<Void> eliminarTrabajoDeOferta(@PathVariable Integer ofertaId) {
-        try {
-            ofertaService.obtenerOfertaPorId(ofertaId);
-
-            Trabajo trabajo = ofertaService.obtenerTrabajo(ofertaId);
-
-            trabajoService.eliminarTrabajo(trabajo.getId());
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
 
     /**
      * GET: Obtener la 'Carga' asociada a una oferta
@@ -473,79 +400,8 @@ public class OfertaController {
         }
     }
 
-    /**
-     * POST: Crear una 'Carga' y asociarla a una oferta
-     * 
-     * Permite crear una carga de transporte y asignarla a una oferta específica.
-     * 
-     * @param ofertaId ID de la oferta a la que se asociará la carga
-     * @param carga    Datos de la carga a crear
-     * @return Carga creada correctamente o error si la oferta no existe.
-     */
-    @PostMapping("/{ofertaId}/carga")
-    public ResponseEntity<Carga> crearCargaParaOferta(@PathVariable Integer ofertaId,
-                                                      @RequestBody Carga carga) {
-        try {
-            Oferta oferta = ofertaService.obtenerOfertaPorId(ofertaId);
-            carga.setOferta(oferta);
 
-            Carga cargaGuardada = cargaService.guardarCarga(carga);
-            return ResponseEntity.ok(cargaGuardada);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
-    /**
-     * PUT: Actualizar la 'Carga' de una oferta
-     * 
-     * Modifica los detalles de una carga vinculada a una oferta.
-     * 
-     * @param ofertaId      ID de la oferta con la carga a actualizar
-     * @param cargaDetalles Nuevos datos de la carga
-     * @return Carga actualizada o error si no existe.
-     */
-    @PutMapping("/{ofertaId}/carga")
-    public ResponseEntity<Carga> actualizarCargaDeOferta(@PathVariable Integer ofertaId,
-                                                         @RequestBody Carga cargaDetalles) {
-        try {
-            Carga cargaActual = ofertaService.obtenerCarga(ofertaId);
-
-            cargaActual.setMercancia(cargaDetalles.getMercancia());
-            cargaActual.setPeso(cargaDetalles.getPeso());
-            cargaActual.setOrigen(cargaDetalles.getOrigen());
-            cargaActual.setDestino(cargaDetalles.getDestino());
-            cargaActual.setDistancia(cargaDetalles.getDistancia());
-            cargaActual.setInicio(cargaDetalles.getInicio());
-            cargaActual.setFinMinimo(cargaDetalles.getFinMinimo());
-            cargaActual.setFinMaximo(cargaDetalles.getFinMaximo());
-
-            Carga cargaActualizada = cargaService.guardarCarga(cargaActual);
-            return ResponseEntity.ok(cargaActualizada);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-     /**
-     * DELETE: Eliminar la 'Carga' de una oferta
-     * 
-     * Borra la carga vinculada a una oferta específica.
-     * 
-     * @param ofertaId ID de la oferta cuya carga será eliminada
-     * @return Respuesta sin contenido si se eliminó correctamente o error si no existe.
-     */
-    @DeleteMapping("/{ofertaId}/carga")
-    public ResponseEntity<Void> eliminarCargaDeOferta(@PathVariable Integer ofertaId) {
-        try {
-            ofertaService.obtenerOfertaPorId(ofertaId);
-            Carga carga = ofertaService.obtenerCarga(ofertaId);
-            cargaService.eliminarCarga(carga.getId());
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     /**
      * PUT: Aplicar un camionero a una oferta

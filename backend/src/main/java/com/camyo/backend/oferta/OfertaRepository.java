@@ -50,7 +50,8 @@ public interface OfertaRepository extends JpaRepository<Oferta,Integer>{
     @Query("SELECT o FROM Oferta o WHERE o.estado = 'ABIERTA' ORDER BY o.promoted DESC, o.fechaPublicacion DESC LIMIT 10")
     List<Oferta> findTopByOrderByFechaPublicacionDesc();
 
-    long countByEmpresaIdAndPromotedTrue(Integer empresaId);
+    @Query("SELECT COUNT(o) FROM Oferta o WHERE o.estado = 'ABIERTA' AND o.empresa.id = :empresaId")
+    Integer countByEmpresaIdPromotedTrue(Integer empresaId);
 
 
 }

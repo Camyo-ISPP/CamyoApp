@@ -89,6 +89,6 @@ public class Oferta {
 
     @Column(nullable = false)
     private Boolean promoted = false;
-    
+
 
 }

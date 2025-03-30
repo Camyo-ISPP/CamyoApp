@@ -42,16 +42,10 @@ public class OfertaService {
     private EmpresaRepository empresaRepository;
 
     @Autowired
-    private OfertaPatrocinadaRepository ofertaPatrocinadaRepository;
-
-    @Autowired
     private SuscripcionService suscripcionService;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private EmpresaService empresaService;
 
 
     @Transactional(readOnly = true)
@@ -126,59 +120,6 @@ public class OfertaService {
     
         ofertaRepository.save(toUpdate);
         return toUpdate;
-    }
-    
-
-
-    @Transactional
-    public Oferta crearOfertaConCarga(OfertaConCargaDTO dto) {
-        Oferta oferta = new Oferta();
-        oferta.setTitulo(dto.getTitulo());
-        oferta.setExperiencia(dto.getExperiencia());
-        oferta.setLicencia(dto.getLicencia());
-        oferta.setNotas(dto.getNotas());
-        oferta.setEstado(dto.getEstado());
-        oferta.setFechaPublicacion(dto.getFechaPublicacion());
-        oferta.setSueldo(dto.getSueldo());
-
-        Oferta ofertaGuardada = ofertaRepository.save(oferta);
-
-        Carga carga = new Carga();
-        carga.setMercancia(dto.getMercancia());
-        carga.setPeso(dto.getPeso());
-        carga.setOrigen(dto.getOrigen());
-        carga.setDestino(dto.getDestino());
-        carga.setDistancia(dto.getDistancia());
-        carga.setInicio(dto.getInicio());
-        carga.setFinMinimo(dto.getFinMinimo());
-        carga.setFinMaximo(dto.getFinMaximo());
-
-        carga.setOferta(ofertaGuardada);
-
-        cargaRepository.save(carga);
-        return ofertaGuardada;
-    }
-
-    @Transactional
-    public Oferta crearOfertaConTrabajo(OfertaConTrabajoDTO dto) {
-
-        Oferta oferta = new Oferta();
-        oferta.setTitulo(dto.getTitulo());
-        oferta.setExperiencia(dto.getExperiencia());
-        oferta.setLicencia(dto.getLicencia());
-        oferta.setNotas(dto.getNotas());
-        oferta.setEstado(dto.getEstado());
-        oferta.setFechaPublicacion(dto.getFechaPublicacion());
-        oferta.setSueldo(dto.getSueldo());
-        oferta = ofertaRepository.save(oferta);
-
-        Trabajo trabajo = new Trabajo();
-        trabajo.setFechaIncorporacion(dto.getFechaIncorporacion());
-        trabajo.setJornada(dto.getJornada());
-        trabajo.setOferta(oferta);
-        trabajo = trabajoRepository.save(trabajo);
-
-        return oferta;
     }
 
     @Transactional
@@ -292,7 +233,7 @@ public class OfertaService {
             throw new RuntimeException("Esta oferta ya está patrocinada actualmente.");
         }
         PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaIdAuth);
-        long patrociniosActivos = ofertaRepository.countByEmpresaIdAndPromotedTrue(empresaIdAuth);
+        Integer patrociniosActivos = ofertaRepository.countByEmpresaIdPromotedTrue(empresaIdAuth);
     
         switch (nivel) {
             case GRATIS:
@@ -351,7 +292,5 @@ public class OfertaService {
 
         return empresa.getId(); 
     }
-
-
 
 }
