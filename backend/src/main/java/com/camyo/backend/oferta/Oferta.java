@@ -90,5 +90,10 @@ public class Oferta {
     @Column(nullable = false)
     private Boolean promoted = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_oferta", nullable = false)
+    private TipoOferta tipoOferta = TipoOferta.DESCONOCIDO; 
+
+
 
 }

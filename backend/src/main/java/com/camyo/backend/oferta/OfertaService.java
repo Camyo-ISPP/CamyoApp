@@ -176,46 +176,6 @@ public class OfertaService {
     }
 
     @Transactional
-    public OfertaCompletaDTO mapearOfertaACompletaDTO(Oferta oferta) {
-        OfertaCompletaDTO dto = new OfertaCompletaDTO();
-        dto.setId(oferta.getId());
-        dto.setTitulo(oferta.getTitulo());
-        dto.setExperiencia(oferta.getExperiencia());
-        dto.setLicencia(oferta.getLicencia());
-        dto.setNotas(oferta.getNotas());
-        dto.setEstado(oferta.getEstado());
-        dto.setFechaPublicacion(oferta.getFechaPublicacion());
-        dto.setSueldo(oferta.getSueldo());
-        dto.setLocalizacion(oferta.getLocalizacion());
-        dto.setCamionero(oferta.getCamionero());
-        dto.setAplicados(oferta.getAplicados());
-        dto.setRechazados(oferta.getRechazados());
-        dto.setPromoted(oferta.getPromoted() != null ? oferta.getPromoted() : false);
-            if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
-                dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
-            }
-        if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
-            dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
-        }
-        try {
-            Carga c = this.obtenerCarga(oferta.getId());
-            if (c != null) {
-                dto.setTipoOferta("CARGA");
-            } else {
-                Trabajo t = this.obtenerTrabajo(oferta.getId());
-                if (t != null) {
-                    dto.setTipoOferta("TRABAJO");
-                } else {
-                    dto.setTipoOferta("DESCONOCIDO");
-                }
-            }
-        } catch (ResourceNotFoundException ex) {
-            dto.setTipoOferta("DESCONOCIDO");
-        }
-    
-        return dto;
-    }
-
     public List<Oferta> obtenerUltimas10Ofertas() {
         return ofertaRepository.findTopByOrderByFechaPublicacionDesc();
     }
