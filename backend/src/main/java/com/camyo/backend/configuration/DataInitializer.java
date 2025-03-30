@@ -480,10 +480,6 @@ public class DataInitializer {
                                 + "(20, 217, 'BASICO', '2025-03-16', '2025-04-16', true)"
                                 );
 
-                                // Insert Oferta Patrocinada
-                                statement.addBatch("INSERT IGNORE INTO ofertas_patrocinadas (id, oferta_id, empresa_id, status) VALUES "
-                                + "(1, 201, 221, 'ACTIVO')");
-
                                 // Execute batch
                                 statement.executeBatch();
                                 System.out.println("Batch execution completed successfully.");
