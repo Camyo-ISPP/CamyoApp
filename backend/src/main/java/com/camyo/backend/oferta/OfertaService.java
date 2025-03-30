@@ -280,84 +280,77 @@ public class OfertaService {
     }
 
     @Transactional
-    public OfertaPatrocinada patrocinarOferta(Integer ofertaId) {
+    public Oferta patrocinarOferta(Integer ofertaId) {
         Integer empresaIdAuth = getEmpresaIdFromToken();
         Oferta oferta = obtenerOfertaPorId(ofertaId);
-        Empresa empresa = empresaService.obtenerEmpresaPorId(empresaIdAuth);
     
+        if (!oferta.getEmpresa().getId().equals(empresaIdAuth)) {
+            throw new RuntimeException("No tienes permiso para patrocinar esta oferta.");
+        }
+    
+        if (Boolean.TRUE.equals(oferta.getPromoted())) {
+            throw new RuntimeException("Esta oferta ya está patrocinada actualmente.");
+        }
         PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaIdAuth);
-        long patrociniosActivos = ofertaPatrocinadaRepository.countActiveByEmpresa(empresaIdAuth);
+        long patrociniosActivos = ofertaRepository.countByEmpresaIdAndPromotedTrue(empresaIdAuth);
     
         switch (nivel) {
             case GRATIS:
                 if (patrociniosActivos >= 1) {
-                    throw new RuntimeException("La cuenta gratuita solo puede patrocinar 1 oferta a la vez.");
+                    throw new RuntimeException("El plan Gratis solo permite patrocinar 1 oferta.");
                 }
                 break;
             case BASICO:
                 if (patrociniosActivos >= 2) {
-                    throw new RuntimeException("El plan Básico solo permite patrocinar 2 ofertas a la vez.");
+                    throw new RuntimeException("El plan Básico solo permite patrocinar 2 ofertas.");
                 }
                 break;
             case PREMIUM:
                 break;
         }
     
-        var existente = ofertaPatrocinadaRepository.findActiveByOferta(ofertaId);
-        if (existente.isPresent()) {
-            throw new RuntimeException("Esta oferta ya está patrocinada actualmente.");
+        oferta.setPromoted(true);
+        return guardarOferta(oferta);
+    }
+    
+    @Transactional
+    public void desactivarPatrocinio(Integer ofertaId) {
+        Integer empresaIdAuth = getEmpresaIdFromToken();
+        Oferta oferta = obtenerOfertaPorId(ofertaId);
+    
+        if (oferta.getEmpresa() == null || !oferta.getEmpresa().getId().equals(empresaIdAuth)) {
+            throw new RuntimeException("No tienes permiso para desactivar esta oferta.");
         }
     
-        OfertaPatrocinada patrocinio = new OfertaPatrocinada();
-        patrocinio.setOferta(oferta);
-        patrocinio.setEmpresa(empresa);
-        patrocinio.setStatus(PatrocinioStatus.ACTIVO);
+        if (!Boolean.TRUE.equals(oferta.getPromoted())) {
+            throw new RuntimeException("Esta oferta no está patrocinada.");
+        }
     
-        oferta.setPromoted(true);
+        oferta.setPromoted(false);
         guardarOferta(oferta);
-    
-        return ofertaPatrocinadaRepository.save(patrocinio);
     }
     
-@Transactional
-public void desactivarPatrocinio(Integer ofertaId) {
-    OfertaPatrocinada patrocinada = ofertaPatrocinadaRepository
-        .findActiveByOferta(ofertaId)
-        .orElseThrow(() -> new ResourceNotFoundException("OfertaPatrocinada", "ofertaId", ofertaId));
+    
 
-    Integer empresaIdAuth = getEmpresaIdFromToken();
+    private Integer getEmpresaIdFromToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No hay usuario autenticado");
+        }
 
-    if (!patrocinada.getEmpresa().getId().equals(empresaIdAuth)) {
-        throw new RuntimeException("No tienes permiso para desactivar esta oferta patrocinada.");
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        Usuario usuario = usuarioRepository.findById(userDetails.getId())
+            .orElseThrow(() -> new RuntimeException(
+                "No existe el usuario con id = " + userDetails.getId()));
+        if (!usuario.hasAuthority("EMPRESA")) {
+            throw new RuntimeException("El usuario autenticado no es una empresa");
+        }
+        Empresa empresa = empresaRepository.obtenerPorUsuario(usuario.getId())
+            .orElseThrow(() -> new RuntimeException("No hay registro de empresa vinculado al usuario " + usuario.getId()));
+
+        return empresa.getId(); 
     }
-
-    patrocinada.setStatus(PatrocinioStatus.CANCELADO);
-    ofertaPatrocinadaRepository.save(patrocinada);
-
-    Oferta oferta = patrocinada.getOferta();
-    oferta.setPromoted(false);
-    guardarOferta(oferta);
-}
-
-private Integer getEmpresaIdFromToken() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !authentication.isAuthenticated()) {
-        throw new RuntimeException("No hay usuario autenticado");
-    }
-
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-    Usuario usuario = usuarioRepository.findById(userDetails.getId())
-        .orElseThrow(() -> new RuntimeException(
-            "No existe el usuario con id = " + userDetails.getId()));
-    if (!usuario.hasAuthority("EMPRESA")) {
-        throw new RuntimeException("El usuario autenticado no es una empresa");
-    }
-    Empresa empresa = empresaRepository.obtenerPorUsuario(usuario.getId())
-        .orElseThrow(() -> new RuntimeException("No hay registro de empresa vinculado al usuario " + usuario.getId()));
-
-    return empresa.getId(); 
-}
 
 
 

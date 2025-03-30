@@ -642,23 +642,23 @@ public class OfertaController {
     @PutMapping("/{ofertaId}/patrocinar")
     public ResponseEntity<?> patrocinarOferta(@PathVariable Integer ofertaId) {
         try {
-            OfertaPatrocinada nuevoPatrocinio = ofertaService.patrocinarOferta(ofertaId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPatrocinio);
+            ofertaService.patrocinarOferta(ofertaId);
+            return ResponseEntity.ok("Patrocinio activado correctamente");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     
-
     @PutMapping("/{ofertaId}/desactivar-patrocinio")
     public ResponseEntity<?> desactivarPatrocinio(@PathVariable Integer ofertaId) {
         try {
             ofertaService.desactivarPatrocinio(ofertaId);
-            return ResponseEntity.ok("Patrocinio desactivado con éxito.");
+            return ResponseEntity.ok("Patrocinio desactivado correctamente.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
 
 
 }
