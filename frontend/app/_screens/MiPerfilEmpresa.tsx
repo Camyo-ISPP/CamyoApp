@@ -21,7 +21,7 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-  const { setId } = usePayment();
+  const { setId, setOfertaId } = usePayment();
   const { user, userToken } = useAuth();
   const router = useRouter();
 
@@ -94,6 +94,13 @@ const MiPerfilEmpresa = () => {
   const canPromoteNewOffer = () => {
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
     return activeOffersCount < rules.maxSponsoredOffers;
+
+  }
+
+  const goToCheckout = (ofertaId: number) => {
+    setId("PATROCINAR");
+    setOfertaId(ofertaId);
+    router.push("/pago/checkout");
 
   }
 
@@ -326,7 +333,8 @@ const MiPerfilEmpresa = () => {
                                 ) : canPromoteNewOffer() ? (
                                   <TouchableOpacity
                                     style={[styles.actionButton,]}
-                                    onPress={() => promoteOffer(item.id)}
+                                    // onPress={() => promoteOffer(item.id)}
+                                    onPress={() => goToCheckout(item.id)}
                                   >
 
                                     <LinearGradient
