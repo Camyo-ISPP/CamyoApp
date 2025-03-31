@@ -86,7 +86,7 @@ login
   const pickPdfAsync = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-      if (!result.canceled) {
+      if (!result.canceled && result.assets[0].uri.split(',')[0] === "data:application/pdf;base64") {
         const base64PDF = result.assets[0].uri.split(',')[1];
         console.log(result)
         if (base64PDF) {
@@ -477,7 +477,7 @@ login
               style={[styles.avatarButton, { backgroundColor: colors.primary }]}
               activeOpacity={0.8}
             >
-              <MaterialIcons name="add-a-photo" size={20} color={colors.white} />
+              <MaterialIcons name="upload-file" size={20} color={colors.white} />
               <Text style={styles.avatarButtonText}>Subir CV (PDF)</Text>
             </TouchableOpacity>
             ) : (

@@ -107,16 +107,15 @@ const EditarPerfilCamionero = () => {
   const pickPdfAsync = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-      if (!result.canceled) {
+      if (!result.canceled && result.assets[0].uri.split(',')[0] === "data:application/pdf;base64") {
         const base64PDF = result.assets[0].uri.split(',')[1];
-        console.log(result)
         if (base64PDF) {
           setFormData((prevState) => ({
             ...prevState,
             curriculum: base64PDF
           }));
         }
-      };
+      }
     } catch (error) {
       console.error('Error picking the document', error);
     }
