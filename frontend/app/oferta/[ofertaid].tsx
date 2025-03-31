@@ -34,16 +34,17 @@ export default function OfertaDetalleScreen() {
                     const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
                     const data = await response.json();
                     setOfferData(data);
-
-                    const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
-                    const trabajoText = await trabajoResponse.text();
-                    const trabajoData = trabajoText ? JSON.parse(trabajoText) : null;
-                    setOfferTrabajoData(trabajoData);
-
-                    const cargaResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`);
-                    const cargaText = await cargaResponse.text();
-                    const cargaData = cargaText ? JSON.parse(cargaText) : null;
-                    setOfferCargaData(cargaData);
+                    
+                    if(data.tipoOferta === "TRABAJO"){
+                        const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
+                        const trabajoData = await trabajoResponse.json();
+                        setOfferTrabajoData(trabajoData);
+                    } else if (data.tipoOferta === "CARGA") {
+                        const cargaResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`);
+                        const cargaText = await cargaResponse.text();
+                        const cargaData = cargaText ? JSON.parse(cargaText) : null;
+                        setOfferCargaData(cargaData);
+                    }
 
                 } catch (error) {
                     console.error("Error fetching data:", error);

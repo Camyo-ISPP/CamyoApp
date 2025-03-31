@@ -3,7 +3,6 @@ package com.camyo.backend.oferta;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.Licencia;
 
 import lombok.Getter;
@@ -14,7 +13,7 @@ import lombok.Setter;
 public class OfertaConTodaInformacionDTO {
 
     private Integer id;
-    private String tipoOferta;
+    private TipoOferta tipoOferta;
     private String localizacion;
     private String nombreEmpresa;
     private String titulo;
