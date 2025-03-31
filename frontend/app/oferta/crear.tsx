@@ -294,7 +294,6 @@ const CrearOfertaScreen = () => {
 
     // Construcción del objeto base de la oferta
     let ofertaData: any = {
-      tipoOferta,
       oferta: {
         titulo: formData.titulo,
         experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
@@ -304,7 +303,8 @@ const CrearOfertaScreen = () => {
         sueldo: parseFloat(formData.sueldo).toFixed(2), // Convertir a float con 2 decimal
         localizacion: formData.localizacion,
         fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales
-        empresa: { id: user?.id ?? null }
+        empresa: { id: user?.id ?? null },
+        tipoOferta: tipoOferta
       }
     };
 
@@ -374,7 +374,7 @@ const CrearOfertaScreen = () => {
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
-          placeholder={disabled ? "Solo disponible para clientes BASIC y PREMIUM." : placeholder}
+          placeholder={disabled ? "Solo disponible para clientes BASICO y PREMIUM." : placeholder}
           placeholderTextColor={colors.mediumGray}
           onChangeText={(value) => !disabled && handleInputChange(field, value)}
           editable={!disabled}
@@ -575,8 +575,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.white,
-    paddingVertical: 20,
-    paddingTop: 80,
+    paddingVertical: 50,
   },
   container: {
     width: "100%",

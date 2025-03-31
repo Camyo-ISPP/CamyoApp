@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 const { unifyUserData } = require("../../utils/unifyData");
 import BackButton from "../_components/BackButton";
-import { startChat } from "../chat/services";
+import { startChat } from "../(protected)/chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
 const PublicCamionero = ({ userId }) => {
@@ -23,7 +23,7 @@ const PublicCamionero = ({ userId }) => {
     const [resenaAEliminar, setResenaAEliminar] = useState(null);
     const [editResenaId, setEditResenaId] = useState(null);
     const [yaEscribioResena, setYaEscribioResena] = useState(false);
-
+    const [fueAsignado, setFueAsignado] = useState(false);
     const [resenas, setResenas] = useState([]);
 
     const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -70,12 +70,20 @@ const PublicCamionero = ({ userId }) => {
         }
     };
 
+    const fetchMisOfertasEmpresa = async () => {
+        const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+        setFueAsignado(response.data.filter((offer: any) => offer.estado === "CERRADA").some((offer: any) => offer.camionero.id === parseInt(userId)));
+    }
+
     useEffect(() => {
         if (user2?.userId) {
             fetchResenas();
         }
+        if(user && user.rol === 'EMPRESA'){
+            fetchMisOfertasEmpresa();
+        }
     }, [user2]);
-
+    
     return (
         <>
             <Modal visible={showResenaModal} transparent animationType="fade">
@@ -238,7 +246,7 @@ const PublicCamionero = ({ userId }) => {
                                 <Text style={styles.username}>@{user2?.username}</Text>
                                 <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
                                 <Text style={styles.description}>{user2?.descripcion}</Text>
-                                {user && user.rol === "EMPRESA" && !yaEscribioResena && (
+                                {user && user.rol === "EMPRESA" && fueAsignado && !yaEscribioResena && (
                                     <TouchableOpacity
                                         style={[styles.publishButton, { marginTop: 10 }]}
                                         onPress={() => {
@@ -259,7 +267,7 @@ const PublicCamionero = ({ userId }) => {
                         onPress={async () => {
                         const chatId = await startChat(user.userId, user2.userId);
                             if (chatId) {
-                                router.replace(`/chat`);
+                                router.push(`/chat`);
                             }
                          }}
                      >
@@ -443,10 +451,9 @@ const PublicCamionero = ({ userId }) => {
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
-        paddingVertical: 20,
+        paddingVertical: 60,
         backgroundColor: colors.white,
         minHeight: "100%",
-        marginTop: 80,
     },    
     card: {
         backgroundColor: colors.white,

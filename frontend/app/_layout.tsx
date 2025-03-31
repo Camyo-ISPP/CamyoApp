@@ -1,17 +1,14 @@
 import { Stack, useSegments, useRouter, usePathname, router } from "expo-router";
-import { Platform } from "react-native";
 import { useState, useEffect } from 'react';
-import CamyoWebNavBar from "./_components/CamyoNavBar";
-import BottomBar from "./_components/BottomBar";
+import CamyoWebNavBar from "./_components/_layout/CamyoNavBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { PaymentProvider } from "@/contexts/PaymentContext";
 
 function RootLayout() {
   const segments = useSegments();
-  const isMobile = Platform.OS === 'ios' || Platform.OS === 'android';
  
   useEffect(() => {
-    if (Platform.OS === "web") {
       const pageTitles: Record<string, string> = {
         index: "Inicio",
         login: "Iniciar Sesión",
@@ -19,7 +16,7 @@ function RootLayout() {
         miperfil: "Mi Perfil",
         miperfilempresa: "Mi Perfil Empresa",
         miperfilcamionero: "Mi Perfil Camionero",
-        "buscar-ofertas": "Buscar Ofertas",
+        "explorar": "Explorar Ofertas",
         "camionero/[camioneroId]": "Perfil Camionero",
         "oferta/crear": "Publicar Nueva Oferta",
         empresas: "Lista de Empresas",
@@ -29,25 +26,25 @@ function RootLayout() {
         "miperfilempresa/editar": "Editar Perfil Empresa",
         workinprogress: "Trabajo en Progreso",
         forbidden: "Acceso Denegado",
-        suscripcion: "Planes de Suscripción",
         chat:"Mis Mensajes",
+        "pago/checkout": "Pago",
+        suscripcion: "Planes de Suscripción",
         misofertas: "Mis Ofertas"
       };
 
       const currentSegment = segments.join("/");
       document.title = pageTitles[currentSegment] || "Camyo";
-    }
+
   }, [segments]);
 
   return (
-    <>
-    {!isMobile && 
-      <CamyoWebNavBar
-        onSearch={(query: string) => {
-          router.push(`/buscar-ofertas?query=${query}`);
-        }}
-      />}
+      <>
+        <CamyoWebNavBar
+          onSearch={(query: string) => {
+            router.push(`/explorar?query=${query}`);
+          }}/>
       
+      <PaymentProvider>
       <SubscriptionProvider>
       
       <Stack screenOptions={{ headerShown: false }}>
@@ -57,6 +54,8 @@ function RootLayout() {
         <Stack.Screen name="(public)/registro/camionero" />
         <Stack.Screen name="(public)/registro/empresa" />
         <Stack.Screen name="(public)/empresas" />
+        <Stack.Screen name="(public)/terminos" />
+        <Stack.Screen name="(public)/privacidad" />
 
         <Stack.Screen name="miperfil" />
         <Stack.Screen name="miperfil/editar" />
@@ -67,7 +66,7 @@ function RootLayout() {
         
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/[ofertaId]" />
-        <Stack.Screen name="buscar-ofertas" />
+        <Stack.Screen name="explorar" />
         <Stack.Screen name="chat" />
         <Stack.Screen name="chat/list" />
         
@@ -76,10 +75,12 @@ function RootLayout() {
         <Stack.Screen name="(admin)/workinprogress" />
         <Stack.Screen name="(public)/forbidden" />
 
+        <Stack.Screen name="pago/checkout" />
         <Stack.Screen name="misofertas" />
       </Stack>
-      {isMobile && <BottomBar />}
+      
       </SubscriptionProvider>
+      </PaymentProvider>
     </>
 
   );

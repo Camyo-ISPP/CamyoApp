@@ -10,7 +10,7 @@ export interface SubscriptionRule {
       maxSponsoredOffers: 1,
       fullFormFields: false,
     },
-    BASIC: {
+    BASICO: {
       maxActiveOffers: 3,
       maxSponsoredOffers: 2,
       fullFormFields: true,

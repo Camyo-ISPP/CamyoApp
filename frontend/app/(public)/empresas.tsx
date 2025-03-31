@@ -3,10 +3,11 @@ import { View, Text, ScrollView, Linking, StyleSheet, ActivityIndicator, Touchab
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
-import { startChat } from "../chat/services";
+import { startChat } from "../(protected)/chat/services";
 import { useAuth } from "@/contexts/AuthContext";
 import { Image } from "react-native";
 import defaultImage from "@/assets/images/empresa.jpg";
+import WebFooter from "../_components/_layout/WebFooter";
 
 interface Usuario {
   id: number;
@@ -54,10 +55,9 @@ const EmpresasLista = () => {
   return (
     <ScrollView contentContainerStyle={{
       flexGrow: 1,
-      paddingTop: 20
     }}>
       {empresas.map((empresa, index) => (
-        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 100 }]}>
+        <View key={empresa.id} style={[styles.card, index === 0 && { marginTop: 40 }]}>
           <View style={styles.contentRow}>
             <Image
               source={empresa.usuario.foto ? { uri: `data:image/png;base64,${empresa.usuario.foto}` } : defaultImage}
@@ -95,7 +95,7 @@ const EmpresasLista = () => {
                   const chatId = await startChat(user.userId, empresa.usuario.id);
                   if (chatId) {
 
-                    router.replace(`/chat`);
+                    router.push(`/chat`);
 
                   }
                 }}
@@ -108,6 +108,7 @@ const EmpresasLista = () => {
           </View>
         </View>
       ))}
+      <WebFooter />
     </ScrollView>
   );
 };

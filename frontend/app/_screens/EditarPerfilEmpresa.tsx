@@ -251,7 +251,7 @@ const EditarPerfilEmpresa = () => {
             <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
           </TouchableOpacity>
 
-          <Text style={styles.title}>Editar Perfil</Text>
+          <Text style={styles.title}>Editar mi Perfil</Text>
 
           {/* Foto de perfil */}
           <View style={{ alignItems: "center", marginBottom: 20, marginTop: 10 }}>

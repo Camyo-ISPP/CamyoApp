@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 
-type SubscriptionLevel = 'GRATIS' | 'BASIC' | 'PREMIUM';
+type SubscriptionLevel = 'GRATIS' | 'BASICO' | 'PREMIUM';
 
 interface SubscriptionContextType {
   subscriptionLevel: SubscriptionLevel | null;

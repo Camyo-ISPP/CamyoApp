@@ -1,7 +1,6 @@
 package com.camyo.backend.pago;
 
 import com.camyo.backend.empresa.EmpresaService;
-import com.camyo.backend.oferta.OfertaPatrocinadaService;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Usuario;
@@ -44,9 +43,6 @@ public class PagoController {
         private SuscripcionService suscripcionService;
 
         @Autowired
-        private OfertaPatrocinadaService patrocinioService;
-
-        @Autowired
         private EmpresaService empresaService;
 
         Dotenv dotenv = Dotenv.load();
@@ -56,7 +52,6 @@ public class PagoController {
         @PostMapping("/integrated")
         public ResponseEntity<String> integratedCheckout(@RequestBody Pago pago) throws StripeException {
                 Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
-                String clientBaseURL = "http://localhost:8081";
                 String secret = null;
 
                 // Start by finding an existing customer record from Stripe or creating a new
@@ -64,19 +59,15 @@ public class PagoController {
                 Usuario cliente = usuarioService.obtenerUsuarioActual();
                 Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
 
-                Long planPrecio = 0L;
                 String precio_id = null;
                 switch (pago.getCompra()) {
                         case BASICO -> {
-                                planPrecio=2499L;
-                                precio_id="price_1R44WZC8z1doGFyHeIuqQXe6";
+                                precio_id="price_1R7E7wIRKHnhkuSfhBa5XZVS";
                         }
                         case PREMIUM -> {
-                                planPrecio=2499L;
-                                precio_id="price_1R44a0C8z1doGFyH9z0geWHE";
+                                precio_id="price_1R7EAFIRKHnhkuSf4dEsT23W";
                         }
                         default -> {
-                                planPrecio=200L;
                                 precio_id=null;
                         }
                 };

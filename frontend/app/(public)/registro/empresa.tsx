@@ -1,26 +1,22 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Modal } from "react-native";
-import globalStyles from "../../../assets/styles/globalStyles";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Modal, ImageBackground, Linking } from "react-native";
 import colors from "../../../assets/styles/colors";
-import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Entypo, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import defaultProfileImage from "../../../assets/images/companyDefaultAvatar.png";
+import defaultProfileImage from "../../../assets/images/image.png";
 import { useAuth } from "../../../contexts/AuthContext";
 import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from "../../_components/SuccessModal";
-import { terminosYCondiciones, politicaDePrivacidad } from "../../../assets/gdpr";
 
 const EmpresaRegisterScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
   const router = useRouter();
+
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const { login } = useAuth();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [legalModalVisible, setLegalModalVisible] = useState(false);
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -32,15 +28,12 @@ const EmpresaRegisterScreen = () => {
     descripcion: "",
     foto: null,
     fotoUri: null,
-
-    // Empresa
     web: "",
     nif: "",
     aceptaTerminos: false,
-
   });
 
-  const handleInputChange = (field: string, value: string | boolean | any[]) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prevState) => ({ ...prevState, [field]: value }));
   };
 
@@ -77,34 +70,33 @@ const EmpresaRegisterScreen = () => {
     }
   };
 
-
   const handleRegister = async () => {
     // Validación de nombre de empresa
-    if (!formData.nombre){
+    if (!formData.nombre) {
       setErrorMessage("El campo nombre de empresa es obligatorio.");
       return;
     }
-    if (formData.nombre.length > 100){
+    if (formData.nombre.length > 100) {
       setErrorMessage("El campo nombre de empresa es demasiado largo.");
       return;
     }
 
     // Validación de nombre de usuario
-    if (!formData.username){
+    if (!formData.username) {
       setErrorMessage("El campo nombre de usuario es obligatorio.");
       return;
     }
-    if (formData.username.length > 30){
+    if (formData.username.length > 30) {
       setErrorMessage("El campo nombre de usuario es demasiado largo.");
       return;
     }
 
     // Validación de correo electrónico
-    if (!formData.email){
+    if (!formData.email) {
       setErrorMessage("El campo correo electrónico es obligatorio.");
       return;
     }
-    if (formData.email.length > 255){
+    if (formData.email.length > 255) {
       setErrorMessage("El campo correo electrónico es demasiado largo.");
       return;
     }
@@ -114,13 +106,13 @@ const EmpresaRegisterScreen = () => {
     }
 
     // Validación de contraseña
-    if (!formData.password){
+    if (!formData.password) {
       setErrorMessage("El campo contraseña es obligatorio.");
       return;
     }
 
     // Validación de número de teléfono
-    if (!formData.telefono){
+    if (!formData.telefono) {
       setErrorMessage("El campo teléfono es obligatorio.");
       return;
     }
@@ -130,41 +122,48 @@ const EmpresaRegisterScreen = () => {
     }
 
     // Validación de la localización
-    if (!formData.localizacion){
+    if (!formData.localizacion) {
       setErrorMessage("El campo localización es obligatorio.");
       return;
     }
-    if (formData.localizacion.length > 200){
+    if (formData.localizacion.length > 200) {
       setErrorMessage("El campo localización es demasiado largo.");
       return;
     }
 
     // Validación de la descripción
-    if (formData.descripcion && formData.descripcion.length > 500){
+    if (formData.descripcion && formData.descripcion.length > 500) {
       setErrorMessage("El campo descripción es demasiado largo.");
       return;
     }
 
     // Validación y corrección de la URL
-    if (!formData.web){
+    if (!formData.web) {
       setErrorMessage("El campo página web es obligatorio.");
       return;
     }
+    let correctedWeb = formData.web;
     if (!formData.web.startsWith('http://') && !formData.web.startsWith('https://')) {
       if (!/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(formData.web)) {
         setErrorMessage('El formato de la URL de la página web no es válido.');
         return;
       }
-      formData.web = 'https://' + formData.web; // Añadir https:// si no tiene esquema
+      correctedWeb = 'https://' + formData.web;
     }
 
     // Validación del NIF
-    if (!formData.nif){
-      setErrorMessage("El campo numero de identificación es obligatorio.");
+    if (!formData.nif) {
+      setErrorMessage("El campo número de identificación es obligatorio.");
       return;
     }
     if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
       setErrorMessage("El formato del número de identificación no es válido.");
+      return;
+    }
+
+    // Validación de aceptación de términos
+    if (!formData.aceptaTerminos) {
+      setErrorMessage("Debes aceptar los términos y condiciones para registrarte.");
       return;
     }
 
@@ -178,15 +177,9 @@ const EmpresaRegisterScreen = () => {
       descripcion: formData.descripcion,
       foto: formData.foto ? formData.foto : null,
       password: formData.password,
-
-      web: formData.web,
+      web: correctedWeb,
       nif: formData.nif
     };
-
-    if (!formData.aceptaTerminos) {
-      setErrorMessage("Debes aceptar los términos y condiciones para registrarte.");
-      return;
-    }
 
     try {
       const response = await axios.post(`${BACKEND_URL}/auth/signup/empresa`, userData, {
@@ -196,7 +189,7 @@ const EmpresaRegisterScreen = () => {
       });
 
       if (response.status === 200) {
-        setErrorMessage("")
+        setErrorMessage("");
 
         const responseLogin = await axios.post(`${BACKEND_URL}/auth/signin`, {
           username: userData.username,
@@ -212,7 +205,6 @@ const EmpresaRegisterScreen = () => {
           router.replace("/");
         }, 1000);
       }
-
     } catch (error) {
       console.error('Error en la solicitud', error);
       if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
@@ -225,24 +217,27 @@ const EmpresaRegisterScreen = () => {
         setErrorMessage('Error desconocido');
       }
     }
-
   };
 
   // Render input function
   const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "") => (
-    <View style={{ width: '90%', marginBottom: 15 }}>
-      <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
+    <View style={styles.inputContainer}>
+      <Text style={styles.inputLabel}>{label}</Text>
+      <View style={[
+        styles.inputWrapper,
+        formData[field] ? styles.inputWrapperFocused : null
+      ]}>
         {icon}
         <TextInput
-          style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline: "none", textAlignVertical: multiline ? 'top' : 'center' }}
+          style={[styles.inputField, { outlineWidth: 0 }]}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           numberOfLines={multiline ? 3 : 1}
           onChangeText={(value) => handleInputChange(field, value)}
           placeholder={placeholder}
-          placeholderTextColor="gray"
+          placeholderTextColor={colors.mediumGray}
+          value={formData[field] || ''}
         />
       </View>
     </View>
@@ -250,63 +245,98 @@ const EmpresaRegisterScreen = () => {
 
   // Password input render
   const renderPasswordInput = () => (
-    <View style={{ width: "90%", marginBottom: 15 }}>
-      <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: "flex-start", paddingHorizontal: 5, zIndex: 1 }}>Contraseña</Text>
-      <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: colors.mediumGray, borderRadius: 8, paddingHorizontal: 10, backgroundColor: colors.white }}>
+    <View style={styles.inputContainer}>
+      <Text style={styles.inputLabel}>Contraseña</Text>
+      <View style={[
+        styles.inputWrapper,
+        formData.password ? styles.inputWrapperFocused : null
+      ]}>
         <Entypo name="lock" size={20} color={colors.primary} />
         <TextInput
-          style={{ flex: 1, height: 40, paddingLeft: 8, outline: "none", textAlignVertical: "center" }}
+          style={[styles.inputField, { outlineWidth: 0 }]}
           secureTextEntry={!passwordVisible}
           value={formData.password || ''}
           onChangeText={(value) => handleInputChange("password", value)}
         />
         <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-          <Entypo name={passwordVisible ? "eye-with-line" : "eye"} size={18} color={colors.mediumGray} />
+          <Entypo
+            name={passwordVisible ? "eye-with-line" : "eye"}
+            size={18}
+            color={colors.mediumGray}
+          />
         </TouchableOpacity>
       </View>
     </View>
   );
 
-  return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <View style={styles.cardContainer}>
+  const navigateToTerms = () => {
+    Linking.openURL(process.env.EXPO_PUBLIC_FRONTEND_URL + '/terminos');
+  };
 
-          <TouchableOpacity style={styles.backButton} onPress={() => router.push('/registro')}>
-            <Ionicons name="arrow-back" size={30} color="#0b4f6c" />
+  return (
+    <ImageBackground
+      source={require('../../../assets/images/auth-bg.png')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.formContainer}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.push('/registro')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.secondary} />
           </TouchableOpacity>
 
-          <Text style={styles.title}>Registro como Empresa</Text>
+          <View style={styles.header}>
+            <View style={styles.iconCircle}>
+              <FontAwesome5 name="building" size={32} color={colors.secondary} />
+            </View>
+            <Text style={styles.title}>Registro de Empresa</Text>
+          </View>
 
           {/* Foto de perfil */}
-          <View style={{ alignItems: "center", marginBottom: 20, marginTop: 10 }}>
+          <View style={styles.avatarContainer}>
             <Image
               source={formData.fotoUri ? { uri: formData.fotoUri } : defaultProfileImage}
-              style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 8, borderWidth: 1, borderColor: colors.mediumGray }}
+              style={styles.avatarImage}
             />
-
-            {!formData.foto ? (
-              <TouchableOpacity onPress={handlePickImage} style={[globalStyles.button, { backgroundColor: colors.secondary, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 140, paddingHorizontal: 15 }]}>
-                <MaterialIcons name="add-a-photo" size={20} color={colors.white} style={{ marginRight: 8 }} />
-                <Text style={globalStyles.buttonText}>Añadir Foto</Text>
-              </TouchableOpacity>
-            ) : (
-              <View style={{ flexDirection: "row" }}>
-                <TouchableOpacity onPress={handlePickImage} style={[globalStyles.button, { backgroundColor: colors.green, marginRight: 7, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
-                  <MaterialIcons name="cached" size={20} color={colors.white} style={{ marginRight: 8 }} />
-                  <Text style={globalStyles.buttonText}>Cambiar</Text>
+            <View style={styles.avatarButtons}>
+              {!formData.foto ? (
+                <TouchableOpacity
+                  onPress={handlePickImage}
+                  style={[styles.avatarButton, { backgroundColor: colors.primary }]}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="add-a-photo" size={20} color={colors.white} />
+                  <Text style={styles.avatarButtonText}>Añadir Foto</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => setFormData({ ...formData, fotoUri: null, foto: null })} style={[globalStyles.button, { backgroundColor: colors.red, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
-                  <FontAwesome5 name="trash" size={18} color={colors.white} style={{ marginRight: 8 }} />
-                  <Text style={globalStyles.buttonText}>Borrar</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+              ) : (
+                <>
+                  <TouchableOpacity
+                    onPress={handlePickImage}
+                    style={[styles.avatarButton, { backgroundColor: colors.green }]}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialIcons name="cached" size={20} color={colors.white} />
+                    <Text style={styles.avatarButtonText}>Cambiar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setFormData({ ...formData, fotoUri: null, foto: null })}
+                    style={[styles.avatarButton, { backgroundColor: colors.red }]}
+                    activeOpacity={0.8}
+                  >
+                    <FontAwesome5 name="trash" size={18} color={colors.white} />
+                    <Text style={styles.avatarButtonText}>Borrar</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
           </View>
 
           {/* Campos del formulario */}
-          {renderInput("Nombre de empresa", "nombre", <FontAwesome5 name="user" size={20} color={colors.primary} />)}
+          {renderInput("Nombre de empresa", "nombre", <FontAwesome5 name="building" size={20} color={colors.primary} />)}
           {renderInput("Nombre de usuario", "username", <FontAwesome5 name="user-alt" size={20} color={colors.primary} />)}
           {renderInput("Correo electrónico", "email", <MaterialIcons name="email" size={20} color={colors.primary} />, "email-address", false, false, "usuario@ejemplo.com")}
           {renderPasswordInput()}
@@ -314,193 +344,229 @@ const EmpresaRegisterScreen = () => {
           {renderInput("Localización", "localizacion", <MaterialIcons name="location-pin" size={20} color={colors.primary} />)}
           {renderInput("Descripción", "descripcion", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
 
-          {/* Campos del formulario específicos de la empresa */}
+          {/* Campos específicos de empresa */}
           {renderInput("Página web", "web", <FontAwesome5 name="globe" size={20} color={colors.primary} />, "url", false, false, "ejemplo.com")}
           {renderInput("Número de identificación", "nif", <FontAwesome5 name="id-card" size={20} color={colors.primary} />, "default", false, false, "A12345678")}
 
-          {errorMessage ? (
-            <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
-              {errorMessage}
-            </Text>
-          ) : null}
+          {errorMessage && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          )}
 
-          <View style={styles.checkboxContainer}>
+          <View style={styles.termsContainer}>
             <TouchableOpacity
               onPress={() => handleInputChange("aceptaTerminos", !formData.aceptaTerminos)}
               style={[
                 styles.checkbox,
-                { backgroundColor: formData.aceptaTerminos ? colors.primary : colors.white }]}>
+                { backgroundColor: formData.aceptaTerminos ? colors.primary : colors.white }
+              ]}
+              activeOpacity={0.8}
+            >
               {formData.aceptaTerminos && (
-                <FontAwesome5 name="check" size={14} color="white" />)}
+                <FontAwesome5 name="check" size={14} color="white" />
+              )}
             </TouchableOpacity>
-
-            <Text style={styles.checkboxText}>
-              He leído y acepto los{' '}
-              <Text style={styles.linkText} onPress={() => setLegalModalVisible(true)}>
-                Términos y condiciones y la Política de privacidad
-              </Text>{' '}
+            <Text style={styles.termsText}>
+              Acepto los{' '}
+              <Text
+                style={styles.termsLink}
+                onPress={navigateToTerms}
+              >
+                Términos y Condiciones
+              </Text>
             </Text>
           </View>
 
-          {/* Botón de registro */}
-          <TouchableOpacity style={[globalStyles.button, { width: "100%", borderRadius: 12, elevation: 5 }]}
+          <TouchableOpacity
+            style={styles.registerButton}
             onPress={handleRegister}
+            activeOpacity={0.8}
           >
-            <Text style={[globalStyles.buttonText, { fontSize: 25 }]}>Registrarse</Text>
+            <Text style={styles.registerButtonText}>Registrarse</Text>
           </TouchableOpacity>
 
-          {/* Modal de éxito */}
           <SuccessModal
             isVisible={successModalVisible}
             onClose={() => setSuccessModalVisible(false)}
             message="¡Registro exitoso!"
           />
-
-          {/* Modal de términos y condiciones */}
-          <Modal
-            visible={legalModalVisible}
-            animationType="fade"
-            transparent={true}
-            onRequestClose={() => setLegalModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.legalModalContainer}>
-                <ScrollView contentContainerStyle={{ padding: 10 }}>
-                  <Text style={styles.modalTitle}>TÉRMINOS Y CONDICIONES</Text>
-                  <Text style={styles.modalParagraph}>{terminosYCondiciones}</Text>
-
-                  <Text style={styles.modalTitle}>POLÍTICA DE PRIVACIDAD</Text>
-                  <Text style={styles.modalParagraph}>{politicaDePrivacidad}</Text>
-                </ScrollView>
-                <TouchableOpacity
-                  style={[globalStyles.button, { marginTop: 10, backgroundColor: colors.primary }]}
-                  onPress={() => setLegalModalVisible(false)}
-                >
-                  <Text style={globalStyles.buttonText}>Cerrar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-
-
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  container: {
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.white,
-    paddingVertical: 20,
-    paddingTop: 80,
+    padding: 16,
+    minHeight: '100%',
+    marginTop: 50,
   },
-  container: {
-    width: "100%",
-    maxWidth: 600,
-    paddingHorizontal: 20,
-  },
-  cardContainer: {
-    backgroundColor: colors.white,
-    paddingVertical: 40,
-    paddingHorizontal: 30,
-    borderRadius: 12,
+  formContainer: {
+    width: "90%",
+    maxWidth: 500,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    padding: 30,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 8,
+    marginVertical: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 1,
+  },
+  header: {
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.lightGray,
+    marginBottom: 24,
+  },
+  iconCircle: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: colors.secondary,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: colors.secondary,
-    marginBottom: 20,
+    marginBottom: 8,
     textAlign: "center",
   },
+  subtitle: {
+    fontSize: 14,
+    color: colors.darkGray,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  avatarContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: colors.lightGray,
+    marginBottom: 12,
+  },
+  avatarButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
+  avatarButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginHorizontal: 6,
+    marginBottom: 8,
+  },
+  avatarButtonText: {
+    color: colors.white,
+    marginLeft: 8,
+    fontSize: 14,
+  },
   inputContainer: {
-    width: "90%",
-    marginBottom: 15,
+    width: "100%",
+    marginBottom: 16,
   },
   inputLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: colors.secondary,
-    marginLeft: 8,
-    marginBottom: -6,
-    backgroundColor: colors.white,
-    paddingHorizontal: 5,
-    zIndex: 1,
+    marginBottom: 8,
+    fontWeight: "600",
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: colors.mediumGray,
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    borderColor: colors.lightGray,
+    borderRadius: 10,
+    paddingHorizontal: 14,
     backgroundColor: colors.white,
+    height: 48,
+  },
+  inputWrapperFocused: {
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 2,
   },
   inputField: {
     flex: 1,
-    height: 40,
-    paddingLeft: 8,
-    outline: "none",
-  },
-  button: {
-    backgroundColor: colors.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: 140,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: colors.white,
+    height: "100%",
+    paddingLeft: 10,
+    color: colors.darkGray,
     fontSize: 16,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    backgroundColor: colors.green,
-    padding: 20,
+  sectionContainer: {
+    width: "100%",
+    marginBottom: 20,
+    backgroundColor: colors.white,
     borderRadius: 10,
-    width: 250,
-    alignItems: "center",
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  modalIcon: {
-    marginBottom: 10,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.secondary,
+    marginBottom: 12,
   },
-  modalText: {
-    fontSize: 18,
-    color: "white",
+  sectionSubtitle: {
+    fontSize: 14,
+    color: colors.secondary,
+    fontWeight: "600",
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  errorContainer: {
+    backgroundColor: "#FEE2E2",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: "#DC2626",
+    fontSize: 14,
     textAlign: "center",
+    fontWeight: '500',
   },
-  backButton: {
-    position: "absolute",
-    top: 20,
-    left: 20,
+  termsContainer: {
     flexDirection: "row",
     alignItems: "center",
-    zIndex: 10,
+    marginBottom: 24,
+    paddingHorizontal: 8,
   },
-  checkboxContainer: {
-    width: '90%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-
   checkbox: {
     width: 24,
     height: 24,
@@ -511,45 +577,78 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 10,
   },
-
-  checkboxText: {
-    color: colors.secondary,
+  termsText: {
     flex: 1,
-    flexWrap: 'wrap',
+    fontSize: 14,
+    color: colors.darkGray,
   },
-
-  linkText: {
+  termsLink: {
     color: colors.primary,
     textDecorationLine: 'underline',
+    fontWeight: '500',
   },
-
-  legalModalContainer: {
-    backgroundColor: colors.white,
-    padding: 20,
+  registerButton: {
+    backgroundColor: colors.primary,
     borderRadius: 10,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  registerButtonText: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  legalModal: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
     width: '90%',
     maxHeight: '80%',
-    alignSelf: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
-
+  legalModalContent: {
+    padding: 24,
+  },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
     color: colors.secondary,
+    marginBottom: 12,
+    marginTop: 8,
   },
-
-  modalParagraph: {
+  modalText: {
     fontSize: 14,
-    color: colors.secondary,
-    marginBottom: 20,
+    color: colors.darkGray,
+    lineHeight: 20,
+    marginBottom: 16,
   },
-
+  modalCloseButton: {
+    backgroundColor: colors.primary,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+  },
+  modalCloseButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default EmpresaRegisterScreen;

@@ -1,4 +1,4 @@
-import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, Platform, ScrollView, Alert, Modal } from "react-native";
+import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
@@ -6,7 +6,7 @@ import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
-import defaultCamImage from "../../assets/images/defaultAvatar.png";
+import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 
 const formatDate = (fecha: string) => {
@@ -34,16 +34,17 @@ export default function OfertaDetalleScreen() {
                     const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
                     const data = await response.json();
                     setOfferData(data);
-
-                    const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
-                    const trabajoText = await trabajoResponse.text();
-                    const trabajoData = trabajoText ? JSON.parse(trabajoText) : null;
-                    setOfferTrabajoData(trabajoData);
-
-                    const cargaResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`);
-                    const cargaText = await cargaResponse.text();
-                    const cargaData = cargaText ? JSON.parse(cargaText) : null;
-                    setOfferCargaData(cargaData);
+                    
+                    if(data.tipoOferta === "TRABAJO"){
+                        const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
+                        const trabajoData = await trabajoResponse.json();
+                        setOfferTrabajoData(trabajoData);
+                    } else if (data.tipoOferta === "CARGA") {
+                        const cargaResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`);
+                        const cargaText = await cargaResponse.text();
+                        const cargaData = cargaText ? JSON.parse(cargaText) : null;
+                        setOfferCargaData(cargaData);
+                    }
 
                 } catch (error) {
                     console.error("Error fetching data:", error);
@@ -490,12 +491,9 @@ export default function OfertaDetalleScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        //justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.white,
         paddingVertical: 20,
-        paddingTop: Platform.OS === "web" ? '5.8%' : '0%',
-        marginTop: 20,
     },
     scrollContainer: {
         flex: 1,
@@ -504,9 +502,9 @@ const styles = StyleSheet.create({
         paddingVertical: 0,
     },
     card: {
-        width: Platform.OS === "web" ? '60%' : '100%',
+        width: '60%',
         marginHorizontal: '15%',
-        padding: Platform.OS === "web" ? 20 : 10,
+        padding: 20,
         backgroundColor: colors.white,
         borderRadius: 10,
         shadowColor: "#000",
@@ -532,7 +530,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     title: {
-        paddingTop: Platform.OS === "web" ? 0 : 10,
+        paddingTop: 0,
         fontSize: 34,
         fontWeight: 'bold',
     },
@@ -692,7 +690,7 @@ const styles = StyleSheet.create({
     },
     backIcon: {
         marginLeft: 10,
-        marginTop: Platform.OS === 'ios' ? 30 : 10,
+        marginTop: 10,
     },
     deleteButton: {
         flex: 1,
