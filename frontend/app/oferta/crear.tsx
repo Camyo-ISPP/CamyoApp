@@ -294,7 +294,6 @@ const CrearOfertaScreen = () => {
 
     // Construcción del objeto base de la oferta
     let ofertaData: any = {
-      tipoOferta,
       oferta: {
         titulo: formData.titulo,
         experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
@@ -304,7 +303,8 @@ const CrearOfertaScreen = () => {
         sueldo: parseFloat(formData.sueldo).toFixed(2), // Convertir a float con 2 decimal
         localizacion: formData.localizacion,
         fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales
-        empresa: { id: user?.id ?? null }
+        empresa: { id: user?.id ?? null },
+        tipoOferta: tipoOferta
       }
     };
 

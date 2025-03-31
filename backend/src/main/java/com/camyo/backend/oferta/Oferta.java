@@ -7,7 +7,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.empresa.Empresa;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.camyo.backend.camionero.Licencia;
 
 import jakarta.persistence.Column;

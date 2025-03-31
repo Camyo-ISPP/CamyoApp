@@ -1,10 +1,6 @@
 package com.camyo.backend.oferta;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +14,6 @@ import com.camyo.backend.camionero.CamioneroRepository;
 import com.camyo.backend.configuration.services.UserDetailsImpl;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaRepository;
-import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
@@ -32,10 +27,7 @@ public class OfertaService {
 
     @Autowired
     private OfertaRepository ofertaRepository;
-    @Autowired
-    private CargaRepository cargaRepository;
-    @Autowired
-    private TrabajoRepository trabajoRepository;
+
     @Autowired
     private CamioneroRepository camioneroRepository;
     @Autowired
@@ -51,16 +43,6 @@ public class OfertaService {
     @Transactional(readOnly = true)
     public List<Oferta> obtenerOfertas() {
         return ofertaRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Oferta> obtenerOfertasPorTipo() {
-        return ofertaRepository.encontrarGenerales();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Oferta> obtenerOfertasCarga() {
-        return ofertaRepository.encontrarCargas();
     }
 
     @Transactional(readOnly = true)
