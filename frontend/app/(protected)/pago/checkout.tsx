@@ -56,7 +56,6 @@ function IntegratedCheckout() {
     }
 
     return <>
-        <View style={styles.whiteTransition} />
         {id === 'BASICO' || id === 'PREMIUM' ?
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>

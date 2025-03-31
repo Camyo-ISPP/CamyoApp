@@ -147,9 +147,8 @@ const MisOfertasCamionero = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
         backgroundColor: colors.white,
-        marginTop: 70,
+        paddingTop: 50,
     },
     pageTitle: {
         fontSize: 26,
