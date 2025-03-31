@@ -69,5 +69,5 @@ export const RouteMap: React.FC<RouteMapProps> = ({ origin, destination, openCag
     loadMap().catch((err) => console.error('Error al cargar el mapa:', err));
   }, [origin, destination, openCageKey, googleMapsApiKey]);
 
-  return <div ref={mapRef} style={{ width: '100%', height: '500px' }} />;
+  return <div ref={mapRef} style={{ width: '100%', height: '500px', borderRadius:20, }} />;
 };

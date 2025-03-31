@@ -381,6 +381,8 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.detallesLabel}>Fin máximo:</Text> {formatDate(offerCargaData.finMaximo)}
                             </Text>
                         </View>
+
+                        <View style={styles.separator} />
                         <RouteMap
                             origin={offerCargaData.origen}
                             destination={offerCargaData.destino}
