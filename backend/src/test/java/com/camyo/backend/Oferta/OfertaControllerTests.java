@@ -1,13 +1,11 @@
 package com.camyo.backend.Oferta;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
-
 
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
@@ -16,9 +14,11 @@ import com.camyo.backend.oferta.Carga;
 import com.camyo.backend.oferta.CargaService;
 import com.camyo.backend.oferta.Oferta;
 import com.camyo.backend.oferta.OfertaController;
+import com.camyo.backend.oferta.OfertaEstado;
 import com.camyo.backend.oferta.OfertaService;
 import com.camyo.backend.oferta.Trabajo;
 import com.camyo.backend.oferta.TrabajoService;
+import com.camyo.backend.oferta.TipoOferta;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -75,12 +75,16 @@ public class OfertaControllerTests {
         oferta1.setTitulo("Oferta Nacional");
         oferta1.setSueldo(1500.0);
         oferta1.setEmpresa(empresa);
+        oferta1.setTipoOferta(TipoOferta.CARGA);
+        oferta1.setEstado(OfertaEstado.ABIERTA);
 
         oferta2 = new Oferta();
         oferta2.setId(2);
         oferta2.setTitulo("Oferta Internacional");
         oferta2.setSueldo(2000.0);
         oferta2.setEmpresa(empresa);
+        oferta2.setTipoOferta(TipoOferta.TRABAJO);
+        oferta2.setEstado(OfertaEstado.ABIERTA);
 
         carga = new Carga();
         carga.setId(1);
@@ -92,13 +96,6 @@ public class OfertaControllerTests {
     }
 
     @Test
-    void debeObtenerTodasLasOfertas() throws Exception {
-        when(ofertaService.obtenerOfertas()).thenReturn(List.of(oferta1, oferta2));
-        mockMvc.perform(get(BASE_URL))
-            .andExpect(status().isOk());
-    }
-
-    @Test
     void debeObtenerUltimas10Ofertas() throws Exception {
         when(ofertaService.obtenerUltimas10Ofertas()).thenReturn(List.of(oferta1, oferta2));
         mockMvc.perform(get(BASE_URL + "/recientes"))
@@ -106,9 +103,17 @@ public class OfertaControllerTests {
     }
 
     @Test
-    void debeObtenerOfertasConInformacion() throws Exception {
+    void debeObtenerOfertasConInformacionCarga() throws Exception {
         when(ofertaService.obtenerOfertas()).thenReturn(List.of(oferta1));
         when(ofertaService.obtenerCarga(anyInt())).thenReturn(carga);
+        mockMvc.perform(get(BASE_URL + "/info"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void debeObtenerOfertasConInformacionTrabajo() throws Exception {
+        when(ofertaService.obtenerOfertas()).thenReturn(List.of(oferta2));
+        when(ofertaService.obtenerTrabajo(anyInt())).thenReturn(trabajo);
         mockMvc.perform(get(BASE_URL + "/info"))
             .andExpect(status().isOk());
     }
@@ -139,30 +144,6 @@ public class OfertaControllerTests {
     void noDebeEliminarOfertaNoExistente() throws Exception {
         when(ofertaService.obtenerOfertaPorId(99)).thenThrow(ResourceNotFoundException.class);
         mockMvc.perform(delete(BASE_URL + "/99"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void debeObtenerTipoOfertaCarga() throws Exception {
-        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
-        when(ofertaService.obtenerCarga(1)).thenReturn(carga);
-        mockMvc.perform(get(BASE_URL + "/1/tipo"))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void debeObtenerTipoOfertaTrabajo() throws Exception {
-        when(ofertaService.obtenerOfertaPorId(2)).thenReturn(oferta2);
-        when(ofertaService.obtenerCarga(2)).thenReturn(null);
-        when(ofertaService.obtenerTrabajo(2)).thenReturn(trabajo);
-        mockMvc.perform(get(BASE_URL + "/2/tipo"))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void noDebeObtenerTipoOfertaInexistente() throws Exception {
-        when(ofertaService.obtenerOfertaPorId(99)).thenThrow(ResourceNotFoundException.class);
-        mockMvc.perform(get(BASE_URL + "/99/tipo"))
             .andExpect(status().isNotFound());
     }
 

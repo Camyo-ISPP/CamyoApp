@@ -5,12 +5,7 @@ import com.camyo.backend.camionero.CamioneroRepository;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaRepository;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
-import com.camyo.backend.oferta.CargaRepository;
-import com.camyo.backend.oferta.Oferta;
-import com.camyo.backend.oferta.OfertaRepository;
-import com.camyo.backend.oferta.OfertaService;
-import com.camyo.backend.oferta.TrabajoRepository;
-
+import com.camyo.backend.oferta.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -60,6 +55,7 @@ public class OfertaServiceTests {
         oferta.setEmpresa(empresa);
         oferta.setAplicados(new HashSet<>());
         oferta.setRechazados(new HashSet<>());
+        oferta.setEstado(OfertaEstado.ABIERTA);
 
         camionero = new Camionero();
         camionero.setId(1);
@@ -119,6 +115,7 @@ public class OfertaServiceTests {
         Oferta result = ofertaService.asignarOferta(1, 1);
         assertEquals(camionero, result.getCamionero());
         assertTrue(result.getRechazados().containsAll(oferta.getAplicados()));
+        assertEquals(OfertaEstado.CERRADA, result.getEstado());
     }
 
     @Test
