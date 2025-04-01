@@ -223,7 +223,7 @@ export default function Index() {
 
                     {(!canCreateNewOffer()) ? (
                       <TouchableOpacity style={styles.mejorarPlanButton} onPress={() => router.push("/suscripcion")}>
-                        <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
+                        <FontAwesome5 name="rocket" size={16} color="#f15025" style={styles.plusIcon} />
                         <Text style={styles.publishButtonText}>Mejorar mi plan</Text>
                       </TouchableOpacity>
                     ) : (
@@ -424,24 +424,29 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.white,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   secondaryButtonText: {
     color: colors.primary,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   mejorarPlanButton: {
-    backgroundColor: '#0993A8FF',
-    padding: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 6,
+    backgroundColor: colors.white,
   },
   publishButtonText: {
-    color: "#fff",
+    color: colors.primary,
     fontSize: 18,
     fontWeight: "bold",
   },
