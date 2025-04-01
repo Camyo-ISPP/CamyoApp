@@ -17,10 +17,13 @@ const MisOfertasEmpresa = () => {
     const [tab, setTab] = useState("ABIERTA");
     const [openOffers, setOpenOffers] = useState<any[]>([]);
     const [closedOffers, setClosedOffers] = useState<any[]>([]);
+    const [draftOffers, setDraftOffers] = useState<any[]>([]);
+
 
     const noOffersInAllCategories =
         openOffers.length === 0 &&
-        closedOffers.length === 0;
+        closedOffers.length === 0 &&
+        draftOffers.length === 0;
 
     useFocusEffect(
         useCallback(() => {
@@ -29,6 +32,7 @@ const MisOfertasEmpresa = () => {
                     const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
                     setOpenOffers(response.data.filter((o: any) => o.estado === "ABIERTA"));
                     setClosedOffers(response.data.filter((o: any) => o.estado === "CERRADA"));
+                    setDraftOffers(response.data.filter((o: any) => o.estado === "BORRADOR"));
                 } catch (error) {
                     console.error("Error al cargar las ofertas:", error);
                 }
@@ -80,6 +84,13 @@ const MisOfertasEmpresa = () => {
             return <ListadoOfertas data={closedOffers} />;
         }
 
+        if (tab === "BORRADOR") {
+            if (draftOffers.length === 0) {
+                return <Text style={styles.emptyTitle}>No tienes ofertas en modo borrador.</Text>;
+            }
+            return <ListadoOfertas data={draftOffers} />;
+        }
+
         return null;
     };
 
@@ -93,8 +104,25 @@ const MisOfertasEmpresa = () => {
                 return {
                     backgroundColor: "#e74c3c"
                 };
+            case "BORRADOR":
+                return {
+                    backgroundColor: "#f39c12"
+                };
             default:
                 return {};
+        }
+    };
+
+    const getTabLabel = (type: string) => {
+        switch (type) {
+            case "ABIERTA":
+                return "Abiertas (sin asignar)";
+            case "CERRADA":
+                return "Cerradas (asignadas)";
+            case "BORRADOR":
+                return "Borrador";
+            default:
+                return "";
         }
     };
 
@@ -104,7 +132,7 @@ const MisOfertasEmpresa = () => {
             {!noOffersInAllCategories &&
                 <View style={styles.contentWrapper}>
                     <View style={styles.tabContainer}>
-                        {["ABIERTA", "CERRADA"].map((t) => {
+                        {["ABIERTA", "BORRADOR", "CERRADA"].map((t) => {
                             const isActive = tab === t;
                             const dynamicStyle = isActive ? getActiveTabStyle(t) : {};
                             return (
@@ -114,7 +142,7 @@ const MisOfertasEmpresa = () => {
                                     style={[styles.tabButton, isActive && styles.activeTab, dynamicStyle]}
                                 >
                                     <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-                                        {t === "ABIERTA" ? "Abiertas (sin asignar)" : "Cerradas (asignadas)"}
+                                        {getTabLabel(t)}
                                     </Text>
                                 </TouchableOpacity>
                             );
