@@ -122,7 +122,7 @@ public class AuthController {
 		try {
 			authService.createCamionero(signUpRequest);
 		} catch (InvalidNifException e) {
-            return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
 	}
@@ -143,7 +143,11 @@ public class AuthController {
 		if (empresaService.obtenerEmpresaPorNif(signUpRequest.getNif()).isPresent()) {
 			return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' ya está registrado."));
 		}
-		authService.createEmpresa(signUpRequest);
+		try {
+			authService.createEmpresa(signUpRequest);
+	 	} catch (InvalidNifException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
 	}
 
@@ -182,7 +186,7 @@ public class AuthController {
 		try {
 			authService.editCamionero(editRequest, usuario, camionero);
 		} catch (InvalidNifException e) {
-            return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}
@@ -219,7 +223,11 @@ public class AuthController {
 		if (!empresa.getNif().equals(editRequest.getNif()) && empresaService.obtenerEmpresaPorNif(editRequest.getNif()).isPresent()) {
 			return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' ya está registrado."));
 		}
-		authService.editEmpresa(editRequest, usuario, empresa);
+		try {
+			authService.editEmpresa(editRequest, usuario, empresa);
+		} catch (InvalidNifException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}
     

@@ -79,7 +79,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void createEmpresa(@Valid SignupRequestEmpresa request) throws DataAccessException, IOException {
+	public void createEmpresa(@Valid SignupRequestEmpresa request) throws DataAccessException, IOException, InvalidNifException {
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.getUsername());
 		usuario.setPassword(request.getPassword());
@@ -129,7 +129,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void editEmpresa(@Valid EditRequestEmpresa request, Usuario usuario, Empresa empresa) throws DataAccessException, IOException {
+	public void editEmpresa(@Valid EditRequestEmpresa request, Usuario usuario, Empresa empresa) throws DataAccessException, IOException, InvalidNifException {
 		usuario.setEmail(request.getEmail());
 		usuario.setLocalizacion(request.getLocalizacion());
 		usuario.setTelefono(request.getTelefono());
