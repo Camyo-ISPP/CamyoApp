@@ -147,6 +147,36 @@ const CamioneroRegisterScreen = () => {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setErrorMessage("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    if (formData.password.length > 255) {
+      setErrorMessage("La contraseña no puede tener más de 255 caracteres.");
+      return;
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos una letra minúscula.");
+      return;
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos una letra mayúscula.");
+      return;
+    }
+
+    if (!/[0-9!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos un número o un carácter especial.");
+      return;
+    }
+
+    if (formData.password.toLowerCase().includes(formData.username.toLowerCase()) || formData.password.toLowerCase().includes(formData.nombre.toLowerCase())) {
+      setErrorMessage("La contraseña no puede contener el nombre de usuario ni el correo electrónico.");
+      return;
+    }
+
     // Validación de número de teléfono
     if (!formData.telefono) {
       setErrorMessage("El campo teléfono es obligatorio.");
