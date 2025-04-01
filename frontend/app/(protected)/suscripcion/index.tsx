@@ -224,7 +224,6 @@ const SubscriptionPlans = () => {
             features: [
                 "1 oferta activa simultánea",
                 "1 oferta patrocinada simultánea",
-                "Personalización limitada de ofertas",
                 "Soporte estándar"
             ],
             borderColor: "#ccc",
@@ -238,7 +237,6 @@ const SubscriptionPlans = () => {
             features: [
                 "Ofertas ilimitadas activas",
                 "Ofertas patrocinadas ilimitadas",
-                "Personalización completa de ofertas",
                 "Soporte prioritario 24/7",
             ],
             borderColor: colors.secondary,
@@ -251,8 +249,6 @@ const SubscriptionPlans = () => {
             features: [
                 "3 ofertas activas simultáneas",
                 "2 ofertas patrocinadas simultáneas",
-                "Visibilidad mejorada",
-                "Personalización completa de ofertas",
                 "Soporte prioritario por email"
             ],
             borderColor: colors.primary,

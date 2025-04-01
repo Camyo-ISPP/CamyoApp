@@ -139,19 +139,17 @@ const CrearOfertaScreen = () => {
     }
 
     // Validación de experiencia
-    if (rules.fullFormFields){
-      if (!formData.experiencia){
-        setErrorMessage("El campo años de experiencia es obligatorio.");
-        return;
-      }
-      if (isNaN(formData.experiencia)) {
-        setErrorMessage("El campo años de experiencia debe ser un número.");
-        return;
-      }
-      if (formData.experiencia < 0) {
-        setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
-        return;
-      }
+    if (!formData.experiencia){
+      setErrorMessage("El campo años de experiencia es obligatorio.");
+      return;
+    }
+    if (isNaN(formData.experiencia)) {
+      setErrorMessage("El campo años de experiencia debe ser un número.");
+      return;
+    }
+    if (formData.experiencia < 0) {
+      setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
+      return;
     }
 
     // Validación de licencia
@@ -327,7 +325,7 @@ const CrearOfertaScreen = () => {
     let ofertaData: any = {
       oferta: {
         titulo: formData.titulo,
-        experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
+        experiencia: Number(formData.experiencia), // Convertir a número
         licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
         notas: formData.notas,
         estado: formData.estado || "ABIERTA",
@@ -589,8 +587,7 @@ const CrearOfertaScreen = () => {
                   "numeric",
                   false,
                   false,
-                  "",
-                  !rules.fullFormFields // Bloquear si no tiene acceso completo
+                  ""
                 )}
               <View style={styles.inputContainer}>
                 <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
