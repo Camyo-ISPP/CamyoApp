@@ -93,6 +93,11 @@ login
       setErrorMessage("El campo nombre y apellidos es demasiado largo.");
       return;
     }
+  
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos solo pueden contener letras y espacios.");
+      return;
+    }
 
     // Validación de nombre de usuario
     if (!formData.username) {
