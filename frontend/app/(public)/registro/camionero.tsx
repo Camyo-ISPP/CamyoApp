@@ -183,7 +183,7 @@ const CamioneroRegisterScreen = () => {
       return;
     }
     if (!/^\d{9}$/.test(formData.telefono)) {
-      setErrorMessage("El número de teléfono debe tener 9 dígitos.");
+      setErrorMessage("El número de teléfono debe tener 9 dígitos numéricos.");
       return;
     }
 
@@ -194,6 +194,16 @@ const CamioneroRegisterScreen = () => {
     }
     if (formData.localizacion.length > 200) {
       setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+    
+    if (formData.localizacion.length < 2) {
+      setErrorMessage("El campo localización es demasiado pequeño.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.nombre)) {
+      setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
       return;
     }
 
