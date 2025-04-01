@@ -1,7 +1,7 @@
 export const Products = new Map();
 
 Products.set("BASICO", {
-    description: "3 ofertas activas simultáneas + 1 patrocinada. Ideal para pequeñas empresas.",
+    description: "3 ofertas activas simultáneas + 2 patrocinadas. Ideal para pequeñas empresas.",
     image: "/assets/images/icon.png",
     name: "Plan Básico",
     price: 24.99,

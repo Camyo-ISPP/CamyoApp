@@ -520,7 +520,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 20,
     backgroundColor: colors.white,
-    marginTop: 20,
     paddingTop: 70,
     minHeight: "90%",
   },

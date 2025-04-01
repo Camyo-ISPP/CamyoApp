@@ -31,6 +31,7 @@ const MiPerfilEmpresa = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const { refreshSubscriptionLevel } = useSubscription();
   const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
+  const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -98,10 +99,9 @@ const MiPerfilEmpresa = () => {
 
   const promoteOffer = async (ofertaId: number) => {
     try {
-      const url = `${BACKEND_URL}/ofertas/patrocinadas?ofertaId=${ofertaId}&dias=30`;
-
+      const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
       const response = await fetch(url, {
-        method: "POST",
+        method: "PUT",
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${userToken}`
@@ -121,10 +121,10 @@ const MiPerfilEmpresa = () => {
       console.error("Error completo en promoteOffer:", err);
     }
   };
-  const unpromoteOffer = async (ofertaId: number) => {
+  const unpromoteOffer = async (ofertaId: number | null) => {
     try {
       const response = await axios.put(
-        `${BACKEND_URL}/ofertas/patrocinadas/desactivar/${ofertaId}`,
+        `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
         {},
         {
           headers: {
@@ -136,6 +136,7 @@ const MiPerfilEmpresa = () => {
 
       if (response.status === 200) {
         fetchOffers();
+        setSelectedOfferId(null);
       }
       setIsModalVisibleCancelar(false);
 
@@ -317,7 +318,7 @@ const MiPerfilEmpresa = () => {
                                 item.promoted ? (
                                   <TouchableOpacity
                                     style={[styles.actionButton, styles.unpromoteButton]}
-                                    onPress={() => setIsModalVisibleCancelar(true)}
+                                    onPress={() => {setIsModalVisibleCancelar(true); setSelectedOfferId(item.id)}}
                                   >
                                     <AntDesign name="closecircleo" size={14} color={colors.white} style={{ paddingRight: 19 }} />
                                     <Text style={styles.actionButtonText}>Cancelar</Text>
@@ -361,7 +362,7 @@ const MiPerfilEmpresa = () => {
                                           <TouchableOpacity onPress={() => setIsModalVisibleCancelar(false)} style={styles.modalButton}>
                                             <Text style={styles.modalButtonText}>Cancelar</Text>
                                           </TouchableOpacity>
-                                          <TouchableOpacity onPress={() => unpromoteOffer(item.id)} style={styles.modalButton}>
+                                          <TouchableOpacity onPress={() => unpromoteOffer(selectedOfferId)} style={styles.modalButton}>
                                             <Text style={styles.modalButtonText}>Confirmar</Text>
                                           </TouchableOpacity>
                                         </View>
@@ -435,9 +436,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 20,
     backgroundColor: colors.white,
-    marginTop: 20,
     paddingTop: 70,
     minHeight: "100%",
   },

@@ -1,7 +1,6 @@
 package com.camyo.backend.pago;
 
 import com.camyo.backend.empresa.EmpresaService;
-import com.camyo.backend.oferta.OfertaPatrocinadaService;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Usuario;
@@ -42,9 +41,6 @@ public class PagoController {
 
         @Autowired
         private SuscripcionService suscripcionService;
-
-        @Autowired
-        private OfertaPatrocinadaService patrocinioService;
 
         @Autowired
         private EmpresaService empresaService;
