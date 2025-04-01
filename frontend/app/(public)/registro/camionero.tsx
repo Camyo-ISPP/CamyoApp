@@ -47,7 +47,7 @@ const CamioneroRegisterScreen = () => {
   const handleInputChange = (field: string, value: string | boolean | any[]) => {
     setFormData((prevState) => ({ ...prevState, [field]: value }));
   };
-login
+  login
   const handlePickImage = async () => {
     const base64Image = await pickImageAsync();
     if (base64Image) {
@@ -85,6 +85,9 @@ login
     const licenciasBackend = formData.licencias.map((licencia) => licencias_backend[licencias.indexOf(licencia)]);
 
     // Validación de nombre y apellidos
+
+    formData.nombre = formData.nombre.trim();
+
     if (!formData.nombre) {
       setErrorMessage("El campo nombre y apellidos es obligatorio.");
       return;
@@ -93,11 +96,26 @@ login
       setErrorMessage("El campo nombre y apellidos es demasiado largo.");
       return;
     }
-  
-    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(formData.nombre)) {
-      setErrorMessage("El nombre y apellidos solo pueden contener letras y espacios.");
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos solo pueden contener letras, espacios y guiones.");
       return;
     }
+
+    if (!/[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos deben contener al menos dos letras.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos deben comenzar con una letra.");
+      return;
+    }
+
+    formData.nombre = formData.nombre
+      .split(/\s+/)
+      .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
+      .join(" ");
 
     // Validación de nombre de usuario
     if (!formData.username) {
