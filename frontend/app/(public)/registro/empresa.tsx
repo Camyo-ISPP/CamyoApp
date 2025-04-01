@@ -76,10 +76,17 @@ const EmpresaRegisterScreen = () => {
       setErrorMessage("El campo nombre de empresa es obligatorio.");
       return;
     }
+
     if (formData.nombre.length > 100) {
       setErrorMessage("El campo nombre de empresa es demasiado largo.");
       return;
     }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos solo pueden contener letras y espacios.");
+      return;
+    }
+
 
     // Validación de nombre de usuario
     if (!formData.username) {
