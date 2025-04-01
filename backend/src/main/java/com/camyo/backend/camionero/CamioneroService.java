@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.camyo.backend.exceptions.InvalidNifException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
+import com.camyo.backend.util.Validators;
 
 @Service
 public class CamioneroService {
@@ -49,13 +51,14 @@ public class CamioneroService {
     }
 
     @Transactional()
-    public Camionero guardarCamionero(Camionero camionero) {
+    public Camionero guardarCamionero(Camionero camionero) throws InvalidNifException {
+        Validators.comprobarNif(camionero.getDni());
         return camioneroRepository.save(camionero);
     }
 
 
     @Transactional()
-    public Camionero actualizarCamionero(Integer id, Camionero camioneroUpdated) {
+    public Camionero actualizarCamionero(Integer id, Camionero camioneroUpdated) throws InvalidNifException {
         Camionero existingCamionero = obtenerCamioneroPorId(id);
         // Ignoramos "id", "usuario", y además "camiones" y "ofertas" si no queremos sobreescribirlas
         BeanUtils.copyProperties(camioneroUpdated, existingCamionero, "id", "usuario", "camiones", "ofertas");

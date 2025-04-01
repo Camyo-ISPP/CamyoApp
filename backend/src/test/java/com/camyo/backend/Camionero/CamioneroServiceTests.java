@@ -138,23 +138,23 @@ class CamioneroServiceTests {
 
         Camionero c1 = new Camionero();
         c1.setExperiencia(10);
-        c1.setDni("12345678Q");
+        c1.setDni("46099435Y");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c1.setDisponibilidad(Disponibilidad.NACIONAL);
         c1.setTieneCAP(true);
         c1.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c1.setUsuario(u1);
-        camioneroService.guardarCamionero(c1);
+        assertDoesNotThrow(() -> camioneroService.guardarCamionero(c1));
 
         Camionero c2 = new Camionero();
         c2.setExperiencia(10);
-        c2.setDni("12445678Q");
+        c2.setDni("46099434M");
         c2.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c2.setDisponibilidad(Disponibilidad.NACIONAL);
         c2.setTieneCAP(true);
         c2.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c2.setUsuario(u2);
-        camioneroService.guardarCamionero(c2);
+        assertDoesNotThrow(() -> camioneroService.guardarCamionero(c2));
 
          /*
         * Guardamos los ids de los camioneros y de sus usuarios 
@@ -250,7 +250,9 @@ class CamioneroServiceTests {
         Set<Licencia> newLicencias = new HashSet<Licencia>(Set.of(Licencia.C, Licencia.C_E));
         camNuevo.setLicencias(newLicencias);
 
-        Camionero camioneroActualizado = camioneroService.actualizarCamionero(id, camNuevo);
+        assertDoesNotThrow(() -> camioneroService.actualizarCamionero(id, camNuevo));
+        Camionero camioneroActualizado = camioneroService.obtenerCamioneroPorId(id);
+
 
         assertEquals(newLicencias, camioneroActualizado.getLicencias());
         assertEquals(newExperiencia, camioneroActualizado.getExperiencia());
@@ -277,13 +279,13 @@ class CamioneroServiceTests {
         
         Camionero c1 = new Camionero();
         c1.setExperiencia(10);
-        c1.setDni("12345688V");
+        c1.setDni("21084571B");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c1.setDisponibilidad(Disponibilidad.NACIONAL);
         c1.setTieneCAP(true);
         c1.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c1.setUsuario(u1);
-        camioneroService.guardarCamionero(c1);
+        assertDoesNotThrow(() -> camioneroService.guardarCamionero(c1));
 
         assertDoesNotThrow(() -> camioneroService.eliminarCamionero(c1.getId()));
     }

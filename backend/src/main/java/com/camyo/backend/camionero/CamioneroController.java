@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.camyo.backend.auth.payload.response.MessageResponse;
+import com.camyo.backend.exceptions.InvalidNifException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
@@ -114,6 +115,11 @@ public class CamioneroController {
         try {
             Camionero camioneroGuardado = camioneroService.guardarCamionero(camionero);
             return new ResponseEntity<>(camioneroGuardado, HttpStatus.CREATED);
+        } catch (InvalidNifException ex) {
+            return new ResponseEntity<>(
+                new MessageResponse("DNI inválido."), 
+                HttpStatus.BAD_REQUEST
+            );
         } catch (DataAccessException ex) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -162,6 +168,11 @@ public class CamioneroController {
         try {
             Camionero camioneroActualizado = camioneroService.actualizarCamionero(id, camionero);
             return new ResponseEntity<>(camioneroActualizado, HttpStatus.OK);
+        } catch (InvalidNifException ex) {
+            return new ResponseEntity<>(
+                new MessageResponse("DNI inválido."), 
+                HttpStatus.BAD_REQUEST
+            );
         } catch (DataAccessException ex) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

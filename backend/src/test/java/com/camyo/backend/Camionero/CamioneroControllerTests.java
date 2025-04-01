@@ -157,7 +157,7 @@ public class CamioneroControllerTests {
         c1 = new Camionero();
         c1.setId(1);
         c1.setExperiencia(10);
-        c1.setDni("12345678Q");
+        c1.setDni("46099435Y");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c1.setDisponibilidad(Disponibilidad.NACIONAL);
         c1.setTieneCAP(true);
@@ -167,7 +167,7 @@ public class CamioneroControllerTests {
         c2 = new Camionero();
         c2.setId(2);
         c2.setExperiencia(10);
-        c2.setDni("12445678Q");
+        c2.setDni("46099434M");
         c2.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c2.setDisponibilidad(Disponibilidad.NACIONAL);
         c2.setTieneCAP(true);
@@ -177,7 +177,7 @@ public class CamioneroControllerTests {
         testCamionero = new Camionero();
         testCamionero.setId(3);
         testCamionero.setExperiencia(12);
-        testCamionero.setDni("12445679P");
+        testCamionero.setDni("46099433G");
         testCamionero.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         testCamionero.setDisponibilidad(Disponibilidad.NACIONAL);
         testCamionero.setTieneCAP(true);

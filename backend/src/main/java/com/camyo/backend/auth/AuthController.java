@@ -34,6 +34,7 @@ import com.camyo.backend.configuration.jwt.JwtUtils;
 import com.camyo.backend.configuration.services.UserDetailsImpl;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.exceptions.InvalidNifException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
@@ -118,7 +119,11 @@ public class AuthController {
 		if (camioneroService.obtenerCamioneroPorDNI(signUpRequest.getDni()).isPresent()) {
 			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' ya está asociado a otra cuenta."));
 		}
-		authService.createCamionero(signUpRequest);
+		try {
+			authService.createCamionero(signUpRequest);
+		} catch (InvalidNifException e) {
+            return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+		}
 		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
 	}
 
@@ -174,7 +179,11 @@ public class AuthController {
 		if (!camionero.getDni().equals(editRequest.getDni()) && camioneroService.obtenerCamioneroPorDNI(editRequest.getDni()).isPresent()) {
 			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + editRequest.getDni() + "' ya está asociado a otra cuenta."));
 		}
-		authService.editCamionero(editRequest, usuario, camionero);
+		try {
+			authService.editCamionero(editRequest, usuario, camionero);
+		} catch (InvalidNifException e) {
+            return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+		}
 		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}
 
