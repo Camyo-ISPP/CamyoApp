@@ -84,6 +84,25 @@ const PublicCamionero = ({ userId }) => {
         }
     }, [user2]);
     
+    const descargarPDF = async () => {
+        const base64Data = user2.curriculum; 
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `CV_${user2.username}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <>
             <Modal visible={showResenaModal} transparent animationType="fade">
@@ -193,7 +212,6 @@ const PublicCamionero = ({ userId }) => {
                                         };
 
                                         if (editResenaId) {
-                                            console.log("Editando reseña con ID:", editResenaId);
                                             const res = await axios.put(`${BACKEND_URL}/resenas/${editResenaId}`, payload, { headers });
 
                                             if (res.status === 200) {
@@ -291,6 +309,11 @@ const PublicCamionero = ({ userId }) => {
                             <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
                             {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
                             {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
+                            {user2?.curriculum &&
+                                <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
+                                    <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                                </TouchableOpacity>
+                            }
                         </View>
                         <View style={styles.separator} />
 
@@ -611,6 +634,17 @@ const styles = StyleSheet.create({
     buttonText: {
         color: colors.white,
         fontWeight: "bold"
+    },
+    pdfButton: {
+        backgroundColor: colors.primary,
+        padding: 10,
+        borderRadius: 5,
+        alignItems: "center",
+        marginTop: 10,
+    },
+    pdfButtonText: {
+        color: colors.white,
+        fontWeight: "bold",
     },
 });
 

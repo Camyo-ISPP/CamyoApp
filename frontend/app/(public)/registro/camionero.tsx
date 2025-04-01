@@ -11,6 +11,7 @@ import defaultProfileImage from "../../../assets/images/image.png";
 import BooleanSelector from "../../_components/BooleanSelector";
 import MultiSelector from "../../_components/MultiSelector";
 import { useAuth } from "../../../contexts/AuthContext";
+import * as DocumentPicker from 'expo-document-picker';
 
 const licencias = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "D1+E", "D"];
 const licencias_backend = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1_E", "C_E", "D1", "D_E", "D1_E", "D"];
@@ -42,6 +43,7 @@ const CamioneroRegisterScreen = () => {
     isAutonomo: false,
     tarjetas: [],
     aceptaTerminos: false,
+    curriculum: null
   });
 
   const handleInputChange = (field: string, value: string | boolean | any[]) => {
@@ -78,6 +80,24 @@ login
     } catch (error) {
       console.error("Error picking image: ", error);
       return null;
+    }
+  };
+
+  const pickPdfAsync = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+      if (!result.canceled && result.assets[0].uri.split(',')[0] === "data:application/pdf;base64") {
+        const base64PDF = result.assets[0].uri.split(',')[1];
+        console.log(result)
+        if (base64PDF) {
+          setFormData((prevState) => ({
+            ...prevState,
+            curriculum: base64PDF
+          }));
+        }
+      };
+    } catch (error) {
+      console.error('Error picking the document', error);
     }
   };
 
@@ -216,6 +236,7 @@ login
       descripcion: formData.descripcion,
       foto: formData.foto ? formData.foto : null,
       password: formData.password,
+      curriculum: formData.curriculum ? formData.curriculum : null,
 
       dni: formData.dni,
       licencias: licenciasBackend,
@@ -447,6 +468,28 @@ login
                 />
               </>
             )}
+          </View>
+
+          <View style={styles.avatarButtons}>
+          { !formData.curriculum ? (
+            <TouchableOpacity
+              onPress={pickPdfAsync}
+              style={[styles.avatarButton, { backgroundColor: colors.primary }]}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="upload-file" size={20} color={colors.white} />
+              <Text style={styles.avatarButtonText}>Subir CV (PDF)</Text>
+            </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+              onPress={() => setFormData({ ...formData, curriculum: null })}
+              style={[styles.avatarButton, { backgroundColor: colors.red }]}
+              activeOpacity={0.8}
+            >
+              <FontAwesome5 name="trash" size={18} color={colors.white} />
+              <Text style={styles.avatarButtonText}>Borrar</Text>
+            </TouchableOpacity>
+          )}
           </View>
 
           {errorMessage && (
