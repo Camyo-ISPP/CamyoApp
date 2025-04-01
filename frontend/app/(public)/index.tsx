@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, ScrollView, ActivityIndicator, Dimensions, Animated, Easing } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
@@ -14,6 +14,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import CamyoNavBar from "../_components/_layout/CamyoNavBar";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -22,6 +23,49 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1040);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [offers, setOffers] = useState<any[]>([]);
+  const { rules, loading: subscriptionLoading } = useSubscriptionRules();
+  const [loadingOffers, setLoadingOffers] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
+
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+    } catch (error) {
+      console.error("Error al cargar las ofertas:", error);
+    } finally {
+      setLoadingOffers(false);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/recientes`);
+      setData(response.data);
+    } catch (error) {
+      console.error('Error al cargar los datos:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOffers();
+  }, [user]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoadingOffers(true);
+      setLoadingData(true);
+      fetchOffers();
+      fetchData();
+    }, [user])
+  );
 
   useEffect(() => {
     const updateSize = () => setIsCompact(Dimensions.get("window").width < 1040);
@@ -38,22 +82,9 @@ export default function Index() {
     return () => Dimensions.removeEventListener("change", updateSize);
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const generalLoading = loadingOffers || loadingData || subscriptionLoading || !rules;
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/ofertas/recientes`);
-      setData(response.data);
-    } catch (error) {
-      console.error('Error al cargar los datos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (generalLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.secondary} />
@@ -136,6 +167,11 @@ export default function Index() {
     </View>
   );
 
+  const canCreateNewOffer = () => {
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+    return activeOffersCount < rules.maxActiveOffers;
+  };
+
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
 
@@ -184,10 +220,18 @@ export default function Index() {
                       <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
                       <Text style={styles.buttonText}>Mis ofertas</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
-                      <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
-                      <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
-                    </TouchableOpacity>
+
+                    {(!canCreateNewOffer()) ? (
+                      <TouchableOpacity style={styles.mejorarPlanButton} onPress={() => router.push("/suscripcion")}>
+                        <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
+                        <Text style={styles.publishButtonText}>Mejorar mi plan</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
+                        <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
+                      </TouchableOpacity>
+                    )}
                   </>
                 ) : (
                   <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
@@ -388,7 +432,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-
+  mejorarPlanButton: {
+    backgroundColor: '#0993A8FF',
+    padding: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  publishButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  plusIcon: {
+    marginRight: 6,
+  },
   /* Stats Section */
   statsContainer: {
     flexDirection: 'row',

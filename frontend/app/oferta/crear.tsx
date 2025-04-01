@@ -14,6 +14,7 @@ import withNavigationGuard from "@/hoc/withNavigationGuard";
 import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import DatePicker from "@/app/_components/DatePicker";
+import { useFocusEffect } from "expo-router";
 
 const CrearOfertaScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -24,6 +25,35 @@ const CrearOfertaScreen = () => {
   const router = useRouter();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const { rules, loading } = useSubscriptionRules();
+  const [offers, setOffers] = useState<any[]>([]);
+  
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+    } catch (error) {
+      console.error("Error al cargar las ofertas:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOffers();
+  }, []);
+
+  
+  const canCreateNewOffer = () => {
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+    return activeOffersCount < rules.maxActiveOffers;
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!loading && !canCreateNewOffer()) {
+        router.push("/suscripcion");
+      }
+    }, [loading, offers, rules])
+  );
+
   const [formData, setFormData] = useState({
     titulo: "",
     experiencia: null,
@@ -400,6 +430,7 @@ const CrearOfertaScreen = () => {
       </View>
     );
   }  
+
 
   return (
     <EmpresaRoute>
