@@ -122,7 +122,7 @@ public class AuthController {
 		try {
 			authService.createCamionero(signUpRequest);
 		} catch (InvalidNifException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
 	}
@@ -145,8 +145,8 @@ public class AuthController {
 		}
 		try {
 			authService.createEmpresa(signUpRequest);
-	 	} catch (InvalidNifException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (InvalidNifException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
 	}
@@ -186,7 +186,7 @@ public class AuthController {
 		try {
 			authService.editCamionero(editRequest, usuario, camionero);
 		} catch (InvalidNifException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + editRequest.getDni() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}
@@ -226,7 +226,7 @@ public class AuthController {
 		try {
 			authService.editEmpresa(editRequest, usuario, empresa);
 		} catch (InvalidNifException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}
