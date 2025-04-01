@@ -16,8 +16,6 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-
-// queda arreglar pk no va el delete offer que sale server 500 y añadir patrocinado
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -29,7 +27,7 @@ const MiPerfilEmpresa = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const { refreshSubscriptionLevel } = useSubscription();
+  const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
   const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
 
@@ -173,7 +171,19 @@ const MiPerfilEmpresa = () => {
 
             {/* Información de la empresa */}
             <View style={styles.infoContainer}>
-              <Text style={styles.name}>{user.nombre}</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Text style={styles.name}>{user.nombre}</Text>
+                {subscriptionLevel === 'PREMIUM' && (
+                  <View style={styles.verifiedBadgePremium}>
+                    <MaterialIcons name="verified" size={20} color="#FFD700" />
+                  </View>
+                )}
+                {subscriptionLevel === 'BASICO' && (
+                  <View style={styles.verifiedBadgeBasic}>
+                    <MaterialIcons name="verified" size={20} color="#C0C0C0" />
+                  </View>
+                )}
+              </View>
               <Text style={styles.username}>@{user.username}</Text>
               <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user.email}</Text>
               <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user.telefono}</Text>
@@ -1182,6 +1192,18 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  verifiedBadgePremium: {
+    marginLeft: 8,
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    borderRadius: 50,
+    padding: 2,
+  },
+  verifiedBadgeBasic: {
+    marginLeft: 8,
+    backgroundColor: 'rgba(192, 192, 192, 0.2)',
+    borderRadius: 50,
+    padding: 2,
   },
 });
 
