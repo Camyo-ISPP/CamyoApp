@@ -26,18 +26,32 @@ public class Validators {
             // NIF de personas jurídicas y entidades: el código de control se obtiene utilizando el número de 7 cifras
             String numeroNIF = nif.substring(1, nif.length()-1);
             // Se suman las posiciones pares de los 7 dígitos centrales
-            Integer sumaPares = (int) numeroNIF.charAt(1) + (int) numeroNIF.charAt(3) + (int) numeroNIF.charAt(5);
+            Integer sumaPares = 0;
+            for (int i = 1; i <= numeroNIF.length()-1; i += 2) {
+                sumaPares += Character.getNumericValue(numeroNIF.charAt(i));
+            }
+
             // Se multiplica cada dígito impar por 2 y se suman las cifras si el resultado tiene más de un dígito
             Integer sumaImpares = 0;
-            for (int i = 0; i == numeroNIF.length(); i += 2) {
-                String digitos = String.valueOf((int) numeroNIF.charAt(i) * 2);
-                for (int j = 0; j == digitos.length(); j++) {
-                    sumaImpares += (int) digitos.charAt(j);
+            for (int i = 0; i <= numeroNIF.length(); i += 2) {
+                String digitos = String.valueOf(Character.getNumericValue(numeroNIF.charAt(i)) * 2);
+                for (int j = 0; j < digitos.length(); j++) {
+                    sumaImpares += Character.getNumericValue(digitos.charAt(j));
                 }
             }
-            Integer numeroControl = 10 - (sumaPares + sumaImpares) % 10;
+
+            // Se calcula el código de control
+            Integer numeroControl;
+            if ((sumaPares + sumaImpares) % 10 != 0) {
+                numeroControl = 10 - (sumaPares + sumaImpares) % 10;
+            } else {
+                numeroControl = 0;
+            }
+
+            // Por último, se comprueba que el número de control calculado coincida con el proporcionado
+            // o que el código de control corresponda al de la tabla
             char control = nif.charAt(nif.length()-1);
-            if ((int) control != numeroControl && control != secuenciaLetrasNIF.charAt(numeroControl)) {
+            if (Character.getNumericValue(control) != numeroControl && control != secuenciaLetrasNIF.charAt(numeroControl)) {
                 throw new InvalidNifException();
             }
         }

@@ -156,7 +156,8 @@ const EmpresaRegisterScreen = () => {
       setErrorMessage("El campo número de identificación es obligatorio.");
       return;
     }
-    if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
+    // TODO: Buscar regex para NIF
+    if (!/^[A-HP-SU-W]|J|N[0-9]{7}[A-J]$/.test(formData.nif)) {
       setErrorMessage("El formato del número de identificación no es válido.");
       return;
     }
