@@ -129,6 +129,15 @@ const EditarPerfilEmpresa = () => {
       setErrorMessage("El campo localización es demasiado largo.");
       return;
     }
+    if (formData.localizacion.length < 2) {
+      setErrorMessage("El campo localización es demasiado pequeño.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.localizacion)) {
+      setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
+      return;
+    }
 
     // Validación de la descripción
     if (formData.descripcion && formData.descripcion.length > 500){
@@ -156,6 +165,14 @@ const EditarPerfilEmpresa = () => {
     }
     if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
       setErrorMessage("El formato del número de identificación no es válido.");
+      return;
+    }
+    const nifLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+    const nifNumber = parseInt(formData.nif.slice(0, 8), 10);
+    const nifLetter = formData.nif.slice(8);
+
+    if (nifLetters[nifNumber % 23] !== nifLetter) {
+      setErrorMessage("El NIF no es válido. La letra no coincide");
       return;
     }
 
