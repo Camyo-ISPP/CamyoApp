@@ -57,7 +57,6 @@ public class OfertaServiceTests {
         usuario = new Usuario();
         usuario.setId(10);
 
-        // Para que coincida con el if: user.hasAuthority("EMPRESA")
         Authorities roleEmpresa = new Authorities();
         roleEmpresa.setAuthority("EMPRESA");
         usuario.setAuthority(roleEmpresa);
@@ -76,16 +75,13 @@ public class OfertaServiceTests {
         camionero = new Camionero();
         camionero.setId(1);
 
-        // Mock de usuario autenticado con userID=10
         UserDetailsImpl userDetails = mock(UserDetailsImpl.class);
         when(userDetails.getId()).thenReturn(10);
         SecurityContextHolder.getContext().setAuthentication(
             new UsernamePasswordAuthenticationToken(userDetails, null, new ArrayList<>())
         );
 
-        // Cuando se pida usuario 10, devolvemos este "usuario"
         when(usuarioRepository.findById(10)).thenReturn(Optional.of(usuario));
-        // Cuando se pida empresa por usuario 10, devolvemos la "empresa" (id=1)
         when(empresaRepository.obtenerPorUsuario(10)).thenReturn(Optional.of(empresa));
     }
 
@@ -155,7 +151,6 @@ public class OfertaServiceTests {
 
         Oferta result = ofertaService.asignarOferta(1, 1);
         assertEquals(camionero, result.getCamionero());
-        // Los demás aplicados pasan a rechazados:
         assertTrue(result.getRechazados().containsAll(oferta.getAplicados()));
     }
 
@@ -217,13 +212,11 @@ public class OfertaServiceTests {
         assertNotNull(result);
     }
 
-    // ========================== Patrocinio Tests ==========================
 
     @Test
     void debePatrocinarOfertaConPlanGratisYDisponible() {
         when(ofertaRepository.findById(1)).thenReturn(Optional.of(oferta));
 
-        // ¡Importante!: Usa el ID de la empresa (1), no el del usuario (10)
         when(suscripcionService.obtenerNivelSuscripcion(empresa.getId()))
             .thenReturn(PlanNivel.GRATIS);
 
@@ -249,7 +242,6 @@ public class OfertaServiceTests {
 
     @Test
     void noDebePatrocinarOfertaSiSinPermiso() {
-        // Cambiamos la empresa de la oferta => ID distinto
         Empresa otraEmpresa = new Empresa(); 
         otraEmpresa.setId(99);
         oferta.setEmpresa(otraEmpresa);
@@ -266,7 +258,6 @@ public class OfertaServiceTests {
     void noDebePatrocinarOfertaSiSuperaLimiteGratis() {
         when(ofertaRepository.findById(1)).thenReturn(Optional.of(oferta));
 
-        // Usa empresaId=1, de lo contrario suscripcionService devolverá null
         when(suscripcionService.obtenerNivelSuscripcion(empresa.getId()))
             .thenReturn(PlanNivel.GRATIS);
 
