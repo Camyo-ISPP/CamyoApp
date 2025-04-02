@@ -89,6 +89,12 @@ const EmpresaRegisterScreen = () => {
       setErrorMessage("El campo nombre de usuario es obligatorio.");
       return;
     }
+    
+    if (formData.username.length < 2) {
+      setErrorMessage("El campo nombre de usuario es demasiado pequeño.");
+      return;
+    }
+
     if (formData.username.length > 30) {
       setErrorMessage("El campo nombre de usuario es demasiado largo.");
       return;
@@ -169,7 +175,7 @@ const EmpresaRegisterScreen = () => {
       return;
     }
 
-    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.nombre)) {
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.localizacion)) {
       setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
       return;
     }
@@ -201,6 +207,15 @@ const EmpresaRegisterScreen = () => {
     }
     if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
       setErrorMessage("El formato del número de identificación no es válido.");
+      return;
+    }
+
+    const nifLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+    const nifNumber = parseInt(formData.nif.slice(0, 8), 10);
+    const nifLetter = formData.nif.slice(8);
+
+    if (nifLetters[nifNumber % 23] !== nifLetter) {
+      setErrorMessage("El NIF no es válido. La letra no coincide");
       return;
     }
 

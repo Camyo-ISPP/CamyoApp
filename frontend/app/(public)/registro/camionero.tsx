@@ -271,13 +271,10 @@ const CamioneroRegisterScreen = () => {
         setErrorMessage("El formato de la fecha de expiración del CAP no es válido. Comprueba que sea dd-mm-YYYY");
         return;
       }
-      // Extract day, month, and year
-      const [day, month, year] = formData.expiracionCAP.split("-").map(num => parseInt(num, 10));
 
-      // Get the current year
+      const [day, month, year] = formData.expiracionCAP.split("-").map(num => parseInt(num, 10));
       const currentYear = new Date().getFullYear();
 
-      // Validate month (1-12)
       if (month < 1 || month > 12) {
         setErrorMessage("El mes de la fecha de expiración del CAP no es válido.");
         return;
