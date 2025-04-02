@@ -35,6 +35,7 @@ import com.camyo.backend.configuration.services.UserDetailsImpl;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.InvalidNifException;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
@@ -123,6 +124,8 @@ public class AuthController {
 			authService.createCamionero(signUpRequest);
 		} catch (InvalidNifException e) {
             return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
 	}
@@ -147,6 +150,8 @@ public class AuthController {
 			authService.createEmpresa(signUpRequest);
 		} catch (InvalidNifException e) {
             return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
 	}
@@ -187,6 +192,8 @@ public class AuthController {
 			authService.editCamionero(editRequest, usuario, camionero);
 		} catch (InvalidNifException e) {
             return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + editRequest.getDni() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + editRequest.getTelefono() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}
@@ -227,6 +234,8 @@ public class AuthController {
 			authService.editEmpresa(editRequest, usuario, empresa);
 		} catch (InvalidNifException e) {
             return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + editRequest.getTelefono() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}

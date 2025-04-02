@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.camyo.backend.auth.payload.response.MessageResponse;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -95,7 +96,12 @@ public class UsuarioController {
     @PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<Usuario> create(@RequestBody @Valid Usuario user) {
-		Usuario usuarioGuardado = usuarioService.guardarUsuario(user);
+		Usuario usuarioGuardado;
+        try {
+            usuarioGuardado = usuarioService.guardarUsuario(user);
+        } catch (InvalidPhoneNumberException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 		return new ResponseEntity<>(usuarioGuardado, HttpStatus.CREATED);
 	}
 
@@ -109,7 +115,12 @@ public class UsuarioController {
 	public ResponseEntity<Usuario> update(@PathVariable("id") Integer id, @RequestBody @Valid Usuario user) {
 		Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
         if (usuario != null) {
-            return new ResponseEntity<>(this.usuarioService.updateUser(user, id), HttpStatus.OK);
+            try {
+                Usuario usuarioActualizado = this.usuarioService.updateUser(user, id);
+                return new ResponseEntity<>(usuarioActualizado, HttpStatus.OK);
+            } catch (InvalidPhoneNumberException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

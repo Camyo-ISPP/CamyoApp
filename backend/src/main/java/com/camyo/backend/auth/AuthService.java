@@ -16,6 +16,7 @@ import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.InvalidNifException;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Authorities;
@@ -47,7 +48,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void createCamionero(@Valid SignupRequestCamionero request) throws DataAccessException, IOException, InvalidNifException {
+	public void createCamionero(@Valid SignupRequestCamionero request) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.getUsername());
 		usuario.setPassword(request.getPassword());
@@ -79,7 +80,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void createEmpresa(@Valid SignupRequestEmpresa request) throws DataAccessException, IOException, InvalidNifException {
+	public void createEmpresa(@Valid SignupRequestEmpresa request) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.getUsername());
 		usuario.setPassword(request.getPassword());
@@ -103,7 +104,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void editCamionero(@Valid EditRequestCamionero request, Usuario usuario, Camionero camionero) throws DataAccessException, IOException, InvalidNifException {
+	public void editCamionero(@Valid EditRequestCamionero request, Usuario usuario, Camionero camionero) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		usuario.setEmail(request.getEmail());
 		usuario.setLocalizacion(request.getLocalizacion());
 		usuario.setTelefono(request.getTelefono());
@@ -129,7 +130,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void editEmpresa(@Valid EditRequestEmpresa request, Usuario usuario, Empresa empresa) throws DataAccessException, IOException, InvalidNifException {
+	public void editEmpresa(@Valid EditRequestEmpresa request, Usuario usuario, Empresa empresa) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		usuario.setEmail(request.getEmail());
 		usuario.setLocalizacion(request.getLocalizacion());
 		usuario.setTelefono(request.getTelefono());

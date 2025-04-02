@@ -1,6 +1,9 @@
 package com.camyo.backend.util;
 
+import java.util.Set;
+
 import com.camyo.backend.exceptions.InvalidNifException;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 
 public class Validators {
     public static void comprobarNif(String nif) throws InvalidNifException {
@@ -54,6 +57,30 @@ public class Validators {
             if (Character.getNumericValue(control) != numeroControl && control != secuenciaLetrasNIF.charAt(numeroControl)) {
                 throw new InvalidNifException();
             }
+        }
+    }
+
+    public static void comprobarTelefono(String telefono) throws InvalidPhoneNumberException {
+        // El teléfono debe estar compuesto de 9 dígitos
+        if (telefono.length() != 9) {
+            throw new InvalidPhoneNumberException();
+        }
+        try {
+            Integer.valueOf(telefono);
+        } catch (NumberFormatException ex) {
+            throw new InvalidPhoneNumberException();
+        }
+        
+        // Rangos de números de teléfono permitidos en España:
+        // Todos los que empiezan por 6
+        // 70-74
+        // 800, 803, 806, 807, 81-88
+        // 900, 901, 902, 91-98
+        Set<Integer> excepciones = Set.of(800, 803, 806, 807, 900, 901, 902);
+        Integer tresPrimeros = Integer.valueOf(telefono.substring(0, 3));
+        if (!(tresPrimeros >= 600 && tresPrimeros <= 749 || tresPrimeros >= 810 && tresPrimeros <= 889
+                || tresPrimeros >= 910 && tresPrimeros <= 989 || excepciones.contains(tresPrimeros))) {
+            throw new InvalidPhoneNumberException();
         }
     }
 }

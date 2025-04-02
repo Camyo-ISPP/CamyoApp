@@ -14,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.security.core.Authentication;
 
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.resena.Resena;
+import com.camyo.backend.util.Validators;
 
 import jakarta.validation.Valid;
 
@@ -74,14 +76,16 @@ public class UsuarioService {
 	}
 
     @Transactional
-    public Usuario guardarUsuario(Usuario usuario) throws DataAccessException {
+    public Usuario guardarUsuario(Usuario usuario) throws DataAccessException, InvalidPhoneNumberException {
+        Validators.comprobarTelefono(usuario.getTelefono());
         usuario.setPassword(encoder.encode(usuario.getPassword()));
 		usuarioRepository.save(usuario);
 		return usuario;
     }
 
     @Transactional
-    public Usuario guardarUsuarioSinEncode(Usuario usuario) throws DataAccessException {
+    public Usuario guardarUsuarioSinEncode(Usuario usuario) throws DataAccessException, InvalidPhoneNumberException {
+        Validators.comprobarTelefono(usuario.getTelefono());
 		return usuarioRepository.save(usuario);
     }
 
@@ -104,8 +108,10 @@ public class UsuarioService {
         return (float) media / list.size();     
     }
 
-    public Usuario updateUser(@Valid Usuario usuario, Integer idToUpdate) {
+    public Usuario updateUser(@Valid Usuario usuario, Integer idToUpdate) throws InvalidPhoneNumberException {
         Usuario toUpdate = obtenerUsuarioPorId(idToUpdate);
+
+        Validators.comprobarTelefono(usuario.getTelefono());
 
         System.out.println("TO UPDATE:" + toUpdate.getEmail());
         System.out.println("UPDATED" + usuario.getEmail());
