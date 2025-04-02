@@ -41,6 +41,7 @@ const MisOfertasEmpresa = () => {
         }, [])
     );
 
+    // TODO: Arreglar la parte de patrocinio en misofertas y tb en detalle de oferta
     const canPromoteNewOffer = () => {
         // Implement your logic here based on subscription rules
         // For example, check if the company can promote more offers

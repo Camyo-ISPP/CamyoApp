@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import ListadoOfertas from "../_components/ListadoOfertas";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
-import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
+import ListadoOfertasCamionero from "../_components/ListadoOfertasCamionero";
 
 const MisOfertasCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -65,7 +65,7 @@ const MisOfertasCamionero = () => {
             if (aceptedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No tienes ofertas asignadas todavía. ¡Sigue atento a nuevas oportunidades!</Text>;
             }
-            return <ListadoOfertas data={aceptedOffers} mostrarPatrocinadas={false} styles={misOfertasStyle} />;
+            return <ListadoOfertasCamionero offers={aceptedOffers} showPromoted={false} />;
         }
 
         if (tab === "PENDIENTE") {
@@ -84,14 +84,14 @@ const MisOfertasCamionero = () => {
                     </View>
                 );
             }
-            return <ListadoOfertas data={pendingOffers} mostrarPatrocinadas={false} styles={misOfertasStyle} />;
+            return <ListadoOfertasCamionero offers={pendingOffers} showPromoted={false} />;
         }
 
         if (tab === "RECHAZADA") {
             if (rejectedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No hay ofertas descartadas.</Text>;
             }
-            return <ListadoOfertas data={rejectedOffers} mostrarPatrocinadas={false} styles={misOfertasStyle} />;
+            return <ListadoOfertasCamionero offers={rejectedOffers} showPromoted={false} />;
         }
 
         return null;
@@ -140,12 +140,20 @@ const MisOfertasCamionero = () => {
                     </View>
                 </View>
             }
-            <ScrollView style={styles.offersWrapper}>{renderOfferList()}</ScrollView>
+            <ScrollView style={styles.offersWrapper}>
+                <View style={styles.contenedorOfertas}>
+                    {renderOfferList()}
+                </View>
+            </ScrollView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    contenedorOfertas: {
+        width: '70%',
+        alignSelf: 'center',
+      },
     container: {
         flex: 1,
         backgroundColor: colors.white,
