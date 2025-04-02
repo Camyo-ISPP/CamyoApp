@@ -257,7 +257,7 @@ const CamioneroRegisterScreen = () => {
     }
 
     if (formData.experiencia > 100) {
-      setErrorMessage("¿Has nacido trabajando? El campo años de experiencia de ser menor que 100.");
+      setErrorMessage("¿Has nacido trabajando? El campo años de experiencia debe ser menor que 100.");
       return;
     }
 
@@ -268,7 +268,34 @@ const CamioneroRegisterScreen = () => {
         return;
       }
       if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.expiracionCAP)) {
-        setErrorMessage("El formato de la fecha de expiración del CAP no es válido.");
+        setErrorMessage("El formato de la fecha de expiración del CAP no es válido. Comprueba que sea dd-mm-YYYY");
+        return;
+      }
+      // Extract day, month, and year
+      const [day, month, year] = formData.expiracionCAP.split("-").map(num => parseInt(num, 10));
+
+      // Get the current year
+      const currentYear = new Date().getFullYear();
+
+      // Validate month (1-12)
+      if (month < 1 || month > 12) {
+        setErrorMessage("El mes de la fecha de expiración del CAP no es válido.");
+        return;
+      }
+
+      const maxDays = new Date(year, month, 0).getDate();
+      if (day < 1 || day > maxDays) {
+        setErrorMessage("El día de la fecha de expiración del CAP no es válido.");
+        return;
+      }
+
+      if (year < currentYear) {
+        setErrorMessage("El año de la fecha de expiración del CAP no puede estar en el pasado.");
+        return;
+      }
+
+      if (year > currentYear + 6) {
+        setErrorMessage("El año de la fecha de expiración del CAP no puede ser más de 5 años en el futuro.");
         return;
       }
     }
