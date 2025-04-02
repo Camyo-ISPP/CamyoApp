@@ -1,22 +1,25 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 import axios from "axios";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import ListadoOfertas from "../_components/ListadoOfertas";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 
 const MisOfertasEmpresa = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-    const { user } = useAuth();
+    const { user, userToken } = useAuth();
     const router = useRouter();
 
     const [tab, setTab] = useState("ABIERTA");
     const [openOffers, setOpenOffers] = useState<any[]>([]);
     const [closedOffers, setClosedOffers] = useState<any[]>([]);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
+    const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
 
     const noOffersInAllCategories =
         openOffers.length === 0 &&
@@ -38,22 +41,73 @@ const MisOfertasEmpresa = () => {
         }, [])
     );
 
-    const renderOfferList = () => {
+    const canPromoteNewOffer = () => {
+        // Implement your logic here based on subscription rules
+        // For example, check if the company can promote more offers
+        return true;
+    };
 
+    const promoteOffer = async (ofertaId: number) => {
+        try {
+            const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+
+            if (response.ok) {
+                setSuccessModalVisible(true);
+                // Refresh offers after promotion
+                const updatedResponse = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+                setOpenOffers(updatedResponse.data.filter((o: any) => o.estado === "ABIERTA"));
+                setClosedOffers(updatedResponse.data.filter((o: any) => o.estado === "CERRADA"));
+            }
+        } catch (err) {
+            console.error("Error promoting offer:", err);
+        }
+    };
+
+    const unpromoteOffer = async (ofertaId: number | null) => {
+        try {
+            const response = await axios.put(
+                `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
+                {},
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                }
+            );
+
+            if (response.status === 200) {
+                // Refresh offers after unpromotion
+                const updatedResponse = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+                setOpenOffers(updatedResponse.data.filter((o: any) => o.estado === "ABIERTA"));
+                setClosedOffers(updatedResponse.data.filter((o: any) => o.estado === "CERRADA"));
+            }
+            setIsModalVisibleCancelar(false);
+            setSelectedOfferId(null);
+        } catch (err) {
+            console.error("Error unpromoting offer:", err);
+        }
+    };
+
+    const renderOfferList = () => {
         if (noOffersInAllCategories) {
             return (
-                <>
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyTitle}>No tienes ofertas publicadas todavía</Text>
-                        <Text style={styles.emptySubtitle}>
-                            Aún no has creado ninguna oferta.
-                        </Text>
-                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/oferta/crear")}>
-                            <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                </>
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyTitle}>No tienes ofertas publicadas todavía</Text>
+                    <Text style={styles.emptySubtitle}>
+                        Aún no has creado ninguna oferta.
+                    </Text>
+                    <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/oferta/crear")}>
+                        <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
+                    </TouchableOpacity>
+                </View>
             );
         }
 
@@ -70,14 +124,46 @@ const MisOfertasEmpresa = () => {
                     </View>
                 );
             }
-            return <ListadoOfertas data={openOffers} mostrarPatrocinadas={false} styles={misOfertasStyle} />;
+            return (
+                <View style={styles.offersContainer}>
+                    <ListadoOfertasEmpresa
+                        offers={openOffers}
+                        canPromoteNewOffer={() => false}
+                        canCancelPromotedOffer={() => false}
+                        promoteOffer={promoteOffer}
+                        successModalVisible={false}
+                        setSuccessModalVisible={setSuccessModalVisible}
+                        isModalVisibleCancelar={false}
+                        setIsModalVisibleCancelar={false}
+                        selectedOfferId={null}
+                        setSelectedOfferId={setSelectedOfferId}
+                        unpromoteOffer={unpromoteOffer}
+                    />
+                </View>
+            );
         }
 
         if (tab === "CERRADA") {
             if (closedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No tienes ofertas cerradas.</Text>;
             }
-            return <ListadoOfertas data={closedOffers} mostrarPatrocinadas={false} styles={misOfertasStyle} />;
+            return (
+                <View style={styles.offersContainer}>
+                    <ListadoOfertasEmpresa
+                        offers={closedOffers}
+                        canPromoteNewOffer={() => false} // No se puede patrocinar ofertas cerradas
+                        canCancelPromotedOffer={() => false}
+                        promoteOffer={() => { }}
+                        successModalVisible={false}
+                        setSuccessModalVisible={() => { }}
+                        isModalVisibleCancelar={false}
+                        setIsModalVisibleCancelar={() => { }}
+                        selectedOfferId={null}
+                        setSelectedOfferId={() => { }}
+                        unpromoteOffer={() => { }}
+                    />
+                </View>
+            );
         }
 
         return null;
@@ -98,15 +184,15 @@ const MisOfertasEmpresa = () => {
         }
     };
 
-
     return (
         <View style={styles.container}>
-            {!noOffersInAllCategories &&
+            {!noOffersInAllCategories && (
                 <View style={styles.contentWrapper}>
                     <View style={styles.tabContainer}>
                         {["ABIERTA", "CERRADA"].map((t) => {
                             const isActive = tab === t;
                             const dynamicStyle = isActive ? getActiveTabStyle(t) : {};
+                            const count = t === "ABIERTA" ? openOffers.length : closedOffers.length;
                             return (
                                 <TouchableOpacity
                                     key={t}
@@ -114,144 +200,24 @@ const MisOfertasEmpresa = () => {
                                     style={[styles.tabButton, isActive && styles.activeTab, dynamicStyle]}
                                 >
                                     <Text style={[styles.tabText, isActive && styles.activeTabText]}>
-                                        {t === "ABIERTA" ? "Abiertas (sin asignar)" : "Cerradas (asignadas)"}
+                                        {t === "ABIERTA" ? `Abiertas (${count})` : `Cerradas (${count})`}
                                     </Text>
                                 </TouchableOpacity>
                             );
                         })}
                     </View>
                 </View>
-            }
+            )}
             <ScrollView style={styles.offersWrapper}>{renderOfferList()}</ScrollView>
         </View>
     );
 };
 
-const misOfertasStyle = StyleSheet.create({
-    contenedorOfertas: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-    },
-    card: {
-      backgroundColor: colors.white,
-      padding: 20,
-      marginVertical: 10,
-      width: "70%",
-      borderRadius: 10,
-      display: "flex",
-      flexWrap: "wrap",
-      flexDirection: "row",
-      alignContent: "center",
-      alignItems: "center",
-      borderLeftWidth: 4,
-      borderColor: "red",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-    companyLogo: {
-      height: 90,
-      width: 90,
-      marginRight: 10,
-    },
-    offerTitle: {
-      fontSize: 16,
-      fontWeight: "bold",
-      flexWrap: "wrap",
-      marginBottom: 2,
-      color: colors.secondary,
-    },
-    offerDetailsTagType: {
-      fontSize: 9,
-      backgroundColor: colors.primary,
-      color: colors.white,
-      borderRadius: 10,
-      paddingTop: 2,
-      paddingBottom: 2,
-      paddingLeft: 5,
-      paddingRight: 6,
-      marginRight: 3,
-      fontWeight: "700",
-      flexWrap: "wrap",
-    },
-    offerDetailsTagLicense: {
-      fontSize: 9,
-      backgroundColor: colors.secondary,
-      borderRadius: 10,
-      color: colors.white,
-      paddingTop: 2,
-      paddingBottom: 3,
-      paddingLeft: 5,
-      paddingRight: 6,
-      marginRight: 3,
-      fontWeight: "bold",
-      flexWrap: "wrap",
-    },
-    offerDetailsTagExperience: {
-      fontSize: 9,
-      borderColor: colors.primary,
-      borderWidth: 2,
-      borderRadius: 10,
-      color: colors.primary,
-      paddingTop: 2,
-      paddingBottom: 2,
-      paddingLeft: 5,
-      paddingRight: 6,
-      marginRight: 3,
-      fontWeight: "bold",
-      flexWrap: "wrap",
-    },
-    offerInfo: {
-      fontSize: 12,
-      color: "gray",
-      marginTop: 5,
-      flexWrap: "wrap",
-    },
-    offerSueldo: {
-      fontSize: 25,
-      fontWeight: "bold",
-      textAlign: "right",
-      paddingLeft: 3,
-      color: colors.secondary,
-      textAlignVertical: "center",
-      width: "35%",
-      alignSelf: "center",
-    },
-    button: {
-      backgroundColor: colors.primary,
-      color: colors.white,
-      paddingLeft: 5,
-      paddingRight: 5,
-      marginLeft: "2%",
-      marginTop: 4,
-      flexDirection: "row",
-      height: 40,
-      width: 150,
-      borderRadius: 10,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    buttonText: {
-      color: colors.white,
-      fontWeight: "bold",
-    },
-    detailsIcon: {
-      color: colors.white,
-      alignSelf: "center",
-      marginLeft: 3,
-      marginTop: 3,
-      marginRight: 5,
-    },
-    localizacion: {
-      fontSize: 15,
-      color: "#696969",
-    },
-  });
-
 const styles = StyleSheet.create({
+    offersContainer: {
+        width: '70%',
+        alignSelf: "center",
+    },
     container: {
         flex: 1,
         padding: 20,
@@ -272,7 +238,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 30,
+        marginTop: 10,
         marginBottom: 20,
         gap: 10
     },
@@ -305,27 +271,6 @@ const styles = StyleSheet.create({
     },
     offersWrapper: {
         marginTop: 10
-    },
-    offerCard: {
-        backgroundColor: colors.lightGray,
-        padding: 15,
-        borderRadius: 10,
-        marginBottom: 15
-    },
-    offerTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: colors.secondary
-    },
-    offerDetail: {
-        fontSize: 14,
-        color: colors.darkGray
-    },
-    emptyText: {
-        textAlign: "center",
-        fontStyle: "italic",
-        marginTop: 30,
-        fontSize: 20
     },
     emptyContainer: {
         marginTop: 10,
@@ -363,7 +308,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600"
     },
-
 });
 
 export default MisOfertasEmpresa;

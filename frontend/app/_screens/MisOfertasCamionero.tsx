@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import ListadoOfertas from "../_components/ListadoOfertas";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 
 const MisOfertasCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;

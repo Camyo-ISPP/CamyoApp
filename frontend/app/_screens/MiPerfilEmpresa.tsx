@@ -271,18 +271,22 @@ const MiPerfilEmpresa = () => {
 
           <View style={styles.separator} />
 
-          <ListadoOfertasEmpresa
-            offers={offers}
-            canPromoteNewOffer={canPromoteNewOffer}
-            promoteOffer={promoteOffer}
-            successModalVisible={successModalVisible}
-            setSuccessModalVisible={setSuccessModalVisible}
-            isModalVisibleCancelar={isModalVisibleCancelar}
-            setIsModalVisibleCancelar={setIsModalVisibleCancelar}
-            selectedOfferId={selectedOfferId}
-            setSelectedOfferId={setSelectedOfferId}
-            unpromoteOffer={unpromoteOffer}
-          />
+          <View style={styles.offersContainer}>
+            <Text style={styles.sectionTitle}>Ofertas Activas</Text>
+            <ListadoOfertasEmpresa
+              offers={offers}
+              canPromoteNewOffer={canPromoteNewOffer}
+              canCancelPromotedOffer={true}
+              promoteOffer={promoteOffer}
+              successModalVisible={successModalVisible}
+              setSuccessModalVisible={setSuccessModalVisible}
+              isModalVisibleCancelar={isModalVisibleCancelar}
+              setIsModalVisibleCancelar={setIsModalVisibleCancelar}
+              selectedOfferId={selectedOfferId}
+              setSelectedOfferId={setSelectedOfferId}
+              unpromoteOffer={unpromoteOffer}
+            />
+          </View>
 
           <View style={styles.separator} />
 
@@ -321,6 +325,16 @@ const MiPerfilEmpresa = () => {
 };
 
 const styles = StyleSheet.create({
+  offersContainer: {
+    width: '100%',
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 15,
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -447,13 +461,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.mediumGray,
     marginVertical: 20,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: colors.secondary,
-    marginBottom: 15,
-    textAlign: "center",
   },
   downContainer: {
     paddingHorizontal: 30,
