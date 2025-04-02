@@ -1,14 +1,16 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import ListadoOfertas from "../_components/ListadoOfertas";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 const MisOfertasCamionero = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const { user } = useAuth();
     const router = useRouter();
 
@@ -18,24 +20,26 @@ const MisOfertasCamionero = () => {
     const [rejectedOffers, setRejectedOffers] = useState<any[]>([]);
 
     const noOffersInAllCategories =
-            aceptedOffers.length === 0 &&
-            pendingOffers.length === 0 &&
-            rejectedOffers.length === 0;
+        aceptedOffers.length === 0 &&
+        pendingOffers.length === 0 &&
+        rejectedOffers.length === 0;
 
-    useEffect(() => {
-        const fetchOffers = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
-                setAceptedOffers(response.data[2]);
-                setPendingOffers(response.data[0]);
-                setRejectedOffers(response.data[1]);
-            } catch (error) {
-                console.error("Error al cargar las ofertas:", error);
-            }
-        };
+    useFocusEffect(
+        useCallback(() => {
+            const fetchOffers = async () => {
+                try {
+                    const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
+                    setAceptedOffers(response.data[2]);
+                    setPendingOffers(response.data[0]);
+                    setRejectedOffers(response.data[1]);
+                } catch (error) {
+                    console.error("Error al cargar las ofertas:", error);
+                }
+            };
 
-        fetchOffers();
-    }, [tab]);
+            fetchOffers();
+        }, [])
+    );
 
     const renderOfferList = () => {
 
@@ -47,8 +51,8 @@ const MisOfertasCamionero = () => {
                         <Text style={styles.emptySubtitle}>
                             Aún no has solicitado ninguna oferta. Vuelve a la página principal y empieza a explorar oportunidades.
                         </Text>
-                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/")}>
-                            <Text style={styles.emptyButtonText}>Buscar Ofertas</Text>
+                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/explorar")}>
+                            <Text style={styles.emptyButtonText}>Explorar Ofertas</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -73,8 +77,8 @@ const MisOfertasCamionero = () => {
                         <Text style={styles.emptySubtitle}>
                             Vuelve a la página principal para buscar ofertas.
                         </Text>
-                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/")}>
-                            <Text style={styles.emptyButtonText}>Buscar Ofertas</Text>
+                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/explorar")}>
+                            <Text style={styles.emptyButtonText}>Explorar Ofertas</Text>
                         </TouchableOpacity>
                     </View>
                 );
@@ -143,9 +147,8 @@ const MisOfertasCamionero = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
         backgroundColor: colors.white,
-        marginTop: 70,
+        paddingTop: 50,
     },
     pageTitle: {
         fontSize: 26,

@@ -1,18 +1,24 @@
 package com.camyo.backend.oferta;
 
-import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.CamioneroRepository;
+import com.camyo.backend.configuration.services.UserDetailsImpl;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaRepository;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.suscripcion.PlanNivel;
+import com.camyo.backend.suscripcion.SuscripcionService;
+import com.camyo.backend.usuario.Usuario;
+import com.camyo.backend.usuario.UsuarioRepository;
 
 import jakarta.validation.Valid;
 
@@ -21,28 +27,22 @@ public class OfertaService {
 
     @Autowired
     private OfertaRepository ofertaRepository;
-    @Autowired
-    private CargaRepository cargaRepository;
-    @Autowired
-    private TrabajoRepository trabajoRepository;
+
     @Autowired
     private CamioneroRepository camioneroRepository;
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    @Autowired
+    private SuscripcionService suscripcionService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+
     @Transactional(readOnly = true)
     public List<Oferta> obtenerOfertas() {
         return ofertaRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Oferta> obtenerOfertasPorTipo() {
-        return ofertaRepository.encontrarGenerales();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Oferta> obtenerOfertasCarga() {
-        return ofertaRepository.encontrarCargas();
     }
 
     @Transactional(readOnly = true)
@@ -103,59 +103,6 @@ public class OfertaService {
         ofertaRepository.save(toUpdate);
         return toUpdate;
     }
-    
-
-
-    @Transactional
-    public Oferta crearOfertaConCarga(OfertaConCargaDTO dto) {
-        Oferta oferta = new Oferta();
-        oferta.setTitulo(dto.getTitulo());
-        oferta.setExperiencia(dto.getExperiencia());
-        oferta.setLicencia(dto.getLicencia());
-        oferta.setNotas(dto.getNotas());
-        oferta.setEstado(dto.getEstado());
-        oferta.setFechaPublicacion(dto.getFechaPublicacion());
-        oferta.setSueldo(dto.getSueldo());
-
-        Oferta ofertaGuardada = ofertaRepository.save(oferta);
-
-        Carga carga = new Carga();
-        carga.setMercancia(dto.getMercancia());
-        carga.setPeso(dto.getPeso());
-        carga.setOrigen(dto.getOrigen());
-        carga.setDestino(dto.getDestino());
-        carga.setDistancia(dto.getDistancia());
-        carga.setInicio(dto.getInicio());
-        carga.setFinMinimo(dto.getFinMinimo());
-        carga.setFinMaximo(dto.getFinMaximo());
-
-        carga.setOferta(ofertaGuardada);
-
-        cargaRepository.save(carga);
-        return ofertaGuardada;
-    }
-
-    @Transactional
-    public Oferta crearOfertaConTrabajo(OfertaConTrabajoDTO dto) {
-
-        Oferta oferta = new Oferta();
-        oferta.setTitulo(dto.getTitulo());
-        oferta.setExperiencia(dto.getExperiencia());
-        oferta.setLicencia(dto.getLicencia());
-        oferta.setNotas(dto.getNotas());
-        oferta.setEstado(dto.getEstado());
-        oferta.setFechaPublicacion(dto.getFechaPublicacion());
-        oferta.setSueldo(dto.getSueldo());
-        oferta = ofertaRepository.save(oferta);
-
-        Trabajo trabajo = new Trabajo();
-        trabajo.setFechaIncorporacion(dto.getFechaIncorporacion());
-        trabajo.setJornada(dto.getJornada());
-        trabajo.setOferta(oferta);
-        trabajo = trabajoRepository.save(trabajo);
-
-        return oferta;
-    }
 
     @Transactional
     public Oferta aplicarOferta(Integer ofertaId, Integer camioneroId) {
@@ -211,41 +158,81 @@ public class OfertaService {
     }
 
     @Transactional
-    public OfertaCompletaDTO mapearOfertaACompletaDTO(Oferta oferta) {
-        OfertaCompletaDTO dto = new OfertaCompletaDTO();
-        dto.setId(oferta.getId());
-        dto.setTitulo(oferta.getTitulo());
-        dto.setExperiencia(oferta.getExperiencia());
-        dto.setLicencia(oferta.getLicencia());
-        dto.setNotas(oferta.getNotas());
-        dto.setEstado(oferta.getEstado());
-        dto.setFechaPublicacion(oferta.getFechaPublicacion());
-        dto.setSueldo(oferta.getSueldo());
-        dto.setLocalizacion(oferta.getLocalizacion());
-        dto.setCamionero(oferta.getCamionero());
-        dto.setAplicados(oferta.getAplicados());
-        dto.setRechazados(oferta.getRechazados());
-        if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
-            dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
-        }
-        try {
-            Carga c = this.obtenerCarga(oferta.getId());
-            if (c != null) {
-                dto.setTipoOferta("CARGA");
-            } else {
-                Trabajo t = this.obtenerTrabajo(oferta.getId());
-                if (t != null) {
-                    dto.setTipoOferta("TRABAJO");
-                } else {
-                    dto.setTipoOferta("DESCONOCIDO");
-                }
-            }
-        } catch (ResourceNotFoundException ex) {
-            dto.setTipoOferta("DESCONOCIDO");
+    public List<Oferta> obtenerUltimas10Ofertas() {
+        return ofertaRepository.findTopByOrderByFechaPublicacionDesc();
+    }
+
+    @Transactional
+    public Oferta patrocinarOferta(Integer ofertaId) {
+        Integer empresaIdAuth = getEmpresaIdFromToken();
+        Oferta oferta = obtenerOfertaPorId(ofertaId);
+    
+        if (!oferta.getEmpresa().getId().equals(empresaIdAuth)) {
+            throw new RuntimeException("No tienes permiso para patrocinar esta oferta.");
         }
     
-        return dto;
+        if (Boolean.TRUE.equals(oferta.getPromoted())) {
+            throw new RuntimeException("Esta oferta ya está patrocinada actualmente.");
+        }
+        PlanNivel nivel = suscripcionService.obtenerNivelSuscripcion(empresaIdAuth);
+        Integer patrociniosActivos = ofertaRepository.countByEmpresaIdPromotedTrue(empresaIdAuth);
+    
+        switch (nivel) {
+            case GRATIS:
+                if (patrociniosActivos >= 1) {
+                    throw new RuntimeException("El plan Gratis solo permite patrocinar 1 oferta.");
+                }
+                break;
+            case BASICO:
+                if (patrociniosActivos >= 2) {
+                    throw new RuntimeException("El plan Básico solo permite patrocinar 2 ofertas.");
+                }
+                break;
+            case PREMIUM:
+                break;
+        }
+    
+        oferta.setPromoted(true);
+        return guardarOferta(oferta);
     }
     
+    @Transactional
+    public void desactivarPatrocinio(Integer ofertaId) {
+        Integer empresaIdAuth = getEmpresaIdFromToken();
+        Oferta oferta = obtenerOfertaPorId(ofertaId);
+    
+        if (oferta.getEmpresa() == null || !oferta.getEmpresa().getId().equals(empresaIdAuth)) {
+            throw new RuntimeException("No tienes permiso para desactivar esta oferta.");
+        }
+    
+        if (!Boolean.TRUE.equals(oferta.getPromoted())) {
+            throw new RuntimeException("Esta oferta no está patrocinada.");
+        }
+    
+        oferta.setPromoted(false);
+        guardarOferta(oferta);
+    }
+    
+    
+
+    private Integer getEmpresaIdFromToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No hay usuario autenticado");
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        Usuario usuario = usuarioRepository.findById(userDetails.getId())
+            .orElseThrow(() -> new RuntimeException(
+                "No existe el usuario con id = " + userDetails.getId()));
+        if (!usuario.hasAuthority("EMPRESA")) {
+            throw new RuntimeException("El usuario autenticado no es una empresa");
+        }
+        Empresa empresa = empresaRepository.obtenerPorUsuario(usuario.getId())
+            .orElseThrow(() -> new RuntimeException("No hay registro de empresa vinculado al usuario " + usuario.getId()));
+
+        return empresa.getId(); 
+    }
 
 }

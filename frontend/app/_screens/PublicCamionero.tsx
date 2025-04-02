@@ -8,12 +8,12 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 const { unifyUserData } = require("../../utils/unifyData");
 import BackButton from "../_components/BackButton";
+import { startChat } from "../(protected)/chat/services";
 import SuccessModal from "../_components/SuccessModal";
 
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const PublicCamionero = ({ userId }) => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const { user, userToken } = useAuth();
     const router = useRouter();
 
@@ -23,7 +23,7 @@ const PublicCamionero = ({ userId }) => {
     const [resenaAEliminar, setResenaAEliminar] = useState(null);
     const [editResenaId, setEditResenaId] = useState(null);
     const [yaEscribioResena, setYaEscribioResena] = useState(false);
-
+    const [fueAsignado, setFueAsignado] = useState(false);
     const [resenas, setResenas] = useState([]);
 
     const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -54,6 +54,7 @@ const PublicCamionero = ({ userId }) => {
         fetchUser();
     }, [userId]);
 
+
     const fetchResenas = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
@@ -69,11 +70,38 @@ const PublicCamionero = ({ userId }) => {
         }
     };
 
+    const fetchMisOfertasEmpresa = async () => {
+        const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+        setFueAsignado(response.data.filter((offer: any) => offer.estado === "CERRADA").some((offer: any) => offer.camionero.id === parseInt(userId)));
+    }
+
     useEffect(() => {
         if (user2?.userId) {
             fetchResenas();
         }
+        if(user && user.rol === 'EMPRESA'){
+            fetchMisOfertasEmpresa();
+        }
     }, [user2]);
+    
+    const descargarPDF = async () => {
+        const base64Data = user2.curriculum; 
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `CV_${user2.username}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     return (
         <>
@@ -184,7 +212,6 @@ const PublicCamionero = ({ userId }) => {
                                         };
 
                                         if (editResenaId) {
-                                            console.log("Editando reseña con ID:", editResenaId);
                                             const res = await axios.put(`${BACKEND_URL}/resenas/${editResenaId}`, payload, { headers });
 
                                             if (res.status === 200) {
@@ -227,7 +254,7 @@ const PublicCamionero = ({ userId }) => {
                             {/* Imagen de perfil */}
                             <View style={styles.profileContainer}>
                                 <Image
-                                    source={user2?.foto ? { uri: user2?.foto } : defaultImage}
+                                    source={user2?.foto ? { uri: `data:image/png;base64,${user2.foto}` } : defaultImage}
                                     style={styles.profileImage}
                                 />
                             </View>
@@ -237,7 +264,7 @@ const PublicCamionero = ({ userId }) => {
                                 <Text style={styles.username}>@{user2?.username}</Text>
                                 <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
                                 <Text style={styles.description}>{user2?.descripcion}</Text>
-                                {user && user.rol === "EMPRESA" && !yaEscribioResena && (
+                                {user && user.rol === "EMPRESA" && fueAsignado && !yaEscribioResena && (
                                     <TouchableOpacity
                                         style={[styles.publishButton, { marginTop: 10 }]}
                                         onPress={() => {
@@ -249,7 +276,24 @@ const PublicCamionero = ({ userId }) => {
                                         <FontAwesome name="star" size={16} color="white" style={styles.plusIcon} />
                                         <Text style={styles.publishButtonText}>Escribir Reseña</Text>
                                     </TouchableOpacity>
+
                                 )}
+                                {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
+                    {user && user.rol == "EMPRESA" && (
+                    <TouchableOpacity
+                        style={styles.chatButton}
+                        onPress={async () => {
+                        const chatId = await startChat(user.userId, user2.userId);
+                            if (chatId) {
+                                router.push(`/chat`);
+                            }
+                         }}
+                     >
+                     <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                     <Text style={styles.chatButtonText}>Contactar</Text>
+                     </TouchableOpacity>
+            )}
+                                
                             </View>
                         </View>
                         {/* Separador */}
@@ -262,10 +306,14 @@ const PublicCamionero = ({ userId }) => {
                                 <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
                                 {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
                             </Text>
-                            <Text style={styles.info}><FontAwesome5 name="clock" size={18} color={colors.primary} />  Disponibilidad: {user2?.disponibilidad}</Text>
                             <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
                             {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
                             {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
+                            {user2?.curriculum &&
+                                <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
+                                    <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                                </TouchableOpacity>
+                            }
                         </View>
                         <View style={styles.separator} />
 
@@ -426,10 +474,9 @@ const PublicCamionero = ({ userId }) => {
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
-        paddingVertical: 20,
+        paddingVertical: 60,
         backgroundColor: colors.white,
         minHeight: "100%",
-        marginTop: 80,
     },    
     card: {
         backgroundColor: colors.white,
@@ -458,19 +505,6 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderColor: colors.primary,
         marginLeft: 30,
-    },
-    editIcon: {
-        position: "absolute",
-        bottom: 10,
-        right: 10,
-        backgroundColor: colors.primary,
-        padding: 8,
-        borderRadius: 15,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 3,
     },
     infoContainer: {
         flex: 1,
@@ -505,20 +539,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.mediumGray,
         marginVertical: 20,
     },
-    infoCard: {
-        backgroundColor: colors.white,
-        paddingVertical: 25,
-        paddingHorizontal: 30,
-        borderRadius: 15,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 5,
-        alignSelf: "stretch",
-        maxWidth: 750,
-        alignItems: "center",
-    },
     sectionTitle: {
         fontSize: 22,
         fontWeight: "bold",
@@ -529,6 +549,26 @@ const styles = StyleSheet.create({
     downContainer: {
         paddingHorizontal: 30,
     },
+    chatButton: {
+        marginTop: 20,
+        backgroundColor: colors.primary,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        alignItems: "flex-end",
+        width:"50%",
+        alignSelf:"flex-end",
+        flexDirection: "row",
+    },
+    chatButtonText: {
+        fontSize: 18,
+        color: colors.white,
+        fontWeight: "bold",
+    },
+    chatIcon: {
+        marginRight: 8,
+        marginBottom: 4,
+      },
     reseñasContainer: {
         paddingHorizontal: 30,
         marginTop: 20,
@@ -595,7 +635,17 @@ const styles = StyleSheet.create({
         color: colors.white,
         fontWeight: "bold"
     },
+    pdfButton: {
+        backgroundColor: colors.primary,
+        padding: 10,
+        borderRadius: 5,
+        alignItems: "center",
+        marginTop: 10,
+    },
+    pdfButtonText: {
+        color: colors.white,
+        fontWeight: "bold",
+    },
 });
-
 
 export default PublicCamionero;

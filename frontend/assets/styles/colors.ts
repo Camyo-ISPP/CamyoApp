@@ -1,6 +1,8 @@
 const colors = {
   primary: "#f15025", // Naranja
+  primaryLight: "#fde8e1", // Naranja Claro
   secondary: "#0b4f6c", // Azul Oscuro
+  secondaryLight: "#e1edf2", // Azul Claro
   white: "#ffffff", // Blanco
   lightGray: "#e6e8e6", // Gris Claro
   mediumGray: "#ced0ce", // Gris Medio

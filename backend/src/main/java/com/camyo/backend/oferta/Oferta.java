@@ -7,7 +7,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.empresa.Empresa;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.camyo.backend.camionero.Licencia;
 
 import jakarta.persistence.Column;
@@ -50,7 +49,7 @@ public class Oferta {
     @Column(name="licencia")
     Licencia licencia;
 
-    @Column(name="notas")
+    @Column(name="notas", length = 500)
     @NotBlank
     String notas;
 
@@ -87,9 +86,13 @@ public class Oferta {
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
 
-
     @Column(nullable = false)
     private Boolean promoted = false;
-    
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_oferta", nullable = false)
+    private TipoOferta tipoOferta = TipoOferta.DESCONOCIDO; 
+
+
 
 }

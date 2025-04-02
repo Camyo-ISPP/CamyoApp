@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,6 +29,7 @@ public class Trabajo {
     private Integer id;
 
     @Column(name="fecha_incorporacion")
+    @NotNull
     LocalDate fechaIncorporacion;
 
     @Column(name="jornada")

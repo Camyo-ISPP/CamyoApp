@@ -4,7 +4,7 @@ import { View, TouchableOpacity, Text } from "react-native";
 // Selector de opciones pasadas por props como una lista de strings
 const Selector = ({ value, onChange, options, colors, globalStyles }) => {
   return (
-    <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20, width: '100%' }}>
+    <View style={{ flexDirection: "row", justifyContent: "space-between", width: '100%' }}>
       {options.map((option) => (
         <TouchableOpacity
           key={option}
