@@ -1,27 +1,42 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import { router } from "expo-router";
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png";
 import colors from "frontend/assets/styles/colors";
 
-const ListadoOfertas = ({ data }: { data: any[] }) => {
+const ListadoOfertas = ({ data, mostrarPatrocinadas = true, styles = {} }: { data: any[]; mostrarPatrocinadas?: boolean; styles?: Partial<typeof styles>; }) => {
   return (
-    <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <View style={styles.contenedorOfertas}>
       {data.map((item) => (
-        <View key={item.id} style={styles.card}>
-          <Image source={defaultCompanyLogo} style={styles.companyLogo} />
+        <View
+          key={item.id}
+          style={[
+            styles.card,
+            item.promoted && mostrarPatrocinadas && styles.promotedCard
+          ]}>
+
+          {mostrarPatrocinadas && item.promoted && (
+            <View style={styles.patrocinadoBadge}>
+              <Text style={styles.patrocinadoText}>PATROCINADO</Text>
+            </View>
+          )}
+
+          <Image
+            source={item?.empresa?.usuario?.foto ? { uri: `data:image/png;base64,${item.empresa.usuario.foto}` } : defaultCompanyLogo}
+            style={styles.companyLogo}
+            resizeMode="contain"
+          />
 
           <View style={{ width: "30%" }}>
             <Text style={styles.offerTitle}>{item.titulo}</Text>
 
-            <View style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
               <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
               <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
               <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
 
-              <View style={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={styles.localizacion}>|</Text>
                 <MaterialIcons name="location-on" size={20} color="#696969" />
                 <Text style={styles.localizacion}>{item.localizacion}</Text>
@@ -33,10 +48,7 @@ const ListadoOfertas = ({ data }: { data: any[] }) => {
 
           <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push(`/oferta/${item.id}`)}
-          >
+          <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
             <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
             <Text style={styles.buttonText}>Ver Detalles</Text>
           </TouchableOpacity>
@@ -46,9 +58,11 @@ const ListadoOfertas = ({ data }: { data: any[] }) => {
   );
 };
 
+
 export default ListadoOfertas;
 
-const styles = StyleSheet.create({
+// TODO: Remove
+const styles2 = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
     padding: 20,

@@ -9,6 +9,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 import WebFooter from "../_components/_layout/WebFooter";
+import ListadoOfertas from "../_components/ListadoOfertas";
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -140,7 +141,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             if (licenciaFilter.length > 0) {
                 filteredResults = filteredResults.filter((item) => {
                     const itemLicenses = item.licencia.split(',').map(lic => lic.trim());
-                    return licenciaFilter.some(filterLic => 
+                    return licenciaFilter.some(filterLic =>
                         itemLicenses.some(itemLic => itemLic === filterLic)
                     );
                 });
@@ -154,7 +155,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
         } else if (selectedOfertaType === 'trabajos') {
             filteredResults = filteredResults.filter((item) => item.tipoOferta.trim().toUpperCase() === 'TRABAJO');
-            
+
             // Experience Filter
             if (minExperienceFilter !== "") {
                 if (parseInt(minExperienceFilter) === 5) {
@@ -183,7 +184,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             if (licenciaFilter.length > 0) {
                 filteredResults = filteredResults.filter((item) => {
                     const itemLicenses = item.licencia.split(',').map(lic => lic.trim());
-                    return licenciaFilter.some(filterLic => 
+                    return licenciaFilter.some(filterLic =>
                         itemLicenses.some(itemLic => itemLic === filterLic)
                     );
                 });
@@ -198,9 +199,9 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
     const toggleLicenciaFilter = (licencia: string) => {
         const internalLicencia = convertLicenseFormat(licencia);
-        setLicenciaFilter(prev => 
-            prev.includes(internalLicencia) 
-                ? prev.filter(l => l !== internalLicencia) 
+        setLicenciaFilter(prev =>
+            prev.includes(internalLicencia)
+                ? prev.filter(l => l !== internalLicencia)
                 : [...prev, internalLicencia]
         );
     };
@@ -231,7 +232,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
                 <View style={styles.mainContent}>
                     {/* Filters and Search Bar Card */}
-                    <View style={[styles.filtersCard, {alignSelf: 'flex-start'}]}>
+                    <View style={[styles.filtersCard, { alignSelf: 'flex-start' }]}>
                         {/* Search Section */}
                         <View style={styles.searchSection}>
                             <Text style={styles.sectionTitle}>Buscar Ofertas</Text>
@@ -247,8 +248,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                         onSubmitEditing={() => handleSearch()}
                                     />
                                 </View>
-                                <TouchableOpacity 
-                                    style={styles.searchButton} 
+                                <TouchableOpacity
+                                    style={styles.searchButton}
                                     onPress={() => handleSearch()}
                                 >
                                     <Text style={styles.searchButtonText}>Buscar</Text>
@@ -267,10 +268,10 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                     ]}
                                     onPress={() => setSelectedOfertaType('trabajos')}
                                 >
-                                    <Ionicons 
-                                        name="briefcase" 
-                                        size={18} 
-                                        color={selectedOfertaType === 'trabajos' ? '#fff' : '#666'} 
+                                    <Ionicons
+                                        name="briefcase"
+                                        size={18}
+                                        color={selectedOfertaType === 'trabajos' ? '#fff' : '#666'}
                                     />
                                     <Text style={[
                                         styles.ofertaTypeButtonText,
@@ -286,10 +287,10 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                     ]}
                                     onPress={() => setSelectedOfertaType('cargas')}
                                 >
-                                    <MaterialIcons 
-                                        name="local-shipping" 
-                                        size={18} 
-                                        color={selectedOfertaType === 'cargas' ? '#fff' : '#666'} 
+                                    <MaterialIcons
+                                        name="local-shipping"
+                                        size={18}
+                                        color={selectedOfertaType === 'cargas' ? '#fff' : '#666'}
                                     />
                                     <Text style={[
                                         styles.ofertaTypeButtonText,
@@ -304,10 +305,10 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                         {/* Placeholder cuando no hay tipo seleccionado */}
                         {!selectedOfertaType && (
                             <View style={styles.emptyFilterState}>
-                                <MaterialCommunityIcons 
-                                    name="filter-outline" 
-                                    size={48} 
-                                    color="#e0e0e0" 
+                                <MaterialCommunityIcons
+                                    name="filter-outline"
+                                    size={48}
+                                    color="#e0e0e0"
                                     style={styles.emptyFilterIcon}
                                 />
                                 <Text style={styles.emptyFilterText}>
@@ -537,10 +538,10 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                             >
                                                 <Picker.Item label="Cualquier jornada" value="" />
                                                 {jornadaOptions.map((jornada) => (
-                                                    <Picker.Item 
-                                                        key={jornada} 
-                                                        label={jornada.charAt(0) + jornada.slice(1).toLowerCase()} 
-                                                        value={jornada} 
+                                                    <Picker.Item
+                                                        key={jornada}
+                                                        label={jornada.charAt(0) + jornada.slice(1).toLowerCase()}
+                                                        value={jornada}
                                                     />
                                                 ))}
                                             </Picker>
@@ -580,42 +581,11 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
                     {/* Offer Cards Section */}
                     <View style={styles.offersSection}>
-                        {filteredData.map((item) => (
-                            <View
-                                key={item.id}
-                                style={[
-                                    styles.card,
-                                    item.promoted && styles.promotedCard 
-                                ]}
-                            >
-                                {item.promoted && (
-                                    <View style={styles.patrocinadoBadge}>
-                                        <Text style={styles.patrocinadoText}>PATROCINADO</Text>
-                                    </View>
-                                )}
-
-                                <Image source={DefaultLogo} style={styles.companyLogo} resizeMode="contain" />
-                                <View style={{ width: "30%" }}>
-                                    <Text style={styles.offerTitle}>{item.titulo}</Text>
-                                    <View style={{ flexDirection: "row" }}>
-                                        <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
-                                        <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-                                        <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
-                                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                            <Text style={styles.localizacion}>|</Text>
-                                            <MaterialIcons name="location-on" size={20} color="#696969" />
-                                            <Text style={styles.localizacion}>{item.localizacion}</Text>
-                                        </View>
-                                    </View>
-                                    <Text style={styles.offerInfo}>{item.notas}</Text>
-                                </View>
-                                <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                                <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
-                                    <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
-                                    <Text style={styles.buttonText}>Ver Detalles</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))}
+                        <ListadoOfertas
+                            data={filteredData}
+                            mostrarPatrocinadas={true}
+                            styles={styles}
+                        />
                     </View>
                 </View>
             </View>
@@ -639,7 +609,7 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingVertical: 25,
         paddingHorizontal: '10%',
-        backgroundColor: colors.primary,
+        backgroundColor: colors.secondary,
         marginBottom: 25,
     },
     headerTitle: {
@@ -989,7 +959,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: "#696969",
     },
-    // Estilos para el placeholder de filtros
     emptyFilterState: {
         paddingVertical: 40,
         alignItems: 'center',
@@ -1010,4 +979,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         lineHeight: 24,
     },
+    contenedorOfertas: { width: '100%' }
 });

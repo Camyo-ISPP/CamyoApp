@@ -70,14 +70,14 @@ const MisOfertasEmpresa = () => {
                     </View>
                 );
             }
-            return <ListadoOfertas data={openOffers} />;
+            return <ListadoOfertas data={openOffers} mostrarPatrocinadas={false} styles={misOfertasStyle} />;
         }
 
         if (tab === "CERRADA") {
             if (closedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No tienes ofertas cerradas.</Text>;
             }
-            return <ListadoOfertas data={closedOffers} />;
+            return <ListadoOfertas data={closedOffers} mostrarPatrocinadas={false} styles={misOfertasStyle} />;
         }
 
         return null;
@@ -126,6 +126,130 @@ const MisOfertasEmpresa = () => {
         </View>
     );
 };
+
+const misOfertasStyle = StyleSheet.create({
+    contenedorOfertas: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
+    },
+    card: {
+      backgroundColor: colors.white,
+      padding: 20,
+      marginVertical: 10,
+      width: "70%",
+      borderRadius: 10,
+      display: "flex",
+      flexWrap: "wrap",
+      flexDirection: "row",
+      alignContent: "center",
+      alignItems: "center",
+      borderLeftWidth: 4,
+      borderColor: "red",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    companyLogo: {
+      height: 90,
+      width: 90,
+      marginRight: 10,
+    },
+    offerTitle: {
+      fontSize: 16,
+      fontWeight: "bold",
+      flexWrap: "wrap",
+      marginBottom: 2,
+      color: colors.secondary,
+    },
+    offerDetailsTagType: {
+      fontSize: 9,
+      backgroundColor: colors.primary,
+      color: colors.white,
+      borderRadius: 10,
+      paddingTop: 2,
+      paddingBottom: 2,
+      paddingLeft: 5,
+      paddingRight: 6,
+      marginRight: 3,
+      fontWeight: "700",
+      flexWrap: "wrap",
+    },
+    offerDetailsTagLicense: {
+      fontSize: 9,
+      backgroundColor: colors.secondary,
+      borderRadius: 10,
+      color: colors.white,
+      paddingTop: 2,
+      paddingBottom: 3,
+      paddingLeft: 5,
+      paddingRight: 6,
+      marginRight: 3,
+      fontWeight: "bold",
+      flexWrap: "wrap",
+    },
+    offerDetailsTagExperience: {
+      fontSize: 9,
+      borderColor: colors.primary,
+      borderWidth: 2,
+      borderRadius: 10,
+      color: colors.primary,
+      paddingTop: 2,
+      paddingBottom: 2,
+      paddingLeft: 5,
+      paddingRight: 6,
+      marginRight: 3,
+      fontWeight: "bold",
+      flexWrap: "wrap",
+    },
+    offerInfo: {
+      fontSize: 12,
+      color: "gray",
+      marginTop: 5,
+      flexWrap: "wrap",
+    },
+    offerSueldo: {
+      fontSize: 25,
+      fontWeight: "bold",
+      textAlign: "right",
+      paddingLeft: 3,
+      color: colors.secondary,
+      textAlignVertical: "center",
+      width: "35%",
+      alignSelf: "center",
+    },
+    button: {
+      backgroundColor: colors.primary,
+      color: colors.white,
+      paddingLeft: 5,
+      paddingRight: 5,
+      marginLeft: "2%",
+      marginTop: 4,
+      flexDirection: "row",
+      height: 40,
+      width: 150,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    buttonText: {
+      color: colors.white,
+      fontWeight: "bold",
+    },
+    detailsIcon: {
+      color: colors.white,
+      alignSelf: "center",
+      marginLeft: 3,
+      marginTop: 3,
+      marginRight: 5,
+    },
+    localizacion: {
+      fontSize: 15,
+      color: "#696969",
+    },
+  });
 
 const styles = StyleSheet.create({
     container: {

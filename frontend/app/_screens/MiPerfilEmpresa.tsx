@@ -14,8 +14,6 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import SuccessModal from "../_components/SuccessModal";
 import { LinearGradient } from "expo-linear-gradient";
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
