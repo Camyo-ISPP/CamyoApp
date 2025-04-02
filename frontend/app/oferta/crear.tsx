@@ -15,6 +15,7 @@ import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import DatePicker from "@/app/_components/DatePicker";
 
+
 const CrearOfertaScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   
@@ -386,7 +387,11 @@ const CrearOfertaScreen = () => {
       }
     }
 
-    //Sin validación para licencia
+    //Validación para licencia
+    if (!formData.licencia){
+      setErrorMessage("El campo licencia es obligatorio para guardar un borrador.");
+      return;
+    }
     // Validación de la descripción
     if (!formData.notas){
       setErrorMessage("El campo descripción es obligatorio para guardar un borrador.");
@@ -487,7 +492,7 @@ const CrearOfertaScreen = () => {
         return;
       }
 
-      // Validación de distancia
+      // Validación de distancia OPCIONAL?
       if (formData.distancia){
         if (isNaN(formData.distancia)) {
           setErrorMessage("El campo distancia debe ser un número.");
@@ -545,77 +550,74 @@ const CrearOfertaScreen = () => {
         setErrorMessage("La fecha de fin mínimo no puede ser posterior a la fecha de fin máximo.");
         return;
       }
-
-
-    // Construcción del objeto base de la oferta
-    let ofertaData: any = {
-      oferta: {
-        titulo: formData.titulo,
-        experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
-        licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
-        notas: formData.notas,
-        estado: formData.estado || "BORRADOR",
-        sueldo: formData.sueldo ? parseFloat(formData.sueldo).toFixed(2) : null, // Convertir a float con 2 decimal
-        localizacion: formData.localizacion,
-        fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales
-        empresa: { id: user?.id ?? null },
-        tipoOferta: tipoOferta
-      }
-    };
+    }
+    
+      // Construcción del objeto base de la oferta
+      let ofertaData: any = {
+        oferta: {
+          titulo: formData.titulo,
+          experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
+          licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
+          notas: formData.notas,
+          estado: formData.estado || "BORRADOR",
+          sueldo: formData.sueldo ? parseFloat(formData.sueldo).toFixed(2) : null, // Convertir a float con 2 decimal
+          localizacion: formData.localizacion,
+          fechaPublicacion: null, // Fecha en formato correcto sin Z y sin decimales
+          empresa: { id: user?.id ?? null },
+          tipoOferta: tipoOferta
+        }
+      };
 
     
-    // Agregar detalles según el tipo de oferta
-    if (tipoOferta === "TRABAJO") {
-      ofertaData = {
-        ...ofertaData,
-        trabajo: {
-          fechaIncorporacion: formData.fechaIncorporacion.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-          jornada: formData.jornada
-        }
-      };
-    } else if (tipoOferta === "CARGA") {
-      ofertaData = {
-        ...ofertaData,
-        carga: {
-          mercancia: formData.mercancia,
-          peso: Number(formData.peso), // Convertir a número
-          origen: formData.origen,
-          destino: formData.destino,
-          distancia: Number(formData.distancia), // Convertir a número
-          inicio: formData.inicio.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-          finMinimo: formData.finMinimo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-          finMaximo: formData.finMaximo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1')
-        }
-      };
-    }
-
-    try {
-      const response = await axios.post(`${BACKEND_URL}/ofertas`, ofertaData, {
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-
-      if (response.status === 201) {
-        setErrorMessage("")
-
-        setSuccessModalVisible(true);
-        setTimeout(() => {
-          setSuccessModalVisible(false);
-          router.replace("/miperfil");
-        }, 1000);
+      // Agregar detalles según el tipo de oferta
+      if (tipoOferta === "TRABAJO") {
+        ofertaData = {
+          ...ofertaData,
+          trabajo: {
+            fechaIncorporacion: formData.fechaIncorporacion.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+            jornada: formData.jornada ? formData.jornada : null
+          }
+        };
+      } else if (tipoOferta === "CARGA") {
+        ofertaData = {
+          ...ofertaData,
+          carga: {
+            mercancia: formData.mercancia,
+            peso: formData.peso ? Number(formData.peso) : null, // Convertir a número
+            origen: formData.origen,
+            destino: formData.destino,
+            distancia: formData.distancia ? Number(formData.distancia) : null, // Convertir a número
+            inicio: formData.inicio.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+            finMinimo: formData.finMinimo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+            finMaximo: formData.finMaximo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1')
+          }
+        };
       }
 
-    } catch (error) {
-      console.error('Error en la solicitud', error);
-      if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
-        setErrorMessage(error.response.data.message);
+      try {
+        const response = await axios.post(`${BACKEND_URL}/ofertas`, ofertaData, {
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${userToken}`
+          }
+        });
+
+        if (response.status === 201) {
+          setErrorMessage("")
+
+          setSuccessModalVisible(true);
+          setTimeout(() => {
+            setSuccessModalVisible(false);
+            router.replace("/miperfil");
+          }, 1000);
+        }
+
+      } catch (error) {
+        console.error('Error en la solicitud', error);
+        if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+          setErrorMessage(error.response.data.message);
+        }
       }
-    }
-
-
-
 
     console.log("Guardando como borrador...");
   };
@@ -814,7 +816,7 @@ const CrearOfertaScreen = () => {
             <View style= {styles.buttonContainer}>
             
               {/* Botón de guardar borrador */}
-              <TouchableOpacity style={styles.draftButton} onPress={handlePublish}>
+              <TouchableOpacity style={styles.draftButton} onPress={handleDraft}>
                 <Text style={styles.draftButtonText}>Guardar borrador</Text>
               </TouchableOpacity>
           
