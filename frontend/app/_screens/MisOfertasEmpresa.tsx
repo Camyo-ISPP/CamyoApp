@@ -120,7 +120,7 @@ const MisOfertasEmpresa = () => {
             case "CERRADA":
                 return "Cerradas (asignadas)";
             case "BORRADOR":
-                return "Borrador";
+                return "Borradores";
             default:
                 return "";
         }
