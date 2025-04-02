@@ -122,6 +122,10 @@ const CamioneroRegisterScreen = () => {
       setErrorMessage("El campo nombre de usuario es obligatorio.");
       return;
     }
+    if (formData.username.length < 2) {
+      setErrorMessage("El campo nombre de usuario es demasiado pequeño.");
+      return;
+    }
     if (formData.username.length > 30) {
       setErrorMessage("El campo nombre de usuario es demasiado largo.");
       return;
@@ -196,7 +200,7 @@ const CamioneroRegisterScreen = () => {
       setErrorMessage("El campo localización es demasiado largo.");
       return;
     }
-    
+
     if (formData.localizacion.length < 2) {
       setErrorMessage("El campo localización es demasiado pequeño.");
       return;
@@ -219,7 +223,16 @@ const CamioneroRegisterScreen = () => {
       return;
     }
     if (!/^\d{8}[A-Z]$/.test(formData.dni)) {
-      setErrorMessage("El formato del DNI no es válido.");
+      setErrorMessage("El formato del DNI no es válido, está compuesto por 8 números y una letra.");
+      return;
+    }
+
+    const dniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+    const dniNumber = parseInt(formData.dni.slice(0, 8), 10);
+    const dniLetter = formData.dni.slice(8);
+
+    if (dniLetters[dniNumber % 23] !== dniLetter) {
+      setErrorMessage("El DNI no es válido. La letra no coincide");
       return;
     }
 
@@ -242,6 +255,7 @@ const CamioneroRegisterScreen = () => {
       setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
       return;
     }
+
 
     // Validación de fecha de expiración del CAP
     if (formData.tieneCAP) {
