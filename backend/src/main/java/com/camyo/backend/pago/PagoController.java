@@ -54,12 +54,17 @@ public class PagoController {
                 Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 String secret = null;
 
+                if (pago.getCompra() == null) {
+                        return new ResponseEntity<>("No hay ningún tipo de compra seleccionada", HttpStatus.BAD_REQUEST);
+                }
+
                 // Start by finding an existing customer record from Stripe or creating a new
                 // one if needed
                 Usuario cliente = usuarioService.obtenerUsuarioActual();
                 Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
 
                 String precio_id = null;
+
                 switch (pago.getCompra()) {
                         case BASICO -> {
                                 precio_id="price_1R7E7wIRKHnhkuSfhBa5XZVS";
@@ -113,7 +118,7 @@ public class PagoController {
                         secret = subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret();
 
                 } else {
-                        return new ResponseEntity<>("Este tipo de compra no existe", HttpStatus.FORBIDDEN);
+                        return new ResponseEntity<>("Este tipo de compra no existe", HttpStatus.BAD_REQUEST);
                 }
                 return new ResponseEntity<>(secret, HttpStatus.OK);
         }
