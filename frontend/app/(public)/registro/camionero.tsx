@@ -256,6 +256,10 @@ const CamioneroRegisterScreen = () => {
       return;
     }
 
+    if (formData.experiencia > 100) {
+      setErrorMessage("¿Has nacido trabajando? El campo años de experiencia de ser menor que 100.");
+      return;
+    }
 
     // Validación de fecha de expiración del CAP
     if (formData.tieneCAP) {
