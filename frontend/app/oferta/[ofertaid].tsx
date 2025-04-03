@@ -215,7 +215,7 @@ export default function OfertaDetalleScreen() {
                     <View style={styles.headerText}>
                         <Text style={styles.title}>{offerData.titulo}</Text>
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 4, marginBottom: 4 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 4, marginBottom: 4, marginLeft: 10 }}>
                             <TouchableOpacity style={styles.companyTouchable}
                                 onPress={() => router.push(`/empresa/${offerData.empresa.id}`)}
                             >

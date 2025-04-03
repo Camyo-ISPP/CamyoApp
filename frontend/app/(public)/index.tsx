@@ -15,6 +15,7 @@ import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import CamyoNavBar from "../_components/_layout/CamyoNavBar";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -172,6 +173,9 @@ export default function Index() {
     return activeOffersCount < rules.maxActiveOffers;
   };
 
+  const ofertasTrabajo = data.filter(item => item.tipoOferta === "TRABAJO");
+  const ofertasCarga = data.filter(item => item.tipoOferta === "CARGA");
+
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
 
@@ -259,9 +263,8 @@ export default function Index() {
                   <FontAwesome5 name="route" size={24} color={colors.secondary} />
                   <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
                 </View>
-                {data.filter(item => item.tipoOferta === "CARGA").map(item => (
-                  <CardOferta key={item.id} item={item} />
-                ))}
+                <ListadoOfertasPublicoSmall offers={ofertasCarga} showPromoted={true} />
+
               </View>
 
               {/* Columna de Trabajo */}
@@ -270,9 +273,8 @@ export default function Index() {
                   <MaterialIcons name="work" size={24} color={colors.secondary} />
                   <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
                 </View>
-                {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
-                  <CardOferta key={item.id} item={item} />
-                ))}
+
+                <ListadoOfertasPublicoSmall offers={ofertasTrabajo} showPromoted={true} />
               </View>
             </View>
           </View>

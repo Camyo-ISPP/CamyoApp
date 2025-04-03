@@ -23,6 +23,7 @@ public class OfertaConTodaInformacionDTO {
     private LocalDateTime fechaPublicacion;
     private Double sueldo;
     private Boolean promoted;
+    private byte[] foto;
 
     private LocalDate fechaIncorporacion;
     private Jornada jornada;

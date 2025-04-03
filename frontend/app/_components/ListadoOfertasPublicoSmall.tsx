@@ -8,9 +8,9 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get('window');
 
-const ListadoOfertasPublico = ({
+const ListadoOfertasPublicoSmall = ({
     offers,
-    showPromoted = false
+    showPromoted = false,
 }) => {
     const router = useRouter();
 
@@ -23,8 +23,7 @@ const ListadoOfertasPublico = ({
                     {offers.map((item: any) => (
                         <View key={item.id} style={[
                             styles.offerCard,
-                            showPromoted && item.promoted && styles.promotedOfferCard
-                        ]}>
+                            showPromoted && item.promoted && styles.promotedOfferCard                        ]}>
                             {showPromoted && item.promoted && (
                                 <LinearGradient
                                     colors={['#D4AF37', '#F0C674', '#B8860B', '#F0C674']}
@@ -38,18 +37,10 @@ const ListadoOfertasPublico = ({
                             )}
                             <View style={styles.offerContent}>
                                 <View style={styles.offerHeader}>
-                                    
                                     <Image
-                                        source={
-                                            item?.empresa?.usuario?.foto
-                                                ? { uri: `data:image/png;base64,${item.empresa.usuario.foto}` }
-                                                : item?.foto
-                                                    ? { uri: `data:image/png;base64,${item.foto}` }
-                                                    : defaultCompanyLogo
-                                        }
+                                        source={item?.empresa?.usuario?.foto ? { uri: `data:image/png;base64,${item.empresa.usuario.foto}` } : defaultCompanyLogo}
                                         style={styles.companyLogoOffer}
                                     />
-
                                     <View style={styles.offerMainInfo}>
                                         <Text style={styles.offerPosition}>{item.titulo}</Text>
                                         <View style={styles.companyInfo}>
@@ -61,18 +52,18 @@ const ListadoOfertasPublico = ({
                                                 <Text style={styles.companyName}>
                                                     {item?.empresa?.usuario?.nombre ?? item?.nombreEmpresa}
                                                 </Text>
-
                                             </TouchableOpacity>
-                                            <Text style={{ color: colors.secondary }}>  |  </Text>
-                                            <MaterialIcons name="location-on" size={16} color={colors.secondary} />
-                                            <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{item.localizacion}</Text>
+                                                <>
+                                                    <Text style={{ color: colors.secondary }}>  |  </Text>
+                                                    <MaterialIcons name="location-on" size={16} color={colors.secondary} />
+                                                    <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{item.localizacion}</Text>
+                                                </>
                                         </View>
 
                                         <View style={styles.detailRow}>
                                             <View style={[
                                                 styles.offerDetailsTagBase,
-                                                item.tipoOferta.toLowerCase() === 'trabajo' ? styles.offerDetailsTagWork : styles.offerDetailsTagLoad
-                                            ]}>
+                                                item.tipoOferta.toLowerCase() === 'trabajo' ? styles.offerDetailsTagWork : styles.offerDetailsTagLoad                                            ]}>
                                                 <MaterialIcons name="work-outline" size={12} color={colors.white} />
                                                 <Text style={styles.detailText}>{item.tipoOferta}</Text>
                                             </View>
@@ -91,15 +82,14 @@ const ListadoOfertasPublico = ({
 
                                     <View style={styles.priceContainer}>
                                         <Text style={styles.offerSalary}>{item.sueldo}€</Text>
+                                        <TouchableOpacity
+                                            style={styles.detailsButton}
+                                            onPress={() => router.push(`/oferta/${item.id}`)}
+                                        >
+                                            <MaterialCommunityIcons name="eye-outline" size={14} color="white" />
+                                            <Text style={styles.detailsButtonText}>Ver detalles</Text>
+                                        </TouchableOpacity>
                                     </View>
-
-                                    <TouchableOpacity
-                                        style={styles.detailsButton}
-                                        onPress={() => router.push(`/oferta/${item.id}`)}
-                                    >
-                                        <MaterialCommunityIcons name="eye-outline" size={14} color="white" />
-                                        <Text style={styles.detailsButtonText}>Ver detalles</Text>
-                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -122,14 +112,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
         borderRadius: 10,
         marginLeft: 10,
     },
     detailsButtonText: {
         color: colors.white,
-        fontSize: 18,
+        fontSize: 15,
         fontWeight: '500',
         marginLeft: 5,
     },
@@ -272,14 +262,16 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: colors.secondary,
         textAlign: 'center',
-        marginRight: width < 768 ? 10 : 30,
+        marginLeft: width < 768 ? 10 : 25,
         marginTop: width < 768 ? 10 : 0,
     },
     priceContainer: {
         justifyContent: 'center',
         marginHorizontal: width < 768 ? 0 : 15,
         alignSelf: width < 768 ? 'flex-start' : 'center',
+        gap: 15,
+        marginTop: 15,
     },
 });
 
-export default ListadoOfertasPublico;
+export default ListadoOfertasPublicoSmall;
