@@ -13,7 +13,6 @@ const heroBackground = require("../../assets/images/lonely-road.jpg");
 import { useAuth } from "../../contexts/AuthContext";
 import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
-import CamyoNavBar from "../_components/_layout/CamyoNavBar";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
 

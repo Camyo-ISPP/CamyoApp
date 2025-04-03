@@ -5,7 +5,7 @@ import colors from "../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import defaultProfileImage from "../../assets/images/companyDefaultAvatar.png";
+import defaultProfileImage from "../../assets/images/companyDefaultAvatar.jpg"
 import { useAuth } from "../../contexts/AuthContext";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';

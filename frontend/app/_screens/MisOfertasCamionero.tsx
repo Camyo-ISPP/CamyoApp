@@ -83,14 +83,14 @@ const MisOfertasCamionero = () => {
                     </View>
                 );
             }
-            return <ListadoOfertasCamionero offers={pendingOffers} showPromoted={false} />;
+            return <ListadoOfertasPublico offers={pendingOffers} showPromoted={false} />;
         }
 
         if (tab === "RECHAZADA") {
             if (rejectedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No hay ofertas descartadas.</Text>;
             }
-            return <ListadoOfertasCamionero offers={rejectedOffers} showPromoted={false} />;
+            return <ListadoOfertasPublico offers={rejectedOffers} showPromoted={false} />;
         }
 
         return null;
