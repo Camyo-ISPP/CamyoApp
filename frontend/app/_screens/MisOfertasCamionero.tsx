@@ -4,10 +4,9 @@ import { useState } from "react";
 import axios from "axios";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import ListadoOfertas from "../_components/ListadoOfertas";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
-import ListadoOfertasCamionero from "../_components/ListadoOfertasCamionero";
+import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
 
 const MisOfertasCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -65,7 +64,7 @@ const MisOfertasCamionero = () => {
             if (aceptedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No tienes ofertas asignadas todavía. ¡Sigue atento a nuevas oportunidades!</Text>;
             }
-            return <ListadoOfertasCamionero offers={aceptedOffers} showPromoted={false} />;
+            return <ListadoOfertasPublico offers={aceptedOffers} showPromoted={false} />;
         }
 
         if (tab === "PENDIENTE") {

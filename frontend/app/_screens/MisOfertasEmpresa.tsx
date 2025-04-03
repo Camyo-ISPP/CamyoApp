@@ -130,7 +130,7 @@ const MisOfertasEmpresa = () => {
                     <ListadoOfertasEmpresa
                         offers={openOffers}
                         canPromoteNewOffer={() => false}
-                        canCancelPromotedOffer={() => false}
+                        canCancelPromotedOffer={false}
                         promoteOffer={promoteOffer}
                         successModalVisible={false}
                         setSuccessModalVisible={setSuccessModalVisible}
@@ -153,7 +153,7 @@ const MisOfertasEmpresa = () => {
                     <ListadoOfertasEmpresa
                         offers={closedOffers}
                         canPromoteNewOffer={() => false} // No se puede patrocinar ofertas cerradas
-                        canCancelPromotedOffer={() => false}
+                        canCancelPromotedOffer={false}
                         promoteOffer={() => { }}
                         successModalVisible={false}
                         setSuccessModalVisible={() => { }}

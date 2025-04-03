@@ -11,6 +11,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import BackButton from "../_components/BackButton";
 import { startChat } from "../(protected)/chat/services";
 import SuccessModal from "../_components/SuccessModal";
+import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
 
 const PublicEmpresa = ({ userId }) => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -316,45 +317,9 @@ const PublicEmpresa = ({ userId }) => {
             {/* Lista de ofertas de la empresa */}
             <View style={styles.offersContainer}>
               <Text style={styles.sectionTitle}>Ofertas Abiertas</Text>
-              {offers.length === 0 ? (
-                <Text style={styles.info}>No hay ofertas abiertas</Text>
-              ) : (
-                <ScrollView>
-                  <View style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    {offers && offers.map((item) => (
-                      <View key={item.id} style={styles.card2}>
-                        <Image source={defaultCompanyLogo} style={styles.companyLogo} />
-                        <View style={{ width: "30%" }}>
-                          <Text style={styles.offerTitle}>{item.titulo}</Text>
-
-                          <View style={{ display: "flex", flexDirection: "row" }}>
-                            <Text style={styles.offerDetailsTagType}>{item.tipoOferta}</Text>
-                            <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-                            <Text style={styles.offerDetailsTagExperience}>{">"}{item.experiencia} años</Text>
-
-                            <View style={{ display: "flex", alignItems: "center", flexDirection: "row" }}>
-                              <Text style={styles.localizacion}>|</Text>
-                              <MaterialIcons name="location-on" size={20} color="#696969" />
-                              <Text style={styles.localizacion}>{item.localizacion}</Text>
-                            </View>
-                          </View>
-
-                          <Text style={styles.offerInfo}>{item.notas}</Text>
-
-                          <View />
-                        </View>
-                        <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-                        <TouchableOpacity style={styles.button} onPress={() => router.push(`/oferta/${item.id}`)}>
-                          <MaterialCommunityIcons name="eye" size={15} color="white" style={styles.detailsIcon} />
-                          <Text style={styles.buttonText}>Ver Detalles</Text>
-
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View >
-
-                </ScrollView >
-              )}
+              
+              <ListadoOfertasPublico offers={offers} />
+              
             </View>
             <View style={styles.separator} />
 

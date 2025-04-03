@@ -101,7 +101,7 @@ const ListadoOfertasEmpresa = ({
                     <View style={styles.offerActions}>
                       {item.promoted ? (
 
-                        !canCancelPromotedOffer && (
+                        canCancelPromotedOffer && (
                           <TouchableOpacity
                           style={[styles.actionButton, styles.unpromoteButton]}
                           onPress={() => { setIsModalVisibleCancelar(true); setSelectedOfferId(item.id) }}

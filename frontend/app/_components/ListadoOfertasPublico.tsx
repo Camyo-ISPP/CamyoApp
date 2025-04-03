@@ -8,7 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get('window');
 
-const ListadoOfertasCamionero = ({
+const ListadoOfertasPublico = ({
     offers,
     showPromoted = false
 }) => {
@@ -271,4 +271,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ListadoOfertasCamionero;
+export default ListadoOfertasPublico;
