@@ -318,7 +318,7 @@ const PublicEmpresa = ({ userId }) => {
             <View style={styles.offersContainer}>
               <Text style={styles.sectionTitle}>Ofertas Abiertas</Text>
               
-              <ListadoOfertasPublico offers={offers} />
+              <ListadoOfertasPublico offers={offers} showPromoted={true} />
               
             </View>
             <View style={styles.separator} />

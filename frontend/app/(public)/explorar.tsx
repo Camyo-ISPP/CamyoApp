@@ -9,7 +9,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 import WebFooter from "../_components/_layout/WebFooter";
-import ListadoOfertas from "../_components/ListadoOfertas";
+import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -581,11 +581,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
                     {/* Offer Cards Section */}
                     <View style={styles.offersSection}>
-                        <ListadoOfertas
-                            data={filteredData}
-                            mostrarPatrocinadas={true}
-                            styles={styles}
-                        />
+                        <ListadoOfertasPublico offers={filteredData} showPromoted={true} />
                     </View>
                 </View>
             </View>

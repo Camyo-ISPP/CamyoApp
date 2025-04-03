@@ -50,7 +50,11 @@ const ListadoOfertasPublico = ({
                                                 onPress={() => router.push(`/empresa/${item.empresa.id}`)}
                                             >
                                                 <FontAwesome5 name="building" size={14} color={colors.primary} />
-                                                <Text style={styles.companyName}>{item?.empresa?.usuario?.nombre}</Text>
+                                                
+                                                <Text style={styles.companyName}>
+                                                    {item?.empresa?.usuario?.nombre ?? item?.nombreEmpresa}
+                                                </Text>
+
                                             </TouchableOpacity>
                                             <Text style={{ color: colors.secondary }}>  |  </Text>
                                             <MaterialIcons name="location-on" size={16} color={colors.secondary} />
