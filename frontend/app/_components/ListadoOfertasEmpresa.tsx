@@ -1,31 +1,95 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, StyleSheet, Dimensions } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { FontAwesome5, MaterialIcons, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import SuccessModal from "../_components/SuccessModal";
 import { LinearGradient } from "expo-linear-gradient";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png";
 import colors from "../../assets/styles/colors";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import SuccessModal from "./SuccessModal";
+import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
+
+interface ListadoOfertasEmpresaProps {
+  offers: any[];
+  canPromoteNewOffer: () => boolean;
+  canCancelPromotedOffer: boolean;
+  fetchOffers: () => void;
+}
 
 const { width } = Dimensions.get('window');
 
-const ListadoOfertasEmpresa = ({
+const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
   offers,
   canPromoteNewOffer,
   canCancelPromotedOffer,
-  promoteOffer,
-  successModalVisible,
-  setSuccessModalVisible,
-  isModalVisibleCancelar,
-  setIsModalVisibleCancelar,
-  selectedOfferId,
-  setSelectedOfferId,
-  unpromoteOffer,
+  fetchOffers,
 }) => {
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  const { user, userToken } = useAuth();
 
-  const { user } = useAuth();
   const router = useRouter();
+
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
+
+  const promoteOffer = async (ofertaId: number) => {
+    try {
+      const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (response.ok) {
+        setSuccessModalVisible(true);
+        fetchOffers();
+
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+        }, 1000);
+      }
+
+    } catch (err) {
+      console.error("Error completo en promoteOffer:", err);
+    }
+  };
+
+  const unpromoteOffer = async (ofertaId: number | null) => {
+    try {
+      const response = await axios.put(
+        `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
+        {},
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${userToken}`
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        setIsModalVisibleCancelar(true);
+        fetchOffers();
+
+        setTimeout(() => {
+          setIsModalVisibleCancelar(false);
+        }, 1000);
+      }
+
+    } catch (err) {
+      console.error("Error en unpromoteOffer:", err);
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("Detalles del error:", {
+          status: err.response.status,
+          data: err.response.data,
+          headers: err.response.headers
+        });
+      }
+    }
+  }
 
   return (
     <>
@@ -103,15 +167,14 @@ const ListadoOfertasEmpresa = ({
 
                         canCancelPromotedOffer && (
                           <TouchableOpacity
-                          style={[styles.actionButton, styles.unpromoteButton]}
-                          onPress={() => { setIsModalVisibleCancelar(true); setSelectedOfferId(item.id) }}
-                        >
-                          <AntDesign name="closecircleo" size={14} color={colors.white} />
-                          <Text style={styles.actionButtonText}>Cancelar</Text>
-                        </TouchableOpacity>
+                            style={[styles.actionButton, styles.unpromoteButton]}
+                            onPress={() => unpromoteOffer(item.id)}
+                          >
+                            <AntDesign name="closecircleo" size={14} color={colors.white} />
+                            <Text style={styles.actionButtonText}>Cancelar</Text>
+                          </TouchableOpacity>
                         )
 
-                        
                       ) : canPromoteNewOffer() ? (
                         <TouchableOpacity onPress={() => promoteOffer(item.id)}>
                           <LinearGradient
@@ -139,6 +202,20 @@ const ListadoOfertasEmpresa = ({
               </View>
             </View>
           ))}
+
+          <SuccessModal
+            isVisible={successModalVisible}
+            onClose={() => setSuccessModalVisible(false)}
+            message="¡Oferta patrocinada con éxito!"
+          />
+
+          <SuccessModal
+            isVisible={isModalVisibleCancelar}
+            onClose={() => setIsModalVisibleCancelar(false)}
+            message="¡Patrocinio cancelado con éxito!"
+            />
+
+
         </View>
       )}
     </>

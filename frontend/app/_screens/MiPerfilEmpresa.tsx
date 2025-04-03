@@ -11,8 +11,6 @@ import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { usePayment } from "../../contexts/PaymentContext";
 import { useSubscription } from '@/contexts/SubscriptionContext';
-import SuccessModal from "../_components/SuccessModal";
-import { LinearGradient } from "expo-linear-gradient";
 import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 
 const MiPerfilEmpresa = () => {
@@ -25,9 +23,7 @@ const MiPerfilEmpresa = () => {
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
-  const [successModalVisible, setSuccessModalVisible] = useState(false);
   const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
-  const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
 
   useFocusEffect(
@@ -35,7 +31,6 @@ const MiPerfilEmpresa = () => {
       refreshSubscriptionLevel();
     }, [])
   );
-
 
   const [resenas, setResenas] = useState([]);
 
@@ -94,61 +89,6 @@ const MiPerfilEmpresa = () => {
 
   }
 
-  const promoteOffer = async (ofertaId: number) => {
-    try {
-      const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-
-      if (response.ok) {
-        setSuccessModalVisible(true);
-        fetchOffers();
-
-        setTimeout(() => {
-          setSuccessModalVisible(false);
-        }, 1000);
-      }
-
-    } catch (err) {
-      console.error("Error completo en promoteOffer:", err);
-    }
-  };
-  const unpromoteOffer = async (ofertaId: number | null) => {
-    try {
-      const response = await axios.put(
-        `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
-        {},
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${userToken}`
-          }
-        }
-      );
-
-      if (response.status === 200) {
-        fetchOffers();
-        setSelectedOfferId(null);
-      }
-      setIsModalVisibleCancelar(false);
-
-    } catch (err) {
-      console.error("Error en unpromoteOffer:", err);
-      if (axios.isAxiosError(err) && err.response) {
-        console.error("Detalles del error:", {
-          status: err.response.status,
-          data: err.response.data,
-          headers: err.response.headers
-        });
-      }
-
-    }
-  }
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -277,14 +217,7 @@ const MiPerfilEmpresa = () => {
               offers={offers}
               canPromoteNewOffer={canPromoteNewOffer}
               canCancelPromotedOffer={true}
-              promoteOffer={promoteOffer}
-              successModalVisible={successModalVisible}
-              setSuccessModalVisible={setSuccessModalVisible}
-              isModalVisibleCancelar={isModalVisibleCancelar}
-              setIsModalVisibleCancelar={setIsModalVisibleCancelar}
-              selectedOfferId={selectedOfferId}
-              setSelectedOfferId={setSelectedOfferId}
-              unpromoteOffer={unpromoteOffer}
+              fetchOffers={fetchOffers}
             />
           </View>
 

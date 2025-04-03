@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
 const MisOfertasEmpresa = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -17,9 +18,8 @@ const MisOfertasEmpresa = () => {
     const [tab, setTab] = useState("ABIERTA");
     const [openOffers, setOpenOffers] = useState<any[]>([]);
     const [closedOffers, setClosedOffers] = useState<any[]>([]);
-    const [successModalVisible, setSuccessModalVisible] = useState(false);
-    const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
-    const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
+
+    const { rules } = useSubscriptionRules();
 
     const noOffersInAllCategories =
         openOffers.length === 0 &&
@@ -27,75 +27,24 @@ const MisOfertasEmpresa = () => {
 
     useFocusEffect(
         useCallback(() => {
-            const fetchOffers = async () => {
-                try {
-                    const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-                    setOpenOffers(response.data.filter((o: any) => o.estado === "ABIERTA"));
-                    setClosedOffers(response.data.filter((o: any) => o.estado === "CERRADA"));
-                } catch (error) {
-                    console.error("Error al cargar las ofertas:", error);
-                }
-            };
-
             fetchOffers();
         }, [])
     );
 
-    // TODO: Arreglar la parte de patrocinio en misofertas y tb en detalle de oferta
+    const fetchOffers = async () => {
+        try {
+            const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+            setOpenOffers(response.data.filter((o: any) => o.estado === "ABIERTA"));
+            setClosedOffers(response.data.filter((o: any) => o.estado === "CERRADA"));
+        } catch (error) {
+            console.error("Error al cargar las ofertas:", error);
+        }
+    };
+
     const canPromoteNewOffer = () => {
-        // Implement your logic here based on subscription rules
-        // For example, check if the company can promote more offers
-        return true;
-    };
-
-    const promoteOffer = async (ofertaId: number) => {
-        try {
-            const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
-            const response = await fetch(url, {
-                method: "PUT",
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${userToken}`
-                }
-            });
-
-            if (response.ok) {
-                setSuccessModalVisible(true);
-                // Refresh offers after promotion
-                const updatedResponse = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-                setOpenOffers(updatedResponse.data.filter((o: any) => o.estado === "ABIERTA"));
-                setClosedOffers(updatedResponse.data.filter((o: any) => o.estado === "CERRADA"));
-            }
-        } catch (err) {
-            console.error("Error promoting offer:", err);
-        }
-    };
-
-    const unpromoteOffer = async (ofertaId: number | null) => {
-        try {
-            const response = await axios.put(
-                `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
-                {},
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${userToken}`
-                    }
-                }
-            );
-
-            if (response.status === 200) {
-                // Refresh offers after unpromotion
-                const updatedResponse = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-                setOpenOffers(updatedResponse.data.filter((o: any) => o.estado === "ABIERTA"));
-                setClosedOffers(updatedResponse.data.filter((o: any) => o.estado === "CERRADA"));
-            }
-            setIsModalVisibleCancelar(false);
-            setSelectedOfferId(null);
-        } catch (err) {
-            console.error("Error unpromoting offer:", err);
-        }
-    };
+        const activeOffersCount = openOffers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
+        return activeOffersCount < rules.maxSponsoredOffers;
+    }
 
     const renderOfferList = () => {
         if (noOffersInAllCategories) {
@@ -129,16 +78,9 @@ const MisOfertasEmpresa = () => {
                 <View style={styles.offersContainer}>
                     <ListadoOfertasEmpresa
                         offers={openOffers}
-                        canPromoteNewOffer={() => false}
-                        canCancelPromotedOffer={false}
-                        promoteOffer={promoteOffer}
-                        successModalVisible={false}
-                        setSuccessModalVisible={setSuccessModalVisible}
-                        isModalVisibleCancelar={false}
-                        setIsModalVisibleCancelar={false}
-                        selectedOfferId={null}
-                        setSelectedOfferId={setSelectedOfferId}
-                        unpromoteOffer={unpromoteOffer}
+                        canPromoteNewOffer={canPromoteNewOffer}
+                        canCancelPromotedOffer={true}
+                        fetchOffers={fetchOffers}
                     />
                 </View>
             );
@@ -153,15 +95,8 @@ const MisOfertasEmpresa = () => {
                     <ListadoOfertasEmpresa
                         offers={closedOffers}
                         canPromoteNewOffer={() => false} // No se puede patrocinar ofertas cerradas
-                        canCancelPromotedOffer={false}
-                        promoteOffer={() => { }}
-                        successModalVisible={false}
-                        setSuccessModalVisible={() => { }}
-                        isModalVisibleCancelar={false}
-                        setIsModalVisibleCancelar={() => { }}
-                        selectedOfferId={null}
-                        setSelectedOfferId={() => { }}
-                        unpromoteOffer={() => { }}
+                        canCancelPromotedOffer={false} // No se puede cancelar el patrocinio de ofertas cerradas
+                        fetchOffers={fetchOffers}
                     />
                 </View>
             );
