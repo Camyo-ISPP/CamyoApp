@@ -92,61 +92,6 @@ export default function Index() {
     );
   }
 
-  const CardOferta = ({ item }) => {
-    const scaleValue = useRef(new Animated.Value(1)).current;
-
-    const handleHover = (toValue) => {
-      Animated.spring(scaleValue, {
-        toValue,
-        friction: 3,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    return (
-      <Animated.View
-        style={[
-          styles.card,
-          { transform: [{ scale: scaleValue }] },
-          item.promoted && styles.promotedCard
-        ]}
-        onMouseEnter={() => handleHover(1.03)}
-        onMouseLeave={() => handleHover(1)}
-      >
-        {item.promoted && (
-          <View style={styles.patrocinadoBadge}>
-            <Text style={styles.patrocinadoText}>PATROCINADO</Text>
-          </View>
-        )}
-        <Image
-          source={item.empresa?.logo ? { uri: item.empresa.logo } : defaultCompanyLogo}
-          style={styles.companyLogo}
-        />
-        <View style={styles.offerContent}>
-          <Text style={styles.offerTitle}>{item.titulo}</Text>
-          <View style={styles.tagsContainer}>
-            <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-            <Text style={styles.offerDetailsTagExperience}>+{item.experiencia} años</Text>
-            <View style={styles.locationContainer}>
-              <MaterialIcons name="location-on" size={16} color="#696969" />
-              <Text style={styles.localizacion}>{item.localizacion}</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.offerActions}>
-          <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push(`/oferta/${item.id}`)}
-          >
-            <MaterialCommunityIcons name="eye" size={16} color="white" />
-            <Text style={styles.buttonText}>Ver Detalles</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    );
-  };
-
   const StatsSection = () => (
     <View style={styles.statsContainer}>
       <View style={styles.statItem}>
