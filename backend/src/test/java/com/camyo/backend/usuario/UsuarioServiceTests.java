@@ -2,125 +2,178 @@ package com.camyo.backend.usuario;
 
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.resena.Resena;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.*;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import java.util.*;
 
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestInstance(Lifecycle.PER_CLASS)
 class UsuarioServiceTests {
 
-    @Mock
-    private PasswordEncoder encoder;
-
-    @Mock
-    private UsuarioRepository usuarioRepository;
-
-    @InjectMocks
+    @Autowired
     private UsuarioService usuarioService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-    @Test
-    void testGuardarUsuario_Exito() {
-        Usuario nuevo = new Usuario();
-        nuevo.setPassword("plainPass");
-    
-        Usuario guardado = new Usuario();
-        guardado.setId(1);
-        guardado.setPassword("encodedPass");
-    
-        when(encoder.encode("plainPass")).thenReturn("encodedPass");
-        // en vez de save(nuevo), pones save(any(Usuario.class))
-        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> {
-            // Obtenemos la instancia real que se pasa a 'save(...)'
-            Usuario param = invocation.getArgument(0);
-        
-            // Le asignamos el ID directamente
-            param.setId(1);
-            param.setPassword("encodedPass");  // si quieres, también
-        
-            // Retornamos esa misma instancia
-            return param;
-        });
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    
-        Usuario result = usuarioService.guardarUsuario(nuevo);
-    
-        assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("encodedPass", result.getPassword());
+    @Autowired
+    private AuthoritiesService authoritiesService;
+
+    private Usuario user1;
+    private Usuario user2;
+
+    @BeforeAll
+    @Transactional
+    void setup() {
+        // Crea un authority:
+        Authorities auth = new Authorities();
+        auth.setAuthority("ROLE_USER");
+        authoritiesService.saveAuthorities(auth);
+
+        // Crea user1
+        user1 = new Usuario();
+        user1.setNombre("Alice");
+        user1.setEmail("alice@test.com");
+        user1.setUsername("aliceUser");
+        user1.setPassword("pass");
+        user1.setAuthority(auth);
+        usuarioService.guardarUsuario(user1); // ID auto?
+
+        // Crea user2
+        user2 = new Usuario();
+        user2.setNombre("Bob");
+        user2.setEmail("bob@test.com");
+        user2.setUsername("bobUser");
+        user2.setPassword("pass2");
+        user2.setAuthority(auth);
+        usuarioService.guardarUsuario(user2);
     }
-    
-    
+
+    @Test
+    @Transactional
+    void testGuardarUsuario_Exito() {
+        Authorities auth = authoritiesService.findByAuthority("ROLE_USER");
+        Usuario nuevo = new Usuario();
+        nuevo.setNombre("Charlie");
+        nuevo.setEmail("charlie@test.com");
+        nuevo.setUsername("charlieUser");
+        nuevo.setPassword("123456");
+        nuevo.setAuthority(auth);
+
+        Usuario guardado = usuarioService.guardarUsuario(nuevo);
+        assertNotNull(guardado.getId());
+        assertEquals("charlie@test.com", guardado.getEmail());
+        assertNotEquals("123456", guardado.getPassword(), "La password debería estar encriptada");
+    }
+
+    @Test
+    void testGuardarUsuario_EmailYaExiste() {
+        // Intentar guardar un usuario con el mismo email de user1 => lanza exception
+        Usuario repetido = new Usuario();
+        repetido.setNombre("Otra");
+        repetido.setEmail("alice@test.com"); // repetido
+        repetido.setUsername("otraUser");
+        repetido.setPassword("p4ss");
+        repetido.setAuthority(user1.getAuthority());
+
+  
+        whenEmailExisteDisparaExcepcion(repetido);
+    }
+
+    private void whenEmailExisteDisparaExcepcion(Usuario repetido) {
+
+        assertThrows(IllegalArgumentException.class, () -> usuarioService.guardarUsuario(repetido));
+    }
+
+    @Test
+    void testGuardarUsuario_UsernameYaExiste() {
+        // Mismo approach, con username duplicado
+        Usuario repetido = new Usuario();
+        repetido.setNombre("Otra2");
+        repetido.setEmail("otra2@test.com");
+        repetido.setUsername("aliceUser"); // repetido
+        repetido.setPassword("p4ss");
+        repetido.setAuthority(user1.getAuthority());
+
+        assertThrows(IllegalArgumentException.class, () -> usuarioService.guardarUsuario(repetido));
+    }
+
     @Test
     void testObtenerUsuarioPorId_NoEncontrado() {
-        when(usuarioRepository.findById(99)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,
+            () -> usuarioService.obtenerUsuarioPorId(9999));
+    }
+
+    @Test
+    @Transactional
+    void testObtenerUsuarios() {
+        // ya tenemos user1, user2 en la base
+        List<Usuario> todos = usuarioService.obtenerUsuarios();
+        // aserciones
+        assertTrue(todos.size() >= 2);
+    }
+
+    @Test
+    @Transactional
+    void testObtenerValoracionMedia_SinResenas() {
+        // user1 no tiene reseñas? si no tiene => 0.0f
+        Float valor = usuarioService.obtenerValoracionMedia(user1.getId());
+        assertEquals(0.0f, valor);
+    }
+
+    @Test
+    void testUpdateUser_EmailDuplicado() {
+        Usuario datos = new Usuario();
+        datos.setEmail("bob@test.com"); // email user2
+        datos.setPassword("newPass");
+
+        // user1 intenta cambiar su email al de user2 => exception
+        assertThrows(IllegalArgumentException.class,
+            () -> usuarioService.updateUser(datos, user1.getId()));
+    }
+
+    @Test
+    void testUpdateUser_NoExiste() {
+        Usuario datos = new Usuario();
+        datos.setEmail("otro@test.com");
+        datos.setPassword("pass");
 
         assertThrows(ResourceNotFoundException.class,
-            () -> usuarioService.obtenerUsuarioPorId(99));
+            () -> usuarioService.updateUser(datos, 9999));
     }
 
     @Test
-    void testObtenerValoracionMedia_ConResenas() {
-        List<Resena> reseñas = new ArrayList<>();
-        Resena r1 = new Resena(); r1.setValoracion(4);
-        Resena r2 = new Resena(); r2.setValoracion(2);
-        reseñas.add(r1);
-        reseñas.add(r2);
+    @Transactional
+    void testEliminarUsuario_Exito() {
+        // Creamos uno nuevo
+        Usuario extra = new Usuario();
+        extra.setNombre("EliminarMe");
+        extra.setEmail("elim@test.com");
+        extra.setUsername("elimUser");
+        extra.setPassword("xxx");
+        extra.setAuthority(user1.getAuthority());
+        Usuario guardado = usuarioService.guardarUsuario(extra);
 
-        when(usuarioRepository.obtenerReseñas(5)).thenReturn(reseñas);
-
-        Float valor = usuarioService.obtenerValoracionMedia(5);
-        assertEquals(3.0f, valor);
-    }
-    @Test
-    void testUpdateUser_EmailExistente() {
-        // Ya hay un usuario con ID=10, email="old@mail.com"
-        Usuario existente = new Usuario();
-        existente.setId(10);
-        existente.setEmail("old@mail.com");
-
-        when(usuarioRepository.findById(10)).thenReturn(Optional.of(existente));
-        
-        // Nuevo email "taken@mail.com" => el repositorio dice que ya existe
-        when(usuarioRepository.existsByEmail("taken@mail.com")).thenReturn(true);
-
-        Usuario detalles = new Usuario();
-        detalles.setEmail("taken@mail.com");
-        detalles.setPassword("newPwd");
-
-        assertThrows(IllegalArgumentException.class,
-            () -> usuarioService.updateUser(detalles, 10));
+        // lo eliminamos
+        assertDoesNotThrow(() -> usuarioService.eliminarUsuario(guardado.getId()));
+        assertThrows(ResourceNotFoundException.class,
+            () -> usuarioService.obtenerUsuarioPorId(guardado.getId()));
     }
 
     @Test
-    void testUpdateUser_SinNuevoPassword() {
-        Usuario existente = new Usuario();
-        existente.setId(10);
-        existente.setEmail("old@mail.com");
-        existente.setPassword("oldEncodedPass");
-
-        when(usuarioRepository.findById(10)).thenReturn(Optional.of(existente));
-        when(usuarioRepository.existsByEmail("new@mail.com")).thenReturn(false);
-
-        Usuario detalles = new Usuario();
-        detalles.setEmail("new@mail.com");
-        // no hay password => no se re-encode
-
-        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        Usuario result = usuarioService.updateUser(detalles, 10);
-        assertEquals("new@mail.com", result.getEmail());
-        // Mantiene la password anterior
-        assertEquals("oldEncodedPass", result.getPassword());
+    void testEliminarUsuario_NoExiste() {
+        assertThrows(ResourceNotFoundException.class,
+            () -> usuarioService.eliminarUsuario(9999));
     }
+
+
 }

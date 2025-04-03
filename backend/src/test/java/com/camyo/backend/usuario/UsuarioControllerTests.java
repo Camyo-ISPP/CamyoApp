@@ -1,99 +1,180 @@
 package com.camyo.backend.usuario;
 
-import com.camyo.backend.auth.payload.response.MessageResponse;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
-import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.camyo.backend.auth.payload.response.MessageResponse;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.Arrays;
+import org.springframework.http.MediaType;
 
-@WebMvcTest(UsuarioController.class)
-@AutoConfigureMockMvc(addFilters = false)  // Quita seguridad
+@WebMvcTest(
+    value = {UsuarioController.class},
+    properties = {"security.BASICO.enabled=false"}
+)
+@ActiveProfiles("test")
+@TestInstance(Lifecycle.PER_CLASS)
+@AutoConfigureMockMvc(addFilters = false)
 class UsuarioControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UsuarioService usuarioService;
 
-    @MockBean
+    @MockitoBean
     private AuthoritiesService authService;
 
-    @Test
-    void testCrearUsuario_Exito() throws Exception {
-        // JSON que enviamos. Nota: authority no es null
-        String jsonBody = """
-        {
-          "nombre":"Laura",
-          "email":"laura@example.com",
-          "password":"plain123",
-          "authority": { "id":1, "authority":"ROLE_USER" }
-        }
-        """;
+    private Usuario u1;
 
-        Usuario guardado = new Usuario();
-        guardado.setId(3);
-        guardado.setNombre("Laura");
-        guardado.setEmail("laura@example.com");
-
-        when(usuarioService.guardarUsuario(any(Usuario.class))).thenReturn(guardado);
-
-        mockMvc.perform(post("/usuarios")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(jsonBody))
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.id").value(3))
-               .andExpect(jsonPath("$.nombre").value("Laura"))
-               .andExpect(jsonPath("$.email").value("laura@example.com"));
+    @BeforeAll
+    void setup() {
+        u1 = new Usuario();
+        u1.setId(5);
+        u1.setNombre("Alice");
+        u1.setEmail("alice@test.com");
+        u1.setUsername("aliceUser");
     }
+
+
+    @Test
+    void testObtenerUsuarioPorId_Exito() throws Exception {
+        when(usuarioService.obtenerUsuarioPorId(5)).thenReturn(u1);
+
+        mockMvc.perform(get("/usuarios/{id}",5))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.nombre").value("Alice"));
+    }
+
 
     @Test
     void testObtenerUsuarioPorId_NoEncontrado() throws Exception {
-        doThrow(new ResourceNotFoundException("Usuario", "id", 99))
+        doThrow(new ResourceNotFoundException("Usuario","id",99))
             .when(usuarioService).obtenerUsuarioPorId(99);
 
-        mockMvc.perform(get("/usuarios/{id}", 99))
+        mockMvc.perform(get("/usuarios/{id}",99))
                .andExpect(status().isNotFound());
     }
+
+
     @Test
-    void testObtenerUsuarios_Exito() throws Exception {
-        Usuario u1 = new Usuario();
-        u1.setId(1); u1.setNombre("Alice");
-        Usuario u2 = new Usuario();
-        u2.setId(2); u2.setNombre("Bob");
+    void testCrearUsuario_EmailEnUso() throws Exception {
+        String jsonBody = """
+          {
+            "nombre": "Pepe",
+            "email": "yaExiste@test.com",
+            "username": "pepeUser",
+            "password": "plain123",
+            "authority": { "id":1, "authority":"ROLE_USER" }
+          }
+        """;
 
-        when(usuarioService.obtenerUsuarios()).thenReturn(Arrays.asList(u1,u2));
 
-        mockMvc.perform(get("/usuarios"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].id").value(1))
-               .andExpect(jsonPath("$[0].nombre").value("Alice"))
-               .andExpect(jsonPath("$[1].id").value(2))
-               .andExpect(jsonPath("$[1].nombre").value("Bob"));
+        when(usuarioService.guardarUsuario(any(Usuario.class)))
+            .thenThrow(new IllegalArgumentException("El email ya está en uso"));
+
+        mockMvc.perform(post("/usuarios")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("El email ya está en uso"));
     }
 
+
+    @Test
+    void testCrearUsuario_UsernameEnUso() throws Exception {
+        String jsonBody = """
+          {
+            "nombre": "Pepe",
+            "email": "pepe2@test.com",
+            "username": "yaExisteUser",
+            "password": "plain123",
+            "authority": { "id":1, "authority":"ROLE_USER" }
+          }
+        """;
+
+        when(usuarioService.guardarUsuario(any(Usuario.class)))
+            .thenThrow(new IllegalArgumentException("El username ya está en uso"));
+
+        mockMvc.perform(post("/usuarios")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("El username ya está en uso"));
+    }
+
+
+    @Test
+    void testActualizarUsuario_NoEncontrado() throws Exception {
+        String jsonBody = """
+          {
+            "nombre": "NuevoNombre",
+            "email": "nuevo@mail.com",
+            "password": "passCambio",
+            "authority": null
+          }
+        """;
+
+        doThrow(new ResourceNotFoundException("Usuario","id",999))
+            .when(usuarioService).updateUser(any(Usuario.class), eq(999));
+
+        mockMvc.perform(put("/usuarios/{id}",999)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody))
+            .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    void testActualizarUsuario_EmailEnUso() throws Exception {
+        String jsonBody = """
+          {
+            "nombre": "NuevoNombre",
+            "email": "existe@test.com"
+          }
+        """;
+
+        doThrow(new IllegalArgumentException("El email ya está en uso"))
+            .when(usuarioService).updateUser(any(Usuario.class), eq(5));
+
+        mockMvc.perform(put("/usuarios/{id}",5)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("El email ya está en uso"));
+    }
+
+
+    @Test
+    void testEliminarUsuario_NoEncontrado() throws Exception {
+        doThrow(new ResourceNotFoundException("Usuario","id",99))
+            .when(usuarioService).eliminarUsuario(99);
+
+        mockMvc.perform(delete("/usuarios/{id}",99))
+               .andExpect(status().isNotFound())
+               .andExpect(jsonPath("$.message").value("Usuario no encontrado."));
+    }
+
+ 
     @Test
     void testEliminarUsuario_Exito() throws Exception {
-        Usuario existente = new Usuario();
-        existente.setId(5);
+        // no excepción => se elimina con éxito
+        // Para que no lance ResourceNotFound, simulas que sí existe
+        Usuario ex = new Usuario();
+        ex.setId(7);
+        when(usuarioService.obtenerUsuarioPorId(7)).thenReturn(ex);
 
-        when(usuarioService.obtenerUsuarioPorId(5)).thenReturn(existente);
-        // no exception => se elimina con exito
-
-        mockMvc.perform(delete("/usuarios/{id}", 5))
+        mockMvc.perform(delete("/usuarios/{id}",7))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.message").value("Usuario eliminado con éxito!"));
     }

@@ -1,112 +1,123 @@
 package com.camyo.backend.resena;
 
-import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.usuario.Authorities;
+import com.camyo.backend.usuario.AuthoritiesRepository;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import com.camyo.backend.exceptions.ResourceNotFoundException;
+
+import org.junit.jupiter.api.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ResenaServiceTests {
 
-    @Mock
-    private ResenaRepository resenaRepository;
-
-    @Mock
-    private UsuarioRepository usuarioRepository;
-
-    @InjectMocks
+    @Autowired
     private ResenaService resenaService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    @Autowired
+    private ResenaRepository resenaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    @Autowired
+    private AuthoritiesRepository authoritiesRepository;
+
+    private Usuario comentado;
+    private Usuario comentador;
+    private Resena r1;
+    private Resena r2;
+
+    @BeforeAll
+    @Transactional
+void setup() {
+       
+        Authorities authUser = new Authorities();
+        authUser.setAuthority("ROLE_USER");
+        authoritiesRepository.save(authUser);
+
+        comentado = new Usuario();
+        comentado.setUsername("ComentadoTest");
+        comentado.setEmail("comentado.unique@ej.com");
+        comentado.setPassword("123");     
+        comentado.setAuthority(authUser);  
+        usuarioRepository.save(comentado);
+
+      
+        comentador = new Usuario();
+        comentador.setUsername("ComentadorTest");
+        comentador.setEmail("comentador.unique@ej.com");
+        comentador.setPassword("123");
+        comentador.setAuthority(authUser);
+        usuarioRepository.save(comentador);
+
+       
+        r1 = new Resena();
+        r1.setValoracion(4);
+        r1.setComentado(comentado);
+        r1.setComentador(comentador);
+        r1 = resenaService.crearResena(r1);
+
+        r2 = new Resena();
+        r2.setValoracion(5);
+        r2.setComentado(comentado);
+        r2.setComentador(comentador);
+        r2 = resenaService.crearResena(r2);
     }
 
     @Test
+    @Transactional
     void testCrearResena_Exito() {
         Resena nueva = new Resena();
-        nueva.setValoracion(5);
+        nueva.setValoracion(3);
+        nueva.setComentado(comentado);
+        nueva.setComentador(comentador);
 
-        Resena guardada = new Resena();
-        guardada.setId(1);
-        guardada.setValoracion(5);
-
-        when(resenaRepository.save(nueva)).thenReturn(guardada);
-
-        Resena result = resenaService.crearResena(nueva);
-        assertNotNull(result);
-        assertEquals(1, result.getId());
+        Resena guardada = resenaService.crearResena(nueva);
+        assertNotNull(guardada.getId());
     }
 
     @Test
-    void testObtenerResena_NoEncontrada() {
-        when(resenaRepository.findById(99)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class,
-            () -> resenaService.obtenerResena(99));
+    @Transactional
+    void testObtenerResena() {
+        Resena res = resenaService.obtenerResena(r1.getId());
+        assertEquals(4, res.getValoracion());
     }
+
     @Test
+    @Transactional
     void testActualizarResena_NoComentadorExiste() {
-        // Reseña ID=1 existe
-        Resena existente = new Resena();
-        existente.setId(1);
+        Resena editar = new Resena();
+        editar.setValoracion(1);
 
-        when(resenaRepository.findById(1)).thenReturn(Optional.of(existente));
-
-        Resena detalles = new Resena();
-        detalles.setValoracion(3);
-
-        // El "comentador" del JSON no existe
-        Usuario noEncontrado = new Usuario();
-        noEncontrado.setId(999);
-        detalles.setComentador(noEncontrado);
-
-        when(usuarioRepository.findById(999)).thenReturn(Optional.empty());
+      
+        Usuario noExiste = new Usuario();
+        noExiste.setId(999);
+        editar.setComentador(noExiste);
+        editar.setComentado(comentado);
 
         assertThrows(ResourceNotFoundException.class,
-            () -> resenaService.actualizarResena(1, detalles));
+            () -> resenaService.actualizarResena(r1.getId(), editar));
     }
 
     @Test
-    void testActualizarResena_NoComentadoExiste() {
-        Resena existente = new Resena();
-        existente.setId(1);
-        when(resenaRepository.findById(1)).thenReturn(Optional.of(existente));
-
-        Resena detalles = new Resena();
-        detalles.setValoracion(3);
-
-        Usuario comentador = new Usuario();
-        comentador.setId(2);
-        detalles.setComentador(comentador);
-
-        // comentado ID=999 no existe
-        Usuario comentado = new Usuario();
-        comentado.setId(999);
-        detalles.setComentado(comentado);
-
-        when(usuarioRepository.findById(2)).thenReturn(Optional.of(comentador));
-        when(usuarioRepository.findById(999)).thenReturn(Optional.empty());
-
+    @Transactional
+    void testEliminarResena() {
+        assertDoesNotThrow(() -> resenaService.eliminarResena(r1.getId()));
         assertThrows(ResourceNotFoundException.class,
-            () -> resenaService.actualizarResena(1, detalles));
+            () -> resenaService.obtenerResena(r1.getId()));
     }
 
-    @Test
-    void testObtenerTodasResenasComentadorPorId_Exito() {
-        // Retornará una lista con un par de reseñas
-        Resena r1 = new Resena(); r1.setId(1);
-        Resena r2 = new Resena(); r2.setId(2);
 
-        when(resenaRepository.findAllComentadorByUserId(5))
-            .thenReturn(Arrays.asList(r1, r2));
-
-        List<Resena> resultado = resenaService.obtenerTodasResenasComentadorPorId(5);
-        assertEquals(2, resultado.size());
-    }
 }

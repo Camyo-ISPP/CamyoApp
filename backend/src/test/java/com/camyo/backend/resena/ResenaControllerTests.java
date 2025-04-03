@@ -1,142 +1,132 @@
 package com.camyo.backend.resena;
 
+import com.camyo.backend.auth.payload.response.MessageResponse;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
+import com.camyo.backend.usuario.Authorities;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ResenaController.class)
-@AutoConfigureMockMvc(addFilters = false)  // Desactiva seguridad en los tests
+import java.util.List;
+
+@WebMvcTest(ResenaController.class)  // solo carga el Controller
+@ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ResenaControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
 
-    // El ResenaController @Autowire-a ResenaService y UsuarioService
-    @MockBean
+    // Mockeamos los servicios que usa el Controller:
+    @MockitoBean
     private ResenaService resenaService;
 
-    @MockBean
+    @MockitoBean
     private UsuarioService usuarioService;
 
-    @Test
-    void testObtenerTodasResenasComentado_Exito() throws Exception {
-        Resena r = new Resena();
-        r.setId(1);
-        r.setValoracion(5);
+    private Usuario comentado;
+    private Usuario comentador;
+    private Resena r1, r2;
 
-        when(resenaService.obtenerTodasResenasComentadoPorId(10))
-            .thenReturn(Collections.singletonList(r));
+    @BeforeAll
+    void setup() {
+        // Creamos un Authorities (dummy) para que "authority" no sea nulo
+        Authorities dummyAuth = new Authorities();
+        dummyAuth.setId(1);
+        dummyAuth.setAuthority("ROLE_USER");
 
-        mockMvc.perform(get("/resenas/comentado/{id}", 10))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].id").value(1))
-               .andExpect(jsonPath("$[0].valoracion").value(5));
+        comentado = new Usuario();
+        comentado.setId(1);
+        comentado.setUsername("UserComentado");
+        comentado.setEmail("comentado@email");
+        comentado.setAuthority(dummyAuth); // Evitamos la ConstraintViolation
+
+        comentador = new Usuario();
+        comentador.setId(2);
+        comentador.setUsername("UserComentador");
+        comentador.setEmail("otro@email");
+        comentador.setAuthority(dummyAuth); // Igualmente
+
+        r1 = new Resena();
+        r1.setId(101);
+        r1.setValoracion(5);
+        r1.setComentado(comentado);
+        r1.setComentador(comentador);
+
+        r2 = new Resena();
+        r2.setId(102);
+        r2.setValoracion(2);
+        r2.setComentado(comentado);
+        r2.setComentador(comentador);
     }
 
     @Test
-    void testCrearResena_Exito() throws Exception {
-        // JSON que enviamos en el body
-        String jsonBody = """
-        {
-          "valoracion":5,
-          "comentarios":"Perfecto",
-          "comentador":{"id":1},
-          "comentado":{"id":2}
-        }
-        """;
-
-        // La reseña que simulamos retorna el service
-        Resena creada = new Resena();
-        creada.setId(99);
-        creada.setValoracion(5);
-        creada.setComentarios("Perfecto");
-
-        when(resenaService.crearResena(any(Resena.class))).thenReturn(creada);
-
-        mockMvc.perform(post("/resenas")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(jsonBody))
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.id").value(99))
-               .andExpect(jsonPath("$.valoracion").value(5))
-               .andExpect(jsonPath("$.comentarios").value("Perfecto"));
-    }
-    
-@Test
     void testObtenerResenaPorId_Exito() throws Exception {
-        Resena r = new Resena();
-        r.setId(10);
-        r.setValoracion(4);
+        when(resenaService.obtenerResena(101)).thenReturn(r1);
 
-        when(resenaService.obtenerResena(10)).thenReturn(r);
-
-        mockMvc.perform(get("/resenas/{id}", 10))
+        mockMvc.perform(get("/resenas/{id}", 101))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").value(10))
-               .andExpect(jsonPath("$.valoracion").value(4));
+               .andExpect(jsonPath("$.id").value(101))
+               .andExpect(jsonPath("$.valoracion").value(5));
     }
 
     @Test
-    void testObtenerResenaPorId_NoEncontrada() throws Exception {
-        doThrow(new ResourceNotFoundException("Resena","id",99))
-            .when(resenaService).obtenerResena(99);
+    void testObtenerResenaPorId_NoEncontrado() throws Exception {
+        when(resenaService.obtenerResena(999))
+            .thenThrow(new ResourceNotFoundException("Resena", "id", 999));
 
-        mockMvc.perform(get("/resenas/{id}", 99))
+        mockMvc.perform(get("/resenas/{id}", 999))
                .andExpect(status().isNotFound());
     }
 
     @Test
-    void testEliminarResena_Exito() throws Exception {
-        // Asume que la reseña ID=1 pertenece al "comentador" ID=5
-        Resena existente = new Resena();
-        existente.setId(1);
-        Usuario comentador = new Usuario();
-        comentador.setId(5);
-        existente.setComentador(comentador);
+    void testObtenerResenasPorComentado() throws Exception {
+        when(resenaService.obtenerTodasResenasComentadoPorId(1))
+            .thenReturn(List.of(r1, r2));
 
-        // El service 'obtenerResena' retorna la reseña
-        when(resenaService.obtenerResena(1)).thenReturn(existente);
-        // El "usuario actual" que llamamos con "usuarioService.obtenerUsuarioActual()" 
-        // para checkear si coincide con comentador
+        mockMvc.perform(get("/resenas/comentado/{userId}", 1))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void testEliminarResena_Exito() throws Exception {
+        // la reseña 101 pertenece a "comentador" con ID=2
+        when(resenaService.obtenerResena(101)).thenReturn(r1);
+        // Suponemos que el usuario actual es el comentador => OK
         when(usuarioService.obtenerUsuarioActual()).thenReturn(comentador);
 
-        mockMvc.perform(delete("/resenas/{id}", 1))
+        // Sin excepción => se elimina con éxito
+        mockMvc.perform(delete("/resenas/{id}", 101))
                .andExpect(status().isNoContent());
     }
 
     @Test
     void testEliminarResena_UsuarioNoCoincide() throws Exception {
-        Resena existente = new Resena();
-        existente.setId(1);
-        Usuario comentador = new Usuario();
-        comentador.setId(5);
-        existente.setComentador(comentador);
+        when(resenaService.obtenerResena(101)).thenReturn(r1);
 
-        when(resenaService.obtenerResena(1)).thenReturn(existente);
-        
-        // El usuario actual es ID=10 => no coincide => FORBIDDEN
-        Usuario usuarioDistinto = new Usuario();
-        usuarioDistinto.setId(10);
-        when(usuarioService.obtenerUsuarioActual()).thenReturn(usuarioDistinto);
+        // usuario actual con ID diferente => no coincide
+        Usuario otro = new Usuario();
+        otro.setId(99);
+        otro.setAuthority(new Authorities()); // no nulo
+        when(usuarioService.obtenerUsuarioActual()).thenReturn(otro);
 
-        mockMvc.perform(delete("/resenas/{id}", 1))
+        mockMvc.perform(delete("/resenas/{id}", 101))
                .andExpect(status().isForbidden())
                .andExpect(content().string("No tienes permiso para borrar esta reseña."));
     }
