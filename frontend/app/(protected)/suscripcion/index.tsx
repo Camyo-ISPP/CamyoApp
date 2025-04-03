@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import axios from "axios";
 import SuccessModal from "../../_components/SuccessModal";
+import WebFooter from "@/app/_components/_layout/WebFooter";
 
 const SubscriptionPlans = () => {
     const { user, userToken } = useAuth();
@@ -308,6 +309,7 @@ const SubscriptionPlans = () => {
                             </View>
                         </View>
                     </View>
+                    <WebFooter />
                 </ScrollView>
 
                 <SuccessModal
@@ -351,7 +353,8 @@ const styles = StyleSheet.create({
     },
     scrollViewContent: {
         flexGrow: 1,
-        paddingBottom: 40,
+        justifyContent: 'space-between', 
+        paddingBottom: 0,
     },
     contentContainer: {
         maxWidth: 1200,
@@ -359,6 +362,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         paddingHorizontal: 20,
         paddingTop: 30,
+        paddingBottom: 20,
     },
     sectionTitle: {
         fontSize: 32,

@@ -13,8 +13,8 @@ const heroBackground = require("../../assets/images/lonely-road.jpg");
 import { useAuth } from "../../contexts/AuthContext";
 import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
-import CamyoNavBar from "../_components/_layout/CamyoNavBar";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -92,61 +92,6 @@ export default function Index() {
     );
   }
 
-  const CardOferta = ({ item }) => {
-    const scaleValue = useRef(new Animated.Value(1)).current;
-
-    const handleHover = (toValue) => {
-      Animated.spring(scaleValue, {
-        toValue,
-        friction: 3,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    return (
-      <Animated.View
-        style={[
-          styles.card,
-          { transform: [{ scale: scaleValue }] },
-          item.promoted && styles.promotedCard
-        ]}
-        onMouseEnter={() => handleHover(1.03)}
-        onMouseLeave={() => handleHover(1)}
-      >
-        {item.promoted && (
-          <View style={styles.patrocinadoBadge}>
-            <Text style={styles.patrocinadoText}>PATROCINADO</Text>
-          </View>
-        )}
-        <Image
-          source={item.empresa?.logo ? { uri: item.empresa.logo } : defaultCompanyLogo}
-          style={styles.companyLogo}
-        />
-        <View style={styles.offerContent}>
-          <Text style={styles.offerTitle}>{item.titulo}</Text>
-          <View style={styles.tagsContainer}>
-            <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-            <Text style={styles.offerDetailsTagExperience}>+{item.experiencia} años</Text>
-            <View style={styles.locationContainer}>
-              <MaterialIcons name="location-on" size={16} color="#696969" />
-              <Text style={styles.localizacion}>{item.localizacion}</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.offerActions}>
-          <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push(`/oferta/${item.id}`)}
-          >
-            <MaterialCommunityIcons name="eye" size={16} color="white" />
-            <Text style={styles.buttonText}>Ver Detalles</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    );
-  };
-
   const StatsSection = () => (
     <View style={styles.statsContainer}>
       <View style={styles.statItem}>
@@ -171,6 +116,9 @@ export default function Index() {
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
     return activeOffersCount < rules.maxActiveOffers;
   };
+
+  const ofertasTrabajo = data.filter(item => item.tipoOferta === "TRABAJO");
+  const ofertasCarga = data.filter(item => item.tipoOferta === "CARGA");
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
@@ -259,9 +207,8 @@ export default function Index() {
                   <FontAwesome5 name="route" size={24} color={colors.secondary} />
                   <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
                 </View>
-                {data.filter(item => item.tipoOferta === "CARGA").map(item => (
-                  <CardOferta key={item.id} item={item} />
-                ))}
+                <ListadoOfertasPublicoSmall offers={ofertasCarga} showPromoted={true} />
+
               </View>
 
               {/* Columna de Trabajo */}
@@ -270,9 +217,8 @@ export default function Index() {
                   <MaterialIcons name="work" size={24} color={colors.secondary} />
                   <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
                 </View>
-                {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
-                  <CardOferta key={item.id} item={item} />
-                ))}
+
+                <ListadoOfertasPublicoSmall offers={ofertasTrabajo} showPromoted={true} />
               </View>
             </View>
           </View>
