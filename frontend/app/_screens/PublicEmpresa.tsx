@@ -205,7 +205,6 @@ const PublicEmpresa = ({ userId }) => {
                     };
 
                     if (editResenaId) {
-                      console.log("Editando reseña con ID:", editResenaId);
                       const res = await axios.put(`${BACKEND_URL}/resenas/${editResenaId}`, payload, { headers });
 
                       if (res.status === 200) {

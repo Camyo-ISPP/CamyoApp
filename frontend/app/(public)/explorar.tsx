@@ -221,8 +221,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         handleSearch('');
     };
 
-    console.log('Filtered Data:', filteredData);
-
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
             <View style={styles.webContainer}>
