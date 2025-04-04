@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   listaContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 20,
+    gap: 40,
     flexWrap: 'wrap',
   },
   columna: {

@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   button: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   primaryButton: {
     backgroundColor: colors.primary,
@@ -208,8 +208,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.secondary,
-    fontWeight: "600",
-    fontSize: 14,
+    fontWeight: "700",
+    fontSize: 16,
   },
   primaryButtonText: {
     color: colors.white,
