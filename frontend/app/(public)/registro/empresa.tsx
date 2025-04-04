@@ -142,13 +142,12 @@ const EmpresaRegisterScreen = () => {
       setErrorMessage("El campo página web es obligatorio.");
       return;
     }
-    let correctedWeb = formData.web;
     if (!formData.web.startsWith('http://') && !formData.web.startsWith('https://')) {
       if (!/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(formData.web)) {
         setErrorMessage('El formato de la URL de la página web no es válido.');
         return;
       }
-      correctedWeb = 'https://' + formData.web;
+      formData.web = 'https://' + formData.web; // Añadir https:// si no tiene esquema
     }
 
     // Validación del NIF
@@ -177,7 +176,7 @@ const EmpresaRegisterScreen = () => {
       descripcion: formData.descripcion,
       foto: formData.foto ? formData.foto : null,
       password: formData.password,
-      web: correctedWeb,
+      web: formData.web,
       nif: formData.nif
     };
 

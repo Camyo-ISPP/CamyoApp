@@ -58,18 +58,6 @@ const MisOfertasCamionero = () => {
         );
     }
 
-    if (error) {
-        return (
-            <View style={styles.errorContainer}>
-                <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.error} />
-                <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={() => fetchOffers()}>
-                    <Text style={styles.retryButtonText}>Reintentar</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-
     const renderOfferList = () => {
         if (noOffersInAllCategories) {
             return (
@@ -266,7 +254,7 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: 18,
-        color: colors.error,
+        color: 'red',
         marginTop: 16,
         marginBottom: 20,
         textAlign: 'center',

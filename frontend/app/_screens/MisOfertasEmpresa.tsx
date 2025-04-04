@@ -9,10 +9,7 @@ import { useCallback } from "react";
 import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { MaterialCommunityIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import WebFooter from "../_components/_layout/WebFooter";
-
-const { width } = Dimensions.get('window');
 
 const MisOfertasEmpresa = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -61,18 +58,6 @@ const MisOfertasEmpresa = () => {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.primary} />
-            </View>
-        );
-    }
-
-    if (error) {
-        return (
-            <View style={styles.errorContainer}>
-                <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.error} />
-                <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={fetchOffers}>
-                    <Text style={styles.retryButtonText}>Reintentar</Text>
-                </TouchableOpacity>
             </View>
         );
     }
