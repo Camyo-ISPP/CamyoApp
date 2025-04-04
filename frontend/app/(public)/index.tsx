@@ -281,7 +281,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.white,
   },
   loadingContainer: {
     flex: 1,

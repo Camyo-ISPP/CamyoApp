@@ -8,9 +8,6 @@ import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
