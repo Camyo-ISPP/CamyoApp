@@ -1,8 +1,8 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TouchableWithoutFeedback, Modal } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TouchableWithoutFeedback, Modal, Alert } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useFocusEffect, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons, AntDesign, FontAwesome } from "@expo/vector-icons";
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png"
@@ -13,6 +13,7 @@ import { usePayment } from "../../contexts/PaymentContext";
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import SuccessModal from "../_components/SuccessModal";
 import { LinearGradient } from "expo-linear-gradient";
+import ResenaModal from "../_components/ResenaModal";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -32,7 +33,10 @@ const MiPerfilEmpresa = () => {
   const { refreshSubscriptionLevel } = useSubscription();
   const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
-
+  const [camioneros, setCamioneros] = useState([]);
+  const [showResenaModal, setShowResenaModal] = useState(false);
+  const [camioneroAResenar, setCamioneroAResenar] = useState(null);
+  const [hoverRating, setHoverRating] = useState(0);
   useFocusEffect(
     useCallback(() => {
       refreshSubscriptionLevel();
@@ -43,21 +47,62 @@ const MiPerfilEmpresa = () => {
   const [resenas, setResenas] = useState([]);
 
   const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+  const fetchResenas = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
+      setResenas(response.data);
+      console.log("reseñas",response.data)
+      const resenasFiltradas = response.data.filter(resena => 
+        resena.comentado.id === user.userId
+      );
+      console.log("reseñas filtradas",resenasFiltradas)
+      // Obtener valoración media del backend
+      const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
+      setValoracionMedia(mediaResponse.data);
+    } catch (error) {
+      console.error("Error al cargar las reseñas o valoración:", error);
+    }
+  };
+  const handleAddResena = async (resenaData) => {
+    try {
+      if (!user?.userId || !camioneroAResenar) {
+        Alert.alert("Error", "Datos incompletos para publicar la reseña");
+        return;
+      }
+
+      const response = await axios.post(`${BACKEND_URL}/resenas`, {
+        ...resenaData,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (response.status === 201) {
+        Alert.alert("Éxito", "Reseña publicada correctamente");
+        await fetchResenas();
+        setShowResenaModal(false);
+        setCamioneroAResenar(null);
+      }
+    } catch (error) {
+      console.error("Error al publicar reseña:", error);
+      let errorMessage = "Error al publicar la reseña";
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 400) {
+          errorMessage = "No tienes ofertas comunes con esta empresa para reseñarla";
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+      }
+
+      Alert.alert("Error", errorMessage);
+    }
+  };
 
 
   useEffect(() => {
-    const fetchResenas = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
-        setResenas(response.data);
-
-        // Obtener valoración media del backend
-        const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
-        setValoracionMedia(mediaResponse.data);
-      } catch (error) {
-        console.error("Error al cargar las reseñas o valoración:", error);
-      }
-    };
 
     if (user?.id) {
       fetchResenas();
@@ -67,7 +112,20 @@ const MiPerfilEmpresa = () => {
   const fetchOffers = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      console.log(response.data)
       setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+      const camionerosUnicos = response.data.reduce((acc, oferta) => {
+        if (oferta.camionero && !acc.some(c => c.id === oferta.camionero.id)) {
+          acc.push({
+            ...oferta.camionero,
+            id: oferta.camionero.id,
+            usuario: oferta.camionero.usuario,
+          });
+        }
+        return acc;
+      }, []);
+      setCamioneros(camionerosUnicos)
+      console.log(camionerosUnicos)
     } catch (error) {
       console.error("Error al cargar las ofertas:", error);
     } finally {
@@ -75,14 +133,12 @@ const MiPerfilEmpresa = () => {
     }
   };
 
+
   useEffect(() => {
     fetchOffers();
   }, []);
 
   useEffect(() => {
-    // If the user goes to the checkout page, does not subscribe and clicks on their profile, 
-    // the subscription they wanted will remain saved.
-    // This will reset the subscription ID chosen.
     setId("");
   }, [])
 
@@ -152,6 +208,7 @@ const MiPerfilEmpresa = () => {
 
     }
   }
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -318,7 +375,7 @@ const MiPerfilEmpresa = () => {
                                 item.promoted ? (
                                   <TouchableOpacity
                                     style={[styles.actionButton, styles.unpromoteButton]}
-                                    onPress={() => {setIsModalVisibleCancelar(true); setSelectedOfferId(item.id)}}
+                                    onPress={() => { setIsModalVisibleCancelar(true); setSelectedOfferId(item.id) }}
                                   >
                                     <AntDesign name="closecircleo" size={14} color={colors.white} style={{ paddingRight: 19 }} />
                                     <Text style={styles.actionButtonText}>Cancelar</Text>
@@ -394,15 +451,93 @@ const MiPerfilEmpresa = () => {
               </View>
             )}
           </View>
+          {/* Separador */}
+          <View style={styles.separator} />
+          <View style={styles.camionerosSection}>
+            <Text style={styles.sectionTitle}>Camioneros Recientes</Text>
+            <View style={{ flexDirection: "row", gap: 7 }}>
+
+              {camioneros.length === 0 ? (
+                <Text style={styles.emptyMessage}>No has trabajado con camioneros recientemente</Text>
+              ) : (
+                camioneros.map(camionero => (
+                  <View key={`camionero-${camionero.id}`} style={styles.camioneroCard}>
+                    {/* Header con imagen y nombre */}
+                    <View style={styles.camioneroHeader}>
+                      {camionero.usuario?.foto ? (
+                        <Image
+                          source={{ uri: `data:image/png;base64,${camionero.usuario.foto}` }}
+                          style={styles.camioneroAvatar}
+                        />
+                      ) : (
+                        <View style={styles.camioneroAvatarPlaceholder}>
+                          <FontAwesome5 name="truck" size={20} color={colors.white} />
+                        </View>
+                      )}
+                      <View style={styles.camioneroInfo}>
+                        <Text style={styles.camioneroNombre}>{camionero.usuario?.nombre}</Text>
+                        <Text style={styles.camioneroUbicación}>
+                          <MaterialIcons name="location-on" size={14} color={colors.secondary} />
+                          {camionero.usuario?.localizacion || 'Ubicación no disponible'}
+                        </Text>
+
+                      </View>
+                    </View>
+                    <View style={styles.valoracionSection}>
+                      <View style={styles.starsContainer}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <TouchableOpacity
+                            key={`star-${star}`}
+                            onPress={() => {
+                              setCamioneroAResenar(camionero);
+                              setShowResenaModal(true);
+                            }}
+                            onPressIn={() => setHoverRating(star)}
+                            onPressOut={() => setHoverRating(0)}
+                            activeOpacity={1}
+                          >
+                            <FontAwesome
+                              name={star <= hoverRating ? "star" : "star-o"}
+                              size={27}
+                              color={star <= hoverRating ? colors.primary : colors.primaryLight}
+                              style={styles.starIcon}
+                            />
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+
+
+                    {/* Botones de acción */}
+                    <View style={styles.actionsContainer}>
+                      <TouchableOpacity
+                        style={styles.fullWidthButton}
+                        onPress={() => router.push(`/camionero/${camionero.id}`)}
+                      >
+                        <FontAwesome5 name="user" size={14} color={colors.white} />
+                        <Text style={styles.actionButtonText}>Ver perfil</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))
+              )}
+            </View>
+          </View>
 
           <View style={styles.separator} />
 
           <View style={styles.reseñasContainer}>
-            <Text style={styles.sectionTitle}>Reseñas</Text>
+            <Text style={styles.sectionTitle}>Reseñas de tus camioneros</Text>
             {resenas.length > 0 ? (
               valoracionMedia !== null && (
                 <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
-                  ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                   <FontAwesome
+                              name={"star" }
+                              size={27}
+                              color={ colors.primary }
+                              style={styles.starIcon}
+                            />
+                 Valoración media: {valoracionMedia.toFixed(1)} / 5
                 </Text>
               )
             ) : (
@@ -427,6 +562,17 @@ const MiPerfilEmpresa = () => {
           </View>
         </View >
       </View >
+      {/* Modal para añadir reseñas */}
+      <ResenaModal
+        visible={showResenaModal}
+        onClose={() => {
+          setShowResenaModal(false);
+          setCamioneroAResenar(null);
+        }}
+        onSubmit={handleAddResena}
+        comentadorId={user?.userId}
+        comentadoId={camioneroAResenar?.usuario?.id}
+      />
     </ScrollView >
   );
 };
@@ -557,6 +703,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "bold",
+    textAlign: "center",
     color: colors.secondary,
     marginBottom: 15,
     textAlign: "center",
@@ -564,9 +711,6 @@ const styles = StyleSheet.create({
   downContainer: {
     paddingHorizontal: 30,
     marginLeft: 30,
-  },
-  offersContainer: {
-    paddingHorizontal: 30,
   },
   companyLogo: {
     height: 120,
@@ -713,9 +857,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
   limitMessage: {
     color: 'red',
     textAlign: 'center',
@@ -744,204 +885,6 @@ const styles = StyleSheet.create({
   reseñaComentario: {
     fontSize: 14,
     color: colors.darkGray,
-  }, offersContainer: {
-    width: '100%',
-    paddingHorizontal: 10,
-  },
-  noOffersText: {
-    textAlign: 'center',
-    color: colors.mediumGray,
-    marginVertical: 20,
-    fontSize: 16,
-  },
-  offersList: {
-    width: '100%',
-  },
-  offerCard: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
-  },
-  promotedOfferCard: {
-    borderLeftColor: colors.secondary,
-    backgroundColor: '#F8F9FF',
-  },
-  offerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  offerTitleContainer: {
-    flex: 1,
-  },
-  offerMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  offerLocation: {
-    fontSize: 14,
-    color: colors.mediumGray,
-    marginLeft: 4,
-  },
-  offerSalary: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.secondary,
-  },
-  offerTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    gap: 8,
-  },
-  offerTagType: {
-    backgroundColor: colors.primary,
-    color: colors.white,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  offerTagLicense: {
-    backgroundColor: colors.secondary,
-    color: colors.white,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  offerTagExperience: {
-    borderWidth: 1,
-    borderColor: colors.primary,
-    color: colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  offerDescription: {
-    fontSize: 14,
-    color: colors.darkGray,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  offerActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 10,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
-  },
-  promoteButton: {
-    backgroundColor: colors.secondary,
-  },
-  unpromoteButton: {
-    backgroundColor: '#6c757d',
-  },
-  detailsButton: {
-    backgroundColor: colors.primary,
-  },
-  actionButtonText: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  companyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 4,
-    backgroundColor: '#F5F7FF',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  offerCompany: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.primary,
-    marginLeft: 6,
-  }, promotedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF9E6',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    marginBottom: 10,
-    alignSelf: 'flex-start',
-  },
-  promotedText: {
-    color: '#D4A017',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 5,
-  },
-  offerContent: {
-    paddingHorizontal: 5,
-  },
-  offerMainInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  offerPosition: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.secondary,
-    marginBottom: 5,
-  },
-  companyInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F7FF',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  companyName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-    marginLeft: 6,
-  },
-  offerDetails: {
-    marginTop: 12,
-    marginBottom: 10,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 6,
-  },
-  detailText: {
-    fontSize: 13,
-    color: colors.darkGray,
-    marginRight: 15,
-    marginLeft: 4,
   },
   offersContainer: {
     width: '100%',
@@ -1049,7 +992,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: "center",
-    width: 150, // Ancho fijo para todos los botones
+    width: 150,
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -1182,7 +1125,94 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: 'white',
     fontSize: 16,
+  }, camioneroInfo: {
+    fontSize: 12,
+    color: colors.darkGray,
+    marginTop: 4,
   },
+  camioneroAvatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }, actionsContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+  }, camioneroCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    position: 'relative',
+    paddingBottom: 60,
+  },
+  camioneroHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  camioneroAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+  },
+  camioneroNombre: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.secondary,
+  },
+  camioneroUbicación: {
+    fontSize: 14,
+    color: colors.secondary,
+    marginTop: 4,
+  }, fullWidthButton: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  }, valoracionSection: {
+    marginBottom: 16,
+  },
+  valoracionTitle: {
+    fontSize: 14,
+    color: colors.darkGray,
+    marginBottom: 8,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  starIcon: {
+    marginHorizontal: 4,
+    transitionDuration: '400ms',
+  }, camionerosSection: {
+    marginTop: 25,
+    width: "50%",
+    paddingHorizontal: 15,
+  },
+
 });
 
 

@@ -22,7 +22,7 @@ const MiPerfilCamionero = () => {
     const [ofertasCamionero, setOfertasCamionero] = useState([]);
     const [camionero, setCamionero] = useState<{ id: string } | null>(null);
     const [showResenaModal, setShowResenaModal] = useState(false);
-    const [empresasRecientes, setEmpresasRecientes] = useState([]);
+    const [empresas, setEmpresas] = useState([]);
     const [empresaAResenar, setEmpresaAResenar] = useState(null);
     const [hoverRating, setHoverRating] = useState(0);
 
@@ -55,7 +55,7 @@ const MiPerfilCamionero = () => {
             }, []);
 
 
-            setEmpresasRecientes(empresasUnicas);
+            setEmpresas(empresasUnicas);
 
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -174,10 +174,10 @@ const MiPerfilCamionero = () => {
                     <View style={styles.empresasSection}>
                         <Text style={styles.sectionTitle}>Empresas Recientes</Text>
 
-                        {empresasRecientes.length === 0 ? (
+                        {empresas.length === 0 ? (
                             <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
                         ) : (
-                            empresasRecientes.map(empresa => (
+                            empresas.map(empresa => (
 
                                 < View key={`empresa-${empresa.id}`} style={styles.empresaCard}>
                                     {/* Header con imagen y nombre */}
