@@ -10,53 +10,58 @@ const OptionsDropdown = () => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   return (
-      <View style={styles.container}>
-        {/* 3 lines */}
-        <TouchableOpacity onPress={() => setDropdownVisible(!dropdownVisible)}>
-          <FontAwesome name="bars" size={20} color={colors.secondary}/>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      {/* 3 lines */}
+      <TouchableOpacity
+        onPress={() => setDropdownVisible(!dropdownVisible)}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginRight: 5 }}
+      >
+        <FontAwesome name="bars" size={18} color={colors.secondary} />
+        <Text style={{ color: colors.secondary, fontWeight: 'bold', fontSize: 18 }}>Menú</Text>
+      </TouchableOpacity>
 
-        {/* Dropdown */}
-        {dropdownVisible && (
-            <View style={styles.dropdown}>
-              <TouchableOpacity onPress={() => setDropdownVisible(false)} style={styles.closeButton}>
-                <Entypo name="cross" size={20} color={colors.primary} />
-              </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => router.push('/empresas')} style={styles.dropdownButton}>
-                <MaterialIcons name="domain" size={20} style={styles.dropdownButtonIcon} />
-                <Text style={styles.dropdownButtonText}>Empresas</Text>
-              </TouchableOpacity>
+      {/* Dropdown */}
+      {dropdownVisible && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity onPress={() => setDropdownVisible(false)} style={styles.closeButton}>
+            <Entypo name="cross" size={20} color={colors.primary} />
+          </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => router.push('/explorar')} style={styles.dropdownButton}>
-                <MaterialIcons name="search" size={20} style={styles.dropdownButtonIcon} />
-                <Text style={styles.dropdownButtonText}>Ofertas</Text>
-              </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/empresas')} style={styles.dropdownButton}>
+            <MaterialIcons name="domain" size={20} style={styles.dropdownButtonIcon} />
+            <Text style={styles.dropdownButtonText}>Empresas</Text>
+          </TouchableOpacity>
 
-              {user && user.rol !== "ADMIN" && (
-                <TouchableOpacity onPress={() => router.push('/misofertas')} style={styles.dropdownButton}>
-                  <MaterialIcons name="work" size={20} style={styles.dropdownButtonIcon} />
-                  <Text style={styles.dropdownButtonText}>Mis ofertas</Text>
-                </TouchableOpacity>
-              )}
+          <TouchableOpacity onPress={() => router.push('/explorar')} style={styles.dropdownButton}>
+            <MaterialIcons name="search" size={20} style={styles.dropdownButtonIcon} />
+            <Text style={styles.dropdownButtonText}>Ofertas</Text>
+          </TouchableOpacity>
 
-              {user && user.rol !== "ADMIN" && (
-                <TouchableOpacity onPress={() => router.push('/chat')} style={styles.dropdownButton}>
-                  <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
-                  <Text style={styles.dropdownButtonText}>Mis mensajes</Text>
-                </TouchableOpacity>
-              )}
+          {user && user.rol !== "ADMIN" && (
+            <TouchableOpacity onPress={() => router.push('/misofertas')} style={styles.dropdownButton}>
+              <MaterialIcons name="work" size={20} style={styles.dropdownButtonIcon} />
+              <Text style={styles.dropdownButtonText}>Mis ofertas</Text>
+            </TouchableOpacity>
+          )}
 
-              {user?.rol === "EMPRESA" && (
-                <TouchableOpacity onPress={() => router.push('/suscripcion')} style={styles.dropdownButton}>
-                  <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
-                  <Text style={styles.dropdownButtonText}>Suscripción</Text>
-                </TouchableOpacity>
-              )}
+          {user && user.rol !== "ADMIN" && (
+            <TouchableOpacity onPress={() => router.push('/chat')} style={styles.dropdownButton}>
+              <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
+              <Text style={styles.dropdownButtonText}>Mis mensajes</Text>
+            </TouchableOpacity>
+          )}
 
-            </View>
-        )}
-      </View >
+          {user?.rol === "EMPRESA" && (
+            <TouchableOpacity onPress={() => router.push('/suscripcion')} style={styles.dropdownButton}>
+              <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
+              <Text style={styles.dropdownButtonText}>Suscripción</Text>
+            </TouchableOpacity>
+          )}
+
+        </View>
+      )}
+    </View >
   );
 };
 
@@ -79,7 +84,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    width: 160,
+    width: 170,
     marginTop: 15,
   },
   dropdownButton: {
@@ -90,10 +95,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   dropdownButtonText: {
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: "bold",
     color: colors.secondary,
-    paddingHorizontal: 4,    
+    paddingHorizontal: 4,
   },
   dropdownButtonIcon: {
     width: 24,

@@ -213,7 +213,7 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
             isVisible={isModalVisibleCancelar}
             onClose={() => setIsModalVisibleCancelar(false)}
             message="¡Patrocinio cancelado con éxito!"
-            />
+          />
 
 
         </View>
@@ -242,10 +242,10 @@ const styles = StyleSheet.create({
     padding: width < 768 ? 12 : 16,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 10,
+    elevation: 5,
     borderLeftWidth: 2,
     borderLeftColor: '#E0E0E0',
     position: 'relative',
@@ -292,10 +292,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   companyLogoOffer: {
-    height: width < 768 ? 80 : 120,
-    width: width < 768 ? 80 : 120,
+    height: 120,
+    width: 120,
     marginRight: width < 768 ? 0 : 10,
     marginBottom: width < 768 ? 10 : 0,
+    borderRadius: 50,
   },
   offerContent: {
     paddingHorizontal: 5,

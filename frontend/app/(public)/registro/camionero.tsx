@@ -554,7 +554,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     minHeight: '100%',
-    marginTop: 50,
   },
   formContainer: {
     width: "90%",
