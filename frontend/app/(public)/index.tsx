@@ -244,7 +244,7 @@ export default function Index() {
               style={styles.ctaButton}
               onPress={() => {
                 if (!user) {
-                  router.push("/login");
+                  router.push("/registro");
                 } else if (user.rol === "CAMIONERO") {
                   router.push("/explorar");
                 } else if (user.rol === "EMPRESA") {

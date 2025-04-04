@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
     pdfButton: {
         backgroundColor: colors.primary,
         padding: 10,
-        borderRadius: 5,
+        borderRadius: 12,
         alignItems: "center",
         marginTop: 10,
     },
