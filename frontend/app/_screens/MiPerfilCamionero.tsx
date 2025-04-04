@@ -22,13 +22,13 @@ const MiPerfilCamionero = () => {
     const [ofertasCamionero, setOfertasCamionero] = useState([]);
     const [camionero, setCamionero] = useState<{ id: string } | null>(null);
     const [showResenaModal, setShowResenaModal] = useState(false);
-    const [empresas, setEmpresas] = useState([]);
+    const [empresasRecientes, setEmpresasRecientes] = useState([]);
     const [empresaAResenar, setEmpresaAResenar] = useState(null);
     const [hoverRating, setHoverRating] = useState(0);
 
     const fetchCamionero = async () => {
         try {
-           
+
 
             const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
 
@@ -55,7 +55,7 @@ const MiPerfilCamionero = () => {
             }, []);
 
 
-            setEmpresas(empresasUnicas);
+            setEmpresasRecientes(empresasUnicas);
 
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -174,10 +174,10 @@ const MiPerfilCamionero = () => {
                     <View style={styles.empresasSection}>
                         <Text style={styles.sectionTitle}>Empresas Recientes</Text>
 
-                        {empresas.length === 0 ? (
+                        {empresasRecientes.length === 0 ? (
                             <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
                         ) : (
-                            empresas.map(empresa => (
+                            empresasRecientes.map(empresa => (
 
                                 < View key={`empresa-${empresa.id}`} style={styles.empresaCard}>
                                     {/* Header con imagen y nombre */}
@@ -240,6 +240,87 @@ const MiPerfilCamionero = () => {
                             ))
                         )}
                     </View>
+                    <View style={styles.reviewsContainer}>
+                        <Text style={styles.sectionTitle}>Reseñas de tus camioneros</Text>
+
+                        {/* Valoración media con estrellas */}
+                        <View style={styles.ratingSummary}>
+                            <View style={styles.starsContainer}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <FontAwesome
+                                        key={star}
+                                        name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
+                                        size={24}
+                                        color={colors.primary}
+                                        style={styles.starIcon}
+                                    />
+                                ))}
+                            </View>
+                            <Text style={styles.averageRatingText}>
+                                {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
+                                {resenas.length > 0 && (
+                                    <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                                )}
+                            </Text>
+                        </View>
+
+                        {/* Lista de reseñas */}
+                        {resenas.length === 0 ? (
+                            <View style={styles.emptyReviews}>
+                                <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
+                                <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
+                            </View>
+                        ) : (
+                            <>
+                                {resenas.map((resena) => (
+                                    <View key={resena.id} style={styles.reviewCard}>
+                                        {/* Encabezado con avatar y nombre */}
+                                        <View style={styles.reviewHeader}>
+                                            {resena.comentador?.foto ? (
+                                                <Image
+                                                    source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
+                                                    style={styles.reviewAvatar}
+                                                />
+                                            ) : (
+                                                <View style={styles.avatarPlaceholder}>
+                                                    <FontAwesome5 name="user" size={20} color="white" />
+                                                </View>
+                                            )}
+                                            <View>
+                                                <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
+                                                <Text style={styles.reviewDate}>
+                                                    {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })}
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        {/* Valoración con estrellas */}
+                                        <View style={styles.reviewStars}>
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <FontAwesome
+                                                    key={star}
+                                                    name={star <= resena.valoracion ? "star" : "star-o"}
+                                                    size={16}
+                                                    color={colors.primary}
+                                                />
+                                            ))}
+                                        </View>
+
+                                        {/* Comentario */}
+                                        <Text style={styles.reviewComment}>{resena.comentarios}</Text>
+
+                                        {/* Divider */}
+                                        <View style={styles.reviewDivider} />
+                                    </View>
+                                ))}
+                            </>
+                        )}
+                    </View>
+
                 </View>
             </View>
 
@@ -265,8 +346,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         paddingVertical: 20,
         backgroundColor: colors.white,
-        marginTop: 20,
-        minHeight: "90%",
     },
     card: {
         backgroundColor: colors.white,
@@ -568,6 +647,101 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginLeft: 8,
     },
+    reviewsContainer: {
+        paddingHorizontal: 20,
+        marginTop: 25,
+        marginBottom: 30,
+      },
+      ratingSummary: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: 25,
+      },
+      averageRatingText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.secondary,
+      },
+      reviewCount: {
+        fontSize: 16,
+        color: colors.mediumGray,
+        fontWeight: '400',
+      },
+      emptyReviews: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 40,
+        backgroundColor: colors.extraLightGray,
+        borderRadius: 12,
+        marginTop: 10,
+      },
+      emptyText: {
+        marginTop: 15,
+        fontSize: 16,
+        color: colors.mediumGray,
+        textAlign: 'center',
+      },
+      reviewCard: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: colors.lightGray,
+      },
+      reviewHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+      },
+      reviewAvatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        marginRight: 12,
+        borderWidth: 1,
+        borderColor: colors.lightGray,
+      },
+      avatarPlaceholder: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: colors.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+      },
+      reviewAuthor: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.secondary,
+        marginBottom: 4,
+      },
+      reviewDate: {
+        fontSize: 13,
+        color: colors.mediumGray,
+      },
+      reviewStars: {
+        flexDirection: 'row',
+        marginBottom: 12,
+      },
+      reviewComment: {
+        fontSize: 15,
+        lineHeight: 22,
+        color: colors.darkGray,
+        marginBottom: 15,
+      },
+      reviewDivider: {
+        height: 1,
+        backgroundColor: colors.extraLightGray,
+        marginHorizontal: -20,
+      },
+    
 });
 
 export default MiPerfilCamionero;

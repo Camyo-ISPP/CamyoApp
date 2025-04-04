@@ -18,7 +18,6 @@ import ResenaModal from "../_components/ResenaModal";
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 
-// queda arreglar pk no va el delete offer que sale server 500 y añadir patrocinado
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -51,11 +50,11 @@ const MiPerfilEmpresa = () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
       setResenas(response.data);
-      console.log("reseñas",response.data)
-      const resenasFiltradas = response.data.filter(resena => 
+      console.log("reseñas", response.data)
+      const resenasFiltradas = response.data.filter(resena =>
         resena.comentado.id === user.userId
       );
-      console.log("reseñas filtradas",resenasFiltradas)
+      console.log("reseñas filtradas", resenasFiltradas)
       // Obtener valoración media del backend
       const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
       setValoracionMedia(mediaResponse.data);
@@ -526,38 +525,84 @@ const MiPerfilEmpresa = () => {
 
           <View style={styles.separator} />
 
-          <View style={styles.reseñasContainer}>
+          <View style={styles.reviewsContainer}>
             <Text style={styles.sectionTitle}>Reseñas de tus camioneros</Text>
-            {resenas.length > 0 ? (
-              valoracionMedia !== null && (
-                <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
-                   <FontAwesome
-                              name={"star" }
-                              size={27}
-                              color={ colors.primary }
-                              style={styles.starIcon}
-                            />
-                 Valoración media: {valoracionMedia.toFixed(1)} / 5
-                </Text>
-              )
-            ) : (
-              <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
-                Valoración media: No hay datos suficientes
-              </Text>
-            )}
 
+            {/* Valoración media con estrellas */}
+            <View style={styles.ratingSummary}>
+              <View style={styles.starsContainer}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <FontAwesome
+                    key={star}
+                    name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
+                    size={24}
+                    color={colors.primary}
+                    style={styles.starIcon}
+                  />
+                ))}
+              </View>
+              <Text style={styles.averageRatingText}>
+                {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
+                {resenas.length > 0 && (
+                  <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                )}
+              </Text>
+            </View>
+
+            {/* Lista de reseñas */}
             {resenas.length === 0 ? (
-              <Text style={styles.info}>Todavía no tienes reseñas.</Text>
+              <View style={styles.emptyReviews}>
+                <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
+                <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
+              </View>
             ) : (
-              resenas.map((resena) => (
-                <View key={resena.id} style={styles.reseñaCard}>
-                  <Text style={styles.reseñaAutor}>
-                    <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
-                  </Text>
-                  <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
-                  <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
-                </View>
-              ))
+              <>
+                {resenas.map((resena) => (
+                  <View key={resena.id} style={styles.reviewCard}>
+                    {/* Encabezado con avatar y nombre */}
+                    <View style={styles.reviewHeader}>
+                      {resena.comentador?.foto ? (
+                        <Image
+                          source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
+                          style={styles.reviewAvatar}
+                        />
+                      ) : (
+                        <View style={styles.avatarPlaceholder}>
+                          <FontAwesome5 name="user" size={20} color="white" />
+                        </View>
+                      )}
+                      <View>
+                        <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
+                        <Text style={styles.reviewDate}>
+                          {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Valoración con estrellas */}
+                    <View style={styles.reviewStars}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <FontAwesome
+                          key={star}
+                          name={star <= resena.valoracion ? "star" : "star-o"}
+                          size={16}
+                          color={colors.primary}
+                        />
+                      ))}
+                    </View>
+
+                    {/* Comentario */}
+                    <Text style={styles.reviewComment}>{resena.comentarios}</Text>
+
+                    {/* Divider */}
+                    <View style={styles.reviewDivider} />
+                  </View>
+                ))}
+              </>
             )}
           </View>
         </View >
@@ -1211,6 +1256,100 @@ const styles = StyleSheet.create({
     marginTop: 25,
     width: "50%",
     paddingHorizontal: 15,
+  },
+  reviewsContainer: {
+    paddingHorizontal: 20,
+    marginTop: 25,
+    marginBottom: 30,
+  },
+  ratingSummary: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 25,
+  },
+  averageRatingText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.secondary,
+  },
+  reviewCount: {
+    fontSize: 16,
+    color: colors.mediumGray,
+    fontWeight: '400',
+  },
+  emptyReviews: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+    backgroundColor: colors.extraLightGray,
+    borderRadius: 12,
+    marginTop: 10,
+  },
+  emptyText: {
+    marginTop: 15,
+    fontSize: 16,
+    color: colors.mediumGray,
+    textAlign: 'center',
+  },
+  reviewCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  reviewAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+  },
+  avatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  reviewAuthor: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.secondary,
+    marginBottom: 4,
+  },
+  reviewDate: {
+    fontSize: 13,
+    color: colors.mediumGray,
+  },
+  reviewStars: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  reviewComment: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.darkGray,
+    marginBottom: 15,
+  },
+  reviewDivider: {
+    height: 1,
+    backgroundColor: colors.extraLightGray,
+    marginHorizontal: -20,
   },
 
 });
