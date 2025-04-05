@@ -16,8 +16,8 @@ import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-  const { setId, setOfertaId } = usePayment();
-  const { user, userToken } = useAuth();
+  const { setId } = usePayment();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [offers, setOffers] = useState<any[]>([]);
