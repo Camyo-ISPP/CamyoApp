@@ -10,6 +10,7 @@ import com.camyo.backend.camionero.Tarjetas;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,7 @@ public class EditRequestCamionero {
 	@NotBlank
 	private String localizacion;
 
+	@Size(max = 5242880, message = "El tamaño de la imagen no puede ser mayor que 5 MB")
 	@NotNull
 	private byte[] foto;
 
