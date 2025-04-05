@@ -173,10 +173,10 @@ public class EmpresaControllerTests {
     * Deprecated controller call, no testing necessary 
   */ 
 
-    @Test
-    void debeGuardarEmpresa() throws Exception{
+    // @Test
+    // void debeGuardarEmpresa() throws Exception{
         
-    }
+    // }
 
     @Test
     void debeActualizarEmpresa() throws Exception{
