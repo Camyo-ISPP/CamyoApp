@@ -1,4 +1,4 @@
-package com.camyo.backend.empresa;
+package com.camyo.backend.Empresa;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -26,6 +26,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.camyo.backend.empresa.Empresa;
+import com.camyo.backend.empresa.EmpresaController;
+import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.Usuario;

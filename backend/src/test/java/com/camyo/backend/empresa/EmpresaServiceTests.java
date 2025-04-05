@@ -1,4 +1,4 @@
-package com.camyo.backend.empresa;
+package com.camyo.backend.Empresa;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +24,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import com.camyo.backend.empresa.Empresa;
+import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.oferta.OfertaService;
 import com.camyo.backend.usuario.Authorities;
