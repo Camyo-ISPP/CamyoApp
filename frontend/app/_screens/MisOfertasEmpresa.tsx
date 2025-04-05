@@ -1,23 +1,26 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 import axios from "axios";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import ListadoOfertas from "../_components/ListadoOfertas";
 import ListadoOfertasBorrador from "../_components/ListadoOfertasBorrador";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
 const MisOfertasEmpresa = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-    const { user } = useAuth();
+    const { user, userToken } = useAuth();
     const router = useRouter();
 
     const [tab, setTab] = useState("ABIERTA");
     const [openOffers, setOpenOffers] = useState<any[]>([]);
     const [closedOffers, setClosedOffers] = useState<any[]>([]);
+
+    const { rules } = useSubscriptionRules();
     const [draftOffers, setDraftOffers] = useState<any[]>([]);
 
 
@@ -28,37 +31,38 @@ const MisOfertasEmpresa = () => {
 
     useFocusEffect(
         useCallback(() => {
-            const fetchOffers = async () => {
-                try {
-                    const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-                    setOpenOffers(response.data.filter((o: any) => o.estado === "ABIERTA"));
-                    setClosedOffers(response.data.filter((o: any) => o.estado === "CERRADA"));
-                    setDraftOffers(response.data.filter((o: any) => o.estado === "BORRADOR"));
-                } catch (error) {
-                    console.error("Error al cargar las ofertas:", error);
-                }
-            };
-
             fetchOffers();
         }, [])
     );
 
-    const renderOfferList = () => {
+    const fetchOffers = async () => {
+        try {
+            const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+            setOpenOffers(response.data.filter((o: any) => o.estado === "ABIERTA"));
+            setClosedOffers(response.data.filter((o: any) => o.estado === "CERRADA"));
+                    setDraftOffers(response.data.filter((o: any) => o.estado === "BORRADOR"));
+        } catch (error) {
+            console.error("Error al cargar las ofertas:", error);
+        }
+    };
 
+    const canPromoteNewOffer = () => {
+        const activeOffersCount = openOffers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
+        return activeOffersCount < rules.maxSponsoredOffers;
+    }
+
+    const renderOfferList = () => {
         if (noOffersInAllCategories) {
             return (
-                <>
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyTitle}>No tienes ofertas publicadas todavía</Text>
-                        <Text style={styles.emptySubtitle}>
-                            Aún no has creado ninguna oferta.
-                        </Text>
-                        <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/oferta/crear")}>
-                            <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                </>
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyTitle}>No tienes ofertas publicadas todavía</Text>
+                    <Text style={styles.emptySubtitle}>
+                        Aún no has creado ninguna oferta.
+                    </Text>
+                    <TouchableOpacity style={styles.emptyButton} onPress={() => router.push("/oferta/crear")}>
+                        <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
+                    </TouchableOpacity>
+                </View>
             );
         }
 
@@ -75,14 +79,32 @@ const MisOfertasEmpresa = () => {
                     </View>
                 );
             }
-            return <ListadoOfertas data={openOffers} />;
+            return (
+                <View style={styles.offersContainer}>
+                    <ListadoOfertasEmpresa
+                        offers={openOffers}
+                        canPromoteNewOffer={canPromoteNewOffer}
+                        canCancelPromotedOffer={true}
+                        fetchOffers={fetchOffers}
+                    />
+                </View>
+            );
         }
 
         if (tab === "CERRADA") {
             if (closedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No tienes ofertas cerradas.</Text>;
             }
-            return <ListadoOfertas data={closedOffers} />;
+            return (
+                <View style={styles.offersContainer}>
+                    <ListadoOfertasEmpresa
+                        offers={closedOffers}
+                        canPromoteNewOffer={() => false} // No se puede patrocinar ofertas cerradas
+                        canCancelPromotedOffer={false} // No se puede cancelar el patrocinio de ofertas cerradas
+                        fetchOffers={fetchOffers}
+                    />
+                </View>
+            );
         }
 
         if (tab === "BORRADOR") {
@@ -130,12 +152,13 @@ const MisOfertasEmpresa = () => {
 
     return (
         <View style={styles.container}>
-            {!noOffersInAllCategories &&
+            {!noOffersInAllCategories && (
                 <View style={styles.contentWrapper}>
                     <View style={styles.tabContainer}>
                         {["ABIERTA", "BORRADOR", "CERRADA"].map((t) => {
                             const isActive = tab === t;
                             const dynamicStyle = isActive ? getActiveTabStyle(t) : {};
+                            const count = t === "ABIERTA" ? openOffers.length : closedOffers.length;
                             return (
                                 <TouchableOpacity
                                     key={t}
@@ -150,13 +173,17 @@ const MisOfertasEmpresa = () => {
                         })}
                     </View>
                 </View>
-            }
+            )}
             <ScrollView style={styles.offersWrapper}>{renderOfferList()}</ScrollView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    offersContainer: {
+        width: '70%',
+        alignSelf: "center",
+    },
     container: {
         flex: 1,
         padding: 20,
@@ -177,7 +204,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 30,
+        marginTop: 10,
         marginBottom: 20,
         gap: 10
     },
@@ -210,27 +237,6 @@ const styles = StyleSheet.create({
     },
     offersWrapper: {
         marginTop: 10
-    },
-    offerCard: {
-        backgroundColor: colors.lightGray,
-        padding: 15,
-        borderRadius: 10,
-        marginBottom: 15
-    },
-    offerTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: colors.secondary
-    },
-    offerDetail: {
-        fontSize: 14,
-        color: colors.darkGray
-    },
-    emptyText: {
-        textAlign: "center",
-        fontStyle: "italic",
-        marginTop: 30,
-        fontSize: 20
     },
     emptyContainer: {
         marginTop: 10,
@@ -268,7 +274,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600"
     },
-
 });
 
 export default MisOfertasEmpresa;

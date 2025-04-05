@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar, Send } from 'react-native-gifted-chat';
-import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc, increment } from 'firebase/firestore';
 import { database } from '../../../firebase';
 import { useAuth } from '../../../contexts/AuthContext';
 import colors from '@/assets/styles/colors';
@@ -33,6 +33,17 @@ function ChatComponent({ chat }: ChatComponentProps) {
   const chatRef = useRef<any>();
 
   useEffect(() => {
+    if (!chat || !user) return;
+    
+    // Poner en 0 el contador para el usuario que está abriendo este chat
+    const chatRef = doc(database, 'chats', chat.id);
+    const updates: any = {};
+    updates[`unreadCounts.${user.userId}`] = 0;
+  
+    updateDoc(chatRef, updates).catch(console.error);
+  }, [chat, user]);
+  
+  useEffect(() => {
     if (chat) {
       const messagesRef = collection(database, `chats/${chat.id}/messages`);
       const q = query(messagesRef, orderBy('createdAt', 'desc'));
@@ -54,6 +65,8 @@ function ChatComponent({ chat }: ChatComponentProps) {
       if (!chat || !user) return;
       setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages));
       const { _id, createdAt, text, user: messageUser } = newMessages[0];
+      const chatRef = doc(database, 'chats', chat.id);
+
       await updateDoc(doc(database, 'chats', chat.id), {
         lastMessage: text,
         lastUpdated: new Date(),
@@ -65,6 +78,18 @@ function ChatComponent({ chat }: ChatComponentProps) {
         seen: false,
         user: { ...messageUser, _id: messageUser._id.toString() },
       });
+      let updates: any = {
+        lastMessage: text,
+        lastUpdated: new Date()
+      };
+      chat.participants
+      .filter((p) => p !== user.userId.toString())
+      .forEach((recipientId) => {
+        // Usamos la notación con corchetes para actualizar un campo dinámico:
+        updates[`unreadCounts.${recipientId}`] = increment(1);
+      });
+
+    await updateDoc(chatRef, updates);
     },
     [chat, user]
   );

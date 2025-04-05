@@ -4,9 +4,9 @@ import { useState } from "react";
 import axios from "axios";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
-import ListadoOfertas from "../_components/ListadoOfertas";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
 
 const MisOfertasCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -64,7 +64,7 @@ const MisOfertasCamionero = () => {
             if (aceptedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No tienes ofertas asignadas todavía. ¡Sigue atento a nuevas oportunidades!</Text>;
             }
-            return <ListadoOfertas data={aceptedOffers} />;
+            return <ListadoOfertasPublico offers={aceptedOffers} showPromoted={false} />;
         }
 
         if (tab === "PENDIENTE") {
@@ -83,14 +83,14 @@ const MisOfertasCamionero = () => {
                     </View>
                 );
             }
-            return <ListadoOfertas data={pendingOffers} />;
+            return <ListadoOfertasPublico offers={pendingOffers} showPromoted={false} />;
         }
 
         if (tab === "RECHAZADA") {
             if (rejectedOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No hay ofertas descartadas.</Text>;
             }
-            return <ListadoOfertas data={rejectedOffers} />;
+            return <ListadoOfertasPublico offers={rejectedOffers} showPromoted={false} />;
         }
 
         return null;
@@ -139,12 +139,20 @@ const MisOfertasCamionero = () => {
                     </View>
                 </View>
             }
-            <ScrollView style={styles.offersWrapper}>{renderOfferList()}</ScrollView>
+            <ScrollView style={styles.offersWrapper}>
+                <View style={styles.contenedorOfertas}>
+                    {renderOfferList()}
+                </View>
+            </ScrollView>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    contenedorOfertas: {
+        width: '70%',
+        alignSelf: 'center',
+      },
     container: {
         flex: 1,
         backgroundColor: colors.white,
@@ -254,6 +262,131 @@ const styles = StyleSheet.create({
         fontWeight: "600"
     },
 
+});
+
+
+const misOfertasStyle = StyleSheet.create({
+    contenedorOfertas: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
+    },
+    card: {
+        backgroundColor: colors.white,
+        padding: 20,
+        marginVertical: 10,
+        width: "70%",
+        borderRadius: 10,
+        display: "flex",
+        flexWrap: "wrap",
+        flexDirection: "row",
+        alignContent: "center",
+        alignItems: "center",
+        borderLeftWidth: 4,
+        borderColor: "red",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    companyLogo: {
+        height: 90,
+        width: 90,
+        marginRight: 10,
+    },
+    offerTitle: {
+        fontSize: 16,
+        fontWeight: "bold",
+        flexWrap: "wrap",
+        marginBottom: 2,
+        color: colors.secondary,
+    },
+    offerDetailsTagType: {
+        fontSize: 9,
+        backgroundColor: colors.primary,
+        color: colors.white,
+        borderRadius: 10,
+        paddingTop: 2,
+        paddingBottom: 2,
+        paddingLeft: 5,
+        paddingRight: 6,
+        marginRight: 3,
+        fontWeight: "700",
+        flexWrap: "wrap",
+    },
+    offerDetailsTagLicense: {
+        fontSize: 9,
+        backgroundColor: colors.secondary,
+        borderRadius: 10,
+        color: colors.white,
+        paddingTop: 2,
+        paddingBottom: 3,
+        paddingLeft: 5,
+        paddingRight: 6,
+        marginRight: 3,
+        fontWeight: "bold",
+        flexWrap: "wrap",
+    },
+    offerDetailsTagExperience: {
+        fontSize: 9,
+        borderColor: colors.primary,
+        borderWidth: 2,
+        borderRadius: 10,
+        color: colors.primary,
+        paddingTop: 2,
+        paddingBottom: 2,
+        paddingLeft: 5,
+        paddingRight: 6,
+        marginRight: 3,
+        fontWeight: "bold",
+        flexWrap: "wrap",
+    },
+    offerInfo: {
+        fontSize: 12,
+        color: "gray",
+        marginTop: 5,
+        flexWrap: "wrap",
+    },
+    offerSueldo: {
+        fontSize: 25,
+        fontWeight: "bold",
+        textAlign: "right",
+        paddingLeft: 3,
+        color: colors.secondary,
+        textAlignVertical: "center",
+        width: "35%",
+        alignSelf: "center",
+    },
+    button: {
+        backgroundColor: colors.primary,
+        color: colors.white,
+        paddingLeft: 5,
+        paddingRight: 5,
+        marginLeft: "2%",
+        marginTop: 4,
+        flexDirection: "row",
+        height: 40,
+        width: 150,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    buttonText: {
+        color: colors.white,
+        fontWeight: "bold",
+    },
+    detailsIcon: {
+        color: colors.white,
+        alignSelf: "center",
+        marginLeft: 3,
+        marginTop: 3,
+        marginRight: 5,
+    },
+    localizacion: {
+        fontSize: 15,
+        color: "#696969",
+    },
 });
 
 export default MisOfertasCamionero;

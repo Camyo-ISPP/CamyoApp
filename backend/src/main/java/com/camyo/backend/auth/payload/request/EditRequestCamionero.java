@@ -1,7 +1,6 @@
 package com.camyo.backend.auth.payload.request;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 import com.camyo.backend.camionero.Disponibilidad;
@@ -29,8 +28,9 @@ public class EditRequestCamionero {
 	@NotBlank
 	private String localizacion;
 
-	@NotNull
 	private byte[] foto;
+
+	private byte[] curriculum;
 
 	private String descripcion;
 

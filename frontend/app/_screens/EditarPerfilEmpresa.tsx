@@ -5,7 +5,7 @@ import colors from "../../assets/styles/colors";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import defaultProfileImage from "../../assets/images/companyDefaultAvatar.png";
+import defaultProfileImage from "../../assets/images/companyDefaultAvatar.jpg"
 import { useAuth } from "../../contexts/AuthContext";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
@@ -85,7 +85,7 @@ const EditarPerfilEmpresa = () => {
     }
   };
 
-  const handleRegister = async () => {
+  const handleUpdate = async () => {
     // Validación de nombre de empresa
     if (!formData.nombre){
       setErrorMessage("El campo nombre de empresa es obligatorio.");
@@ -166,7 +166,7 @@ const EditarPerfilEmpresa = () => {
       email: formData.email,
       localizacion: formData.localizacion,
       descripcion: formData.descripcion,
-      foto: formData.foto ? formData.foto : "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/57T3goAAAAASUVORK5CYII=",
+      foto: formData.foto ? formData.foto : null,
 
       web: formData.web,
       nif: formData.nif
@@ -299,7 +299,7 @@ const EditarPerfilEmpresa = () => {
 
           {/* Botón de guardar */}
           <TouchableOpacity style={[globalStyles.button, { width: "100%", borderRadius: 12, elevation: 5 }]}
-            onPress={handleRegister}
+            onPress={handleUpdate}
           >
             <Text style={[globalStyles.buttonText, { fontSize: 25 }]}>Guardar cambios</Text>
           </TouchableOpacity>
