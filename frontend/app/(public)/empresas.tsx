@@ -9,21 +9,11 @@ import { Image } from "react-native";
 import defaultImage from "@/assets/images/empresa.jpg";
 import WebFooter from "../_components/_layout/WebFooter";
 
-interface Usuario {
-  id: number;
-  nombre: string;
-  telefono: string;
-  email: string;
-  localizacion: string;
-  descripcion: string;
-  foto?: string | null;
-}
 
 interface Empresa {
   id: number;
   web: string;
   nif: string;
-  usuario: Usuario;
 }
 
 const EmpresasLista = () => {

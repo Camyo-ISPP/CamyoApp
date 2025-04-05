@@ -70,6 +70,7 @@ public class AuthService {
 		camionero.setDisponibilidad(request.getDisponibilidad());
 		camionero.setTieneCAP(request.getTieneCAP());
 		camionero.setExperiencia(request.getExperiencia());
+		camionero.setCurriculum(request.getCurriculum());
 		if (request.getExpiracionCAP() != null) {
 			camionero.setExpiracionCAP(request.getExpiracionCAP());
 		}
@@ -120,6 +121,7 @@ public class AuthService {
 		camionero.setDisponibilidad(request.getDisponibilidad());
 		camionero.setTieneCAP(request.getTieneCAP());
 		camionero.setExperiencia(request.getExperiencia());
+		camionero.setCurriculum(request.getCurriculum());
 		if (request.getExpiracionCAP() != null) {
 			camionero.setExpiracionCAP(request.getExpiracionCAP());
 		}

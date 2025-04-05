@@ -1,7 +1,6 @@
 package com.camyo.backend.auth.payload.request;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 import com.camyo.backend.camionero.Disponibilidad;
@@ -33,6 +32,8 @@ public class EditRequestCamionero {
 	@Size(max = 5242880, message = "El tamaño de la imagen no puede ser mayor que 5 MB")
 	@NotNull
 	private byte[] foto;
+
+	private byte[] curriculum;
 
 	private String descripcion;
 

@@ -38,6 +38,8 @@ public class SignupRequestCamionero {
 	@Size(max = 5242880, message = "El tamaño de la imagen no puede ser mayor que 5 MB")
 	private byte[] foto;
 
+	private byte[] curriculum;
+
 	private String descripcion;
 
 	@NotBlank

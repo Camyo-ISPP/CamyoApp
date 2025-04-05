@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image,
 import globalStyles from "../../assets/styles/globalStyles";
 import colors from "../../assets/styles/colors";
 import BooleanSelector from "../_components/BooleanSelector";
-import Selector from "../_components/Selector";
 import MultiSelector from "../_components/MultiSelector";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import axios from 'axios';
@@ -13,6 +12,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from "../_components/SuccessModal";
 import defaultProfileImage from "../../assets/images/defaultAvatar.png";
+import * as DocumentPicker from 'expo-document-picker';
 
 const licencias = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "D1+E", "D"];
 const licencias_backend = ["AM", "A1", "A2", "A", "B", "C1", "C", "C1_E", "C_E", "D1", "D_E", "D1_E", "D"];
@@ -40,7 +40,8 @@ const EditarPerfilCamionero = () => {
     tieneCAP: false,
     expiracionCAP: "",
     isAutonomo: false,
-    tarjetas: []
+    tarjetas: [],
+    curriculum: null
   });
 
   useEffect(() => {
@@ -60,7 +61,8 @@ const EditarPerfilCamionero = () => {
         tieneCAP: user.tieneCAP,
         expiracionCAP: user.expiracionCAP? user.expiracionCAP.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1'): null,
         isAutonomo: user.isAutonomo,
-        tarjetas: user.tarjetas 
+        tarjetas: user.tarjetas ,
+        curriculum: user.curriculum || null
       });
     }
   }, [user]); 
@@ -102,7 +104,25 @@ const EditarPerfilCamionero = () => {
     }
   };
 
-  const handleRegister = async () => {
+  const pickPdfAsync = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+      if (!result.canceled && result.assets[0].uri.split(',')[0] === "data:application/pdf;base64") {
+        const base64PDF = result.assets[0].uri.split(',')[1];
+        if (base64PDF) {
+          setFormData((prevState) => ({
+            ...prevState,
+            curriculum: base64PDF
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error picking the document', error);
+    }
+  };
+
+
+  const handleUpdate = async () => {
     const licenciasBackend = formData.licencias.map((licencia) => licencias_backend[licencias.indexOf(licencia)]);
 
     // Validación de nombre y apellidos
@@ -212,7 +232,8 @@ const EditarPerfilCamionero = () => {
       email: formData.email,
       localizacion: formData.localizacion,
       descripcion: formData.descripcion,
-      foto: formData.foto ? formData.foto : "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/57T3goAAAAASUVORK5CYII=",
+      foto: formData.foto ? formData.foto : null,
+      curriculum: formData.curriculum ? formData.curriculum : null,
 
       dni: formData.dni,
       licencias: licenciasBackend,
@@ -252,7 +273,8 @@ const EditarPerfilCamionero = () => {
           telefono: userData.telefono, 
           tieneCAP: userData.tieneCAP,
           userId: user.userId,
-          username: user.username
+          username: user.username,
+          curriculum: userData.curriculum
         }
         updateUser(usuarioData)
 
@@ -409,6 +431,18 @@ const EditarPerfilCamionero = () => {
             </View>
           )}
 
+          { !formData.curriculum ? (
+            <TouchableOpacity onPress={pickPdfAsync} style={[globalStyles.button, { backgroundColor: colors.secondary, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 140, paddingHorizontal: 15 }]}>
+              <MaterialIcons name="upload-file" size={20} color={colors.white} style={{ marginRight: 8 }} />
+              <Text style={globalStyles.buttonText}>Subir CV (PDF)</Text>
+            </TouchableOpacity>
+            ) : (
+            <TouchableOpacity onPress={() => setFormData({ ...formData, curriculum: null })} style={[globalStyles.button, { backgroundColor: colors.red, flexDirection: "row", alignItems: "center", justifyContent: "center", width: 120, paddingHorizontal: 15 }]}>
+              <FontAwesome5 name="trash" size={18} color={colors.white} style={{ marginRight: 8 }} />
+              <Text style={globalStyles.buttonText}>Borrar CV</Text>
+            </TouchableOpacity>
+          )}
+
           {errorMessage ? (
             <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
               {errorMessage}
@@ -417,7 +451,7 @@ const EditarPerfilCamionero = () => {
 
           {/* Botón de guardar */}
           <TouchableOpacity style={[globalStyles.button, { width: "100%", borderRadius: 12, elevation: 5 }]}
-            onPress={handleRegister}
+            onPress={handleUpdate}
           >
             <Text style={[globalStyles.buttonText, { fontSize: 25 }]}>Guardar cambios</Text>
           </TouchableOpacity>
