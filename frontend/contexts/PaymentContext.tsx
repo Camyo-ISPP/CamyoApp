@@ -3,25 +3,26 @@ import React, { useContext, useEffect, useState } from 'react';
 interface PaymentContextType {
     id: string | null;
     setId: (id: string) => void;
+    ofertaId: number | null;
+    setOfertaId: (ofertaId: number) => void;
   }
 
-const PaymentContext = React.createContext<PaymentContextType>({id: null, setId: () => {}});
+const PaymentContext = React.createContext<PaymentContextType>({id: null, setId: () => {}, ofertaId: null, setOfertaId: () => {}});
 
 interface PaymentProviderProps {
   children: React.ReactNode;
 }
 
 export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) => {
-  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  
   const [id, setId] = useState<string | null>(null);
+  const [ofertaId, setOfertaId] = useState<number | null>(null);
 
   useEffect(() => {
     
-  }, [id]);
+  }, [id, ofertaId]);
 
   return (
-    <PaymentContext.Provider value={{ id, setId }}>
+    <PaymentContext.Provider value={{ id, setId, ofertaId, setOfertaId }}>
       {children}
     </PaymentContext.Provider>
   );

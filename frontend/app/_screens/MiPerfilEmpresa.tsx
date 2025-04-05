@@ -17,7 +17,7 @@ const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const { setId } = usePayment();
-  const { user, userToken } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [offers, setOffers] = useState<any[]>([]);

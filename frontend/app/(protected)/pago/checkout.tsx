@@ -14,7 +14,7 @@ import globalStyles from "@/assets/styles/globalStyles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 function IntegratedCheckout() {
-    const { id, setId } = usePayment();
+    const { id, setId, ofertaId, setOfertaId } = usePayment();
     const { user, userToken } = useAuth();
     const [transactionClientSecret, setTransactionClientSecret] = useState("")
     const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null)
@@ -44,6 +44,7 @@ function IntegratedCheckout() {
 
     const handleCancel = () => {
         setId("");
+        setOfertaId(0);
         router.back();
     }
 
@@ -56,7 +57,7 @@ function IntegratedCheckout() {
     }
 
     return <>
-        {id === 'BASICO' || id === 'PREMIUM' ?
+        {id === 'BASICO' || id === 'PREMIUM' || id === 'PATROCINAR' ?
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
@@ -73,7 +74,7 @@ function IntegratedCheckout() {
                             
                             <View style={styles.planInfo}>
                                 <Text style={styles.planName}>{Products.get(id).name}</Text>
-                                <Text style={styles.planPrice}>{Products.get(id).price}€/mes</Text>
+                                <Text style={styles.planPrice}>{Products.get(id).price}€{id !== "PATROCINAR" ? "/mes" : ""}</Text>
                             </View>
 
                             <View style={styles.featuresList}>
@@ -143,7 +144,7 @@ function IntegratedCheckout() {
 const CheckoutForm = (transactionClientSecret: any) => {
     const stripe = useStripe();
     const { user, userToken } = useAuth();
-    const { setId } = usePayment();
+    const { setId, ofertaId } = usePayment();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -170,7 +171,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
         }
         stripe.retrievePaymentIntent(transactionClientSecret.transactionClientSecret)
         .then(function(result: any) {
-            fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/pago/apply_subscription", {
+            fetch(process.env.EXPO_PUBLIC_BACKEND_URL + "/pago/apply_compra", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
@@ -179,6 +180,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
                 body: JSON.stringify({
                     intent: result.paymentIntent?.id,
                     compra: transactionClientSecret.plan,
+                    ofertaId: ofertaId,
                 })
             })
                 .then(res => {

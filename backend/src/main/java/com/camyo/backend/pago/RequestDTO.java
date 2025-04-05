@@ -8,4 +8,5 @@ import lombok.Setter;
 public class RequestDTO {
     String intent;
     Compra compra;
+    Integer ofertaId;
 }
