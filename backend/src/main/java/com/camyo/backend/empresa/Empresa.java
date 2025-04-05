@@ -46,7 +46,7 @@ public class Empresa {
     @Pattern(regexp = "^[A-Z]\\d{8}$")
     private String nif;
 
-    @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.PERSIST })
+    @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE })
 	@JoinColumn(name = "usuario_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Usuario usuario;
