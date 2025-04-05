@@ -5,6 +5,7 @@ import axios from "axios";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import ListadoOfertas from "../_components/ListadoOfertas";
+import ListadoOfertasBorrador from "../_components/ListadoOfertasBorrador";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 
@@ -88,7 +89,7 @@ const MisOfertasEmpresa = () => {
             if (draftOffers.length === 0) {
                 return <Text style={styles.emptyTitle}>No tienes ofertas en modo borrador.</Text>;
             }
-            return <ListadoOfertas data={draftOffers} />;
+            return <ListadoOfertasBorrador data={draftOffers} />;
         }
 
         return null;

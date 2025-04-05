@@ -29,7 +29,8 @@ function RootLayout() {
         chat:"Mis Mensajes",
         "pago/checkout": "Pago",
         suscripcion: "Planes de Suscripción",
-        misofertas: "Mis Ofertas"
+        misofertas: "Mis Ofertas",
+        "oferta/[ofertaId]/editar": "Editar Oferta",
       };
 
       const currentSegment = segments.join("/");
@@ -66,6 +67,7 @@ function RootLayout() {
         
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/[ofertaId]" />
+        <Stack.Screen name="oferta/[ofertaId]/editar" />
         <Stack.Screen name="explorar" />
         <Stack.Screen name="chat" />
         <Stack.Screen name="chat/list" />
