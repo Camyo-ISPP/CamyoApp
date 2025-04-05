@@ -11,11 +11,13 @@ const Perfil = () => {
     const { user } = useAuth();
     const router = useRouter();
 
+    /*
     useEffect(() => {
         if (!user || !user.rol) {
             router.replace("/login");
         }
     }, [user, router]);
+    */
 
     if (!user || !user.rol) {
         return null;

@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import axios from "axios";
 import SuccessModal from "../../_components/SuccessModal";
+import WebFooter from "@/app/_components/_layout/WebFooter";
 
 const SubscriptionPlans = () => {
     const { user, userToken } = useAuth();
@@ -224,7 +225,6 @@ const SubscriptionPlans = () => {
             features: [
                 "1 oferta activa simultánea",
                 "1 oferta patrocinada simultánea",
-                "Personalización limitada de ofertas",
                 "Soporte estándar"
             ],
             borderColor: "#ccc",
@@ -238,7 +238,6 @@ const SubscriptionPlans = () => {
             features: [
                 "Ofertas ilimitadas activas",
                 "Ofertas patrocinadas ilimitadas",
-                "Personalización completa de ofertas",
                 "Soporte prioritario 24/7",
             ],
             borderColor: colors.secondary,
@@ -251,8 +250,6 @@ const SubscriptionPlans = () => {
             features: [
                 "3 ofertas activas simultáneas",
                 "2 ofertas patrocinadas simultáneas",
-                "Visibilidad mejorada",
-                "Personalización completa de ofertas",
                 "Soporte prioritario por email"
             ],
             borderColor: colors.primary,
@@ -312,6 +309,7 @@ const SubscriptionPlans = () => {
                             </View>
                         </View>
                     </View>
+                    <WebFooter />
                 </ScrollView>
 
                 <SuccessModal
@@ -355,7 +353,8 @@ const styles = StyleSheet.create({
     },
     scrollViewContent: {
         flexGrow: 1,
-        paddingBottom: 40,
+        justifyContent: 'space-between', 
+        paddingBottom: 0,
     },
     contentContainer: {
         maxWidth: 1200,
@@ -363,6 +362,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         paddingHorizontal: 20,
         paddingTop: 30,
+        paddingBottom: 20,
     },
     sectionTitle: {
         fontSize: 32,
