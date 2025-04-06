@@ -61,13 +61,13 @@ public class SecurityConfiguration {
 
 			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/trabajo").hasAnyAuthority("EMPRESA","ADMIN")
 			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/carga").hasAnyAuthority("EMPRESA","ADMIN")
 			.requestMatchers(HttpMethod.POST, "/ofertas").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.PUT, "/ofertas/**").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.DELETE, "/ofertas/**").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.DELETE, "/ofertas/**").hasAnyAuthority("EMPRESA","ADMIN")
 			.requestMatchers(HttpMethod.GET, "/ofertas/{id}/camioneros").hasAnyAuthority("EMPRESA", "CAMIONERO")
 
 			.requestMatchers(HttpMethod.GET, "/resenas").hasAnyAuthority("EMPRESA", "CAMIONERO")
