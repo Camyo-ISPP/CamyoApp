@@ -36,6 +36,8 @@ public class SignupRequestCamionero {
 
 	private byte[] foto;
 
+	private byte[] curriculum;
+
 	private String descripcion;
 
 	@NotBlank

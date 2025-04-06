@@ -15,7 +15,7 @@ interface Chat {
   participants: string[];
   lastMessage: string;
   unreadMessagesCount: number;
-  recipient:Usuario;
+  recipient: Usuario;
   lastUpdated: number;
 }
 
@@ -34,45 +34,46 @@ function ChatList() {
 
   useEffect(() => {
     if (!user || !user?.userId) return;
-  
+
     const chatsRef = collection(database, 'chats');
     const q = query(chatsRef, where('participants', 'array-contains', user.userId.toString()));
-  
+
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       if (querySnapshot.empty) {
         setChats([]); // Asegurar que se vacíe la lista si no hay chats
         return;
       }
-  
+
       const fetchedChats: Chat[] = [];
-  
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-  
+
         fetchedChats.push({
           id: doc.id,
           participants: data.participants,
           lastMessage: data.lastMessage?.trim() !== "" ? data.lastMessage : "Inicia una conversación",
+          unreadCounts: data.unreadCounts || {},
           unreadMessagesCount: data.unreadMessagesCount || 0,
           lastUpdated: data.lastUpdated?.toMillis ? data.lastUpdated.toMillis() : 0,  // 🔥 Convertir Timestamp a milisegundos
         });
       });
-  
+
       // Ordenar los chats por la fecha de `lastUpdated` de manera descendente (más reciente primero)
       fetchedChats.sort((a, b) => b.lastUpdated - a.lastUpdated);
 
-  
+
       setChats(fetchedChats);
     });
-  
+
     return () => unsubscribe(); // Se desuscribe cuando el componente se desmonta
   }, [user?.userId]);
-  
+
   const formatDateTime = (timestamp: number) => {
     if (!timestamp) return ""; // Evitar errores si no hay fecha
     const date = new Date(timestamp);
 
-  
+
     // Obtener día y hora en formato español
     return date.toLocaleString("es-ES", {
       weekday: "short",
@@ -85,9 +86,9 @@ function ChatList() {
     });
   };
 
-  
-  
-  
+
+
+
   const handleChatClick = (chat: Chat) => {
     const otherUserId = chat.participants.find(participant => participant !== user.userId.toString());
     if (otherUserId && userDetails[otherUserId]) {
@@ -99,7 +100,7 @@ function ChatList() {
       setCurrentChat(chat);
     }
   };
-  
+
 
   useEffect(() => {
     if (!user?.userId) return;
@@ -133,25 +134,33 @@ function ChatList() {
           style={[styles.chatItem]}  // Aplicar estilo de chat seleccionado
           onPress={() => handleChatClick(item)}  // Usamos la función para seleccionar el chat
         >
-          
+
           <View style={{ flex: 1 }}>
 
-          {/* Mostrar la imagen del otro usuario */}
-          <Image
-            source={otherUser?.foto? { uri: otherUser?.foto }: otherUser?.authority.authority === "CAMIONERO" ? defaultImage : defaultEmpImage}
-            style={styles.userImage}
-          />
-          {/* Nombre del usuario */}
-          <Text style={styles.chatText}>{otherUser ? otherUser.nombre : `Chat with User ID: ${otherUserId}`}</Text>
+            {/* Mostrar la imagen del otro usuario */}
+            <Image
+              source={otherUser?.foto ? { uri: otherUser?.foto } : otherUser?.authority.authority === "CAMIONERO" ? defaultImage : defaultEmpImage}
+              style={styles.userImage}
+            />
+            {/* Nombre del usuario */}
+            <Text style={styles.chatText}>{otherUser ? otherUser.nombre : `Chat with User ID: ${otherUserId}`}</Text>
 
-          {/* Último mensaje */}
-          <Text style={styles.lastMessage}>{item.lastMessage || 'No messages yet'}</Text>
+            {/* Último mensaje */}
+            <Text style={styles.lastMessage}>{item.lastMessage || 'No messages yet'}</Text>
 
-          {/* Fecha y hora del último mensaje */}
-          {item.lastMessage && (
-            <Text style={styles.timestamp}>{formatDateTime(item.lastUpdated)}</Text>
-          )}
-        </View>
+            {/* Fecha y hora del último mensaje */}
+            {item.lastMessage && (
+              <Text style={styles.timestamp}>{formatDateTime(item.lastUpdated)}</Text>
+            )}
+
+            {item.unreadCounts && item.unreadCounts[user.userId] > 0 && (
+              <View style={styles.badgeContainer}>
+                <Text style={styles.badgeText}>
+                  {item.unreadCounts[user.userId]}
+                </Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
       </View>
     );
@@ -159,19 +168,19 @@ function ChatList() {
 
   return (
     <ProtectedRoute>
-    <View style={styles.container}>
-      <FlatList
-        data={chats}
-        keyExtractor={item => item.id}
-        renderItem={renderChatItem}
-        ListEmptyComponent={<Text style={styles.emptyText}>No chats available</Text>}
-      />
-      <View style={{ flex: 10 }}>
-        {currentChat && <ChatComponent chat={currentChat} 
-        recipientName={userDetails[currentChat.participants.find(id => id !== user?.userId)]?.nombre || "Desconocido"}
-        />}  {/* Mostrar el chat seleccionado */}
+      <View style={styles.container}>
+        <FlatList
+          data={chats}
+          keyExtractor={item => item.id}
+          renderItem={renderChatItem}
+          ListEmptyComponent={<Text style={styles.emptyText}>No chats available</Text>}
+        />
+        <View style={{ flex: 10 }}>
+          {currentChat && <ChatComponent chat={currentChat}
+            recipientName={userDetails[currentChat.participants.find(id => id !== user?.userId)]?.nombre || "Desconocido"}
+          />}  {/* Mostrar el chat seleccionado */}
+        </View>
       </View>
-    </View>
     </ProtectedRoute>
   );
 }
@@ -208,14 +217,14 @@ const styles = StyleSheet.create({
   chatText: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginLeft:60,
-    bottom:15,
+    marginLeft: 60,
+    bottom: 15,
   },
   lastMessage: {
     fontSize: 14,
     color: '#666',
-    marginLeft:60,
-    bottom:10,
+    marginLeft: 60,
+    bottom: 10,
   },
   emptyText: {
     textAlign: 'center',
@@ -227,12 +236,28 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 40, // Hacer la imagen circular
-    top:35,
+    top: 35,
   },
   timestamp: {
     fontSize: 12,
     color: "#999",
     marginTop: 2,
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: 20,
+    right: 0,
+    backgroundColor: 'red',
+    borderRadius: 12,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
   
 });

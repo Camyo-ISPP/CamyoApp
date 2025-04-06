@@ -28,9 +28,7 @@ const MiPerfilEmpresa = () => {
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
-  const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const { refreshSubscriptionLevel } = useSubscription();
-  const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
+  const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
   const [camioneros, setCamioneros] = useState([]);
   const [showResenaModal, setShowResenaModal] = useState(false);
@@ -41,7 +39,6 @@ const MiPerfilEmpresa = () => {
       refreshSubscriptionLevel();
     }, [])
   );
-
 
   const [resenas, setResenas] = useState([]);
 
@@ -229,7 +226,19 @@ const MiPerfilEmpresa = () => {
 
             {/* Información de la empresa */}
             <View style={styles.infoContainer}>
-              <Text style={styles.name}>{user.nombre}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.name}>{user.nombre}</Text>
+                {subscriptionLevel === 'PREMIUM' && (
+                  <View style={styles.verifiedBadgePremium}>
+                    <MaterialIcons name="verified" size={20} color="#FFD700" />
+                  </View>
+                )}
+                {subscriptionLevel === 'BASICO' && (
+                  <View style={styles.verifiedBadgeBasic}>
+                    <MaterialIcons name="verified" size={20} color="#C0C0C0" />
+                  </View>
+                )}
+              </View>
               <Text style={styles.username}>@{user.username}</Text>
               <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user.email}</Text>
               <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user.telefono}</Text>
@@ -320,135 +329,12 @@ const MiPerfilEmpresa = () => {
 
           <View style={styles.offersContainer}>
             <Text style={styles.sectionTitle}>Ofertas Activas</Text>
-            {offers.length === 0 ? (
-              <Text style={styles.noOffersText}>No hay ofertas activas en este momento</Text>
-            ) : (
-              <View style={styles.offersList}>
-                {offers.map((item: any) => (
-                  <View key={item.id} style={[
-                    styles.offerCard
-                  ]}>
-                    {/* Encabezado con estado de patrocinio */}
-
-
-                    {/* Contenido principal */}
-                    <View style={styles.offerContent}>
-                      <View style={styles.offerHeader}>
-                        <Image source={defaultCompanyLogo} style={styles.companyLogo} />
-                        <View style={styles.offerMainInfo}>
-                          <Text style={styles.offerPosition}>{item.titulo}</Text>
-                          <View style={styles.companyInfo}>
-                            <FontAwesome5 name="building" size={14} color={colors.primary} />
-                            <Text style={{ ...styles.companyName, fontSize: 15, fontWeight: 700 }}>{user.nombre}</Text>
-                            <Text style={{ color: colors.secondary }}>  |  </Text>
-                            <MaterialIcons name="location-on" size={16} color={colors.secondary} />
-                            <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{item.localizacion}</Text>
-                          </View>
-                          <View style={styles.detailRow}>
-                            <View style={styles.offerDetailsTagType}>
-                              <MaterialIcons name="work-outline" size={12} color={colors.white} />
-                              <Text style={styles.detailText}>{item.tipoOferta}</Text>
-                            </View>
-                            <View style={styles.offerDetailsTagLicense}>
-                              <AntDesign name="idcard" size={12} color={colors.white} />
-                              <Text style={styles.detailText}>{item.licencia.replace(/_/g, '+')}</Text>
-                            </View>
-                            <View style={styles.offerDetailsTagExperience}>
-                              <MaterialIcons name="timelapse" size={12} color={colors.white} />
-                              <Text style={styles.detailText}>{'>' + item.experiencia} años</Text>
-                            </View>
-                          </View>
-
-                        </View>
-                        <View style={{ display: "flex", alignItems: "flex-end" }}>
-                          {item.promoted && (
-                            <View style={styles.promotedBadge}>
-                              <AntDesign name="star" size={14} color="#FFD700" />
-                              <Text style={styles.promotedText}>PATROCINADA</Text>
-                            </View>
-                          )}
-                          <View style={{ display: "flex", flexDirection: "row", gap: 30, alignItems: "center" }}>
-                            <Text style={styles.offerSalary}>{item.sueldo}€</Text>
-                            <View style={styles.offerActions}>
-                              {
-                                item.promoted ? (
-                                  <TouchableOpacity
-                                    style={[styles.actionButton, styles.unpromoteButton]}
-                                    onPress={() => { setIsModalVisibleCancelar(true); setSelectedOfferId(item.id) }}
-                                  >
-                                    <AntDesign name="closecircleo" size={14} color={colors.white} style={{ paddingRight: 19 }} />
-                                    <Text style={styles.actionButtonText}>Cancelar</Text>
-                                  </TouchableOpacity>
-                                ) : canPromoteNewOffer() ? (
-                                  <TouchableOpacity
-                                    style={[styles.actionButton,]}
-                                    onPress={() => promoteOffer(item.id)}
-                                  >
-
-                                    <LinearGradient
-                                      colors={['#D4AF37', '#F0C674', '#B8860B', '#F0C674']}
-                                      start={{ x: 0, y: 0 }}
-                                      end={{ x: 1, y: 1 }}
-                                      style={[styles.actionButton]}
-                                    >
-                                      <AntDesign name="star" size={14} color={colors.white} style={{ paddingRight: 9 }} />
-                                      <Text style={styles.actionButtonText}>Patrocinar</Text>
-
-                                    </LinearGradient>
-                                  </TouchableOpacity>
-
-                                ) : null}
-                              <SuccessModal
-                                isVisible={successModalVisible}
-                                onClose={() => setSuccessModalVisible(false)}
-                                message="¡Oferta patrocinada con éxito!"
-                              />
-                              <Modal
-                                animationType="fade"
-                                transparent={true}
-                                visible={isModalVisibleCancelar}
-                                onRequestClose={() => setIsModalVisibleCancelar(false)}
-                              >
-                                <TouchableWithoutFeedback onPress={() => setIsModalVisibleCancelar(false)}>
-                                  <View style={styles.modalBackground}>
-                                    <TouchableWithoutFeedback>
-                                      <View style={styles.modalContainer}>
-                                        <Text style={styles.modalText}>¿Estás seguro/a de que quieres dejar de patrocinar la oferta?</Text>
-                                        <View style={styles.modalButtons}>
-                                          <TouchableOpacity onPress={() => setIsModalVisibleCancelar(false)} style={styles.modalButton}>
-                                            <Text style={styles.modalButtonText}>Cancelar</Text>
-                                          </TouchableOpacity>
-                                          <TouchableOpacity onPress={() => unpromoteOffer(selectedOfferId)} style={styles.modalButton}>
-                                            <Text style={styles.modalButtonText}>Confirmar</Text>
-                                          </TouchableOpacity>
-                                        </View>
-                                      </View>
-                                    </TouchableWithoutFeedback>
-                                  </View>
-                                </TouchableWithoutFeedback>
-                              </Modal>
-
-                              <TouchableOpacity
-                                style={[styles.actionButton, styles.detailsButton]}
-                                onPress={() => router.push(`/oferta/${item.id}`)}
-                              >
-                                <MaterialCommunityIcons name="eye-outline" size={14} color={colors.white} />
-                                <Text style={styles.actionButtonText}>Ver detalles</Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-                        </View>
-                      </View>
-
-
-
-                    </View>
-
-
-                  </View>
-                ))}
-              </View>
-            )}
+            <ListadoOfertasEmpresa
+              offers={offers}
+              canPromoteNewOffer={canPromoteNewOffer}
+              canCancelPromotedOffer={true}
+              fetchOffers={fetchOffers}
+            />
           </View>
           {/* Separador */}
           <View style={styles.separator} />
@@ -623,6 +509,16 @@ const MiPerfilEmpresa = () => {
 };
 
 const styles = StyleSheet.create({
+  offersContainer: {
+    width: '100%',
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 15,
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -671,46 +567,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
-  },
-  buttonsWrapper: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    flexDirection: 'column',
-    gap: 15,
-  },
-  publishButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-  mejorarPlanButton: {
-    backgroundColor: '#0993A8FF',
-    padding: 10,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  plusIcon: {
-    marginRight: 6,
-  },
-  publishButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
   },
   infoContainer: {
     flex: 1,
@@ -772,69 +628,17 @@ const styles = StyleSheet.create({
   offerDate: {
     fontSize: 12,
     color: "gray", flexWrap: "wrap",
+  buttonsWrapper: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'column',
+    gap: 15,
   },
-  offerDetailsTagLicense: {
-    backgroundColor: colors.primary,
-    display: "flex",
+  publishButton: {
     flexDirection: "row",
-    color: colors.white,
-    borderRadius: 10,
-    paddingTop: 2,
     alignItems: "center",
-    textAlign: "center",
-    textAlignVertical: "center",
-    paddingBottom: 2,
-    paddingLeft: 5,
-    marginRight: 5,
-  },
-  offerDetailsTagExperience: {
-    backgroundColor: colors.green,
-    display: "flex",
-    flexDirection: "row",
-    color: colors.white,
-    borderRadius: 10,
-    paddingTop: 2,
-    alignItems: "center",
-    textAlign: "center",
-    textAlignVertical: "center",
-    paddingBottom: 2,
-    paddingLeft: 5,
-    marginRight: 5,
-  },
-  offerDetailsTagType: {
-    backgroundColor: colors.secondary,
-    display: "flex",
-    flexDirection: "row",
-    color: colors.white,
-    borderRadius: 10,
-    paddingTop: 2,
-    textAlign: "center",
-    textAlignVertical: "center",
-    paddingBottom: 2,
-    paddingLeft: 5,
-    marginRight: 5,
-  },
-  offerInfo: {
-    fontSize: 12,
-    color: colors.secondary,
-    marginTop: 5,
-    flexWrap: "wrap",
-  },
-  offerSueldo: {
-    fontSize: 25,
-    fontWeight: "bold",
-    textAlign: "right",
-    paddingLeft: 3,
-    color: colors.secondary,
-    textAlignVertical: "center",
-    width: "35%",
-    alignSelf: "center"
-  },
-  localizacion: {
-    fontSize: 15,
-    color: "#696969",
-  },
-  button: {
+    justifyContent: "center",
     backgroundColor: colors.primary,
     color: colors.white,
     paddingLeft: 5,
@@ -874,38 +678,44 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderColor: "red",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  upgradeMessage: {
-    color: colors.primary,
-    marginTop: 1,
-    textAlign: "left",
-    textDecorationLine: "underline",
+  disabledButton: {
+    backgroundColor: '#ccc',
   },
-  editButton: {
-    marginTop: 20,
-    backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+  plusIcon: {
+    marginRight: 6,
+  },
+  publishButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  mejorarPlanButton: {
+    backgroundColor: '#0993A8FF',
+    padding: 10,
     borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    justifyContent: 'center',
   },
   limitMessage: {
     color: 'red',
     textAlign: 'center',
     marginBottom: 10,
+  },
+  separator: {
+    width: "100%",
+    height: 1,
+    backgroundColor: colors.mediumGray,
+    marginVertical: 20,
+  },
+  downContainer: {
+    paddingHorizontal: 30,
+    marginLeft: 30,
   },
   reseñasContainer: {
     paddingHorizontal: 30,
@@ -930,6 +740,12 @@ const styles = StyleSheet.create({
   reseñaComentario: {
     fontSize: 14,
     color: colors.darkGray,
+  },
+  verifiedBadgePremium: {
+    marginLeft: 8,
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    borderRadius: 50,
+    padding: 2,
   },
   offersContainer: {
     width: '100%',
@@ -1356,5 +1172,3 @@ const styles = StyleSheet.create({
 
 
 export default MiPerfilEmpresa;
-
-

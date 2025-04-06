@@ -129,6 +129,25 @@ const MiPerfilCamionero = () => {
         }
     }, [user]);
 
+    const descargarPDF = async () => {
+        const base64Data = user.curriculum; 
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `CV_${user.username}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     useEffect(() => {
         if (camionero?.id) {
             fetchOfertasCamionero();
@@ -168,6 +187,11 @@ const MiPerfilCamionero = () => {
                         <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
                         {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
                         {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+                        {user.curriculum &&
+                            <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
+                                <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                            </TouchableOpacity>
+                        }                       
                     </View>
                     <View style={styles.separator} />
 
@@ -473,6 +497,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.darkGray,
         marginBottom: 8,
+    },
+    pdfButton: {
+        backgroundColor: colors.primary,
+        padding: 10,
+        borderRadius: 5,
+        alignItems: "center",
+        marginTop: 10,
+    },
+    pdfButtonText: {
+        color: colors.white,
+        fontWeight: "bold",
     },
     resenaFecha: {
         fontSize: 12,

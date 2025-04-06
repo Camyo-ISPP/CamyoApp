@@ -21,6 +21,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -65,8 +66,10 @@ public class Camionero{
     private LocalDate expiracionCAP;
 
     @ElementCollection
-    // @JsonIgnore
     private Set<Tarjetas> tarjetasAutonomo;
+
+    @Lob
+    private byte[] curriculum;
 
     @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE })
 	@JoinColumn(name = "usuario_id", referencedColumnName = "id")

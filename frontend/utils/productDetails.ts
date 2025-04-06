@@ -9,7 +9,7 @@ Products.set("BASICO", {
 });
 
 Products.set("PREMIUM", {
-    description: "Ofertas ilimitadas activas y patrocinadas. Máxima visibilidad y herramientas avanzadas.",
+    description: "Ofertas ilimitadas activas y patrocinadas. Máxima visibilidad.",
     image: "/assets/images/icon.png",
     name: "Plan Premium",
     price: 49.99,

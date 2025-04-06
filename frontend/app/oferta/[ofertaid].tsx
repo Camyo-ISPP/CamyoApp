@@ -8,6 +8,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
+import { RouteMap } from "../_components/Maps";
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
@@ -27,6 +28,10 @@ export default function OfertaDetalleScreen() {
     const [successModalVisibleCam, setSuccessModalVisibleCam] = useState(false);
     const [successModalVisibleEmp, setSuccessModalVisibleEmp] = useState(false);
 
+    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const openCageKey = process.env.EXPO_PUBLIC_OPENCAGE_API_KEY;
+
+
     useEffect(() => {
         if (ofertaid) {
             const fetchData = async () => {
@@ -34,8 +39,8 @@ export default function OfertaDetalleScreen() {
                     const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
                     const data = await response.json();
                     setOfferData(data);
-                    
-                    if(data.tipoOferta === "TRABAJO"){
+
+                    if (data.tipoOferta === "TRABAJO") {
                         const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
                         const trabajoData = await trabajoResponse.json();
                         setOfferTrabajoData(trabajoData);
@@ -204,17 +209,34 @@ export default function OfertaDetalleScreen() {
                 <View style={styles.header}>
                     <BackButton />
                     <Image
-                        source={defaultCompanyLogo}
+                        source={offerData?.empresa?.usuario?.foto ? { uri: `data:image/png;base64,${offerData.empresa.usuario.foto}` } : defaultCompanyLogo}
                         style={styles.logo}
                     />
                     <View style={styles.headerText}>
                         <Text style={styles.title}>{offerData.titulo}</Text>
-                        <Text style={styles.empresa}>
-                            {offerData.empresa.usuario.nombre.toUpperCase()} |
-                            <MaterialIcons name="location-on" size={18} color="#0b4f6c" />
-                            <Text style={styles.empresa}> {offerData.localizacion}</Text>
-                        </Text>
-                        <Text style={styles.empresa}>Estado: {offerData.estado} </Text>
+
+                        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 4, marginBottom: 4, marginLeft: 10 }}>
+                            <TouchableOpacity style={styles.companyTouchable}
+                                onPress={() => router.push(`/empresa/${offerData.empresa.id}`)}
+                            >
+                                <FontAwesome5 name="building" size={14} color={colors.primary} />
+                                <Text style={styles.companyNameText}>
+                                    {offerData.empresa.usuario.nombre}
+                                </Text>
+                            </TouchableOpacity>
+                            <Text style={styles.separatorText}>|</Text>
+                            <MaterialIcons name="location-on" size={16} color={colors.secondary} />
+                            <Text style={styles.locationText}>
+                                {offerData.localizacion}
+                            </Text>
+                        </View>
+
+                        <View style={[styles.estadoBadgeBase, offerData.estado === 'ABIERTA' ? styles.estadoAbierta : styles.estadoCerrada]}>
+                            <Text style={[styles.estadoText, offerData.estado === 'ABIERTA' ? styles.estadoAbiertaText : styles.estadoCerradaText]}>
+                                {offerData.estado}
+                            </Text>
+                        </View>
+
                     </View>
 
                     <View style={{ alignItems: "flex-end" }}>
@@ -377,6 +399,14 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.detallesLabel}>Fin máximo:</Text> {formatDate(offerCargaData.finMaximo)}
                             </Text>
                         </View>
+
+                        <View style={styles.separator} />
+                        <RouteMap
+                            origin={offerCargaData.origen}
+                            destination={offerCargaData.destino}
+                            openCageKey={openCageKey}
+                            googleMapsApiKey={googleApiKey}
+                        />
                     </>
                 ) : (
                     offerTrabajoData !== null ? (
@@ -594,7 +624,8 @@ const styles = StyleSheet.create({
     },
 
     detallesLabel: {
-        fontWeight: 'bold',
+        fontWeight: '600',
+        color: colors.secondary,
     },
     camCard: {
         backgroundColor: colors.white,
@@ -719,5 +750,69 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 14,
         marginLeft: 5
-    }
+    },
+    companyInfoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        marginTop: 4,
+        marginBottom: 4,
+    },
+    companyTouchable: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    companyNameText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.primary,
+        marginLeft: 6,
+    },
+    separatorText: {
+        color: colors.secondary,
+        marginHorizontal: 6,
+    },
+    locationText: {
+        fontSize: 17,
+        fontWeight: '500',
+        color: colors.secondary,
+        marginLeft: 4,
+    },
+    estadoBadgeBase: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginTop: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    estadoAbierta: {
+        backgroundColor: '#E8F5E9',
+        borderWidth: 1.5,
+        borderColor: '#4CAF50',
+    },
+    estadoCerrada: {
+        backgroundColor: '#FFEBEE',
+        borderWidth: 1.5,
+        borderColor: '#F44336',
+    },
+    estadoText: {
+        fontWeight: '700',
+        fontSize: 14,
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
+    },
+    estadoAbiertaText: {
+        color: '#2E7D32',
+    },
+    estadoCerradaText: {
+        color: '#C62828',
+    },
 });

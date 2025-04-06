@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import com.camyo.backend.oferta.Oferta;
 import com.camyo.backend.oferta.OfertaEstado;
 import com.camyo.backend.oferta.OfertaService;
+import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/resenas")
@@ -106,6 +108,15 @@ public class ResenaController {
         }
         resenaService.eliminarResena(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/resenados/{userId}")
+    public ResponseEntity<?> obtenerUsuariosReseñadosPorUsuario(@PathVariable Integer userId) {
+        List<Resena> resenasDondeComentador = resenaService.obtenerTodasResenasComentadorPorId(userId);
+        List<Usuario> resenas = resenasDondeComentador.stream()
+                .map(resena -> resena.getComentado())
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(resenas, HttpStatus.OK);
     }
 
 }

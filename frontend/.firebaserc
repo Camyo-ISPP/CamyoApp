@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "ispp-2425-g5-s2-fafe6"
-  }
+    "default": "camyo-s3-9fe1b",
+    "camyo-s3": "camyo-s3-9fe1b"
+  },
+  "targets": {},
+  "etags": {}
 }
