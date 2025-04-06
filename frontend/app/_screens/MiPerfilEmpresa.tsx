@@ -11,12 +11,9 @@ import BackButton from "../_components/BackButton";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { usePayment } from "../../contexts/PaymentContext";
 import { useSubscription } from '@/contexts/SubscriptionContext';
+import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 import SuccessModal from "../_components/SuccessModal";
-import { LinearGradient } from "expo-linear-gradient";
 import ResenaModal from "../_components/ResenaModal";
-
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -28,37 +25,59 @@ const MiPerfilEmpresa = () => {
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
-  const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
   const [camioneros, setCamioneros] = useState([]);
   const [showResenaModal, setShowResenaModal] = useState(false);
   const [camioneroAResenar, setCamioneroAResenar] = useState(null);
   const [hoverRating, setHoverRating] = useState(0);
+  const [resenas, setResenas] = useState([]);
+  const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
+  const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
+  const [resenados,setResenados] = useState([]);
+
   useFocusEffect(
     useCallback(() => {
       refreshSubscriptionLevel();
     }, [])
   );
 
-  const [resenas, setResenas] = useState([]);
 
-  const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+  useEffect(() => {
+    const fetchResenas = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
+        setResenas(response.data);
+
+        // Obtener valoración media del backend
+        const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
+        setValoracionMedia(mediaResponse.data);
+      } catch (error) {
+        console.error("Error al cargar las reseñas o valoración:", error);
+      }
+    };
+
+    if (user?.id) {
+      fetchResenas();
+    }
+  }, [user]);
+
+
   const fetchResenas = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
       setResenas(response.data);
-      console.log("reseñas", response.data)
       const resenasFiltradas = response.data.filter(resena =>
         resena.comentado.id === user.userId
       );
-      console.log("reseñas filtradas", resenasFiltradas)
-      // Obtener valoración media del backend
       const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
       setValoracionMedia(mediaResponse.data);
     } catch (error) {
       console.error("Error al cargar las reseñas o valoración:", error);
     }
   };
+
   const handleAddResena = async (resenaData) => {
     try {
       if (!user?.userId || !camioneroAResenar) {
@@ -84,7 +103,6 @@ const MiPerfilEmpresa = () => {
     } catch (error) {
       console.error("Error al publicar reseña:", error);
       let errorMessage = "Error al publicar la reseña";
-
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 400) {
           errorMessage = "No tienes ofertas comunes con esta empresa para reseñarla";
@@ -92,49 +110,63 @@ const MiPerfilEmpresa = () => {
           errorMessage = error.response.data.message;
         }
       }
-
       Alert.alert("Error", errorMessage);
     }
   };
-
-
-  useEffect(() => {
-
-    if (user?.id) {
-      fetchResenas();
-    }
-  }, [user]);
-
-  const fetchOffers = async () => {
+  const fetchCamionerosResenados = async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-      console.log(response.data)
-      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-      const camionerosUnicos = response.data.reduce((acc, oferta) => {
-        if (oferta.camionero && !acc.some(c => c.id === oferta.camionero.id)) {
-          acc.push({
-            ...oferta.camionero,
-            id: oferta.camionero.id,
-            usuario: oferta.camionero.usuario,
-          });
-        }
-        return acc;
-      }, []);
-      setCamioneros(camionerosUnicos)
-      console.log(camionerosUnicos)
+        const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
+        const ids = response.data.map(camionero => camionero.id);
+        console.log(ids); 
+        console.log(response.data)
+        setResenados(ids)
     } catch (error) {
-      console.error("Error al cargar las ofertas:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        console.error("Error al obtener los camioneros reseñados:", error);
+        return [];
+    } 
+}
 
+const fetchOffers = async () => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+    
 
+    const ofertasCerradas = response.data.filter((offer: any) => offer.estado === "CERRADA");
+
+    setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+    
+    console.log("Ofertas cerradas:", ofertasCerradas);
+
+    const camionerosUnicos = ofertasCerradas.reduce((acc, oferta) => {
+      if (oferta.camionero && !acc.some(c => c.id === oferta.camionero.id)) {
+        acc.push({
+          ...oferta.camionero,
+          id: oferta.camionero.id,
+          usuario: oferta.camionero.usuario,
+          userId:oferta.camionero.usuario.id
+        });
+      }
+      return acc;
+    }, []);
+    
+    console.log("Camioneros únicos de ofertas cerradas:", camionerosUnicos);
+    setCamioneros(camionerosUnicos);
+    
+  } catch (error) {
+    console.error("Error al cargar las ofertas:", error);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     fetchOffers();
+    fetchCamionerosResenados();
   }, []);
 
   useEffect(() => {
+    // If the user goes to the checkout page, does not subscribe and clicks on their profile, 
+    // the subscription they wanted will remain saved.
+    // This will reset the subscription ID chosen.
     setId("");
   }, [])
 
@@ -148,62 +180,17 @@ const MiPerfilEmpresa = () => {
     return activeOffersCount < rules.maxSponsoredOffers;
 
   }
-
-  const promoteOffer = async (ofertaId: number) => {
+  const handleSubmitResenaWrapper = async (resenaData: any) => {
     try {
-      const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
-
-      if (response.ok) {
-        setSuccessModalVisible(true);
-        fetchOffers();
-
-        setTimeout(() => {
-          setSuccessModalVisible(false);
-        }, 1000);
-      }
-
-    } catch (err) {
-      console.error("Error completo en promoteOffer:", err);
+      await handleAddResena(resenaData);
+      await fetchOffers();
+      await fetchCamionerosResenados();
+      setShowResenaModal(false);
+      setCamioneroAResenar(null);
+    } catch (error) {
+      console.error("Error en el proceso completo:", error);
     }
   };
-  const unpromoteOffer = async (ofertaId: number | null) => {
-    try {
-      const response = await axios.put(
-        `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
-        {},
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${userToken}`
-          }
-        }
-      );
-
-      if (response.status === 200) {
-        fetchOffers();
-        setSelectedOfferId(null);
-      }
-      setIsModalVisibleCancelar(false);
-
-    } catch (err) {
-      console.error("Error en unpromoteOffer:", err);
-      if (axios.isAxiosError(err) && err.response) {
-        console.error("Detalles del error:", {
-          status: err.response.status,
-          data: err.response.data,
-          headers: err.response.headers
-        });
-      }
-
-    }
-  }
 
   return (
     <ScrollView>
@@ -336,116 +323,95 @@ const MiPerfilEmpresa = () => {
               fetchOffers={fetchOffers}
             />
           </View>
-          {/* Separador */}
-          <View style={styles.separator} />
-          <View style={styles.camionerosSection}>
+          {/* Recent Truckers */}
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Camioneros Recientes</Text>
-            <View style={{ flexDirection: "row", gap: 7 }}>
-
-              {camioneros.length === 0 ? (
-                <Text style={styles.emptyMessage}>No has trabajado con camioneros recientemente</Text>
-              ) : (
-                camioneros.map(camionero => (
-                  <View key={`camionero-${camionero.id}`} style={styles.camioneroCard}>
-                    {/* Header con imagen y nombre */}
-                    <View style={styles.camioneroHeader}>
+            {camioneros.length === 0? (
+              <Text style={styles.emptyMessage}>No has trabajado con camioneros recientemente</Text>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {camioneros
+                .filter(camionero => !(resenados.includes(camionero.userId)))
+                .map(camionero => (
+                  <View key={`camionero-${camionero.id}`} style={styles.personCard}>
+                    <View style={styles.personHeader}>
                       {camionero.usuario?.foto ? (
                         <Image
                           source={{ uri: `data:image/png;base64,${camionero.usuario.foto}` }}
-                          style={styles.camioneroAvatar}
+                          style={styles.personAvatar}
                         />
                       ) : (
-                        <View style={styles.camioneroAvatarPlaceholder}>
+                        <View style={styles.personAvatarPlaceholder}>
                           <FontAwesome5 name="truck" size={20} color={colors.white} />
                         </View>
                       )}
-                      <View style={styles.camioneroInfo}>
-                        <Text style={styles.camioneroNombre}>{camionero.usuario?.nombre}</Text>
-                        <Text style={styles.camioneroUbicación}>
+                      <View style={styles.personInfo}>
+                        <Text style={styles.personName}>{camionero.usuario?.nombre}</Text>
+                        <View style={styles.locationRow}>
                           <MaterialIcons name="location-on" size={14} color={colors.secondary} />
-                          {camionero.usuario?.localizacion || 'Ubicación no disponible'}
-                        </Text>
-
-                      </View>
-                    </View>
-                    <View style={styles.valoracionSection}>
-                      <View style={styles.starsContainer}>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <TouchableOpacity
-                            key={`star-${star}`}
-                            onPress={() => {
-                              setCamioneroAResenar(camionero);
-                              setShowResenaModal(true);
-                            }}
-                            onPressIn={() => setHoverRating(star)}
-                            onPressOut={() => setHoverRating(0)}
-                            activeOpacity={1}
-                          >
-                            <FontAwesome
-                              name={star <= hoverRating ? "star" : "star-o"}
-                              size={27}
-                              color={star <= hoverRating ? colors.primary : colors.primaryLight}
-                              style={styles.starIcon}
-                            />
-                          </TouchableOpacity>
-                        ))}
+                          <Text style={styles.locationText}>{camionero.usuario?.localizacion || 'Ubicación no disponible'}</Text>
+                        </View>
                       </View>
                     </View>
 
-
-                    {/* Botones de acción */}
-                    <View style={styles.actionsContainer}>
-                      <TouchableOpacity
-                        style={styles.fullWidthButton}
-                        onPress={() => router.push(`/camionero/${camionero.id}`)}
-                      >
-                        <FontAwesome5 name="user" size={14} color={colors.white} />
-                        <Text style={styles.actionButtonText}>Ver perfil</Text>
-                      </TouchableOpacity>
+                    <View style={styles.ratingContainer}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <TouchableOpacity
+                          key={`star-${star}`}
+                          onPress={() => {
+                            setCamioneroAResenar(camionero);
+                            setShowResenaModal(true);
+                          }}
+                          onPressIn={() => setHoverRating(star)}
+                          onPressOut={() => setHoverRating(0)}
+                          activeOpacity={1}
+                        >
+                          <FontAwesome
+                            name={star <= hoverRating ? "star" : "star-o"}
+                            size={24}
+                            color={star <= hoverRating ? colors.primary : colors.primaryLight}
+                          />
+                        </TouchableOpacity>
+                      ))}
                     </View>
+
+                    <TouchableOpacity
+                      style={styles.profileButton}
+                      onPress={() => router.push(`/camionero/${camionero.id}`)}
+                    >
+                      <FontAwesome5 name="user" size={14} color={colors.white} />
+                      <Text style={styles.profileButtonText}>Ver perfil</Text>
+                    </TouchableOpacity>
                   </View>
-                ))
-              )}
-            </View>
-          </View>
-
-          <View style={styles.separator} />
-
-          <View style={styles.reviewsContainer}>
-            <Text style={styles.sectionTitle}>Reseñas de tus camioneros</Text>
-
-            {/* Valoración media con estrellas */}
-            <View style={styles.ratingSummary}>
-              <View style={styles.starsContainer}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <FontAwesome
-                    key={star}
-                    name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
-                    size={24}
-                    color={colors.primary}
-                    style={styles.starIcon}
-                  />
                 ))}
-              </View>
-              <Text style={styles.averageRatingText}>
-                {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
-                {resenas.length > 0 && (
-                  <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
-                )}
-              </Text>
-            </View>
+              </ScrollView>
+            )}
 
-            {/* Lista de reseñas */}
-            {resenas.length === 0 ? (
-              <View style={styles.emptyReviews}>
-                <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
-                <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
-              </View>
-            ) : (
-              <>
-                {resenas.map((resena) => (
+            <View style={styles.separator} />
+
+            <View style={styles.reseñasContainer}>
+              <Text style={styles.sectionTitle}>Reseñas</Text>
+              {resenas.length > 0 ? (
+                valoracionMedia !== null && (
+                  <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                  </Text>
+                )
+              ) : (
+                <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                  Valoración media: No hay datos suficientes
+                </Text>
+              )}
+
+
+              {resenas.length === 0 ? (
+                <View style={styles.emptyReviews}>
+                  <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
+                  <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
+                </View>
+              ) : (
+                resenas.map((resena) => (
                   <View key={resena.id} style={styles.reviewCard}>
-                    {/* Encabezado con avatar y nombre */}
                     <View style={styles.reviewHeader}>
                       {resena.comentador?.foto ? (
                         <Image
@@ -469,7 +435,6 @@ const MiPerfilEmpresa = () => {
                       </View>
                     </View>
 
-                    {/* Valoración con estrellas */}
                     <View style={styles.reviewStars}>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <FontAwesome
@@ -481,29 +446,25 @@ const MiPerfilEmpresa = () => {
                       ))}
                     </View>
 
-                    {/* Comentario */}
                     <Text style={styles.reviewComment}>{resena.comentarios}</Text>
-
-                    {/* Divider */}
-                    <View style={styles.reviewDivider} />
                   </View>
-                ))}
-              </>
-            )}
-          </View>
+                ))
+              )}
+            </View>
+          </View >
         </View >
-      </View >
-      {/* Modal para añadir reseñas */}
-      <ResenaModal
-        visible={showResenaModal}
-        onClose={() => {
-          setShowResenaModal(false);
-          setCamioneroAResenar(null);
-        }}
-        onSubmit={handleAddResena}
-        comentadorId={user?.userId}
-        comentadoId={camioneroAResenar?.usuario?.id}
-      />
+        {/* Modals */}
+        <ResenaModal
+          visible={showResenaModal}
+          onClose={() => {
+            setShowResenaModal(false);
+            setCamioneroAResenar(null);
+          }}
+          onSubmit={handleSubmitResenaWrapper}
+          comentadorId={user?.userId}
+          comentadoId={camioneroAResenar?.usuario?.id}
+        />
+    </View>
     </ScrollView >
   );
 };
@@ -595,39 +556,6 @@ const styles = StyleSheet.create({
     color: colors.darkGray,
     marginTop: 6,
   },
-  separator: {
-    width: "100%",
-    height: 1,
-    backgroundColor: colors.mediumGray,
-    marginVertical: 20,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: colors.secondary,
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  downContainer: {
-    paddingHorizontal: 30,
-    marginLeft: 30,
-  },
-  companyLogo: {
-    height: 120,
-    width: 120,
-    marginRight: 10,
-  },
-  offerTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    flexWrap: "wrap",
-    marginBottom: 2,
-    color: colors.secondary
-  },
-  offerDate: {
-    fontSize: 12,
-    color: "gray", flexWrap: "wrap",
   buttonsWrapper: {
     position: 'absolute',
     top: 10,
@@ -640,43 +568,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.primary,
-    color: colors.white,
-    paddingLeft: 5,
-    paddingRight: 5,
-    marginLeft: "2%",
-    marginTop: 4,
-    flexDirection: "row",
-    flexWrap: "nowrap",
-    height: 40,
-    width: 150,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  buttonText: {
-    color: colors.white,
-    fontWeight: "bold"
-  },
-  detailsIcon: {
-    color: colors.white,
-    alignSelf: "center",
-    marginLeft: 3,
-    marginTop: 3,
-    marginRight: 5,
-  },
-  card2: {
-    backgroundColor: colors.white,
-    padding: 20,
-    marginVertical: 10,
-    width: "100%",
-    borderRadius: 10,
-    display: "flex",
-    flexWrap: "wrap",
-    flexDirection: "row",
-    alignContent: "center",
-    alignItems: "center",
-    borderLeftWidth: 4,
-    borderColor: "red",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -747,120 +641,184 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 2,
   },
-  offersContainer: {
-    width: '100%',
-    paddingHorizontal: 10,
+  verifiedBadgeBasic: {
+    marginLeft: 8,
+    backgroundColor: 'rgba(192, 192, 192, 0.2)',
+    borderRadius: 50,
+    padding: 2,
   },
-  noOffersText: {
-    textAlign: 'center',
-    color: colors.mediumGray,
+  sectionDivider: {
+    height: 1,
+    backgroundColor: colors.lightGray,
     marginVertical: 20,
+  },
+  section: {
+    marginBottom: 20,
+  },
+
+  actionsContainer: {
+    marginBottom: 10,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  actionButtonText: {
+    color: colors.white,
     fontSize: 16,
+    fontWeight: "500",
+    marginLeft: 8,
+  },
+  upgradePrompt: {
+    backgroundColor: colors.extraLightGray,
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  upgradeText: {
+    fontSize: 14,
+    color: colors.darkGray,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  upgradeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.secondary,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  emptyMessage: {
+    textAlign: "center",
+    color: colors.mediumGray,
+    fontSize: 16,
+    marginVertical: 20,
+    fontStyle: "italic",
   },
   offersList: {
-    width: '100%',
+    marginTop: 10,
   },
   offerCard: {
     backgroundColor: colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     borderLeftWidth: 4,
     borderLeftColor: colors.primary,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   promotedOfferCard: {
-    borderLeftColor: colors.secondary,
-    backgroundColor: '#F8F9FF',
+    borderLeftColor: colors.gold,
+    backgroundColor: colors.extraLightPrimary,
   },
   offerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
     marginBottom: 12,
   },
-  offerTitleContainer: {
+  companyLogo: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 15,
+  },
+  offerContent: {
     flex: 1,
   },
-  offerMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  offerPosition: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 5,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  companyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
   },
-  offerLocation: {
+  companyName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.primary,
+    marginLeft: 5,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  locationText: {
     fontSize: 14,
-    color: colors.mediumGray,
+    color: colors.secondary,
+    marginLeft: 5,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 5,
+  },
+  tag: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  tagText: {
+    fontSize: 12,
+    color: colors.white,
     marginLeft: 4,
   },
+  offerRightSection: {
+    alignItems: "flex-end",
+    marginLeft: 10,
+  },
+  promotedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.lightGold,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  promotedText: {
+    color: colors.gold,
+    fontSize: 12,
+    fontWeight: "600",
+    marginLeft: 5,
+  },
   offerSalary: {
-    fontSize: 30,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: "700",
     color: colors.secondary,
   },
-  offerTags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    gap: 8,
-  },
-  offerTagType: {
-    backgroundColor: colors.primary,
-    color: colors.white,
-    paddingHorizontal: 10,
-    display: "flex",
-    flexDirection: "row",
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  offerTagLicense: {
-    backgroundColor: colors.secondary,
-    color: colors.white,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  offerTagExperience: {
-    borderWidth: 1,
-    borderColor: colors.primary,
-    color: colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  offerDescription: {
-    fontSize: 14,
-    color: colors.darkGray,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
   offerActions: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    gap: 10,
+    flexDirection: "row",
+    justifyContent: "flex-end",
   },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: "center",
-    width: 150,
+  offerActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 6,
+    borderRadius: 6,
+    marginLeft: 10,
   },
   promoteButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: colors.gold,
   },
   unpromoteButton: {
     backgroundColor: colors.red,
@@ -868,261 +826,120 @@ const styles = StyleSheet.create({
   detailsButton: {
     backgroundColor: colors.primary,
   },
-  actionButtonText: {
+  offerActionText: {
     color: colors.white,
     fontSize: 14,
-    textAlign: "left",
-    fontWeight: '500',
-  },
-  companyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 4,
-    backgroundColor: '#F5F7FF',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  offerCompany: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.primary,
+    fontWeight: "500",
     marginLeft: 6,
   },
-  promotedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF9E6',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    marginBottom: 10,
-    alignSelf: 'flex-end',
-  },
-  promotedText: {
-    color: '#D4A017',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 5,
-  },
-  offerContent: {
-    paddingHorizontal: 5,
-  },
-  offerMainInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  offerPosition: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.secondary,
-    marginBottom: 5,
-  },
-  companyInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  companyName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-    marginLeft: 6,
-  },
-  offerDetails: {
-    marginTop: 12,
-    marginBottom: 10,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 6,
-  },
-  detailText: {
-    fontSize: 9,
-    color: colors.white,
-    fontWeight: 700,
-    marginRight: 10,
-    marginLeft: 4,
-  },
-  // Estilos del Modal
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContainer: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
-  modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: colors.primary,
-    borderRadius: 20,
-  },
-  modalButtonText: {
-    color: 'white',
-    fontSize: 16,
-  }, camioneroInfo: {
-    fontSize: 12,
-    color: colors.darkGray,
-    marginTop: 4,
-  },
-  camioneroAvatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }, actionsContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 16,
-  }, camioneroCard: {
+  personCard: {
     backgroundColor: colors.white,
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-    position: 'relative',
-    paddingBottom: 60,
-  },
-  camioneroHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  camioneroAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-  },
-  camioneroNombre: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.secondary,
-  },
-  camioneroUbicación: {
-    fontSize: 14,
-    color: colors.secondary,
-    marginTop: 4,
-  }, fullWidthButton: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: colors.primary,
-    shadowColor: '#000',
+    width: 200,
+    marginRight: 15,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
-  }, valoracionSection: {
-    marginBottom: 16,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
   },
-  valoracionTitle: {
+  personHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  personAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+  },
+  personAvatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  personInfo: {
+    flex: 1,
+  },
+  personName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.secondary,
+    marginBottom: 4,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 15,
+  },
+  profileButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.primary,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  profileButtonText: {
+    color: colors.white,
     fontSize: 14,
-    color: colors.darkGray,
-    marginBottom: 8,
-  },
-  starsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  starIcon: {
-    marginHorizontal: 4,
-    transitionDuration: '400ms',
-  }, camionerosSection: {
-    marginTop: 25,
-    width: "50%",
-    paddingHorizontal: 15,
-  },
-  reviewsContainer: {
-    paddingHorizontal: 20,
-    marginTop: 25,
-    marginBottom: 30,
+    fontWeight: "500",
+    marginLeft: 8,
   },
   ratingSummary: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: 25,
+    alignItems: "center",
+    marginBottom: 20,
   },
-  averageRatingText: {
+  starsContainer: {
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  averageRating: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.secondary,
   },
   reviewCount: {
     fontSize: 16,
     color: colors.mediumGray,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   emptyReviews: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 40,
     backgroundColor: colors.extraLightGray,
     borderRadius: 12,
-    marginTop: 10,
   },
   emptyText: {
     marginTop: 15,
     fontSize: 16,
     color: colors.mediumGray,
-    textAlign: 'center',
   },
   reviewCard: {
     backgroundColor: colors.white,
     borderRadius: 12,
-    padding: 20,
+    padding: 16,
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: 4,
     elevation: 2,
-    borderWidth: 1,
-    borderColor: colors.lightGray,
   },
   reviewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 15,
   },
   reviewAvatar: {
@@ -1138,13 +955,13 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   reviewAuthor: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.secondary,
     marginBottom: 4,
   },
@@ -1153,21 +970,56 @@ const styles = StyleSheet.create({
     color: colors.mediumGray,
   },
   reviewStars: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 12,
   },
   reviewComment: {
     fontSize: 15,
     lineHeight: 22,
     color: colors.darkGray,
-    marginBottom: 15,
   },
-  reviewDivider: {
-    height: 1,
-    backgroundColor: colors.extraLightGray,
-    marginHorizontal: -20,
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
-
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    minWidth: 120,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: colors.lightGray,
+    marginRight: 10,
+  },
+  confirmButton: {
+    backgroundColor: colors.primary,
+  },
+  modalButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "500",
+  },
 });
 
 

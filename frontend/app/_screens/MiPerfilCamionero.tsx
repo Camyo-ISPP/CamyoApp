@@ -25,6 +25,7 @@ const MiPerfilCamionero = () => {
     const [empresasRecientes, setEmpresasRecientes] = useState([]);
     const [empresaAResenar, setEmpresaAResenar] = useState(null);
     const [hoverRating, setHoverRating] = useState(0);
+    const [resenados,setResenados] = useState([]);
 
     const fetchCamionero = async () => {
         try {
@@ -49,10 +50,14 @@ const MiPerfilCamionero = () => {
             // Extraer empresas de las ofertas
             const empresasUnicas = response.data[2].reduce((acc, oferta) => {
                 if (oferta.empresa && !acc.some(e => e.id === oferta.empresa.id)) {
-                    acc.push(oferta.empresa);
+                    acc.push({...oferta.empresa,
+                        userId:oferta.empresa.usuario.id}
+
+                    );
                 }
                 return acc;
             }, []);
+            console.log("empresas uinicaas",empresasUnicas)
 
 
             setEmpresasRecientes(empresasUnicas);
@@ -69,6 +74,17 @@ const MiPerfilCamionero = () => {
             }
         }
     };
+    const fetchEmpresasResenados = async () => {
+        try {
+            const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
+            const ids = response.data.map(empresa => empresa.id);
+            setResenados(ids)
+        } catch (error) {
+            console.error("Error al obtener los camioneros reseñados:", error);
+            return [];
+        } 
+    }
+    
 
     const fetchResenas = async () => {
         try {
@@ -126,6 +142,7 @@ const MiPerfilCamionero = () => {
         if (user?.userId) {
             fetchCamionero();
             fetchResenas();
+            fetchEmpresasResenados();
         }
     }, [user]);
 
@@ -154,6 +171,17 @@ const MiPerfilCamionero = () => {
         }
     }, [camionero]);
 
+    const handleSubmitResenaWrapper = async (resenaData: any) => {
+        try {
+          await handleAddResena(resenaData);
+          await fetchOfertasCamionero();
+          await fetchEmpresasResenados();
+          setShowResenaModal(false);
+          setEmpresaAResenar(null);
+        } catch (error) {
+          console.error("Error en el proceso completo:", error);
+        }
+      };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.container}>
@@ -201,7 +229,9 @@ const MiPerfilCamionero = () => {
                         {empresasRecientes.length === 0 ? (
                             <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
                         ) : (
-                            empresasRecientes.map(empresa => (
+                            empresasRecientes
+                            .filter(empresa => !(resenados.includes(empresa.userId)))
+                            .map(empresa => (
 
                                 < View key={`empresa-${empresa.id}`} style={styles.empresaCard}>
                                     {/* Header con imagen y nombre */}
@@ -355,7 +385,7 @@ const MiPerfilCamionero = () => {
                     setShowResenaModal(false);
                     setEmpresaAResenar(null);
                 }}
-                onSubmit={handleAddResena}
+                onSubmit={handleSubmitResenaWrapper}
                 comentadorId={user?.userId}
                 comentadoId={empresaAResenar?.usuario?.id}
             />
