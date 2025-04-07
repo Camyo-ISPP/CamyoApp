@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -47,12 +46,6 @@ public class EmpresaService {
         empresaRepository.save(empresa);
         return empresa;
     }
-
-	public Empresa actualizarEmpresa(Empresa empresa, int id) throws DataAccessException {
-		Empresa toUpdate = obtenerEmpresaPorId(id);
-		BeanUtils.copyProperties(empresa, toUpdate, "id", "usuario");
-		return guardarEmpresa(toUpdate);
-	}
 
 	@Transactional
 	public void eliminarEmpresa(int id) throws DataAccessException {
