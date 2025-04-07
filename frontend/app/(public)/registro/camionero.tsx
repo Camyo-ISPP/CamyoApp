@@ -88,7 +88,7 @@ login
       const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
       if (!result.canceled && result.assets[0].uri.split(',')[0] === "data:application/pdf;base64") {
         const base64PDF = result.assets[0].uri.split(',')[1];
-        console.log(result)
+
         if (base64PDF) {
           setFormData((prevState) => ({
             ...prevState,

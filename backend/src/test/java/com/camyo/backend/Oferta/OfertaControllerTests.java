@@ -181,4 +181,43 @@ public class OfertaControllerTests {
         mockMvc.perform(put(BASE_URL + "/1/rechazar/1"))
             .andExpect(status().isOk());
     }
+
+    @Test
+    void debeObtenerTrabajoDeOferta() throws Exception {
+        when(ofertaService.obtenerTrabajo(1)).thenReturn(trabajo);
+        mockMvc.perform(get(BASE_URL + "/1/trabajo"))
+            .andExpect(status().isOk());
+    }
+    @Test
+    void debeObtenerCargaDeOferta() throws Exception {
+        when(ofertaService.obtenerCarga(1)).thenReturn(carga);
+        mockMvc.perform(get(BASE_URL + "/1/carga"))
+            .andExpect(status().isOk());
+    }
+    @Test
+    void debeObtenerOfertasPorCamionero() throws Exception {
+        when(ofertaService.obtenerOfertasPorCamionero(1)).thenReturn(List.of(List.of(oferta1)));
+        mockMvc.perform(get(BASE_URL + "/camionero/1"))
+            .andExpect(status().isOk());
+    }
+    @Test
+    void debeObtenerOfertasPorEmpresa() throws Exception {
+        when(ofertaService.obtenerOfertasPorEmpresa(1)).thenReturn(List.of(oferta1));
+        mockMvc.perform(get(BASE_URL + "/empresa/1"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void debePatrocinarOferta() throws Exception {
+        when(ofertaService.patrocinarOferta(1)).thenReturn(oferta1);
+        mockMvc.perform(put(BASE_URL + "/1/patrocinar"))
+            .andExpect(status().isOk());
+    }    
+    @Test
+    void debeDesactivarPatrocinio() throws Exception {
+        doNothing().when(ofertaService).desactivarPatrocinio(1);
+        mockMvc.perform(put(BASE_URL + "/1/desactivar-patrocinio"))
+            .andExpect(status().isOk());
+    }
+
 }

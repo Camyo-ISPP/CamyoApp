@@ -73,7 +73,7 @@ class CamioneroServiceTests {
         authoritiesService.saveAuthorities(authCam);
 
         Authorities authEmp = new Authorities();
-        authCam.setAuthority("Empresa");
+        authEmp.setAuthority("Empresa");
         authoritiesService.saveAuthorities(authEmp);
 
          /*
