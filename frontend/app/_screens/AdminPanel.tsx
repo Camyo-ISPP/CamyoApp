@@ -1,44 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Text, ScrollView, Dimensions, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
-import { router } from "expo-router";
 import axios from "axios";
 import colors from "@/assets/styles/colors";
-import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, AntDesign, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
+import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
+import SuccessModal from "../_components/SuccessModal";
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  rol: string;
-  nombre: string;
-  estado: string;
-}
-
-interface Offer {
-  id: number;
-  titulo: string;
-  tipoOferta: string;
-  estado: string;
-  nombreEmpresa: string;
-  createdAt: string;
-}
+const { width } = Dimensions.get('window');
 
 const AdminPanel = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  const { user, logout } = useAuth();
+  const { user, userToken } = useAuth();
   const [activeTab, setActiveTab] = useState<"users" | "offers">("users");
   const [users, setUsers] = useState<User[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user?.rol !== "ADMIN") {
-      router.replace("/");
-      return;
-    }
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState("");
+  const [deleteAction, setDeleteAction] = useState<() => void>(() => { });
 
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+
+  useEffect(() => {
     fetchData();
   }, [activeTab]);
 
@@ -51,7 +37,7 @@ const AdminPanel = () => {
         const response = await axios.get(`${BACKEND_URL}/usuarios`);
         setUsers(response.data);
       } else {
-        const response = await axios.get(`${BACKEND_URL}/ofertas`);
+        const response = await axios.get(`${BACKEND_URL}/ofertas/info`);
         setOffers(response.data);
       }
     } catch (err) {
@@ -62,113 +48,141 @@ const AdminPanel = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: number) => {
-    Alert.alert(
-      "Confirmar eliminación",
-      "¿Estás seguro de que quieres eliminar este usuario?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        { 
-          text: "Eliminar", 
-          onPress: async () => {
-            try {
-              await axios.delete(`${BACKEND_URL}/admin/users/${userId}`);
-              setUsers(users.filter(u => u.id !== userId));
-            } catch (err) {
-              setError("Error al eliminar el usuario");
-              console.error("Error deleting user:", err);
-            }
-          }
+  const triggerDelete = (type: "user" | "offer", id: number) => {
+    const entityName = type === "user" ? "usuario" : "oferta";
+    setDeleteMessage(`¿Estás seguro de que quieres eliminar este ${entityName}?`);
+    setDeleteAction(() => async () => {
+      try {
+        const response = await axios.delete(`${BACKEND_URL}/${type === "user" ? "usuarios" : "ofertas"}/${id}`, {
+          headers: { Authorization: `Bearer ${userToken}` },
+        });
+        if (type === "user") {
+          setUsers(users.filter(u => u.id !== id));
+        } else {
+          setOffers(offers.filter(o => o.id !== id));
         }
-      ]
-    );
+
+        if (response.status === 204) {
+          setSuccessModalVisible(true);
+          setTimeout(() => {
+            setSuccessModalVisible(false);
+          }, 1500);
+        }
+
+      } catch (err) {
+        setError(`Error al eliminar el ${entityName}`);
+        console.error(`Error deleting ${entityName}:`, err);
+      } finally {
+        setIsDeleteModalVisible(false);
+      }
+    });
+    setIsDeleteModalVisible(true);
   };
 
-  const handleDeleteOffer = async (offerId: number) => {
-    Alert.alert(
-      "Confirmar eliminación",
-      "¿Estás seguro de que quieres eliminar esta oferta?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel"
-        },
-        { 
-          text: "Eliminar", 
-          onPress: async () => {
-            try {
-              await axios.delete(`${BACKEND_URL}/admin/offers/${offerId}`);
-              setOffers(offers.filter(o => o.id !== offerId));
-            } catch (err) {
-              setError("Error al eliminar la oferta");
-              console.error("Error deleting offer:", err);
-            }
-          }
-        }
-      ]
-    );
-  };
+  const renderUserItem = (user) => {
+    if (user.authority.authority === "ADMIN") return null; 
 
-  const renderUserItem = (user: User) => (
-    <View key={user.id} style={styles.card}>
-      <View style={styles.cardHeader}>
-        <FontAwesome 
-          name={user.rol === "EMPRESA" ? "building" : user.rol === "CAMIONERO" ? "truck" : "user"} 
-          size={24} 
-          color={colors.primary} 
-        />
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardTitle}>{user.nombre || user.username}</Text>
-          <Text style={styles.cardSubtitle}>{user.email}</Text>
-          <View style={styles.cardBadge}>
-            <Text style={styles.badgeText}>{user.rol}</Text>
-            <Text style={[styles.badgeText, { 
-              color: user.estado === "ACTIVO" ? colors.green : colors.red 
-            }]}>
-              {user.estado}
+    else return (
+      <View key={user.id} style={styles.card}>
+
+      <View style={styles.offerMainInfo}>
+        <Text style={styles.offerPosition}>{user.nombre}</Text>
+        <View style={styles.companyInfo}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome5 name="envelope" size={14} color={colors.primary} />
+            <Text style={styles.companyName}>
+              {user?.email}
             </Text>
+          </View>
+
+          <Text style={{ color: colors.secondary }}>  |  </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialIcons name="location-on" size={16} color={colors.secondary} />
+            <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{user?.localizacion}</Text>
+          </View>
+        </View>
+
+        <View style={styles.detailRow}>
+          <View style={styles.offerDetailsTagBase}>
+            <FontAwesome5
+              name={user.authority.authority == "EMPRESA" ? "building" : "truck"}
+              size={14}
+              color={colors.white}
+            />
+            <Text style={styles.detailText}>{user?.authority.authority}</Text>
           </View>
         </View>
       </View>
-      <TouchableOpacity 
-        style={styles.deleteButton}
-        onPress={() => handleDeleteUser(user.id)}
-      >
-        <MaterialIcons name="delete" size={20} color={colors.red} />
-      </TouchableOpacity>
-    </View>
-  );
 
-  const renderOfferItem = (offer: Offer) => (
-    <View key={offer.id} style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Ionicons 
-          name={offer.tipoOferta === "CARGA" ? "cube" : "briefcase"} 
-          size={24} 
-          color={colors.primary} 
-        />
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardTitle}>{offer.titulo}</Text>
-          <Text style={styles.cardSubtitle}>{offer.nombreEmpresa}</Text>
-          <View style={styles.cardBadge}>
-            <Text style={styles.badgeText}>{offer.tipoOferta}</Text>
-            <Text style={[styles.badgeText, { 
-              color: offer.estado === "ABIERTA" ? colors.green : colors.red 
-            }]}>
-              {offer.estado}
-            </Text>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => triggerDelete("user", user.id)}
+      >
+        <MaterialIcons name="delete" size={16} color={colors.white} />
+        <Text style={styles.deleteButtonText}>Eliminar</Text>
+      </TouchableOpacity>
+    </View>)
+  };
+
+  const renderOfferItem = (offer) => (
+    <View key={offer.id} style={styles.offerCard}>
+      <View style={styles.offerContent}>
+        <View style={styles.offerHeader}>
+          <View style={styles.offerMainInfo}>
+            <Text style={styles.offerPosition}>{offer.titulo}</Text>
+            <View style={styles.companyInfo}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <FontAwesome5 name="building" size={14} color={colors.primary} />
+                <Text style={styles.companyName}>
+                  {offer?.nombreEmpresa}
+                </Text>
+              </View>
+
+              <Text style={{ color: colors.secondary }}>  |  </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MaterialIcons name="location-on" size={16} color={colors.secondary} />
+                <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{offer?.localizacion}</Text>
+              </View>
+            </View>
+
+            <View style={styles.detailRow}>
+              <View style={[
+                styles.offerDetailsTagBase,
+                offer.tipoOferta.toLowerCase() === 'trabajo' ? styles.offerDetailsTagWork : styles.offerDetailsTagLoad
+              ]}>
+                <Ionicons
+                  name={offer.tipoOferta === "CARGA" ? "cube-outline" : "briefcase-outline"}
+                  size={14}
+                  color={colors.white}
+                />
+                <Text style={styles.detailText}>{offer.tipoOferta}</Text>
+              </View>
+
+              <View style={styles.offerDetailsTagLicense}>
+                <AntDesign name="idcard" size={12} color={colors.white} />
+                <Text style={styles.detailText}>{offer.licencia.replace(/_/g, '+')}</Text>
+              </View>
+
+              <View style={styles.offerDetailsTagExperience}>
+                <MaterialIcons name="timelapse" size={12} color={colors.white} />
+                <Text style={styles.detailText}>{'>' + offer.experiencia} años</Text>
+              </View>
+            </View>
           </View>
+
+          <View style={styles.priceContainer}>
+            <Text style={styles.offerSalary}>{offer.sueldo}€</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => triggerDelete("offer", offer.id)}
+          >
+            <MaterialIcons name="delete" size={16} color={colors.white} />
+            <Text style={styles.deleteButtonText}>Eliminar</Text>
+          </TouchableOpacity>
         </View>
       </View>
-      <TouchableOpacity 
-        style={styles.deleteButton}
-        onPress={() => handleDeleteOffer(offer.id)}
-      >
-        <MaterialIcons name="delete" size={20} color={colors.red} />
-      </TouchableOpacity>
     </View>
   );
 
@@ -192,60 +206,96 @@ const AdminPanel = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+
+      <View style={styles.headerBanner}>
         <Text style={styles.headerTitle}>Panel de Administración</Text>
-        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-          <MaterialIcons name="logout" size={20} color={colors.white} />
-          <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
-        </TouchableOpacity>
+        <Text style={styles.headerSubtitle}>Filtra y encuentra el trabajo perfecto para ti</Text>
       </View>
 
-      <View style={styles.tabsContainer}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === "users" && styles.activeTab]}
-          onPress={() => setActiveTab("users")}
-        >
-          <Text style={[styles.tabText, activeTab === "users" && styles.activeTabText]}>
-            Usuarios ({users.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === "offers" && styles.activeTab]}
-          onPress={() => setActiveTab("offers")}
-        >
-          <Text style={[styles.tabText, activeTab === "offers" && styles.activeTabText]}>
-            Ofertas ({offers.length})
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <View style={styles.mainContainer}>
+        <View style={styles.tabsContainer}>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === "users" && styles.activeTab]}
+            onPress={() => setActiveTab("users")}
+          >
+            <Text style={[styles.tabText, activeTab === "users" && styles.activeTabText]}>
+              Usuarios ({users.length - 1})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === "offers" && styles.activeTab]}
+            onPress={() => setActiveTab("offers")}
+          >
+            <Text style={[styles.tabText, activeTab === "offers" && styles.activeTabText]}>
+              Ofertas ({offers.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {activeTab === "users" ? (
-        users.length > 0 ? (
-          users.map(renderUserItem)
+        {activeTab === "users" ? (
+          users.length > 0 ? (
+            users.map(renderUserItem)
+          ) : (
+            <View style={styles.emptyState}>
+              <MaterialIcons name="people-outline" size={48} color={colors.mediumGray} />
+              <Text style={styles.emptyText}>No hay usuarios registrados</Text>
+            </View>
+          )
+        ) : offers.length > 0 ? (
+          offers.map(renderOfferItem)
         ) : (
           <View style={styles.emptyState}>
-            <MaterialIcons name="people-outline" size={48} color={colors.mediumGray} />
-            <Text style={styles.emptyText}>No hay usuarios registrados</Text>
+            <MaterialIcons name="work-outline" size={48} color={colors.mediumGray} />
+            <Text style={styles.emptyText}>No hay ofertas publicadas</Text>
           </View>
-        )
-      ) : offers.length > 0 ? (
-        offers.map(renderOfferItem)
-      ) : (
-        <View style={styles.emptyState}>
-          <MaterialIcons name="work-outline" size={48} color={colors.mediumGray} />
-          <Text style={styles.emptyText}>No hay ofertas publicadas</Text>
-        </View>
-      )}
+        )}
+
+        <ConfirmDeleteModal
+          isVisible={isDeleteModalVisible}
+          onCancel={() => setIsDeleteModalVisible(false)}
+          onConfirm={deleteAction}
+          message={deleteMessage}
+        />
+
+        <SuccessModal
+          isVisible={successModalVisible}
+          onClose={() => setSuccessModalVisible(false)}
+          message="¡Se ha eliminado correctamente!"
+        />
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollViewContent: {
     flexGrow: 1,
-    padding: 20,
-    backgroundColor: colors.lightGray,
+    backgroundColor: "#F5F5F5",
+  },
+  headerBanner: {
+    width: '100%',
+    paddingVertical: 25,
+    paddingHorizontal: '10%',
+    backgroundColor: colors.secondary,
+    marginBottom: 25,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: "#fff",
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 20,
+    color: "#fff",
+    opacity: 0.9,
+},
+  mainContainer: {
+    width: '70%',
+    alignSelf: 'center',
+    paddingBottom: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -280,11 +330,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.secondary,
   },
   logoutButton: {
     flexDirection: "row",
@@ -369,10 +414,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
   },
-  deleteButton: {
-    padding: 8,
-    marginLeft: 10,
-  },
   emptyState: {
     flex: 1,
     justifyContent: "center",
@@ -384,6 +425,128 @@ const styles = StyleSheet.create({
     color: colors.mediumGray,
     marginTop: 10,
     textAlign: "center",
+  },
+  offerCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: width < 768 ? 12 : 16,
+    marginBottom: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+    borderLeftWidth: 2,
+    borderLeftColor: '#E0E0E0',
+    position: 'relative',
+  },
+  offerContent: {
+    paddingHorizontal: 5,
+    width: '100%',
+  },
+  offerHeader: {
+    flexDirection: width < 768 ? 'column' : 'row',
+    alignItems: width < 768 ? 'flex-start' : 'center',
+  },
+  offerMainInfo: {
+    flex: 1,
+    marginLeft: width < 768 ? 0 : 12,
+    marginRight: width < 768 ? 0 : 12,
+  },
+  offerPosition: {
+    fontSize: width < 768 ? 17 : 19,
+    fontWeight: '700',
+    color: colors.secondary,
+    marginBottom: 4,
+    lineHeight: 24,
+  },
+  companyInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  companyName: {
+    fontSize: width < 768 ? 14 : 16,
+    fontWeight: '700',
+    color: colors.primary,
+    marginLeft: 6,
+  },
+  detailText: {
+    fontSize: width < 768 ? 10 : 12,
+    color: colors.white,
+    fontWeight: '700',
+    marginRight: 8,
+    marginLeft: 8,
+    justifyContent: 'center',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  offerDetailsTagBase: {
+    flexDirection: "row",
+    borderRadius: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    backgroundColor: colors.secondary,
+  },
+  offerDetailsTagWork: {
+    backgroundColor: '#6C9BCF',
+  },
+  offerDetailsTagLoad: {
+    backgroundColor: '#D7B373',
+  },
+  offerDetailsTagLicense: {
+    backgroundColor: colors.primary,
+    flexDirection: "row",
+    borderRadius: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    alignItems: "center",
+  },
+  offerDetailsTagExperience: {
+    backgroundColor: colors.green,
+    flexDirection: "row",
+    borderRadius: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    alignItems: "center",
+  },
+  offerSalary: {
+    fontSize: width < 768 ? 22 : 26,
+    fontWeight: '700',
+    color: colors.secondary,
+    textAlign: 'center',
+    marginRight: width < 768 ? 10 : 30,
+    marginTop: width < 768 ? 10 : 0,
+  },
+  priceContainer: {
+    justifyContent: 'center',
+    marginHorizontal: width < 768 ? 0 : 15,
+    alignSelf: width < 768 ? 'flex-start' : 'center',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.red,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 5,
+  },
+  deleteButtonText: {
+    color: colors.white,
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });
 

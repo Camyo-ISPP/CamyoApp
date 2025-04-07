@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   heroSubtitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: 'white',
     textAlign: 'center',
     opacity: 0.9,
