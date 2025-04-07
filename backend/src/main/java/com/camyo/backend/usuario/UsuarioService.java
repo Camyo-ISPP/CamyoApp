@@ -1,10 +1,7 @@
 package com.camyo.backend.usuario;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,8 +13,6 @@ import org.springframework.security.core.Authentication;
 
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.resena.Resena;
-
-import jakarta.validation.Valid;
 
 @Service
 public class UsuarioService {
@@ -33,26 +28,9 @@ public class UsuarioService {
 		this.usuarioRepository = usuarioRepository;
 	}
 
-	@Transactional(readOnly = true)
-    public List<Usuario> obtenerUsuarios() {
-        Iterable<Usuario> usuariosIterable = usuarioRepository.findAll();
-        return StreamSupport.stream(usuariosIterable.spliterator(), false)
-                            .collect(Collectors.toList());
-    }
-
     @Transactional(readOnly = true)
 	public Usuario obtenerUsuarioPorId(Integer id) {
 		return usuarioRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
-	}
-
-    @Transactional(readOnly = true)
-	public Usuario obtenerUsuarioPorEmail(String email) {
-		return usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", email));
-	}
-
-	@Transactional(readOnly = true)
-	public Usuario obtenerUsuarioPorUsername(String username) {
-		return usuarioRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("Usuario", "username", username));
 	}
 
     public Boolean existeUsuarioPorUsername(String username) {
@@ -103,37 +81,14 @@ public class UsuarioService {
         }
         return (float) media / list.size();     
     }
-
-    public Usuario updateUser(@Valid Usuario usuario, Integer idToUpdate) {
-        Usuario toUpdate = obtenerUsuarioPorId(idToUpdate);
-
-        System.out.println("TO UPDATE:" + toUpdate.getEmail());
-        System.out.println("UPDATED" + usuario.getEmail());
-    
-        if (!toUpdate.getEmail().equals(usuario.getEmail())) {
-            if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-                throw new IllegalArgumentException("El email ya está en uso por otro usuario.");
-            }
-            toUpdate.setEmail(usuario.getEmail());
-        }
-    
-        BeanUtils.copyProperties(usuario, toUpdate, "id", "reseñas", "password", "email");
-    
-        if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
-            toUpdate.setPassword(encoder.encode(usuario.getPassword()));
-        }
-        usuarioRepository.save(toUpdate);
-    
-        return toUpdate;
-    }
     
     public Integer obtenerCamioneroIdPorUsuarioId(Integer camioneroId) {
         return usuarioRepository.findCamioneroIdByUsuarioId(camioneroId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el camioneroId: " + camioneroId));
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el camioneroId: " + camioneroId));
     }
 
     public Integer obtenerEmpresaIdPorUsuarioId(Integer empresaId) {
         return usuarioRepository.findEmpresaIdByUsuarioId(empresaId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el empresaId: " + empresaId));
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el empresaId: " + empresaId));
     }  
 }
