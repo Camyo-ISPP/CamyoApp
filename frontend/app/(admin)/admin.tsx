@@ -1,14 +1,13 @@
 import React from 'react';
 import AdminRoute from '../../security/AdminRoute';
-import WIP from '../_screens/WIP';
+import AdminPanel from '../_screens/AdminPanel';
 
-const WorkInProgressScreen: React.FC = () => {
-
+const AdminScreen: React.FC = () => {
     return (
         <AdminRoute>
-            <WIP />
+            <AdminPanel />
         </AdminRoute>
     );
 };
 
-export default WorkInProgressScreen;
+export default AdminScreen;

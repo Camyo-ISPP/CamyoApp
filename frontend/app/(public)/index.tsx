@@ -182,10 +182,16 @@ export default function Index() {
                     )}
                   </>
                 ) : (
-                  <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
+                  <>
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
                     <MaterialIcons name="logout" size={20} color="white" style={{ marginRight: 8 }} />
                     <Text style={styles.buttonText}>Cerrar sesión</Text>
                   </TouchableOpacity>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/admin")}>
+                      <FontAwesome5 name="wrench" size={18} color="#f15025" style={{ marginRight: 8 }} />
+                      <Text style={styles.secondaryButtonText}>Panel de Administración</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
 
               </View>

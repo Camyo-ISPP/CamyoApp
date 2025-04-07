@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children }) {
             if (user == null) {
                 router.replace("/login");
             } else if (user.rol === "ADMIN") {
-                router.replace("/workinprogress");
+                router.replace("/admin");
             } else {
                 setChecking(false);
             }
