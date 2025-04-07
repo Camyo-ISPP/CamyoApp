@@ -30,6 +30,7 @@ public class Usuario {
     private String telefono;
 
     @Size(max = 30, message = "El nombre de usuario no puede tener más de 30 caracteres")
+    @Pattern(regexp = "^[A-Za-z0-9ÑñÁáÉéÍíÓóÚúÝýÜü._-]+$", message = "El nombre de usuario solo puede contener caracteres alfanuméricos, punto, guion y guion bajo")
     @Column(unique = true)
 	String username;
     
