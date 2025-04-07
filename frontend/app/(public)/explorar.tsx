@@ -287,8 +287,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                     ]}
                                     onPress={() => setSelectedOfertaType('cargas')}
                                 >
-                                    <MaterialIcons
-                                        name="local-shipping"
+                                    <Ionicons
+                                        name="cube"
                                         size={18}
                                         color={selectedOfertaType === 'cargas' ? '#fff' : '#666'}
                                     />
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     headerSubtitle: {
-        fontSize: 16,
+        fontSize: 18,
         color: colors.white,
         opacity: 0.9,
     },

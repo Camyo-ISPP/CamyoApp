@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
-import { FontAwesome5, MaterialIcons, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, AntDesign, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
@@ -38,7 +38,7 @@ const ListadoOfertasPublico = ({
                             )}
                             <View style={styles.offerContent}>
                                 <View style={styles.offerHeader}>
-                                    
+
                                     <Image
                                         source={
                                             item?.empresa?.usuario?.foto
@@ -73,7 +73,11 @@ const ListadoOfertasPublico = ({
                                                 styles.offerDetailsTagBase,
                                                 item.tipoOferta.toLowerCase() === 'trabajo' ? styles.offerDetailsTagWork : styles.offerDetailsTagLoad
                                             ]}>
-                                                <MaterialIcons name="work-outline" size={12} color={colors.white} />
+                                                <Ionicons
+                                                    name={item.tipoOferta === "CARGA" ? "cube-outline" : "briefcase-outline"}
+                                                    size={14}
+                                                    color={colors.white}
+                                                />
                                                 <Text style={styles.detailText}>{item.tipoOferta}</Text>
                                             </View>
 

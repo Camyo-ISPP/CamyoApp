@@ -80,6 +80,15 @@ export default function CamyoWebNavBar({ onSearch }) {
                   <NavSeparator />
                 </>
               )}
+              {user?.rol === "ADMIN" && (
+                <>
+                  <NavButton 
+                    text="Panel de Administración" 
+                    onPress={() => router.push("/admin")} 
+                  />
+                  <NavSeparator />
+                </>
+              )}
               <NavButton 
                 text="Explorar Ofertas" 
                 onPress={() => router.push("/explorar")} 

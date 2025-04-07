@@ -146,36 +146,6 @@ public class DataInitializer {
                                         + "(226, 10, '98765432G', 'NACIONAL', true, '2025-05-31', 247),"
                                         + "(227, 10, '98765422I', 'INTERNACIONAL', true, '2025-05-31', 248)");
 
-                                // Insert Camiones
-                                statement.addBatch("INSERT IGNORE INTO camion (id, matricula, modelo, foto, notas, camionero_id) VALUES "
-                                        + "(201, '1234ABC', 'Ford Transit', NULL, 'Camión en excelente estado', 201),"
-                                        + "(202, '5678DEF', 'Mercedes Benz Sprinter', NULL, NULL, 202),"
-                                        + "(203, '8765GHI', 'Mercedes Benz Actros', NULL, NULL, 203),"
-                                        + "(204, '4321JKL', 'Volksvagen Crafter', NULL, 'Recientemente ha pasado la revision', 204), "
-                                        + "(205, '1235ABC', 'Ford Transit', NULL, 'Camión en excelente estado', 205),"
-                                        + "(206, '5679DEF', 'Mercedes Benz Sprinter', NULL, NULL, 206),"
-                                        + "(207, '8766GHI', 'Mercedes Benz Actros', NULL, NULL, 207),"
-                                        + "(208, '4322JKL', 'Volksvagen Crafter', NULL, 'Recientemente ha pasado la revision', 208), "
-                                        + "(209, '1236ABC', 'Ford Transit', NULL, 'Camión en excelente estado', 209),"
-                                        + "(210, '5680DEF', 'Mercedes Benz Sprinter', NULL, NULL, 210),"
-                                        + "(211, '8767GHI', 'Mercedes Benz Actros', NULL, NULL, 211),"
-                                        + "(212, '4323JKL', 'Volksvagen Crafter', NULL, 'Recientemente ha pasado la revision', 212), "
-                                        + "(213, '1237ABC', 'Ford Transit', NULL, 'Camión en excelente estado', 213),"
-                                        + "(214, '5681DEF', 'Mercedes Benz Sprinter', NULL, NULL, 214),"
-                                        + "(215, '8768GHI', 'Mercedes Benz Actros', NULL, NULL, 215),"
-                                        + "(216, '4325JKL', 'Volksvagen Crafter', NULL, 'Recientemente ha pasado la revision', 216), "
-                                        + "(217, '1238ABC', 'Ford Transit', NULL, 'Camión en excelente estado', 217),"
-                                        + "(218, '5682DEF', 'Mercedes Benz Sprinter', NULL, NULL, 218),"
-                                        + "(219, '8769GHI', 'Mercedes Benz Actros', NULL, NULL, 219),"
-                                        + "(220, '1239ABC', 'Ford Transit', NULL, 'Camión en excelente estado', 220),"
-                                        + "(221, '5683DEF', 'Mercedes Benz Sprinter', NULL, NULL, 221),"
-                                        + "(222, '4326JKL', 'Volksvagen Crafter', NULL, 'Recientemente ha pasado la revision', 222),"
-                                        + "(223, '1766SHI', 'Mercedes Benz Actros', NULL, NULL, 223),"
-                                        + "(224, '4222SKL', 'Volksvagen Crafter', NULL, 'Recientemente ha pasado la revision', 224),"
-                                        + "(225, '1136SBC', 'Ford Transit', NULL, 'Camión en excelente estado', 225),"
-                                        + "(226, '5380SEF', 'Mercedes Benz Sprinter', NULL, NULL, 226),"
-                                        + "(227, '8567SHI', 'Mercedes Benz Actros', NULL, NULL, 227)");
-
                                 // Insert Camionero tarjetas
                                 statement.addBatch("INSERT IGNORE INTO camionero_tarjetas_autonomo (camionero_id, tarjetas_autonomo) VALUES "
                                         + "(208, 0),"
