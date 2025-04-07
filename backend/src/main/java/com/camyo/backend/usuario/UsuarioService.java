@@ -1,6 +1,8 @@
 package com.camyo.backend.usuario;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -27,6 +29,13 @@ public class UsuarioService {
 		this.encoder = encoder;
 		this.usuarioRepository = usuarioRepository;
 	}
+
+    @Transactional(readOnly = true)
+    public List<Usuario> obtenerUsuarios() {
+        Iterable<Usuario> usuariosIterable = usuarioRepository.findAll();
+        return StreamSupport.stream(usuariosIterable.spliterator(), false)
+            .collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
 	public Usuario obtenerUsuarioPorId(Integer id) {

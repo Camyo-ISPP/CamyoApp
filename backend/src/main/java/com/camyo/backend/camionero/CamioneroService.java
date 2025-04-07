@@ -3,7 +3,6 @@ package com.camyo.backend.camionero;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +28,6 @@ public class CamioneroService {
     }
 
     @Transactional(readOnly = true)
-    public List<Camionero> obtenerTodosCamioneros() {
-        return camioneroRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
     public Camionero obtenerCamioneroPorId(Integer id) {
         Optional<Camionero> optionalCamionero = camioneroRepository.findById(id);
         return optionalCamionero.orElseThrow(
@@ -55,15 +49,6 @@ public class CamioneroService {
     @Transactional()
     public Camionero guardarCamionero(Camionero camionero) {
         return camioneroRepository.save(camionero);
-    }
-
-
-    @Transactional()
-    public Camionero actualizarCamionero(Integer id, Camionero camioneroUpdated) {
-        Camionero existingCamionero = obtenerCamioneroPorId(id);
-        // Ignoramos "id", "usuario", y además "camiones" y "ofertas" si no queremos sobreescribirlas
-        BeanUtils.copyProperties(camioneroUpdated, existingCamionero, "id", "usuario", "camiones", "ofertas");
-        return guardarCamionero(existingCamionero);
     }
     
     @Transactional()
