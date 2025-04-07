@@ -39,7 +39,7 @@ export default function CamyoWebNavBar({ onSearch }) {
           <TextInput 
               style={styles.searchInput} 
               placeholder="Buscar ofertas..." 
-              placeholderTextColor={colors.lightGray} 
+              placeholderTextColor={colors.darkGray} 
               value={searchQuery} 
               onChangeText={setSearchQuery} 
               onSubmitEditing={handleSearch}
@@ -189,18 +189,21 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 15,
-    fontSize: 14,
+    fontSize: 15,
     outlineStyle: 'none',
+    borderColor: colors.lightGray,
   },
   searchButton: {
     padding: 10,
     backgroundColor: colors.primary,
     borderRadius: 0,
+    borderWidth: 1,
+    borderColor: colors.primary,
   },
   button: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   primaryButton: {
     backgroundColor: colors.primary,
@@ -208,8 +211,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.secondary,
-    fontWeight: "600",
-    fontSize: 14,
+    fontWeight: "700",
+    fontSize: 16,
   },
   primaryButtonText: {
     color: colors.white,

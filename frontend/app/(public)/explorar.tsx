@@ -593,11 +593,11 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 const styles = StyleSheet.create({
     scrollViewContent: {
         flexGrow: 1,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: "#f9f9f9",
     },
     webContainer: {
         flex: 1,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: "#f9f9f9",
         alignItems: 'center',
         marginBottom: 50,
     },
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
     filtersCard: {
         width: '30%',
         backgroundColor: colors.white,
-        borderRadius: 12,
+        borderRadius: 14,
         padding: 20,
         marginRight: 20,
         height: 'auto',
@@ -638,8 +638,8 @@ const styles = StyleSheet.create({
             width: 0,
             height: 4,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
         elevation: 5,
     },
     sectionTitle: {
@@ -686,6 +686,7 @@ const styles = StyleSheet.create({
         height: '100%',
         color: '#333',
         fontSize: 14,
+        outlineStyle: 'none',
     },
     searchButton: {
         paddingVertical: 12,
@@ -819,24 +820,6 @@ const styles = StyleSheet.create({
     offersSection: {
         width: '70%',
         flexShrink: 1,
-    },
-    card: {
-        backgroundColor: colors.white,
-        padding: 20,
-        marginVertical: 10,
-        borderRadius: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderLeftWidth: 4,
-        borderColor: "red",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
     },
     companyLogo: {
         height: 90,
