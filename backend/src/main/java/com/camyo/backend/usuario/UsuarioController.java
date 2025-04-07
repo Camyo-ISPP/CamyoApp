@@ -44,6 +44,16 @@ public class UsuarioController {
         this.ofertaService = ofertaService;
 	}
 
+    @Operation(summary = "Obtener todos los usuarios", description = "Obtiene la lista de todos los usuarios registrados.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuarios encontrados y devueltos")
+    })
+    @GetMapping
+    public ResponseEntity<List<Usuario>> obtenerUsuarios() {
+        List<Usuario> usuarios = usuarioService.obtenerUsuarios();
+        return new ResponseEntity<>(usuarios, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}/valoracion")
     public ResponseEntity<Float> obtenerValoracionMedia(@PathVariable Integer id) {
         Float valoracionMedia = usuarioService.obtenerValoracionMedia(id);
