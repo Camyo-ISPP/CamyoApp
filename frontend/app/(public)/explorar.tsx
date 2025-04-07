@@ -686,6 +686,7 @@ const styles = StyleSheet.create({
         height: '100%',
         color: '#333',
         fontSize: 14,
+        outlineStyle: 'none',
     },
     searchButton: {
         paddingVertical: 12,

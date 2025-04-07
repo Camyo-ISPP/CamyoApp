@@ -88,15 +88,15 @@ const EmpresasLista = () => {
                 source={empresa.usuario.foto ? { uri: `data:image/png;base64,${empresa.usuario.foto}` } : defaultImage}
                 style={styles.profileImage}
               />
-              
+
               <View style={styles.headerTextContainer}>
                 <Text style={styles.companyName}>{empresa.usuario.nombre}</Text>
-                
+
                 <View style={styles.locationContainer}>
                   <MaterialIcons name="location-on" size={16} color={colors.secondary} />
                   <Text style={styles.locationText}>{empresa.usuario.localizacion}</Text>
                 </View>
-                
+
                 {user && user.rol === "EMPRESA" && empresa.id === user.id && (
                   <View style={styles.ownCompanyBadge}>
                     <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
@@ -108,27 +108,27 @@ const EmpresasLista = () => {
 
             {/* Company Details */}
             <View style={styles.detailsContainer}>
-              <DetailItem 
-                icon="globe" 
-                text={empresa.web} 
-                link 
+              <DetailItem
+                icon="globe"
+                text={empresa.web}
+                link
                 label="Web"
               />
-              <DetailItem 
-                icon="id-card" 
-                text={empresa.nif} 
+              <DetailItem
+                icon="id-card"
+                text={empresa.nif}
                 label="NIF"
               />
-              <DetailItem 
-                icon="phone" 
-                text={empresa.usuario.telefono} 
+              <DetailItem
+                icon="phone"
+                text={empresa.usuario.telefono}
                 label="Teléfono"
               />
             </View>
 
             {/* Actions */}
             <View style={styles.actionsContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.detailsButton}
                 onPress={() => router.push(`/empresa/${empresa.id}`)}
               >
@@ -152,20 +152,20 @@ const EmpresasLista = () => {
           </View>
         ))}
       </View>
-      
+
       <WebFooter />
     </ScrollView>
   );
 };
 
-const DetailItem = ({ 
-  icon, 
-  text, 
-  link = false, 
-  label 
-}: { 
-  icon: keyof typeof FontAwesome.glyphMap; 
-  text?: string; 
+const DetailItem = ({
+  icon,
+  text,
+  link = false,
+  label
+}: {
+  icon: keyof typeof FontAwesome.glyphMap;
+  text?: string;
   link?: boolean;
   label?: string;
 }) => (
@@ -174,12 +174,12 @@ const DetailItem = ({
       <FontAwesome style={styles.detailIcon} name={icon} size={14} color={colors.mediumGray} />
       {label && <Text style={styles.detailLabel}>{label}</Text>}
     </View>
-    
+
     {text ? (
       link ? (
         <TouchableOpacity onPress={() => Linking.openURL(text.startsWith('http') ? text : `https://${text}`)}>
           <Text style={styles.detailLink} ellipsizeMode="tail">
-            {text}
+            {text.replace(/(^\w+:|^)\/\//, '').replace('www.', '')}
           </Text>
         </TouchableOpacity>
       ) : (
@@ -327,6 +327,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    overflow: 'hidden',
   },
   detailLabelContainer: {
     flexDirection: 'row',
@@ -353,7 +354,7 @@ const styles = StyleSheet.create({
     color: "#0969CFFF",
     fontWeight: '500',
     textDecorationLine: 'underline',
-    width: '65%',
+    width: '100%',
     textAlign: 'right',
   },
   detailEmpty: {

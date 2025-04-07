@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: 'white',
     paddingVertical: 15,
+    paddingHorizontal: 5,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    width: 170,
+    minWidth: 190,
     marginTop: 15,
   },
   dropdownButton: {

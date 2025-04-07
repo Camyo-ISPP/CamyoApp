@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     profileImage: {
         width: 150,
         height: 150,
-        borderRadius: 70,
+        borderRadius: 75,
         borderWidth: 3,
         borderColor: colors.primary,
         marginLeft: 30,
