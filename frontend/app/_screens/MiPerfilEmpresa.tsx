@@ -17,7 +17,7 @@ const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
   const { setId } = usePayment();
-  const { user, userToken } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [offers, setOffers] = useState<any[]>([]);
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 150,
     height: 150,
-    borderRadius: 70,
+    borderRadius: 75,
     borderWidth: 3,
     borderColor: colors.primary,
     marginLeft: 30,

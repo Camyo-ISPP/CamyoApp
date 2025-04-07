@@ -1,6 +1,7 @@
 package com.camyo.backend.pago;
 
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.oferta.OfertaService;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Usuario;
@@ -44,6 +45,9 @@ public class PagoController {
 
         @Autowired
         private EmpresaService empresaService;
+
+        @Autowired
+        private OfertaService ofertaService;
 
         Dotenv dotenv = Dotenv.load();
 
@@ -141,22 +145,24 @@ public class PagoController {
         public ResponseEntity<String> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
 
                 Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
+                Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
                 PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
 
                 if (paymentIntent.getStatus().equals("succeeded") && suscripciones.contains(requestDto.getCompra())) {
 
-                        Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
                         suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), 9999);
                         return ResponseEntity.ok("Suscripción aplicada con éxito");
 
-                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra()){
-
-                        //patrocinioService.patrocinarOferta(ofertaId, 99999);
-                        return ResponseEntity.ok("Compra aplicada con éxito");
-                
-                } else {
-                        return ResponseEntity.badRequest().build();
+                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra() && requestDto.getOfertaId() != null){
+                        // ofertaId puede ser null, por lo que la comprobación se realiza aquí
+                        if (ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual)) {
+                                ofertaService.patrocinarOferta(requestDto.getOfertaId());
+                                return ResponseEntity.ok("Compra aplicada con éxito");
+                        }
+                        
                 }
+                return ResponseEntity.badRequest().build();
+                
         }
 
 }

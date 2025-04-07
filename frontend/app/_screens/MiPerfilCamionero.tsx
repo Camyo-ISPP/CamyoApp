@@ -8,9 +8,6 @@ import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -170,7 +167,7 @@ const styles = StyleSheet.create({
     profileImage: {
         width: 150,
         height: 150,
-        borderRadius: 70,
+        borderRadius: 75,
         borderWidth: 3,
         borderColor: colors.primary,
         marginLeft: 30,
@@ -272,7 +269,7 @@ const styles = StyleSheet.create({
     pdfButton: {
         backgroundColor: colors.primary,
         padding: 10,
-        borderRadius: 5,
+        borderRadius: 12,
         alignItems: "center",
         marginTop: 10,
     },
