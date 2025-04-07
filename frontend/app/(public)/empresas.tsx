@@ -196,7 +196,7 @@ const DetailItem = ({
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f9f9f9",
   },
   loadingContainer: {
     flex: 1,
