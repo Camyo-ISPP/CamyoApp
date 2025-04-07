@@ -593,11 +593,11 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 const styles = StyleSheet.create({
     scrollViewContent: {
         flexGrow: 1,
-        backgroundColor: colors.lightGray,
+        backgroundColor: '#f9f9f9',
     },
     webContainer: {
         flex: 1,
-        backgroundColor: colors.lightGray,
+        backgroundColor: '#f9f9f9',
         alignItems: 'center',
         marginBottom: 50,
     },

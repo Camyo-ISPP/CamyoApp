@@ -66,6 +66,9 @@ public class EmpresaController {
         return empresa.isPresent() ? new ResponseEntity<>(empresa.get(), HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+     /*
+    * Deprecated
+  */ 
     @Operation(summary = "Guardar empresa", description = "Almacena una empresa en la BD.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Empresa creada con éxito"),
@@ -113,11 +116,16 @@ public class EmpresaController {
     public ResponseEntity<Object> actualizarEmpresa(@RequestBody Empresa empresa, @PathVariable Integer id) {
         try {
             Usuario usuario = usuarioService.obtenerUsuarioActual();
-            Empresa empresaParaActualizar = empresaService.obtenerEmpresaPorId(id);
-            if (!empresaParaActualizar.getUsuario().equals(usuario)) {
-                return new ResponseEntity<>(new MessageResponse("No puede actualizar una empresa que no es suya."), HttpStatus.FORBIDDEN);
-            }     
-            empresa.setUsuario(usuario);
+            try {
+                Empresa empresaParaActualizar = empresaService.obtenerEmpresaPorId(id);
+                if (!empresaParaActualizar.getUsuario().equals(usuario)) {
+                    return new ResponseEntity<>(new MessageResponse("No puede actualizar una empresa que no es suya."), HttpStatus.FORBIDDEN);
+                }     
+                empresa.setUsuario(usuario);
+            } catch (ResourceNotFoundException e) {
+                return new ResponseEntity<>(new MessageResponse("No se ha encontrado la empresa indicada"), HttpStatus.NOT_FOUND);
+
+            }
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new MessageResponse("Debe iniciar sesión para actualizar una empresa."), HttpStatus.FORBIDDEN);
         }
@@ -132,6 +140,8 @@ public class EmpresaController {
             );
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (DataAccessException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -145,9 +155,14 @@ public class EmpresaController {
     public ResponseEntity<Object> eliminarEmpresa(@PathVariable Integer id) {
         try {
             Usuario usuario = usuarioService.obtenerUsuarioActual();
-            Empresa empresaParaEliminar = empresaService.obtenerEmpresaPorId(id);
-            if (!empresaParaEliminar.getUsuario().equals(usuario)) {
-                return new ResponseEntity<>(new MessageResponse("No puede eliminar una empresa que no es suya."), HttpStatus.FORBIDDEN);
+            try {
+                Empresa empresaParaEliminar = empresaService.obtenerEmpresaPorId(id);
+                if (!empresaParaEliminar.getUsuario().equals(usuario)) {
+                    return new ResponseEntity<>(new MessageResponse("No puede eliminar una empresa que no es suya."), HttpStatus.FORBIDDEN);
+                }
+            } catch (ResourceNotFoundException e) {
+                return new ResponseEntity<>(new MessageResponse("No se ha encontrado la empresa indicada"), HttpStatus.NOT_FOUND);
+
             }     
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new MessageResponse("Debe iniciar sesión para eliminar una empresa."), HttpStatus.FORBIDDEN);
@@ -156,8 +171,8 @@ public class EmpresaController {
         try {
             empresaService.eliminarEmpresa(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (DataAccessException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
