@@ -48,7 +48,6 @@ public class EmpresaService {
         return empresa;
     }
 
-	@Transactional
 	public Empresa actualizarEmpresa(Empresa empresa, int id) throws DataAccessException {
 		Empresa toUpdate = obtenerEmpresaPorId(id);
 		BeanUtils.copyProperties(empresa, toUpdate, "id", "usuario");
