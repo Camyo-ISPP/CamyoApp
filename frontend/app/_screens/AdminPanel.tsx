@@ -13,36 +13,49 @@ const AdminPanel = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const { user, userToken } = useAuth();
   const [activeTab, setActiveTab] = useState<"users" | "offers">("users");
-  const [users, setUsers] = useState<User[]>([]);
-  const [offers, setOffers] = useState<Offer[]>([]);
+  const [users, setUsers] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState("");
-  const [deleteAction, setDeleteAction] = useState<() => void>(() => { });
+  const [deleteAction, setDeleteAction] = useState(() => { });
 
   const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    fetchUsers();
+    fetchOffers();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "users") {
+      fetchUsers();
+    } else {
+      fetchOffers();
+    }
   }, [activeTab]);
 
-  const fetchData = async () => {
+  const fetchUsers = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
-      if (activeTab === "users") {
-        const response = await axios.get(`${BACKEND_URL}/usuarios`);
-        setUsers(response.data);
-      } else {
-        const response = await axios.get(`${BACKEND_URL}/ofertas/info`);
-        setOffers(response.data);
-      }
+      const response = await axios.get(`${BACKEND_URL}/usuarios`);
+      setUsers(response.data);
     } catch (err) {
-      setError("Error al cargar los datos");
-      console.error("Error fetching data:", err);
+      setError("Error al cargar los usuarios");
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/info`);
+      setOffers(response.data);
+    } catch (err) {
+      setError("Error al cargar las ofertas");
+      console.error("Error fetching offers:", err);
     } finally {
       setLoading(false);
     }
@@ -80,48 +93,48 @@ const AdminPanel = () => {
   };
 
   const renderUserItem = (user) => {
-    if (user.authority.authority === "ADMIN") return null; 
+    if (user.authority.authority === "ADMIN") return null;
 
     else return (
       <View key={user.id} style={styles.card}>
 
-      <View style={styles.offerMainInfo}>
-        <Text style={styles.offerPosition}>{user.nombre}</Text>
-        <View style={styles.companyInfo}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <FontAwesome5 name="envelope" size={14} color={colors.primary} />
-            <Text style={styles.companyName}>
-              {user?.email}
-            </Text>
+        <View style={styles.offerMainInfo}>
+          <Text style={styles.offerPosition}>{user.nombre}</Text>
+          <View style={styles.companyInfo}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome5 name="envelope" size={14} color={colors.primary} />
+              <Text style={styles.companyName}>
+                {user?.email}
+              </Text>
+            </View>
+
+            <Text style={{ color: colors.secondary }}>  |  </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <MaterialIcons name="location-on" size={16} color={colors.secondary} />
+              <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{user?.localizacion}</Text>
+            </View>
           </View>
 
-          <Text style={{ color: colors.secondary }}>  |  </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialIcons name="location-on" size={16} color={colors.secondary} />
-            <Text style={{ ...styles.detailText, color: colors.secondary, fontSize: 15 }}>{user?.localizacion}</Text>
+          <View style={styles.detailRow}>
+            <View style={styles.offerDetailsTagBase}>
+              <FontAwesome5
+                name={user.authority.authority == "EMPRESA" ? "building" : "truck"}
+                size={14}
+                color={colors.white}
+              />
+              <Text style={styles.detailText}>{user?.authority.authority}</Text>
+            </View>
           </View>
         </View>
 
-        <View style={styles.detailRow}>
-          <View style={styles.offerDetailsTagBase}>
-            <FontAwesome5
-              name={user.authority.authority == "EMPRESA" ? "building" : "truck"}
-              size={14}
-              color={colors.white}
-            />
-            <Text style={styles.detailText}>{user?.authority.authority}</Text>
-          </View>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => triggerDelete("user", user.id)}
-      >
-        <MaterialIcons name="delete" size={16} color={colors.white} />
-        <Text style={styles.deleteButtonText}>Eliminar</Text>
-      </TouchableOpacity>
-    </View>)
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => triggerDelete("user", user.id)}
+        >
+          <MaterialIcons name="delete" size={16} color={colors.white} />
+          <Text style={styles.deleteButtonText}>Eliminar</Text>
+        </TouchableOpacity>
+      </View>)
   };
 
   const renderOfferItem = (offer) => (
@@ -291,7 +304,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#fff",
     opacity: 0.9,
-},
+  },
   mainContainer: {
     width: '70%',
     alignSelf: 'center',
