@@ -39,7 +39,7 @@ export default function CamyoWebNavBar({ onSearch }) {
           <TextInput 
               style={styles.searchInput} 
               placeholder="Buscar ofertas..." 
-              placeholderTextColor={colors.darkGray} 
+              placeholderTextColor={colors.mediumGray2} 
               value={searchQuery} 
               onChangeText={setSearchQuery} 
               onSubmitEditing={handleSearch}
