@@ -2,6 +2,7 @@ package com.camyo.backend.resena;
 
 import com.camyo.backend.auth.payload.response.MessageResponse;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.oferta.OfertaService;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
 import com.camyo.backend.usuario.Authorities;
@@ -38,6 +39,9 @@ class ResenaControllerTests {
 
     @MockitoBean
     private UsuarioService usuarioService;
+
+    @MockitoBean
+    private OfertaService ofertaService;
 
     private Usuario comentado;
     private Usuario comentador;

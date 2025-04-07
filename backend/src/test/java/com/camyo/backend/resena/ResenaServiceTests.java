@@ -2,6 +2,7 @@ package com.camyo.backend.resena;
 
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesRepository;
+import com.camyo.backend.usuario.AuthoritiesService;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioRepository;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
@@ -27,12 +28,13 @@ class ResenaServiceTests {
     private ResenaService resenaService;
 
     @Autowired
-    private ResenaRepository resenaRepository;
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private UsuarioRepository usuarioRepository;
-    @Autowired
     private AuthoritiesRepository authoritiesRepository;
+
+    @Autowired
+    private AuthoritiesService authoritiesService;
 
     private Usuario comentado;
     private Usuario comentador;
@@ -64,24 +66,34 @@ void setup() {
 
        
         r1 = new Resena();
+        r1.setId(null);
         r1.setValoracion(4);
         r1.setComentado(comentado);
         r1.setComentador(comentador);
         r1 = resenaService.crearResena(r1);
 
         r2 = new Resena();
+        r2.setId(null);
         r2.setValoracion(5);
-        r2.setComentado(comentado);
-        r2.setComentador(comentador);
+        r2.setComentado(comentador);
+        r2.setComentador(comentado); // Invertir ya que un usuario no puede hacer dos reseñas del mismo usuario
         r2 = resenaService.crearResena(r2);
     }
 
     @Test
     @Transactional
     void testCrearResena_Exito() {
+        Usuario comentado2 = new Usuario();
+        comentado2.setUsername("ComentadoTest2");
+        comentado2.setEmail("comentado2@ej.com");
+        comentado2.setPassword("123");     
+        comentado2.setAuthority(authoritiesService.findByAuthority("ROLE_USER"));  
+        usuarioRepository.save(comentado2);
+        
         Resena nueva = new Resena();
+        nueva.setId(null);
         nueva.setValoracion(3);
-        nueva.setComentado(comentado);
+        nueva.setComentado(comentado2);
         nueva.setComentador(comentador);
 
         Resena guardada = resenaService.crearResena(nueva);

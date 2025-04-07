@@ -3,6 +3,12 @@ package com.camyo.backend.suscripcion;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.oferta.OfertaService;
+import com.camyo.backend.usuario.Authorities;
+import com.camyo.backend.usuario.AuthoritiesService;
+import com.camyo.backend.usuario.Usuario;
+import com.camyo.backend.usuario.UsuarioService;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,13 +29,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class SuscripcionServiceTests {
 
     @Autowired
-    private SuscripcionService suscripcionService;
+    protected SuscripcionService suscripcionService;
 
     @Autowired
-    private SuscripcionRepository suscripcionRepository;
+    protected SuscripcionRepository suscripcionRepository;
 
     @Autowired
-    private EmpresaService empresaService;
+    protected EmpresaService empresaService;
+
+    @Autowired
+    protected UsuarioService usuarioService;
+
+    @Autowired
+    protected AuthoritiesService authoritiesService;
 
     private Empresa e1;
     private Suscripcion s1;
@@ -37,16 +49,42 @@ class SuscripcionServiceTests {
     @BeforeAll
     @Transactional
     void setup() {
-        // Creas la empresa
+
+        /*
+         * Creamos las authorities para empresas y empresas
+         */
+
+        Authorities authEmp = new Authorities();
+        authEmp.setAuthority("Empresa");
+        authoritiesService.saveAuthorities(authEmp);
+
+        /*
+         * Creamos un usuario
+         */
+        Usuario u1 = new Usuario();
+        u1.setNombre("Manolo");
+        u1.setTelefono("620300400");
+        u1.setUsername("Robertongo");
+        u1.setPassword("12");
+        u1.setEmail("robertongo@gmail.com");
+        u1.setAuthority(authEmp);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u1));
+
+        /*
+         * Creamos la empresa
+         */
         e1 = new Empresa();
-        e1.setId(9999); // set manual si no hay identity
+        e1.setId(null);
         e1.setWeb("http://empresa.test");
-        e1.setNif("A1234567"); 
+        e1.setUsuario(u1);
+        e1.setNif("A12345674"); 
         // ... haz un usuario, etc.
 
         empresaService.guardarEmpresa(e1);
 
-        // Creas suscripción
+        /*
+         * Creamos la suscripción
+         */ 
         s1 = new Suscripcion();
         s1.setNivel(PlanNivel.BASICO);
         s1.setEmpresa(e1);
