@@ -1,6 +1,7 @@
 import React from 'react';
 import AdminRoute from '../../security/AdminRoute';
 import AdminPanel from '../_screens/AdminPanel';
+import withNavigationGuard from '@/hoc/withNavigationGuard';
 
 const AdminScreen: React.FC = () => {
     return (
@@ -10,4 +11,4 @@ const AdminScreen: React.FC = () => {
     );
 };
 
-export default AdminScreen;
+export default withNavigationGuard(AdminScreen);
