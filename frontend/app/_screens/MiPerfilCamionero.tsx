@@ -7,11 +7,13 @@ import defaultImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { usePayment } from "@/contexts/PaymentContext";
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
     const { user } = useAuth();
+    const { setId } = usePayment();
     const router = useRouter();
 
     const [resenas, setResenas] = useState([]);
@@ -55,6 +57,11 @@ const MiPerfilCamionero = () => {
         document.body.removeChild(link);
     };
 
+    const handleRemoveAds = () => {
+        setId("ELIMINAR_ANUNCIOS");
+        router.push("/pago/checkout");
+      }
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.container}>
@@ -79,6 +86,7 @@ const MiPerfilCamionero = () => {
                             <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
                             <Text style={styles.description}>{user.descripcion}</Text>
                         </View>
+                        
                     </View>
                     {/* Separador */}
                     <View style={styles.separator} />
@@ -130,6 +138,22 @@ const MiPerfilCamionero = () => {
                             ))
                         )}
                     </View>
+
+                    {/* Botón de eliminar anuncios */}
+                    {user.ads ?
+                        <View>
+                            <View style={styles.separator} />
+                            <View>
+                                <TouchableOpacity
+                                    style={styles.mejorarPlanButton}
+                                    onPress={handleRemoveAds}
+                                >
+                                    <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                                    <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        : <></>}
                 </View>
             </View>
         </ScrollView >
@@ -276,6 +300,22 @@ const styles = StyleSheet.create({
     pdfButtonText: {
         color: colors.white,
         fontWeight: "bold",
+    },
+    plusIcon: {
+        marginRight: 6,
+    },
+        publishButtonText: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    mejorarPlanButton: {
+        backgroundColor: '#0993A8FF',
+        padding: 10,
+        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
 

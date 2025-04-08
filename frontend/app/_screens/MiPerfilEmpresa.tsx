@@ -86,7 +86,11 @@ const MiPerfilEmpresa = () => {
   const canPromoteNewOffer = () => {
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
     return activeOffersCount < rules.maxSponsoredOffers;
+  };
 
+  const handleRemoveAds = () => {
+    setId("ELIMINAR_ANUNCIOS");
+    router.push("/pago/checkout");
   }
 
   return (
@@ -197,8 +201,22 @@ const MiPerfilEmpresa = () => {
                   <Text style={styles.publishButtonText}>Mejora tu plan aquí</Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Botón de eliminar anuncios */}
+              {user.ads ?
+                <View>
+                  <TouchableOpacity
+                      style={styles.mejorarPlanButton}
+                      onPress={handleRemoveAds}
+                    >
+                      <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                      <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                    </TouchableOpacity>
+                </View>
+              : <></>}
             </View>
           </View>
+          
 
           {/* Separador */}
           <View style={styles.separator} />

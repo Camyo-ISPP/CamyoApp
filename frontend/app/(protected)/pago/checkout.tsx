@@ -57,7 +57,7 @@ function IntegratedCheckout() {
     }
 
     return <>
-        {id === 'BASICO' || id === 'PREMIUM' || id === 'PATROCINAR' ?
+        {id === 'BASICO' || id === 'PREMIUM' || id === 'PATROCINAR' || id === 'ELIMINAR_ANUNCIOS' ?
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
@@ -74,7 +74,7 @@ function IntegratedCheckout() {
                             
                             <View style={styles.planInfo}>
                                 <Text style={styles.planName}>{Products.get(id).name}</Text>
-                                <Text style={styles.planPrice}>{Products.get(id).price}€{id !== "PATROCINAR" ? "/mes" : ""}</Text>
+                                <Text style={styles.planPrice}>{Products.get(id).price}€{id !== "PATROCINAR" && id !== "ELIMINAR_ANUNCIOS" ? "/mes" : ""}</Text>
                             </View>
 
                             <View style={styles.featuresList}>
