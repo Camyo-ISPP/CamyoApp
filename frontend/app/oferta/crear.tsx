@@ -98,12 +98,17 @@ const CrearOfertaScreen = () => {
 
   const handlePublish = async () => {
     // Validación de título
+    formData.titulo = formData.titulo.trim();
     if (!formData.titulo){
       setErrorMessage("El campo título es obligatorio.");
       return;
     }
     if (formData.titulo.length > 255){
       setErrorMessage("El campo titulo es demasiado largo.");
+      return;
+    }
+    if (formData.titulo.length < 2){
+      setErrorMessage("El campo titulo es demasiado corto.");
       return;
     }
 
@@ -119,6 +124,10 @@ const CrearOfertaScreen = () => {
       }
       if (formData.experiencia < 0) {
         setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
+        return;
+      }
+      if (formData.experiencia > 100) {
+        setErrorMessage("¿Quieres un alien? El campo años de experiencia debe ser menor que 100.");
         return;
       }
     }
@@ -153,6 +162,11 @@ const CrearOfertaScreen = () => {
       return;
     }
 
+    if (formData.sueldo > 100000) {
+      setErrorMessage("El campo sueldo debe ser menor a 100000, que barbaridad dar 100000 euros al mes.");
+      return;
+    }
+
     // Validación de localización
     if (!formData.localizacion){
       setErrorMessage("El campo localización es obligatorio.");
@@ -160,6 +174,16 @@ const CrearOfertaScreen = () => {
     }
     if (formData.localizacion.length > 255){
       setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+
+    if (formData.localizacion.length < 2) {
+      setErrorMessage("El campo localización es demasiado pequeño.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.localizacion)) {
+      setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
       return;
     }
 

@@ -206,7 +206,7 @@ const CamioneroRegisterScreen = () => {
       return;
     }
 
-    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.nombre)) {
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.localizacion)) {
       setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
       return;
     }
