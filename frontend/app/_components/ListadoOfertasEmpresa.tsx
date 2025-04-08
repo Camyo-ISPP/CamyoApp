@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import SuccessModal from "./SuccessModal";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePayment } from "@/contexts/PaymentContext";
 
 interface ListadoOfertasEmpresaProps {
   offers: any[];
@@ -26,12 +27,21 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
 }) => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const { user, userToken } = useAuth();
+  const { setId, setOfertaId } = usePayment();
 
   const router = useRouter();
 
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
 
+  const promoteOfferCheckout = (ofertaId: number) => {
+    setId("PATROCINAR");
+    setOfertaId(ofertaId);
+    router.push("/pago/checkout");
+
+  }
+
+  // Deprecated
   const promoteOffer = async (ofertaId: number) => {
     try {
       const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
@@ -176,7 +186,7 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
                         )
 
                       ) : canPromoteNewOffer() ? (
-                        <TouchableOpacity onPress={() => promoteOffer(item.id)}>
+                        <TouchableOpacity onPress={() => promoteOfferCheckout(item.id)}>
                           <LinearGradient
                             colors={['#D4AF37', '#F0C674', '#B8860B', '#F0C674']}
                             start={{ x: 0, y: 0 }}
@@ -213,7 +223,7 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
             isVisible={isModalVisibleCancelar}
             onClose={() => setIsModalVisibleCancelar(false)}
             message="¡Patrocinio cancelado con éxito!"
-            />
+          />
 
 
         </View>
@@ -242,10 +252,10 @@ const styles = StyleSheet.create({
     padding: width < 768 ? 12 : 16,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 10,
+    elevation: 5,
     borderLeftWidth: 2,
     borderLeftColor: '#E0E0E0',
     position: 'relative',
@@ -292,10 +302,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   companyLogoOffer: {
-    height: width < 768 ? 80 : 120,
-    width: width < 768 ? 80 : 120,
+    height: 120,
+    width: 120,
     marginRight: width < 768 ? 0 : 10,
     marginBottom: width < 768 ? 10 : 0,
+    borderRadius: 50,
   },
   offerContent: {
     paddingHorizontal: 5,
