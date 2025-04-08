@@ -9,7 +9,11 @@ const CityPicker = ({ label, field, icon, formData, handleInputChange }) => {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
-
+  
+  useEffect(() => {
+    setSearchText(formData[field] ?? "");
+  }, [formData[field]]);
+  
   // Función para buscar ciudades con Nominatim
   const searchCities = async (query) => {
     if (query.length < 3) return;

@@ -20,7 +20,7 @@ import CityPicker from "../_components/CityPicker";
 
 const CrearOfertaScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  
+
   const { user, userToken } = useAuth();
   const [tipoOferta, setTipoOferta] = useState("TRABAJO");
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,7 +28,7 @@ const CrearOfertaScreen = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const { rules, loading } = useSubscriptionRules();
   const [offers, setOffers] = useState<any[]>([]);
-  
+
   const fetchOffers = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
@@ -42,7 +42,7 @@ const CrearOfertaScreen = () => {
     fetchOffers();
   }, []);
 
-  
+
   const canCreateNewOffer = () => {
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
     return activeOffersCount < rules.maxActiveOffers;
@@ -130,17 +130,17 @@ const CrearOfertaScreen = () => {
 
   const handlePublish = async () => {
     // Validación de título
-    if (!formData.titulo){
+    if (!formData.titulo) {
       setErrorMessage("El campo título es obligatorio.");
       return;
     }
-    if (formData.titulo.length > 255){
+    if (formData.titulo.length > 255) {
       setErrorMessage("El campo titulo es demasiado largo.");
       return;
     }
 
     // Validación de experiencia
-    if (!formData.experiencia){
+    if (!formData.experiencia) {
       setErrorMessage("El campo años de experiencia es obligatorio.");
       return;
     }
@@ -154,23 +154,23 @@ const CrearOfertaScreen = () => {
     }
 
     // Validación de licencia
-    if (!formData.licencia){
+    if (!formData.licencia) {
       setErrorMessage("El campo licencia es obligatorio.");
       return;
     }
 
     // Validación de la descripción
-    if (!formData.notas){
+    if (!formData.notas) {
       setErrorMessage("El campo descripción es obligatorio.");
       return;
     }
-    if (formData.notas.length > 500){
+    if (formData.notas.length > 500) {
       setErrorMessage("El campo descripción es demasiado largo.");
       return;
     }
 
     // Validación de sueldo
-    if (!formData.sueldo){
+    if (!formData.sueldo) {
       setErrorMessage("El campo sueldo es obligatorio.");
       return;
     }
@@ -184,11 +184,11 @@ const CrearOfertaScreen = () => {
     }
 
     // Validación de localización
-    if (!formData.localizacion){
+    if (!formData.localizacion) {
       setErrorMessage("El campo localización es obligatorio.");
       return;
     }
-    if (formData.localizacion.length > 255){
+    if (formData.localizacion.length > 255) {
       setErrorMessage("El campo localización es demasiado largo.");
       return;
     }
@@ -196,9 +196,9 @@ const CrearOfertaScreen = () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    if(tipoOferta === "TRABAJO"){
+    if (tipoOferta === "TRABAJO") {
       // Validación fecha de incorporación
-      if(!formData.fechaIncorporacion){
+      if (!formData.fechaIncorporacion) {
         setErrorMessage("El campo fecha de incorporación es obligatorio.");
         return;
       }
@@ -207,30 +207,30 @@ const CrearOfertaScreen = () => {
         return;
       }
       const fechaI = convertirFecha(formData.fechaIncorporacion);
-      if(fechaI < hoy){
+      if (fechaI < hoy) {
         setErrorMessage("La fecha de incorporación no puede ser anterior a hoy.");
         return;
       }
 
       // Validación de jornada
-      if (!formData.jornada){
+      if (!formData.jornada) {
         setErrorMessage("El campo jornada es obligatorio.");
         return;
       }
     }
-    if(tipoOferta === "CARGA"){
+    if (tipoOferta === "CARGA") {
       // Validación de mercancía
-      if (!formData.mercancia){
+      if (!formData.mercancia) {
         setErrorMessage("El campo mercancía es obligatorio.");
         return;
       }
-      if (formData.mercancia.length > 255){
+      if (formData.mercancia.length > 255) {
         setErrorMessage("El campo mercancía es demasiado largo.");
         return;
       }
 
       // Validación de peso
-      if (!formData.peso){
+      if (!formData.peso) {
         setErrorMessage("El campo peso es obligatorio.");
         return;
       }
@@ -242,29 +242,29 @@ const CrearOfertaScreen = () => {
         setErrorMessage("El campo peso debe ser mayor a 0.0.");
         return;
       }
-    
+
       // Validación de origen
-      if (!formData.origen){
+      if (!formData.origen) {
         setErrorMessage("El campo origen es obligatorio.");
         return;
       }
-      if (formData.origen.length > 255){
+      if (formData.origen.length > 255) {
         setErrorMessage("El campo origen es demasiado largo.");
         return;
       }
 
       // Validación de destino
-      if (!formData.destino){
+      if (!formData.destino) {
         setErrorMessage("El campo destino es obligatorio.");
         return;
       }
-      if (formData.destino.length > 255){
+      if (formData.destino.length > 255) {
         setErrorMessage("El campo destino es demasiado largo.");
         return;
       }
 
       // Validación de distancia
-      if (!formData.distancia){
+      if (!formData.distancia) {
         setErrorMessage("El distancia es obligatorio.");
         return;
       }
@@ -278,7 +278,7 @@ const CrearOfertaScreen = () => {
       }
 
       // Validación inicio
-      if(!formData.inicio){
+      if (!formData.inicio) {
         setErrorMessage("El campo inicio es obligatorio.");
         return;
       }
@@ -287,12 +287,12 @@ const CrearOfertaScreen = () => {
         return;
       }
       const fechaI = convertirFecha(formData.inicio);
-      if(fechaI < hoy){
+      if (fechaI < hoy) {
         setErrorMessage("La fecha de inicio no puede ser anterior a hoy.");
         return;
       }
       // Validación fin mínimo
-      if(!formData.finMinimo){
+      if (!formData.finMinimo) {
         setErrorMessage("El campo fin mínino es obligatorio.");
         return;
       }
@@ -301,7 +301,7 @@ const CrearOfertaScreen = () => {
         return;
       }
       // Validación fin máximo
-      if(!formData.finMaximo){
+      if (!formData.finMaximo) {
         setErrorMessage("El campo fin máximo es obligatorio.");
         return;
       }
@@ -393,47 +393,46 @@ const CrearOfertaScreen = () => {
 
   const handleDraft = async () => {
     // Validación de título
-    if (!formData.titulo){
+    if (!formData.titulo) {
       setErrorMessage("El campo título es obligatorio para guardar un borrador.");
       return;
     }
-    if (formData.titulo.length > 255){
+    if (formData.titulo.length > 255) {
       setErrorMessage("El campo titulo es demasiado largo.");
       return;
     }
 
     // Validación de experiencia OPCIONAL
-    if (rules.fullFormFields){
-      if (formData.experiencia){
-        if (isNaN(formData.experiencia)) {
-          setErrorMessage("El campo años de experiencia debe ser un número.");
-          return;
-        }
-        if (formData.experiencia < 0) {
-          setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
-          return;
-        }
+    if (formData.experiencia) {
+      if (isNaN(formData.experiencia)) {
+        setErrorMessage("El campo años de experiencia debe ser un número.");
+        return;
+      }
+      if (formData.experiencia < 0) {
+        setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
+        return;
       }
     }
 
+
     //Validación para licencia
-    if (!formData.licencia){
+    if (!formData.licencia) {
       setErrorMessage("El campo licencia es obligatorio para guardar un borrador.");
       return;
     }
     // Validación de la descripción
-    if (!formData.notas){
+    if (!formData.notas) {
       setErrorMessage("El campo descripción es obligatorio para guardar un borrador.");
       return;
     }
-    if (formData.notas.length > 500){
+    if (formData.notas.length > 500) {
       setErrorMessage("El campo descripción es demasiado largo.");
       return;
     }
 
-    
+
     // Validación de sueldo OPCIONAL
-    if (formData.sueldo){
+    if (formData.sueldo) {
       if (isNaN(formData.sueldo)) {
         setErrorMessage("El campo sueldo debe ser un número.");
         return;
@@ -446,11 +445,11 @@ const CrearOfertaScreen = () => {
 
 
     // Validación de localización
-    if (!formData.localizacion){
+    if (!formData.localizacion) {
       setErrorMessage("El campo localización es obligatorio para guardar un borrador.");
       return;
     }
-    if (formData.localizacion.length > 255){
+    if (formData.localizacion.length > 255) {
       setErrorMessage("El campo localización es demasiado largo.");
       return;
     }
@@ -458,9 +457,9 @@ const CrearOfertaScreen = () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    if(tipoOferta === "TRABAJO"){
+    if (tipoOferta === "TRABAJO") {
       // Validación fecha de incorporación
-      if(!formData.fechaIncorporacion){
+      if (!formData.fechaIncorporacion) {
         setErrorMessage("El campo fecha de incorporación es obligatorio para guardar el borrador.");
         return;
       }
@@ -469,7 +468,7 @@ const CrearOfertaScreen = () => {
         return;
       }
       const fechaI = convertirFecha(formData.fechaIncorporacion);
-      if(fechaI < hoy){
+      if (fechaI < hoy) {
         setErrorMessage("La fecha de incorporación no puede ser anterior a hoy.");
         return;
       }
@@ -477,19 +476,19 @@ const CrearOfertaScreen = () => {
       // Validación de jornada no, OPCIONAL
     }
 
-    if(tipoOferta === "CARGA"){
+    if (tipoOferta === "CARGA") {
       // Validación de mercancía
-      if (!formData.mercancia){
+      if (!formData.mercancia) {
         setErrorMessage("El campo mercancía es obligatorio para guardar el borrador.");
         return;
       }
-      if (formData.mercancia.length > 255){
+      if (formData.mercancia.length > 255) {
         setErrorMessage("El campo mercancía es demasiado largo.");
         return;
       }
 
       // Validación de peso OPCIONAL
-      if (formData.peso){
+      if (formData.peso) {
         if (isNaN(formData.peso)) {
           setErrorMessage("El campo peso debe ser un número.");
           return;
@@ -500,29 +499,29 @@ const CrearOfertaScreen = () => {
         }
       }
 
-    
+
       // Validación de origen
-      if (!formData.origen){
+      if (!formData.origen) {
         setErrorMessage("El campo origen es obligatorio para guardar el borrador.");
         return;
       }
-      if (formData.origen.length > 255){
+      if (formData.origen.length > 255) {
         setErrorMessage("El campo origen es demasiado largo.");
         return;
       }
 
       // Validación de destino
-      if (!formData.destino){
+      if (!formData.destino) {
         setErrorMessage("El campo destino es obligatorio para guardar el borrador.");
         return;
       }
-      if (formData.destino.length > 255){
+      if (formData.destino.length > 255) {
         setErrorMessage("El campo destino es demasiado largo.");
         return;
       }
 
       // Validación de distancia OPCIONAL?
-      if (formData.distancia){
+      if (formData.distancia) {
         if (isNaN(formData.distancia)) {
           setErrorMessage("El campo distancia debe ser un número.");
           return;
@@ -534,7 +533,7 @@ const CrearOfertaScreen = () => {
       }
 
       // Validación inicio
-      if(!formData.inicio){
+      if (!formData.inicio) {
         setErrorMessage("El campo inicio es obligatorio para guardar el borrador.");
         return;
       }
@@ -543,14 +542,14 @@ const CrearOfertaScreen = () => {
         return;
       }
       const fechaI = convertirFecha(formData.inicio);
-      if(fechaI < hoy){
+      if (fechaI < hoy) {
         setErrorMessage("La fecha de inicio no puede ser anterior a hoy.");
         return;
       }
 
 
       // Validación fin mínimo
-      if(!formData.finMinimo){
+      if (!formData.finMinimo) {
         setErrorMessage("El campo fin mínino es obligatorio para guardar el borrador.");
         return;
       }
@@ -561,7 +560,7 @@ const CrearOfertaScreen = () => {
 
 
       // Validación fin máximo
-      if(!formData.finMaximo){
+      if (!formData.finMaximo) {
         setErrorMessage("El campo fin máximo es obligatorio para guardar el borrador.");
         return;
       }
@@ -580,73 +579,73 @@ const CrearOfertaScreen = () => {
         return;
       }
     }
-    
-      // Construcción del objeto base de la oferta
-      let ofertaData: any = {
-        oferta: {
-          titulo: formData.titulo,
-          experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
-          licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
-          notas: formData.notas,
-          estado: formData.estado || "BORRADOR",
-          sueldo: formData.sueldo ? parseFloat(formData.sueldo).toFixed(2) : null, // Convertir a float con 2 decimal
-          localizacion: formData.localizacion,
-          fechaPublicacion: null, // Fecha en formato correcto sin Z y sin decimales
-          empresa: { id: user?.id ?? null },
-          tipoOferta: tipoOferta
+
+    // Construcción del objeto base de la oferta
+    let ofertaData: any = {
+      oferta: {
+        titulo: formData.titulo,
+        experiencia: Number(formData.experiencia), // Convertir a número
+        licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
+        notas: formData.notas,
+        estado: formData.estado || "BORRADOR",
+        sueldo: formData.sueldo ? parseFloat(formData.sueldo).toFixed(2) : null, // Convertir a float con 2 decimal
+        localizacion: formData.localizacion,
+        fechaPublicacion: null, // Fecha en formato correcto sin Z y sin decimales
+        empresa: { id: user?.id ?? null },
+        tipoOferta: tipoOferta
+      }
+    };
+
+
+    // Agregar detalles según el tipo de oferta
+    if (tipoOferta === "TRABAJO") {
+      ofertaData = {
+        ...ofertaData,
+        trabajo: {
+          fechaIncorporacion: formData.fechaIncorporacion.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          jornada: formData.jornada ? formData.jornada : null
         }
       };
+    } else if (tipoOferta === "CARGA") {
+      ofertaData = {
+        ...ofertaData,
+        carga: {
+          mercancia: formData.mercancia,
+          peso: formData.peso ? Number(formData.peso) : null, // Convertir a número
+          origen: formData.origen,
+          destino: formData.destino,
+          distancia: formData.distancia ? Number(formData.distancia) : null, // Convertir a número
+          inicio: formData.inicio.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          finMinimo: formData.finMinimo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          finMaximo: formData.finMaximo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1')
+        }
+      };
+    }
 
-    
-      // Agregar detalles según el tipo de oferta
-      if (tipoOferta === "TRABAJO") {
-        ofertaData = {
-          ...ofertaData,
-          trabajo: {
-            fechaIncorporacion: formData.fechaIncorporacion.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-            jornada: formData.jornada ? formData.jornada : null
-          }
-        };
-      } else if (tipoOferta === "CARGA") {
-        ofertaData = {
-          ...ofertaData,
-          carga: {
-            mercancia: formData.mercancia,
-            peso: formData.peso ? Number(formData.peso) : null, // Convertir a número
-            origen: formData.origen,
-            destino: formData.destino,
-            distancia: formData.distancia ? Number(formData.distancia) : null, // Convertir a número
-            inicio: formData.inicio.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-            finMinimo: formData.finMinimo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
-            finMaximo: formData.finMaximo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1')
-          }
-        };
+    try {
+      const response = await axios.post(`${BACKEND_URL}/ofertas`, ofertaData, {
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (response.status === 201) {
+        setErrorMessage("")
+
+        setSuccessModalVisible(true);
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+          router.replace("/miperfil");
+        }, 1000);
       }
 
-      try {
-        const response = await axios.post(`${BACKEND_URL}/ofertas`, ofertaData, {
-          headers: {
-            "Content-Type": "application/json",
-            'Authorization': `Bearer ${userToken}`
-          }
-        });
-
-        if (response.status === 201) {
-          setErrorMessage("")
-
-          setSuccessModalVisible(true);
-          setTimeout(() => {
-            setSuccessModalVisible(false);
-            router.replace("/miperfil");
-          }, 1000);
-        }
-
-      } catch (error) {
-        console.error('Error en la solicitud', error);
-        if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
-          setErrorMessage(error.response.data.message);
-        }
+    } catch (error) {
+      console.error('Error en la solicitud', error);
+      if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
       }
+    }
 
     console.log("Guardando como borrador...");
   };
@@ -655,32 +654,32 @@ const CrearOfertaScreen = () => {
   const renderInput = (label, field, icon, keyboardType = "default", secureTextEntry = false, multiline = false, placeholder = "", disabled = false) => {
     const iconColor = disabled ? colors.lightGray : colors.primary;
     return (
-    <View style={{ width: '90%', marginBottom: 15 }}>
-      <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
-      <View style={[styles.inputContainerStyle, disabled && styles.disabledInputContainer]}>
-        {React.cloneElement(icon, { color: iconColor })}
-        <TextInput
-          style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline: "none", textAlignVertical: multiline ? 'top' : 'center' }}
-          keyboardType={keyboardType}
-          secureTextEntry={secureTextEntry}
-          multiline={multiline}
-          numberOfLines={multiline ? 3 : 1}
-          placeholder={disabled ? "Solo disponible para clientes BASICO y PREMIUM." : placeholder}
-          placeholderTextColor={colors.mediumGray}
-          onChangeText={(value) => !disabled && handleInputChange(field, value)}
-          editable={!disabled}
-          value={formData[field]}
-        />
-      </View>
+      <View style={{ width: '90%', marginBottom: 15 }}>
+        <Text style={{ fontSize: 16, color: colors.secondary, marginLeft: 8, marginBottom: -6, backgroundColor: colors.white, alignSelf: 'flex-start', paddingHorizontal: 5, zIndex: 1 }}>{label}</Text>
+        <View style={[styles.inputContainerStyle, disabled && styles.disabledInputContainer]}>
+          {React.cloneElement(icon, { color: iconColor })}
+          <TextInput
+            style={{ flex: 1, height: multiline ? 80 : 40, paddingLeft: 8, outline: "none", textAlignVertical: multiline ? 'top' : 'center' }}
+            keyboardType={keyboardType}
+            secureTextEntry={secureTextEntry}
+            multiline={multiline}
+            numberOfLines={multiline ? 3 : 1}
+            placeholder={disabled ? "Solo disponible para clientes BASICO y PREMIUM." : placeholder}
+            placeholderTextColor={colors.mediumGray}
+            onChangeText={(value) => !disabled && handleInputChange(field, value)}
+            editable={!disabled}
+            value={formData[field]}
+          />
+        </View>
 
-      {disabled && (
-        <TouchableOpacity onPress={() => router.replace("/suscripcion")}>
-          <Text style={styles.upgradeMessage}>
-            ¿Quieres más opciones? Mejora tu plan aquí.
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
+        {disabled && (
+          <TouchableOpacity onPress={() => router.replace("/suscripcion")}>
+            <Text style={styles.upgradeMessage}>
+              ¿Quieres más opciones? Mejora tu plan aquí.
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
     );
   };
 
@@ -690,17 +689,17 @@ const CrearOfertaScreen = () => {
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
-  }  
+  }
 
   const renderPicker = (label, field, icon) => {
     const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
-  
+
     // Función para buscar ciudades con Nominatim
     const searchCities = async (query) => {
       if (query.length < 3) return; // No buscar con menos de 3 caracteres
-      
+
       setLoading(true);
       try {
         const response = await axios.get(
@@ -715,11 +714,11 @@ const CrearOfertaScreen = () => {
             }
           }
         );
-        
+
         // Procesar los resultados
         const uniqueCities = [];
         const seen = new Set();
-        
+
         response.data.forEach(item => {
           const cityName = item.address.city || item.address.town || item.address.village;
           if (cityName && !seen.has(cityName)) {
@@ -731,7 +730,7 @@ const CrearOfertaScreen = () => {
             });
           }
         });
-        
+
         setCities(uniqueCities);
       } catch (error) {
         console.error('Error fetching cities:', error);
@@ -739,7 +738,7 @@ const CrearOfertaScreen = () => {
         setLoading(false);
       }
     };
-  
+
     // Debounce para evitar muchas llamadas mientras se escribe
     useEffect(() => {
       const timer = setTimeout(() => {
@@ -747,10 +746,10 @@ const CrearOfertaScreen = () => {
           searchCities(searchText);
         }
       }, 500); // Espera 500ms después de la última tecla
-      
+
       return () => clearTimeout(timer);
     }, [searchText]);
-  
+
     return (
       <View style={{ width: '90%', marginBottom: 15 }}>
         <Text
@@ -769,7 +768,7 @@ const CrearOfertaScreen = () => {
         </Text>
         <View style={styles.inputContainerStyle}>
           {React.cloneElement(icon, { color: colors.primary })}
-          
+
           {/* Cambiamos el Picker por un TextInput con lista de sugerencias */}
           <TextInput
             style={{
@@ -788,10 +787,10 @@ const CrearOfertaScreen = () => {
               }
             }}
           />
-          
+
           {loading && <ActivityIndicator size="small" color={colors.primary} />}
         </View>
-        
+
         {/* Lista de sugerencias */}
         {cities.length > 0 && (
           <View style={{
@@ -830,203 +829,203 @@ const CrearOfertaScreen = () => {
       </View>
     );
   };
-  
-  
+
+
   return (
-      <EmpresaRoute>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            <View style={styles.cardContainer}>
-              <BackButtonAbsolute />
-              <Text style={styles.title}>Crear nueva oferta</Text>
-  
-              {/* Campos generales */}
-              {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
-              {renderInput(
-                  "Experiencia (años)",
-                  "experiencia",
-                  <FontAwesome5 name="briefcase" size={20} />,
-                  "numeric",
-                  false,
-                  false,
-                  ""
-                )}
-              <View style={styles.inputContainer}>
-                <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
-                  Licencia:
-                </Text>
-                <View style={styles.licenciaContainer}>
-                  {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
-                    const storedValue = licencia.replace(/\+/g, "_");
-                    const isSelected = formData.licencia === storedValue;
-  
-                    return (
-                      <TouchableOpacity
-                        key={licencia}
-                        style={[
-                          styles.licenciaButton,
-                          isSelected && styles.licenciaButtonSelected
-                        ]}
-                        onPress={() => handleInputChange("licencia", storedValue)}
-                      >
-                        <Text style={[
-                          styles.licenciaText,
-                          isSelected && styles.licenciaTextSelected
-                        ]}>
-                          {licencia} {/* Mostramos el valor con + en la UI */}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
+    <EmpresaRoute>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <View style={styles.cardContainer}>
+            <BackButtonAbsolute />
+            <Text style={styles.title}>Crear nueva oferta</Text>
+
+            {/* Campos generales */}
+            {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
+            {renderInput(
+              "Experiencia (años)",
+              "experiencia",
+              <FontAwesome5 name="briefcase" size={20} />,
+              "numeric",
+              false,
+              false,
+              ""
+            )}
+            <View style={styles.inputContainer}>
+              <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
+                Licencia:
+              </Text>
+              <View style={styles.licenciaContainer}>
+                {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
+                  const storedValue = licencia.replace(/\+/g, "_");
+                  const isSelected = formData.licencia === storedValue;
+
+                  return (
+                    <TouchableOpacity
+                      key={licencia}
+                      style={[
+                        styles.licenciaButton,
+                        isSelected && styles.licenciaButtonSelected
+                      ]}
+                      onPress={() => handleInputChange("licencia", storedValue)}
+                    >
+                      <Text style={[
+                        styles.licenciaText,
+                        isSelected && styles.licenciaTextSelected
+                      ]}>
+                        {licencia} {/* Mostramos el valor con + en la UI */}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-  
-              {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
-              {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} color={colors.primary} />)}
-              <CityPicker 
-               label="Localizacion"
+            </View>
+
+            {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
+            {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} color={colors.primary} />)}
+            <CityPicker
+              label="Localizacion"
               field="localizacion"
-              icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary}/>}
+              icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
               formData={formData}
               handleInputChange={handleInputChange}
-              />
-  
-              {/* Selector de tipo de oferta */}
-              <Text style={styles.title}>¿Qué tipo de oferta quieres publicar?</Text>
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={[styles.userTypeButton, tipoOferta === "TRABAJO" ? styles.selectedButton : styles.unselectedButton]}
-                  onPress={() => setTipoOferta("TRABAJO")}
-                >
-                  <FontAwesome5 size={24} color={tipoOferta === "TRABAJO" ? colors.white : colors.secondary} />
-                  <Text style={[styles.userTypeText, tipoOferta === "TRABAJO" ? styles.selectedText : styles.unselectedText]}>
-                    TRABAJO
+            />
+
+            {/* Selector de tipo de oferta */}
+            <Text style={styles.title}>¿Qué tipo de oferta quieres publicar?</Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.userTypeButton, tipoOferta === "TRABAJO" ? styles.selectedButton : styles.unselectedButton]}
+                onPress={() => setTipoOferta("TRABAJO")}
+              >
+                <FontAwesome5 size={24} color={tipoOferta === "TRABAJO" ? colors.white : colors.secondary} />
+                <Text style={[styles.userTypeText, tipoOferta === "TRABAJO" ? styles.selectedText : styles.unselectedText]}>
+                  TRABAJO
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.userTypeButton, tipoOferta === "CARGA" ? styles.selectedButton : styles.unselectedButton]}
+                onPress={() => setTipoOferta("CARGA")}
+              >
+                <FontAwesome5 size={24} color={tipoOferta === "CARGA" ? colors.white : colors.secondary} />
+                <Text style={[styles.userTypeText, tipoOferta === "CARGA" ? styles.selectedText : styles.unselectedText]}>
+                  CARGA
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Campos dinámicos según el tipo de oferta */}
+            {tipoOferta === "TRABAJO" ? (
+              <>
+                <DatePicker
+                  label="Expiración de incorporación"
+                  value={formData.fechaIncorporacion}
+                  onChange={(date) => handleInputChange("fechaIncorporacion", date)}
+                  iconName="calendar-check"
+                />
+
+                <View style={styles.inputContainer}>
+                  <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
+                    Jornada:
                   </Text>
-                </TouchableOpacity>
-  
-                <TouchableOpacity
-                  style={[styles.userTypeButton, tipoOferta === "CARGA" ? styles.selectedButton : styles.unselectedButton]}
-                  onPress={() => setTipoOferta("CARGA")}
-                >
-                  <FontAwesome5 size={24} color={tipoOferta === "CARGA" ? colors.white : colors.secondary} />
-                  <Text style={[styles.userTypeText, tipoOferta === "CARGA" ? styles.selectedText : styles.unselectedText]}>
-                    CARGA
-                  </Text>
-                </TouchableOpacity>
-              </View>
-  
-              {/* Campos dinámicos según el tipo de oferta */}
-              {tipoOferta === "TRABAJO" ? (
-                <>
-                  <DatePicker
-                    label="Expiración de incorporación"
-                    value={formData.fechaIncorporacion}
-                    onChange={(date) => handleInputChange("fechaIncorporacion", date)}
-                    iconName="calendar-check"
-                  />
-  
-                  <View style={styles.inputContainer}>
-                    <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
-                      Jornada:
-                    </Text>
-                    <View style={styles.jornadaContainer}>
-                      {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
-                        <TouchableOpacity
-                          key={jornada}
-                          style={[
-                            styles.jornadaButton,
-                            formData.jornada === jornada && styles.jornadaButtonSelected
-                          ]}
-                          onPress={() => handleInputChange("jornada", jornada)}
-                        >
-                          <Text style={[
-                            styles.jornadaText,
-                            formData.jornada === jornada && styles.jornadaTextSelected
-                          ]}>
-                            {jornada}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                  <View style={styles.jornadaContainer}>
+                    {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
+                      <TouchableOpacity
+                        key={jornada}
+                        style={[
+                          styles.jornadaButton,
+                          formData.jornada === jornada && styles.jornadaButtonSelected
+                        ]}
+                        onPress={() => handleInputChange("jornada", jornada)}
+                      >
+                        <Text style={[
+                          styles.jornadaText,
+                          formData.jornada === jornada && styles.jornadaTextSelected
+                        ]}>
+                          {jornada}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
-                </>
-              ) : (
-                <>
-                  {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} color={colors.primary} />)}
-                  {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} color={colors.primary} />)}
-  
-                  {/*{renderPicker("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}/*/}
-                  <CityPicker 
+                </View>
+              </>
+            ) : (
+              <>
+                {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} color={colors.primary} />)}
+                {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} color={colors.primary} />)}
+
+                {/*{renderPicker("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}/*/}
+                <CityPicker
                   label="Origen"
                   field="origen"
-                  icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary}/>}
+                  icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
                   formData={formData}
                   handleInputChange={handleInputChange}
-                  />
-                 {/*{renderPicker("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}*/}
-                  <CityPicker 
+                />
+                {/*{renderPicker("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}*/}
+                <CityPicker
                   label="Destino"
                   field="destino"
-                  icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary}/>}
+                  icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
                   formData={formData}
                   handleInputChange={handleInputChange}
-                  />
-                  {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
-  
-                  {/* Fechas */}
-                  <DatePicker
-                    label="Inicio"
-                    value={formData.inicio}
-                    onChange={(date) => handleInputChange("inicio", date)}
-                    iconName="stopwatch"
-                  />
-                  <DatePicker
-                    label="Fin mínimo"
-                    value={formData.finMinimo}
-                    onChange={(date) => handleInputChange("finMinimo", date)}
-                    iconName="calendar-minus"
-                  />
-                  <DatePicker
-                    label="Fin máximo"
-                    value={formData.finMaximo}
-                    onChange={(date) => handleInputChange("finMaximo", date)}
-                    iconName="calendar-plus"
-                  />
-                </>
-              )}
-  
-              {errorMessage ? (
-                <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
-                  {errorMessage}
-                </Text>
-              ) : null}
-  
-            <View style= {styles.buttonContainer}>
-            
+                />
+                {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
+
+                {/* Fechas */}
+                <DatePicker
+                  label="Inicio"
+                  value={formData.inicio}
+                  onChange={(date) => handleInputChange("inicio", date)}
+                  iconName="stopwatch"
+                />
+                <DatePicker
+                  label="Fin mínimo"
+                  value={formData.finMinimo}
+                  onChange={(date) => handleInputChange("finMinimo", date)}
+                  iconName="calendar-minus"
+                />
+                <DatePicker
+                  label="Fin máximo"
+                  value={formData.finMaximo}
+                  onChange={(date) => handleInputChange("finMaximo", date)}
+                  iconName="calendar-plus"
+                />
+              </>
+            )}
+
+            {errorMessage ? (
+              <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
+                {errorMessage}
+              </Text>
+            ) : null}
+
+            <View style={styles.buttonContainer}>
+
               {/* Botón de guardar borrador */}
               <TouchableOpacity style={styles.draftButton} onPress={handleDraft}>
                 <Text style={styles.draftButtonText}>Guardar borrador</Text>
               </TouchableOpacity>
-          
-                  <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
-                  <Text style={styles.publishButtonText}>Publicar oferta</Text>
-                </TouchableOpacity>
-              
+
+              <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
+                <Text style={styles.publishButtonText}>Publicar oferta</Text>
+              </TouchableOpacity>
+
             </View>
 
 
 
-              <SuccessModal
-                isVisible={successModalVisible}
-                onClose={() => setSuccessModalVisible(false)}
-                message="¡Oferta creada con éxito!"
-              />
-            </View>
+            <SuccessModal
+              isVisible={successModalVisible}
+              onClose={() => setSuccessModalVisible(false)}
+              message="¡Oferta creada con éxito!"
+            />
           </View>
-        </ScrollView>
-      </EmpresaRoute>
+        </View>
+      </ScrollView>
+    </EmpresaRoute>
   );
-  
+
 };
 
 const styles = StyleSheet.create({
