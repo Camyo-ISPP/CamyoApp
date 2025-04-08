@@ -15,6 +15,7 @@ import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
+import AdSense from "../_components/AdSense";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -122,7 +123,10 @@ export default function Index() {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-
+    <head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4434133815240639"
+     crossOrigin="anonymous"></script>
+     </head>
       <View style={styles.webContainer}>
         <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
           {/* Hero Section */}
@@ -267,7 +271,8 @@ export default function Index() {
               </Text>
             </TouchableOpacity>
           </View>
-
+          {/* Renderiza el anuncio */}
+      <AdSense />
           <WebFooter />
 
         </ScrollView>
