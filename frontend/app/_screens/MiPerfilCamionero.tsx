@@ -6,11 +6,7 @@ import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
-
 import axios from "axios";
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -20,7 +16,6 @@ const MiPerfilCamionero = () => {
 
     const [resenas, setResenas] = useState([]);
     const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
-    const [ofertas, setOfertas] = useState([]);
 
     useEffect(() => {
         const fetchResenas = async () => {
@@ -36,19 +31,29 @@ const MiPerfilCamionero = () => {
             }
         };
 
-        const fetchCamionero = async () => {
-            try {
-                const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
-                setCamionero(response.data);
-            } catch (error) {
-                console.error("Error al cargar el camionero:", error);
-            }
-        };
-
         if (user?.userId) {
             fetchResenas();
         }
     }, [user]);
+
+    const descargarPDF = async () => {
+        const base64Data = user.curriculum; 
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "application/pdf" });
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `CV_${user.username}.pdf`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -88,6 +93,11 @@ const MiPerfilCamionero = () => {
                         <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
                         {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
                         {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+                        {user.curriculum &&
+                            <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
+                                <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                            </TouchableOpacity>
+                        }                       
                     </View>
                     <View style={styles.separator} />
 
@@ -157,7 +167,7 @@ const styles = StyleSheet.create({
     profileImage: {
         width: 150,
         height: 150,
-        borderRadius: 70,
+        borderRadius: 75,
         borderWidth: 3,
         borderColor: colors.primary,
         marginLeft: 30,
@@ -255,6 +265,17 @@ const styles = StyleSheet.create({
     reseñaComentario: {
         fontSize: 14,
         color: colors.darkGray,
+    },
+    pdfButton: {
+        backgroundColor: colors.primary,
+        padding: 10,
+        borderRadius: 12,
+        alignItems: "center",
+        marginTop: 10,
+    },
+    pdfButtonText: {
+        color: colors.white,
+        fontWeight: "bold",
     },
 });
 

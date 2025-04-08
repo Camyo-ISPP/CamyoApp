@@ -14,6 +14,8 @@ import withNavigationGuard from "@/hoc/withNavigationGuard";
 import BackButtonAbsolute from "../_components/BackButtonAbsolute";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import DatePicker from "@/app/_components/DatePicker";
+import { useFocusEffect } from "expo-router";
+import CityPicker from "../_components/CityPicker";
 
 const CrearOfertaScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -24,6 +26,35 @@ const CrearOfertaScreen = () => {
   const router = useRouter();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const { rules, loading } = useSubscriptionRules();
+  const [offers, setOffers] = useState<any[]>([]);
+  
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+    } catch (error) {
+      console.error("Error al cargar las ofertas:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOffers();
+  }, []);
+
+  
+  const canCreateNewOffer = () => {
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+    return activeOffersCount < rules.maxActiveOffers;
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!loading && !canCreateNewOffer()) {
+        router.push("/suscripcion");
+      }
+    }, [loading, offers, rules])
+  );
+
   const [formData, setFormData] = useState({
     titulo: "",
     experiencia: null,
@@ -320,7 +351,7 @@ const CrearOfertaScreen = () => {
     let ofertaData: any = {
       oferta: {
         titulo: formData.titulo,
-        experiencia: rules.fullFormFields ? Number(formData.experiencia): 0, // Convertir a número
+        experiencia: Number(formData.experiencia), // Convertir a número
         licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
         notas: formData.notas,
         estado: formData.estado || "ABIERTA",
@@ -425,172 +456,330 @@ const CrearOfertaScreen = () => {
     );
   }  
 
-  return (
-    <EmpresaRoute>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.container}>
-          <View style={styles.cardContainer}>
-            <BackButtonAbsolute />
-            <Text style={styles.title}>Crear nueva oferta</Text>
-
-            {/* Campos generales */}
-            {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
-            {renderInput(
-                "Experiencia (años)",
-                "experiencia",
-                <FontAwesome5 name="briefcase" size={20} />,
-                "numeric",
-                false,
-                false,
-                "",
-                !rules.fullFormFields // Bloquear si no tiene acceso completo
-              )}
-            <View style={styles.inputContainer}>
-              <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
-                Licencia:
-              </Text>
-              <View style={styles.licenciaContainer}>
-                {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
-                  const storedValue = licencia.replace(/\+/g, "_");
-                  const isSelected = formData.licencia === storedValue;
-
-                  return (
-                    <TouchableOpacity
-                      key={licencia}
-                      style={[
-                        styles.licenciaButton,
-                        isSelected && styles.licenciaButtonSelected
-                      ]}
-                      onPress={() => handleInputChange("licencia", storedValue)}
-                    >
-                      <Text style={[
-                        styles.licenciaText,
-                        isSelected && styles.licenciaTextSelected
-                      ]}>
-                        {licencia} {/* Mostramos el valor con + en la UI */}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
-
-            {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
-            {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} color={colors.primary} />)}
-            {renderInput("Localización", "localizacion", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
-
-            {/* Selector de tipo de oferta */}
-            <Text style={styles.title}>¿Qué tipo de oferta quieres publicar?</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.userTypeButton, tipoOferta === "TRABAJO" ? styles.selectedButton : styles.unselectedButton]}
-                onPress={() => setTipoOferta("TRABAJO")}
-              >
-                <FontAwesome5 size={24} color={tipoOferta === "TRABAJO" ? colors.white : colors.secondary} />
-                <Text style={[styles.userTypeText, tipoOferta === "TRABAJO" ? styles.selectedText : styles.unselectedText]}>
-                  TRABAJO
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.userTypeButton, tipoOferta === "CARGA" ? styles.selectedButton : styles.unselectedButton]}
-                onPress={() => setTipoOferta("CARGA")}
-              >
-                <FontAwesome5 size={24} color={tipoOferta === "CARGA" ? colors.white : colors.secondary} />
-                <Text style={[styles.userTypeText, tipoOferta === "CARGA" ? styles.selectedText : styles.unselectedText]}>
-                  CARGA
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Campos dinámicos según el tipo de oferta */}
-            {tipoOferta === "TRABAJO" ? (
-              <>
-                <DatePicker
-                  label="Expiración de incorporación"
-                  value={formData.fechaIncorporacion}
-                  onChange={(date) => handleInputChange("fechaIncorporacion", date)}
-                  iconName="calendar-check"
-                />
-
-                <View style={styles.inputContainer}>
-                  <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
-                    Jornada:
+  const renderPicker = (label, field, icon) => {
+    const [cities, setCities] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchText, setSearchText] = useState('');
+  
+    // Función para buscar ciudades con Nominatim
+    const searchCities = async (query) => {
+      if (query.length < 3) return; // No buscar con menos de 3 caracteres
+      
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/search?`,
+          {
+            params: {
+              q: query,
+              format: 'json',
+              addressdetails: 1,
+              limit: 10,
+              countrycodes: 'es', // Filtra por España (puedes quitarlo si quieres internacional)
+            }
+          }
+        );
+        
+        // Procesar los resultados
+        const uniqueCities = [];
+        const seen = new Set();
+        
+        response.data.forEach(item => {
+          const cityName = item.address.city || item.address.town || item.address.village;
+          if (cityName && !seen.has(cityName)) {
+            seen.add(cityName);
+            uniqueCities.push({
+              name: cityName,
+              state: item.address.state,
+              country: item.address.country
+            });
+          }
+        });
+        
+        setCities(uniqueCities);
+      } catch (error) {
+        console.error('Error fetching cities:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    // Debounce para evitar muchas llamadas mientras se escribe
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        if (searchText) {
+          searchCities(searchText);
+        }
+      }, 500); // Espera 500ms después de la última tecla
+      
+      return () => clearTimeout(timer);
+    }, [searchText]);
+  
+    return (
+      <View style={{ width: '90%', marginBottom: 15 }}>
+        <Text
+          style={{
+            fontSize: 16,
+            color: colors.secondary,
+            marginLeft: 8,
+            marginBottom: -6,
+            backgroundColor: colors.white,
+            alignSelf: 'flex-start',
+            paddingHorizontal: 5,
+            zIndex: 1
+          }}
+        >
+          {label}
+        </Text>
+        <View style={styles.inputContainerStyle}>
+          {React.cloneElement(icon, { color: colors.primary })}
+          
+          {/* Cambiamos el Picker por un TextInput con lista de sugerencias */}
+          <TextInput
+            style={{
+              flex: 1,
+              height: 40,
+              paddingLeft: 8,
+              color: colors.primary,
+            }}
+            placeholder="Busca una ciudad..."
+            value={searchText}
+            onChangeText={(text) => {
+              setSearchText(text);
+              if (text === '') {
+                handleInputChange(field, '');
+                setCities([]);
+              }
+            }}
+          />
+          
+          {loading && <ActivityIndicator size="small" color={colors.primary} />}
+        </View>
+        
+        {/* Lista de sugerencias */}
+        {cities.length > 0 && (
+          <View style={{
+            maxHeight: 200,
+            borderWidth: 1,
+            borderColor: colors.lightGray,
+            borderRadius: 5,
+            marginTop: 5,
+            backgroundColor: colors.white,
+            zIndex: 1000
+          }}>
+            <ScrollView>
+              {cities.map((city, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={{
+                    padding: 10,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.lightGray
+                  }}
+                  onPress={() => {
+                    handleInputChange(field, city.name);
+                    setSearchText(city.name);
+                    setCities([]);
+                  }}
+                >
+                  <Text style={{ color: colors.primary }}>
+                    {city.name}
+                    {city.state && `, ${city.state}`}
                   </Text>
-                  <View style={styles.jornadaContainer}>
-                    {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </View>
+    );
+  };
+  
+  
+  return (
+      <EmpresaRoute>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.container}>
+            <View style={styles.cardContainer}>
+              <BackButtonAbsolute />
+              <Text style={styles.title}>Crear nueva oferta</Text>
+  
+              {/* Campos generales */}
+              {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} color={colors.primary} />)}
+              {renderInput(
+                  "Experiencia (años)",
+                  "experiencia",
+                  <FontAwesome5 name="briefcase" size={20} />,
+                  "numeric",
+                  false,
+                  false,
+                  ""
+                )}
+              <View style={styles.inputContainer}>
+                <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
+                  Licencia:
+                </Text>
+                <View style={styles.licenciaContainer}>
+                  {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
+                    const storedValue = licencia.replace(/\+/g, "_");
+                    const isSelected = formData.licencia === storedValue;
+  
+                    return (
                       <TouchableOpacity
-                        key={jornada}
+                        key={licencia}
                         style={[
-                          styles.jornadaButton,
-                          formData.jornada === jornada && styles.jornadaButtonSelected
+                          styles.licenciaButton,
+                          isSelected && styles.licenciaButtonSelected
                         ]}
-                        onPress={() => handleInputChange("jornada", jornada)}
+                        onPress={() => handleInputChange("licencia", storedValue)}
                       >
                         <Text style={[
-                          styles.jornadaText,
-                          formData.jornada === jornada && styles.jornadaTextSelected
+                          styles.licenciaText,
+                          isSelected && styles.licenciaTextSelected
                         ]}>
-                          {jornada}
+                          {licencia} {/* Mostramos el valor con + en la UI */}
                         </Text>
                       </TouchableOpacity>
-                    ))}
-                  </View>
+                    );
+                  })}
                 </View>
-              </>
-            ) : (
-              <>
-                {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} color={colors.primary} />)}
-                {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} color={colors.primary} />)}
-                {renderInput("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}
-                {renderInput("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}
-                {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
-                {/* Inicio */}
-                <DatePicker
-                  label="Inicio"
-                  value={formData.inicio}
-                  onChange={(date) => handleInputChange("inicio", date)}
-                  iconName="stopwatch"
-                />
-                {/* Fin mínimo */}
-                <DatePicker
-                  label="Fin mínimo"
-                  value={formData.finMinimo}
-                  onChange={(date) => handleInputChange("finMinimo", date)}
-                  iconName="calendar-minus"
-                />
-                {/* Fin máximo */}
-                <DatePicker
-                  label="Fin máximo"
-                  value={formData.finMaximo}
-                  onChange={(date) => handleInputChange("finMaximo", date)}
-                  iconName="calendar-plus"
-                />
-              </>
-            )}
-
-            {errorMessage ? (
-              <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
-                {errorMessage}
-              </Text>
-            ) : null}
-
-            {/* Botón de publicación */}
-            <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
-              <Text style={styles.publishButtonText}>Publicar oferta</Text>
-            </TouchableOpacity>
-
-            {/* Modal de éxito */}
-            <SuccessModal
-              isVisible={successModalVisible}
-              onClose={() => setSuccessModalVisible(false)}
-              message="¡Oferta creada con éxito!"
-            />
+              </View>
+  
+              {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
+              {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} color={colors.primary} />)}
+              <CityPicker 
+               label="Localizacion"
+              field="localizacion"
+              icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary}/>}
+              formData={formData}
+              handleInputChange={handleInputChange}
+              />
+  
+              {/* Selector de tipo de oferta */}
+              <Text style={styles.title}>¿Qué tipo de oferta quieres publicar?</Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[styles.userTypeButton, tipoOferta === "TRABAJO" ? styles.selectedButton : styles.unselectedButton]}
+                  onPress={() => setTipoOferta("TRABAJO")}
+                >
+                  <FontAwesome5 size={24} color={tipoOferta === "TRABAJO" ? colors.white : colors.secondary} />
+                  <Text style={[styles.userTypeText, tipoOferta === "TRABAJO" ? styles.selectedText : styles.unselectedText]}>
+                    TRABAJO
+                  </Text>
+                </TouchableOpacity>
+  
+                <TouchableOpacity
+                  style={[styles.userTypeButton, tipoOferta === "CARGA" ? styles.selectedButton : styles.unselectedButton]}
+                  onPress={() => setTipoOferta("CARGA")}
+                >
+                  <FontAwesome5 size={24} color={tipoOferta === "CARGA" ? colors.white : colors.secondary} />
+                  <Text style={[styles.userTypeText, tipoOferta === "CARGA" ? styles.selectedText : styles.unselectedText]}>
+                    CARGA
+                  </Text>
+                </TouchableOpacity>
+              </View>
+  
+              {/* Campos dinámicos según el tipo de oferta */}
+              {tipoOferta === "TRABAJO" ? (
+                <>
+                  <DatePicker
+                    label="Expiración de incorporación"
+                    value={formData.fechaIncorporacion}
+                    onChange={(date) => handleInputChange("fechaIncorporacion", date)}
+                    iconName="calendar-check"
+                  />
+  
+                  <View style={styles.inputContainer}>
+                    <Text style={{ color: colors.secondary, fontSize: 16, marginBottom: 10 }}>
+                      Jornada:
+                    </Text>
+                    <View style={styles.jornadaContainer}>
+                      {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
+                        <TouchableOpacity
+                          key={jornada}
+                          style={[
+                            styles.jornadaButton,
+                            formData.jornada === jornada && styles.jornadaButtonSelected
+                          ]}
+                          onPress={() => handleInputChange("jornada", jornada)}
+                        >
+                          <Text style={[
+                            styles.jornadaText,
+                            formData.jornada === jornada && styles.jornadaTextSelected
+                          ]}>
+                            {jornada}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <>
+                  {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} color={colors.primary} />)}
+                  {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} color={colors.primary} />)}
+  
+                  {/*{renderPicker("Origen", "origen", <FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />)}/*/}
+                  <CityPicker 
+                  label="Origen"
+                  field="origen"
+                  icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary}/>}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  />
+                 {/*{renderPicker("Destino", "destino", <FontAwesome5 name="map-marker" size={20} color={colors.primary} />)}*/}
+                  <CityPicker 
+                  label="Destino"
+                  field="destino"
+                  icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary}/>}
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  />
+                  {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} color={colors.primary} />)}
+  
+                  {/* Fechas */}
+                  <DatePicker
+                    label="Inicio"
+                    value={formData.inicio}
+                    onChange={(date) => handleInputChange("inicio", date)}
+                    iconName="stopwatch"
+                  />
+                  <DatePicker
+                    label="Fin mínimo"
+                    value={formData.finMinimo}
+                    onChange={(date) => handleInputChange("finMinimo", date)}
+                    iconName="calendar-minus"
+                  />
+                  <DatePicker
+                    label="Fin máximo"
+                    value={formData.finMaximo}
+                    onChange={(date) => handleInputChange("finMaximo", date)}
+                    iconName="calendar-plus"
+                  />
+                </>
+              )}
+  
+              {errorMessage ? (
+                <Text style={{ color: "red", fontSize: 18, marginBottom: 10, justifyContent: "center", textAlign: "center" }}>
+                  {errorMessage}
+                </Text>
+              ) : null}
+  
+              <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
+                <Text style={styles.publishButtonText}>Publicar oferta</Text>
+              </TouchableOpacity>
+  
+              <SuccessModal
+                isVisible={successModalVisible}
+                onClose={() => setSuccessModalVisible(false)}
+                message="¡Oferta creada con éxito!"
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </EmpresaRoute>
+        </ScrollView>
+      </EmpresaRoute>
   );
+  
 };
 
 const styles = StyleSheet.create({

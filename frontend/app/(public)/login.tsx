@@ -50,7 +50,7 @@ const LoginScreen = () => {
 
       setTimeout(() => {
         setSuccessModalVisible(false);
-        router.replace(rol === "ADMIN" ? "/workinprogress" : "/");
+        router.replace(rol === "ADMIN" ? "/admin" : "/");
       }, 1000);
 
     } catch (error) {

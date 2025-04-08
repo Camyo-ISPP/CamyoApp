@@ -2,8 +2,8 @@
   "scripts": {
     "backend": "cd backend && mvn spring-boot:run",
     "frontend": "cd frontend && npx expo start",
-    "android:studio": "cd frontend && npm run android",
-    "postinstall": "cd frontend && npm install"
+    "postinstall": "cd frontend && npm install",
+    "seed:imagenes": "cd backend && mvn spring-boot:run -Dspring-boot.run.profiles=imagenes"
   },
   "dependencies": {
     "firebase": "^11.4.0",

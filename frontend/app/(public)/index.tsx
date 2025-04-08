@@ -1,27 +1,67 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, ScrollView, ActivityIndicator, Dimensions, Animated, Easing } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
-const truckImage = require("../../assets/images/camion.png");
 const heroBackground = require("../../assets/images/lonely-road.jpg");
 import { useAuth } from "../../contexts/AuthContext";
 import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
-import CamyoNavBar from "../_components/_layout/CamyoNavBar";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const { user, logout } = useAuth();
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1040);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [offers, setOffers] = useState<any[]>([]);
+  const { rules, loading: subscriptionLoading } = useSubscriptionRules();
+  const [loadingOffers, setLoadingOffers] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
+
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+    } catch (error) {
+      console.error("Error al cargar las ofertas:", error);
+    } finally {
+      setLoadingOffers(false);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/recientes`);
+      setData(response.data);
+    } catch (error) {
+      console.error('Error al cargar los datos:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOffers();
+  }, [user]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoadingOffers(true);
+      setLoadingData(true);
+      fetchOffers();
+      fetchData();
+    }, [user])
+  );
 
   useEffect(() => {
     const updateSize = () => setIsCompact(Dimensions.get("window").width < 1040);
@@ -38,83 +78,15 @@ export default function Index() {
     return () => Dimensions.removeEventListener("change", updateSize);
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const generalLoading = loadingOffers || loadingData || subscriptionLoading || !rules;
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/ofertas/recientes`);
-      setData(response.data);
-    } catch (error) {
-      console.error('Error al cargar los datos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (generalLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.secondary} />
       </View>
     );
   }
-
-  const CardOferta = ({ item }) => {
-    const scaleValue = useRef(new Animated.Value(1)).current;
-
-    const handleHover = (toValue) => {
-      Animated.spring(scaleValue, {
-        toValue,
-        friction: 3,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    return (
-      <Animated.View
-        style={[
-          styles.card,
-          { transform: [{ scale: scaleValue }] },
-          item.promoted && styles.promotedCard
-        ]}
-        onMouseEnter={() => handleHover(1.03)}
-        onMouseLeave={() => handleHover(1)}
-      >
-        {item.promoted && (
-          <View style={styles.patrocinadoBadge}>
-            <Text style={styles.patrocinadoText}>PATROCINADO</Text>
-          </View>
-        )}
-        <Image
-          source={item.empresa?.logo ? { uri: item.empresa.logo } : defaultCompanyLogo}
-          style={styles.companyLogo}
-        />
-        <View style={styles.offerContent}>
-          <Text style={styles.offerTitle}>{item.titulo}</Text>
-          <View style={styles.tagsContainer}>
-            <Text style={styles.offerDetailsTagLicense}>{item.licencia.replace(/_/g, '+')}</Text>
-            <Text style={styles.offerDetailsTagExperience}>+{item.experiencia} años</Text>
-            <View style={styles.locationContainer}>
-              <MaterialIcons name="location-on" size={16} color="#696969" />
-              <Text style={styles.localizacion}>{item.localizacion}</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.offerActions}>
-          <Text style={styles.offerSueldo}>{item.sueldo}€</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push(`/oferta/${item.id}`)}
-          >
-            <MaterialCommunityIcons name="eye" size={16} color="white" />
-            <Text style={styles.buttonText}>Ver Detalles</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    );
-  };
 
   const StatsSection = () => (
     <View style={styles.statsContainer}>
@@ -135,6 +107,14 @@ export default function Index() {
       </View>
     </View>
   );
+
+  const canCreateNewOffer = () => {
+    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+    return activeOffersCount < rules.maxActiveOffers;
+  };
+
+  const ofertasTrabajo = data.filter(item => item.tipoOferta === "TRABAJO");
+  const ofertasCarga = data.filter(item => item.tipoOferta === "CARGA");
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
@@ -184,16 +164,30 @@ export default function Index() {
                       <FontAwesome5 name="briefcase" size={18} color="white" style={{ marginRight: 8 }} />
                       <Text style={styles.buttonText}>Mis ofertas</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
-                      <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
-                      <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
-                    </TouchableOpacity>
+
+                    {(!canCreateNewOffer()) ? (
+                      <TouchableOpacity style={styles.mejorarPlanButton} onPress={() => router.push("/suscripcion")}>
+                        <FontAwesome5 name="rocket" size={16} color="#f15025" style={styles.plusIcon} />
+                        <Text style={styles.publishButtonText}>Mejorar mi plan</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/oferta/crear")}>
+                        <MaterialIcons name="post-add" size={20} color="#f15025" style={{ marginRight: 8 }} />
+                        <Text style={styles.secondaryButtonText}>Publicar nueva oferta</Text>
+                      </TouchableOpacity>
+                    )}
                   </>
                 ) : (
-                  <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
-                    <MaterialIcons name="logout" size={20} color="white" style={{ marginRight: 8 }} />
-                    <Text style={styles.buttonText}>Cerrar sesión</Text>
+                  <>
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/admin")}>
+                    <FontAwesome5 name="wrench" size={18} color="white" style={{ marginRight: 8 }} />
+                    <Text style={styles.buttonText}>Panel de Administración</Text>
                   </TouchableOpacity>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => logout()}>
+                      <MaterialIcons name="logout" size={20} color="#f15025" style={{ marginRight: 8 }} />
+                      <Text style={styles.secondaryButtonText}>Cerrar sesión</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
 
               </View>
@@ -215,9 +209,8 @@ export default function Index() {
                   <FontAwesome5 name="route" size={24} color={colors.secondary} />
                   <Text style={styles.columnaTitulo}>Transporte de Carga</Text>
                 </View>
-                {data.filter(item => item.tipoOferta === "CARGA").map(item => (
-                  <CardOferta key={item.id} item={item} />
-                ))}
+                <ListadoOfertasPublicoSmall offers={ofertasCarga} showPromoted={true} />
+
               </View>
 
               {/* Columna de Trabajo */}
@@ -226,9 +219,8 @@ export default function Index() {
                   <MaterialIcons name="work" size={24} color={colors.secondary} />
                   <Text style={styles.columnaTitulo}>Ofertas de Trabajo</Text>
                 </View>
-                {data.filter(item => item.tipoOferta === "TRABAJO").map(item => (
-                  <CardOferta key={item.id} item={item} />
-                ))}
+
+                <ListadoOfertasPublicoSmall offers={ofertasTrabajo} showPromoted={true} />
               </View>
             </View>
           </View>
@@ -254,7 +246,7 @@ export default function Index() {
               style={styles.ctaButton}
               onPress={() => {
                 if (!user) {
-                  router.push("/login");
+                  router.push("/registro");
                 } else if (user.rol === "CAMIONERO") {
                   router.push("/explorar");
                 } else if (user.rol === "EMPRESA") {
@@ -291,7 +283,7 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.white,
   },
   loadingContainer: {
     flex: 1,
@@ -380,15 +372,35 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.white,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   secondaryButtonText: {
     color: colors.primary,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
-
+  mejorarPlanButton: {
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 6,
+    backgroundColor: colors.white,
+  },
+  publishButtonText: {
+    color: colors.primary,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  plusIcon: {
+    marginRight: 6,
+  },
   /* Stats Section */
   statsContainer: {
     flexDirection: 'row',
@@ -445,7 +457,7 @@ const styles = StyleSheet.create({
   listaContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 20,
+    gap: 40,
     flexWrap: 'wrap',
   },
   columna: {
