@@ -165,6 +165,9 @@ public class OfertaController {
                 if (nuevaData.getLicencia() != null) ofertaExistente.setLicencia(nuevaData.getLicencia());
                 if (nuevaData.getSueldo() != null) ofertaExistente.setSueldo(nuevaData.getSueldo());
                 if (nuevaData.getNotas() != null) ofertaExistente.setNotas(nuevaData.getNotas());
+                if (nuevaData.getExperiencia() != null) ofertaExistente.setExperiencia(nuevaData.getExperiencia());
+                if (nuevaData.getLocalizacion() != null) ofertaExistente.setLocalizacion(nuevaData.getLocalizacion());
+                if (nuevaData.getEstado() != null) ofertaExistente.setEstado(nuevaData.getEstado());
             }
     
             Oferta ofertaActualizada = ofertaService.guardarOferta(ofertaExistente);
@@ -173,6 +176,13 @@ public class OfertaController {
                 if (cargaExistente != null) {
                     cargaExistente.setOferta(ofertaActualizada);
                     cargaExistente.setPeso(request.getCarga().getPeso());
+                    cargaExistente.setMercancia(request.getCarga().getMercancia());
+                    cargaExistente.setOrigen(request.getCarga().getOrigen());
+                    cargaExistente.setDestino(request.getCarga().getDestino());
+                    cargaExistente.setDistancia(request.getCarga().getDistancia());
+                    cargaExistente.setInicio(request.getCarga().getInicio());
+                    cargaExistente.setFinMinimo(request.getCarga().getFinMinimo());
+                    cargaExistente.setFinMaximo(request.getCarga().getFinMaximo());
                     cargaService.guardarCarga(cargaExistente);
                 } else {
                     request.getCarga().setOferta(ofertaActualizada);
@@ -182,6 +192,7 @@ public class OfertaController {
                 Trabajo trabajoExistente = ofertaService.obtenerTrabajo(id);
                 if (trabajoExistente != null) {
                     trabajoExistente.setOferta(ofertaActualizada);
+                    trabajoExistente.setFechaIncorporacion(request.getTrabajo().getFechaIncorporacion());
                     trabajoExistente.setJornada(request.getTrabajo().getJornada());
                     trabajoService.guardarTrabajo(trabajoExistente);
                 } else {
