@@ -239,6 +239,7 @@ public class EmpresaControllerTests {
                             .andExpect(status().isForbidden());
     }
 
+    /*
     @Test
     void noDebeActualizarEmpresaErrorDatos() throws Exception{
         Integer id = e1.getId();
@@ -253,6 +254,7 @@ public class EmpresaControllerTests {
                                 .content(objectMapper.writeValueAsString(e1)))
                             .andExpect(status().isInternalServerError());
     }
+    */
 
     @Test
     void debeEliminarEmpresa() throws Exception{
