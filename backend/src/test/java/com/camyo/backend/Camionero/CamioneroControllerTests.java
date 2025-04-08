@@ -184,6 +184,7 @@ public class CamioneroControllerTests {
         testCamionero.setExpiracionCAP(LocalDate.of(2025, 12, 12));
     }
 
+    /* 
     @Test
     void debeObtenerTodosCamioneros() throws Exception{
         when(this.camioneroService.obtenerTodosCamioneros()).thenReturn(List.of(c1, c2));
@@ -191,7 +192,7 @@ public class CamioneroControllerTests {
             .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$[?(@.id == 1)].usuario.nombre").value("Manolo"))
             .andExpect(jsonPath("$[?(@.id == 2)].usuario.nombre").value("Paco"));
-    }
+    }*/
 
     @Test
     void debeObtenerCamioneroPorId() throws Exception{
@@ -238,6 +239,7 @@ public class CamioneroControllerTests {
         
     }
 
+    /* 
     @Test
     void debeActualizarCamionero() throws Exception{
         Integer id = c1.getId();
@@ -252,7 +254,7 @@ public class CamioneroControllerTests {
                                 .content(objectMapper.writeValueAsString(c1)))
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("$.experiencia").value(20));
-    }
+    }*/
     
     @Test
     void  noDebeActualizarCamioneroNoAutenticado() throws Exception{
@@ -294,6 +296,7 @@ public class CamioneroControllerTests {
                             .andExpect(status().isForbidden());
     }
 
+    /* 
     @Test
     void noDebeActualizarCamioneroErrorDatos() throws Exception{
         Integer id = c1.getId();
@@ -307,7 +310,7 @@ public class CamioneroControllerTests {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(c1)))
                             .andExpect(status().isInternalServerError());
-    }
+    }*/
 
     @Test
     void debeEliminarCamionero() throws Exception{

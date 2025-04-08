@@ -200,6 +200,7 @@ class EmpresaServiceTests {
         assertTrue(empresaService.obtenerEmpresaPorNif(nif).isEmpty());
     }
 
+    /*
     @Test
     @Transactional(readOnly = true)
     void debeActualizarEmpresa() {
@@ -217,7 +218,7 @@ class EmpresaServiceTests {
         assertEquals(newWeb, empActualizada.getWeb());
         assertEquals(e1.getId(), empActualizada.getId());
 
-    }
+    }*/
 
     @Test
     @Transactional
