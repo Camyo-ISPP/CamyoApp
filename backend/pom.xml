@@ -79,6 +79,7 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>3.2.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
@@ -98,6 +99,12 @@
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
             <version>28.4.0</version>
+        </dependency>
+		<dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>5.2.0</version>
+            <scope>test</scope>
         </dependency>
 	</dependencies>
 

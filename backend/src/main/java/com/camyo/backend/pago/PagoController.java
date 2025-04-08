@@ -62,12 +62,16 @@ public class PagoController {
                         return new ResponseEntity<>("No hay ningún tipo de compra seleccionada", HttpStatus.BAD_REQUEST);
                 }
 
+
                 // Start by finding an existing customer record from Stripe or creating a new
                 // one if needed
                 Usuario cliente = usuarioService.obtenerUsuarioActual();
                 Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
 
                 String precio_id = null;
+
+                // Integer empresaId = empresaService.obtenerEmpresaPorUsuario(cliente.getId()).get().getId();
+                // suscripcionService.obtenerSuscripcionActiva(empresaId);
 
                 switch (pago.getCompra()) {
                         case BASICO -> {
@@ -155,9 +159,11 @@ public class PagoController {
 
                 } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra() && requestDto.getOfertaId() != null){
                         // ofertaId puede ser null, por lo que la comprobación se realiza aquí
+                        System.out.println( ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual));
+                       
                         if (ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual)) {
                                 ofertaService.patrocinarOferta(requestDto.getOfertaId());
-                                return ResponseEntity.ok("Compra aplicada con éxito");
+                                return ResponseEntity.ok("Patrocinio aplicado con éxito");
                         }
                         
                 }
