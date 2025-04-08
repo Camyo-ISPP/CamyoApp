@@ -121,7 +121,7 @@ function IntegratedCheckout() {
                         <Text style={styles.legalLink} onPress={openTermsLink}>Términos y Condiciones</Text>{' '}
                         y nuestra{' '}
                         <Text style={styles.legalLink} onPress={openPrivacyLink}>Política de Privacidad</Text>.
-                        El pago se renovará automáticamente cada mes hasta que canceles tu suscripción.
+                        {id !== "PATROCINAR" && id !== "ELIMINAR_ANUNCIOS" ? "El pago se renovará automáticamente cada mes hasta que canceles tu suscripción." : ""}
                     </Text>
                 </View>
             </ScrollView>
