@@ -54,17 +54,11 @@ public class SecurityConfiguration {
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 			//.requestMatchers("/resources/**", "/webjars/**", "/static/**", "/swagger-resources/**").permitAll()			
 			//.requestMatchers( "/","/auth/**","/swagger-ui.html","/swagger-ui/**").permitAll()
+			.requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasAuthority("ADMIN")
 			.requestMatchers("/usuarios/**").permitAll()
 			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/desaplicar/**").hasAuthority("CAMIONERO")
 			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/aplicar/**").hasAuthority("CAMIONERO")
 
-
-			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/trabajo").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/trabajo").hasAnyAuthority("EMPRESA","ADMIN")
-			.requestMatchers(HttpMethod.POST, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/carga").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.DELETE, "/ofertas/{id}/carga").hasAnyAuthority("EMPRESA","ADMIN")
 			.requestMatchers(HttpMethod.POST, "/ofertas").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.PUT, "/ofertas/**").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.DELETE, "/ofertas/**").hasAnyAuthority("EMPRESA","ADMIN")
@@ -72,10 +66,6 @@ public class SecurityConfiguration {
 
 			.requestMatchers(HttpMethod.GET, "/resenas").hasAnyAuthority("EMPRESA", "CAMIONERO")
 
-			.requestMatchers(HttpMethod.PUT, "/camioneros/**").hasAuthority("CAMIONERO")
-			.requestMatchers(HttpMethod.DELETE, "/camioneros/**").hasAuthority("CAMIONERO")
-			.requestMatchers(HttpMethod.PUT, "/empresas/**").hasAuthority("EMPRESA")
-			.requestMatchers(HttpMethod.DELETE, "/empresas/**").hasAuthority("EMPRESA")
 			.requestMatchers(HttpMethod.POST, "/pago/**").hasAuthority("EMPRESA")
 
 			.anyRequest().permitAll()

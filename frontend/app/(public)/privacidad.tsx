@@ -136,6 +136,8 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: 50,
     paddingVertical: 50,
+    marginLeft:"7%",
+    marginRight:"7%"
   },
   header: {
     flexDirection: 'row',

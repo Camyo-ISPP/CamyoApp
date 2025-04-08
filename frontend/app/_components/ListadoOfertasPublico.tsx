@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
-import { FontAwesome5, MaterialIcons, AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, AntDesign, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import defaultCompanyLogo from "../../assets/images/defaultCompImg.png";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
@@ -38,7 +38,7 @@ const ListadoOfertasPublico = ({
                             )}
                             <View style={styles.offerContent}>
                                 <View style={styles.offerHeader}>
-                                    
+
                                     <Image
                                         source={
                                             item?.empresa?.usuario?.foto
@@ -73,7 +73,11 @@ const ListadoOfertasPublico = ({
                                                 styles.offerDetailsTagBase,
                                                 item.tipoOferta.toLowerCase() === 'trabajo' ? styles.offerDetailsTagWork : styles.offerDetailsTagLoad
                                             ]}>
-                                                <MaterialIcons name="work-outline" size={12} color={colors.white} />
+                                                <Ionicons
+                                                    name={item.tipoOferta === "CARGA" ? "cube-outline" : "briefcase-outline"}
+                                                    size={14}
+                                                    color={colors.white}
+                                                />
                                                 <Text style={styles.detailText}>{item.tipoOferta}</Text>
                                             </View>
 
@@ -140,12 +144,12 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: 12,
         padding: width < 768 ? 12 : 16,
-        marginBottom: 16,
+        marginBottom: 18,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowRadius: 10,
+        elevation: 5,
         borderLeftWidth: 2,
         borderLeftColor: '#E0E0E0',
         position: 'relative',
@@ -187,10 +191,11 @@ const styles = StyleSheet.create({
         alignItems: width < 768 ? 'flex-start' : 'center',
     },
     companyLogoOffer: {
-        height: width < 768 ? 80 : 120,
-        width: width < 768 ? 80 : 120,
+        height: 110,
+        width: 110,
         marginRight: width < 768 ? 0 : 10,
         marginBottom: width < 768 ? 10 : 0,
+        borderRadius: 50,
     },
     offerContent: {
         paddingHorizontal: 5,

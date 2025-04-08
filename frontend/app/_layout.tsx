@@ -31,6 +31,7 @@ function RootLayout() {
         suscripcion: "Planes de Suscripción",
         misofertas: "Mis Ofertas",
         "oferta/[ofertaId]/editar": "Editar Oferta",
+        admin: "Panel de Administración",
       };
 
       const currentSegment = segments.join("/");
@@ -74,7 +75,7 @@ function RootLayout() {
         
         <Stack.Screen name="suscripcion" />
 
-        <Stack.Screen name="(admin)/workinprogress" />
+        <Stack.Screen name="(admin)/admin" />
         <Stack.Screen name="(public)/forbidden" />
 
         <Stack.Screen name="pago/checkout" />
