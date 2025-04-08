@@ -23,6 +23,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -79,7 +80,7 @@ public class PagoController {
                 if (pago.getCompra()==Compra.PATROCINAR) {
                         // Create a PaymentIntent and send its client secret to the client
                         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                                .setAmount(500L)
+                                .setAmount(499L)
                                 .setCurrency("eur")
                                 .setCustomer(clienteStripe.getId())
                                 .setAutomaticPaymentMethods(
@@ -116,24 +117,26 @@ public class PagoController {
 
                         secret = subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret();
 
+                } else if (pago.getCompra()==Compra.ELIMINAR_ANUNCIOS) {
+                        // Create a PaymentIntent and send its client secret to the client
+                        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+                                .setAmount(499L)
+                                .setCurrency("eur")
+                                .setCustomer(clienteStripe.getId())
+                                .setAutomaticPaymentMethods(
+                                        PaymentIntentCreateParams.AutomaticPaymentMethods
+                                                .builder()
+                                                .setEnabled(true)
+                                                .build())
+                                .build();
+
+                        PaymentIntent paymentIntent = PaymentIntent.create(params);
+
+                        secret = paymentIntent.getClientSecret();
                 } else {
                         return new ResponseEntity<>("Este tipo de compra no existe", HttpStatus.FORBIDDEN);
                 }
                 return new ResponseEntity<>(secret, HttpStatus.OK);
-        }
-
-        @PostMapping("/apply_subscription")
-        public ResponseEntity<String> applySubscription(@RequestBody RequestDTO requestDto) throws StripeException {
-                Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
-
-                PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
-                if (paymentIntent.getStatus().equals("succeeded")) {
-                        Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
-                suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), null);
-                        return ResponseEntity.ok("Suscripción aplicada con éxito");
-                } else {
-                        return ResponseEntity.badRequest().build();
-                }
         }
 
         @PostMapping("/apply_compra")
@@ -155,6 +158,10 @@ public class PagoController {
                                 return ResponseEntity.ok("Compra aplicada con éxito");
                         }
                         
+                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.ELIMINAR_ANUNCIOS == requestDto.getCompra()){
+                        Integer userId = usuarioService.obtenerUsuarioActual().getId();
+                        usuarioService.eliminarAnuncios(userId);
+                        return ResponseEntity.ok("Anuncios eliminados correctamente");
                 }
                 return ResponseEntity.badRequest().build();
                 
