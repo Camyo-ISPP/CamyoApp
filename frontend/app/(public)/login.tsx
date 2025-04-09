@@ -6,7 +6,6 @@ import colors from "../../assets/styles/colors";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import SuccessModal from "../_components/SuccessModal";
-import withNavigationGuard from "@/hoc/withNavigationGuard";
 
 const LoginScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -344,4 +343,4 @@ const styles = StyleSheet.create({
   },  
 });
 
-export default withNavigationGuard(LoginScreen);
+export default LoginScreen;
