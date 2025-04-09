@@ -28,6 +28,9 @@ const EditarOfertaScreen = () => {
     const [tipoOferta, setTipoOferta] = useState("TRABAJO");
     const [errorMessage, setErrorMessage] = useState("");
     const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [offers, setOffers] = useState<any[]>([]);
+    const [drafts, setDrafts] = useState<any[]>([]);
+
     // Estado para mantener los datos de la oferta
     const [formData, setFormData] = useState({
         titulo: "",
@@ -70,6 +73,24 @@ const EditarOfertaScreen = () => {
         }
     }, [user]);
 
+    const fetchOffers = async () => {
+        try {
+            const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+            setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+            setDrafts(response.data.filter((offer: any) => offer.estado === "BORRADOR"));
+        } catch (error) {
+            console.error("Error al cargar las ofertas:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchOffers();
+    }, []);
+    
+    const canCreateNewOffer = () => {
+        const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
+        return activeOffersCount < rules.maxActiveOffers;
+    };
     const formatToDDMMYYYY = (dateInput) => {
         const date = new Date(dateInput);
         const day = String(date.getDate()).padStart(2, "0");
@@ -103,7 +124,7 @@ const EditarOfertaScreen = () => {
                         'Authorization': `Bearer ${userToken}`
                     }
                 });
-                
+
                 const dataCarga = responseCarga.data;
                 setFormData({
                     titulo: data.titulo || "",
@@ -131,10 +152,10 @@ const EditarOfertaScreen = () => {
                         : "",
                     finMinimo: dataCarga.finMinimo
                         ? formatToDDMMYYYY(dataCarga.finMinimo)
-                        : "",                
+                        : "",
                     finMaximo: dataCarga.finMaximo
                         ? formatToDDMMYYYY(dataCarga.finMaximo)
-                        : "",                
+                        : "",
                 });
 
                 setTipoOferta(data.tipoOferta || "TRABAJO");
@@ -404,7 +425,7 @@ const EditarOfertaScreen = () => {
     };
 
     const handleDraft = async () => {
-        
+
         if (!formData.titulo) {
             setErrorMessage("El campo título es obligatorio para guardar un borrador.");
             return;
@@ -913,8 +934,16 @@ const EditarOfertaScreen = () => {
                             <TouchableOpacity style={styles.draftButton} onPress={handleDraft}>
                                 <Text style={styles.draftButtonText}>Guardar borrador</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
-                                <Text style={styles.publishButtonText}>Publicar oferta</Text>
+                            <TouchableOpacity
+                                style={[
+                                    styles.publishButton,
+                                    !canCreateNewOffer() && styles.disabledButton]}
+                                onPress={handlePublish}
+                                disabled={!canCreateNewOffer()}
+                            >
+                                <Text style={styles.publishButtonText}>
+                                    {canCreateNewOffer() ? 'Publicar' : 'Máximo Alcanzado'}
+                                </Text>
                             </TouchableOpacity>
                         </View>
 
@@ -977,6 +1006,9 @@ const styles = StyleSheet.create({
         color: colors.white,
         fontSize: 20,
         fontWeight: "bold",
+    },
+    disabledButton: {
+        backgroundColor: '#ccc',
     },
     draftButton: {
         backgroundColor: colors.primary,

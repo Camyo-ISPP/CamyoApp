@@ -25,6 +25,8 @@ const MiPerfilEmpresa = () => {
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
   const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
+  const [drafts, setDrafts] = useState<any[]>([]);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -60,6 +62,7 @@ const MiPerfilEmpresa = () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
       setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+      setDrafts(response.data.filter((offer: any) => offer.estado === "BORRADOR"));
     } catch (error) {
       console.error("Error al cargar las ofertas:", error);
     } finally {
@@ -153,6 +156,13 @@ const MiPerfilEmpresa = () => {
                     {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
                   </Text>
                 </TouchableOpacity>
+                {drafts.length > 0 && (
+                    <TouchableOpacity onPress={() => router.push("/misofertas")}>
+                    <Text style={styles.limitMessage}>
+                      Haz Click Aquí para ver tus borradores
+                    </Text>
+                    </TouchableOpacity>
+                )}
 
               </View>
 
@@ -434,6 +444,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(192, 192, 192, 0.2)',
     borderRadius: 50,
     padding: 2,
+  },
+  draftMessageText: {
+    fontSize: 16,
+    color: colors.primary,
+    textAlign: "center",
+    marginTop: 10,
+    textDecorationLine: "underline",
   },
 });
 
