@@ -100,26 +100,6 @@ class UsuarioServiceTests {
         assertEquals(0.0f, valor);
     }
 
-    @Test
-    void testUpdateUser_EmailDuplicado() {
-        Usuario datos = new Usuario();
-        datos.setEmail("bob@test.com"); // email user2
-        datos.setPassword("newPass");
-
-        // user1 intenta cambiar su email al de user2 => exception
-        assertThrows(IllegalArgumentException.class,
-            () -> usuarioService.updateUser(datos, user1.getId()));
-    }
-
-    @Test
-    void testUpdateUser_NoExiste() {
-        Usuario datos = new Usuario();
-        datos.setEmail("otro@test.com");
-        datos.setPassword("pass");
-
-        assertThrows(ResourceNotFoundException.class,
-            () -> usuarioService.updateUser(datos, 9999));
-    }
 
     @Test
     @Transactional

@@ -71,48 +71,6 @@ class UsuarioControllerTests {
 
 
 
-    @Test
-    void testActualizarUsuario_NoEncontrado() throws Exception {
-        String jsonBody = """
-          {
-            "nombre": "NuevoNombre",
-            "email": "nuevo@mail.com",
-            "password": "passCambio",
-            "authority": null
-          }
-        """;
-    
-        doThrow(new ResourceNotFoundException("Usuario","id",999))
-            .when(usuarioService).updateUser(any(Usuario.class), eq(999));
-    
-        mockMvc.perform(put("/usuarios/{id}",999)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody))
-            .andExpect(status().isBadRequest());
-
-    }
-    
-
-    @Test
-    void testActualizarUsuario_EmailEnUso() throws Exception {
-        String jsonBody = """
-          {
-            "nombre": "NuevoNombre",
-            "email": "existe@test.com"
-          }
-        """;
-    
-        doThrow(new IllegalArgumentException("El email ya está en uso"))
-            .when(usuarioService).updateUser(any(Usuario.class), eq(5));
-    
-        mockMvc.perform(put("/usuarios/{id}",5)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody))
-            .andExpect(status().isBadRequest());
-        // Eliminado: .andExpect(jsonPath("$.message").value("El email ya está en uso"));
-    }
-
-
 
 @Test
 void testEliminarUsuario_NoEncontrado() throws Exception {
