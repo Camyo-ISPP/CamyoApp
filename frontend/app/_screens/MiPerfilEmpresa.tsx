@@ -13,6 +13,7 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
+import SuccessModal from "../_components/SuccessModal";
 
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -28,6 +29,7 @@ const MiPerfilEmpresa = () => {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -92,10 +94,18 @@ const MiPerfilEmpresa = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete(`${BACKEND_URL}/usuarios/${user.userId}`, {
+      const response = await axios.delete(`${BACKEND_URL}/usuarios/${user.userId}`, {
         headers: { Authorization: `Bearer ${userToken}` },
       });
-      logout();
+
+      if (response.status === 200) {
+        setSuccessModalVisible(true);
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+          logout();
+        }, 2500);
+      }
+
     } catch (error) {
       console.error("Error al eliminar la cuenta:", error);
       setErrorModalVisible(true);
@@ -290,6 +300,12 @@ const MiPerfilEmpresa = () => {
       <ErrorModal
         isVisible={errorModalVisible}
         message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
+      />
+
+      <SuccessModal
+        isVisible={successModalVisible}
+        onClose={() => setSuccessModalVisible(false)}
+        message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
       />
     </ScrollView >
   );

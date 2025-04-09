@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
+import SuccessModal from "../_components/SuccessModal";
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -21,6 +22,7 @@ const MiPerfilCamionero = () => {
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchResenas = async () => {
@@ -43,16 +45,24 @@ const MiPerfilCamionero = () => {
 
     const handleDeleteAccount = async () => {
         try {
-            await axios.delete(`${BACKEND_URL}/usuarios/${user.userId}`, {
+            const response = await axios.delete(`${BACKEND_URL}/usuarios/${user.userId}`, {
                 headers: { Authorization: `Bearer ${userToken}` },
             });
-            logout();
+
+            if (response.status === 200) {
+                setSuccessModalVisible(true);
+                setTimeout(() => {
+                    setSuccessModalVisible(false);
+                    logout();
+                }, 2500);
+            }
+
         } catch (error) {
             console.error("Error al eliminar la cuenta:", error);
             setErrorModalVisible(true);
             setTimeout(() => {
                 setErrorModalVisible(false);
-              }, 2500);
+            }, 2500);
         } finally {
             setShowDeleteModal(false);
         }
@@ -175,6 +185,13 @@ const MiPerfilCamionero = () => {
                 isVisible={errorModalVisible}
                 message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
             />
+
+            <SuccessModal
+                isVisible={successModalVisible}
+                onClose={() => setSuccessModalVisible(false)}
+                message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
+            />
+
         </ScrollView >
     );
 };
