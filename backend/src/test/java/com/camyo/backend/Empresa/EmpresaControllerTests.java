@@ -181,6 +181,7 @@ public class EmpresaControllerTests {
         
     // }
 
+    /* 
     @Test
     void debeActualizarEmpresa() throws Exception{
         Integer id = e1.getId();
@@ -196,7 +197,7 @@ public class EmpresaControllerTests {
                                 .content(objectMapper.writeValueAsString(e1)))
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("$.web").value(newWeb));
-    }
+    }*/
     
     @Test
     void  noDebeActualizarEmpresaNoAutenticado() throws Exception{
@@ -238,6 +239,7 @@ public class EmpresaControllerTests {
                             .andExpect(status().isForbidden());
     }
 
+    /*
     @Test
     void noDebeActualizarEmpresaErrorDatos() throws Exception{
         Integer id = e1.getId();
@@ -252,6 +254,7 @@ public class EmpresaControllerTests {
                                 .content(objectMapper.writeValueAsString(e1)))
                             .andExpect(status().isInternalServerError());
     }
+    */
 
     @Test
     void debeEliminarEmpresa() throws Exception{

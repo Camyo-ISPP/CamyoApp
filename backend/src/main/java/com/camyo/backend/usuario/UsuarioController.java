@@ -11,6 +11,7 @@ import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.oferta.Oferta;
 import com.camyo.backend.oferta.OfertaService;
 
@@ -78,8 +79,25 @@ public class UsuarioController {
     })
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<MessageResponse> delete(@PathVariable("id") int id) {
+        Usuario usuarioActual = null;
+		try {
+			usuarioActual = usuarioService.obtenerUsuarioActual();
+		} catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(
+                new MessageResponse("Debe iniciar sesión para eliminar un usuario."), 
+                HttpStatus.FORBIDDEN
+            );
+        }
+        
         Usuario usuario = usuarioService.obtenerUsuarioPorId(id);
         if (usuario != null) {
+            if(!usuarioActual.getAuthority().getAuthority().equals("ADMIN") && !usuarioActual.getId().equals(usuario.getId())){
+                return new ResponseEntity<>(
+                    new MessageResponse("Sólo un administrador puede eliminar cuentas ajenas."), 
+                    HttpStatus.FORBIDDEN
+                );
+            }
+
             if (usuario.getAuthority().getAuthority().equals("EMPRESA")){
                 Empresa empresa = empresaService.obtenerEmpresaPorUsuario(usuario.getId()).get();
                 empresaService.eliminarEmpresa(empresa.getId());
