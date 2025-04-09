@@ -265,7 +265,7 @@ export default function OfertaDetalleScreen() {
                 {/*Banner de estado*/}
                 {offerData.estado === 'CERRADA' && user && user.rol === 'CAMIONERO' && offerData.camionero?.id === user.id && (
                     <View style={[styles.statusBanner, styles.assignedBanner]}>
-                        <MaterialCommunityIcons name="check-circle-outline" size={24} color="#28a745" style={styles.statusIcon}/>
+                        <MaterialCommunityIcons name="check-circle-outline" size={24} color="#28a745" style={styles.statusIcon} />
                         <Text style={[styles.statusText, styles.assignedText]}>
                             ¡Felicidades! Has sido asignado a esta oferta
                         </Text>
@@ -274,7 +274,7 @@ export default function OfertaDetalleScreen() {
 
                 {user && user.rol === 'CAMIONERO' && offerData.rechazados.some((c: { id: string }) => c.id === user.id) && (
                     <View style={[styles.statusBanner, styles.rejectedBanner]}>
-                        <MaterialCommunityIcons name="close-circle-outline"size={24}color="#dc3545"style={styles.statusIcon}/>
+                        <MaterialCommunityIcons name="close-circle-outline" size={24} color="#dc3545" style={styles.statusIcon} />
                         <Text style={[styles.statusText, styles.rejectedText]}>
                             Lo sentimos, no has sido seleccionado para esta oferta
                         </Text>
@@ -360,7 +360,7 @@ export default function OfertaDetalleScreen() {
                 <View style={styles.detailRow}>
                     <FontAwesome5 name="id-card" size={18} color="#0b4f6c" />
                     <Text style={styles.detalles}>
-                        <Text style={styles.detallesLabel}>Licencia(s) Requerida(s):</Text> {offerData.licencia}
+                        <Text style={styles.detallesLabel}>Licencia(s) Requerida(s):</Text> {offerData.licencia?.replace(/_/g, '+')}
                     </Text>
                 </View>
 
