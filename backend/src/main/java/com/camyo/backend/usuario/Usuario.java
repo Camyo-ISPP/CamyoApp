@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.camyo.backend.resena.Resena;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,6 +51,7 @@ public class Usuario {
     @Lob
     private byte[] foto;
     
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
 	@NotNull
