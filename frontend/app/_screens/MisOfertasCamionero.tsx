@@ -19,10 +19,7 @@ const MisOfertasCamionero = () => {
     const [pendingOffers, setPendingOffers] = useState<any[]>([]);
     const [rejectedOffers, setRejectedOffers] = useState<any[]>([]);
 
-    const [isLoading, setIsLoading] = useState(true);
-
     const noOffersInAllCategories =
-        !isLoading &&
         aceptedOffers.length === 0 &&
         pendingOffers.length === 0 &&
         rejectedOffers.length === 0;
@@ -32,13 +29,11 @@ const MisOfertasCamionero = () => {
             const fetchOffers = async () => {
                 try {
                     const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
-                    setAceptedOffers(response.data[2] || []);
-                    setPendingOffers(response.data[0] || []);
-                    setRejectedOffers(response.data[1] || []);
+                    setAceptedOffers(response.data[2]);
+                    setPendingOffers(response.data[0]);
+                    setRejectedOffers(response.data[1]);
                 } catch (error) {
                     console.error("Error al cargar las ofertas:", error);
-                } finally {
-                    setIsLoading(false);
                 }
             };
 
@@ -120,13 +115,6 @@ const MisOfertasCamionero = () => {
         }
     };
 
-    if (isLoading) {
-        return (
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <ActivityIndicator size="large" color={colors.primary} />
-            </View>
-        );
-    }    
 
     return (
         <View style={styles.container}>
@@ -164,7 +152,7 @@ const styles = StyleSheet.create({
     contenedorOfertas: {
         width: '70%',
         alignSelf: 'center',
-    },
+      },
     container: {
         flex: 1,
         backgroundColor: colors.white,
