@@ -55,7 +55,14 @@ const LoginScreen = () => {
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setErrorMessage(error.response?.data?.message || 'Credenciales incorrectas. Por favor, inténtalo de nuevo.');
+        if (error.response?.status === 401) {
+          setErrorMessage("Usuario o contraseña incorrectos. Por favor, inténtalo de nuevo.");
+        } else if (error.response?.status === 404) {
+          setErrorMessage("Usuario no encontrado. Por favor, verifica tu nombre de usuario o regístrate si todavía no tienes cuenta.");
+        } else {
+          setErrorMessage("Ocurrió un error inesperado. Por favor, inténtalo más tarde.");
+        }
+        // setErrorMessage(error.response?.data?.message || 'Credenciales incorrectas. Por favor, inténtalo de nuevo.');
       } else {
         setErrorMessage('Ocurrió un error inesperado. Por favor, inténtalo más tarde.');
       }
