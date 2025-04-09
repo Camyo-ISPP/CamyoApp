@@ -125,6 +125,10 @@ const EditarPerfilEmpresa = () => {
       setErrorMessage("El campo localización es demasiado largo.");
       return;
     }
+    if (formData.localizacion.length < 2) {
+      setErrorMessage("El campo localización es demasiado pequeño.");
+      return;
+    }
 
     // Validación de la descripción
     if (formData.descripcion && formData.descripcion.length > 500) {
@@ -151,8 +155,8 @@ const EditarPerfilEmpresa = () => {
       setErrorMessage("El campo numero de identificación es obligatorio.");
       return;
     }
-    if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
-      setErrorMessage("El formato del número de identificación no es válido.");
+    if (!/^[A-HJNPQRSUVW]\d{7}\d$/.test(formData.nif.toUpperCase())) {
+      setErrorMessage("El formato del NIF de empresa no es válido.");
       return;
     }
 

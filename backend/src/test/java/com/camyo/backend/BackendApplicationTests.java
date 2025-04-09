@@ -16,7 +16,7 @@ public class BackendApplicationTests {
         Dotenv dotenv = Dotenv.load();
         dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
     }
-
+ 
     @Test
     void contextLoads() {
         // Prueba básica para verificar que el contexto se carga
