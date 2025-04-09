@@ -25,7 +25,7 @@ const MiPerfilCamionero = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
-
+    console.log(user.ads)
     useEffect(() => {
         const fetchResenas = async () => {
             try {
@@ -94,128 +94,148 @@ const MiPerfilCamionero = () => {
         router.push("/pago/checkout");
       }
 
-    return (
+      return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={styles.container}>
-                <View style={styles.card}>
-                    <View style={styles.rowContainer}>
-                        <BackButton />
-                        {/* Imagen de perfil */}
-                        <View style={styles.profileContainer}>
-                            <Image
-                                source={user?.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
-                                style={styles.profileImage}
-                            />
-                            {/* Botón de edición */}
-                            <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
-                                <Feather name="edit-3" size={22} color={colors.white} />
-                            </TouchableOpacity>
-                        </View>
-                        {/* Información del usuario */}
-                        <View style={styles.infoContainer}>
-                            <Text style={styles.name}>{user.nombre}</Text>
-                            <Text style={styles.username}>@{user.username}</Text>
-                            <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
-                            <Text style={styles.description}>{user.descripcion}</Text>
-                        </View>
-                        
-                    </View>
-                    {/* Separador */}
-                    <View style={styles.separator} />
-
-                    <View style={styles.downContainer}>
-                        {/* Información profesional */}
-                        <Text style={styles.sectionTitle}>Información Profesional</Text>
-                        <Text style={styles.info}>
-                            <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
-                            {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
-                        </Text>
-                        <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
-                        {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
-                        {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
-                        {user.curriculum &&
-                            <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
-                                <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
-                            </TouchableOpacity>
-                        }
-                    </View>
-
-                    <TouchableOpacity
-                        style={styles.deleteAccountButton}
-                        onPress={() => setShowDeleteModal(true)}
-                    >
-                        <MaterialIcons name="delete" size={20} color={colors.white} />
-                        <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.separator} />
-
-                    <View style={styles.reseñasContainer}>
-                        <Text style={styles.sectionTitle}>Reseñas</Text>
-                        {resenas.length > 0 ? (
-                            valoracionMedia !== null && (
-                                <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
-                                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
-                                </Text>
-                            )
-                        ) : (
-                            <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
-                                Valoración media: No hay datos suficientes
-                            </Text>
-                        )}
-
-
-                        {resenas.length === 0 ? (
-                            <Text style={styles.info}>Todavía no tienes reseñas.</Text>
-                        ) : (
-                            resenas.map((resena) => (
-                                <View key={resena.id} style={styles.reseñaCard}>
-                                    <Text style={styles.reseñaAutor}>
-                                        <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
-                                    </Text>
-                                    <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
-                                    <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
-                                </View>
-                            ))
-                        )}
-                    </View>
-
-                    {/* Botón de eliminar anuncios */}
-                    {user.ads ?
-                        <View>
-                            <View style={styles.separator} />
-                            <View>
-                                <TouchableOpacity
-                                    style={styles.mejorarPlanButton}
-                                    onPress={handleRemoveAds}
-                                >
-                                    <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
-                                    <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+            <View style={styles.pageContainer}>
+                {/* Left Ad Placeholder */}
+                {user.ads && (
+                <View style={styles.adContainer}>
+                    <Image
+                        source={require("../../assets/images/truck_mockup_ad.jpg")}
+                        style={styles.adImage}
+                        resizeMode="cover"
+                    />
+                </View>
+            )}
+    
+                {/* Main Content */}
+                <View style={styles.container}>
+                    <View style={styles.card}>
+                        <View style={styles.rowContainer}>
+                            <BackButton />
+                            {/* Imagen de perfil */}
+                            <View style={styles.profileContainer}>
+                                <Image
+                                    source={user?.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
+                                    style={styles.profileImage}
+                                />
+                                {/* Botón de edición */}
+                                <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
+                                    <Feather name="edit-3" size={22} color={colors.white} />
                                 </TouchableOpacity>
                             </View>
+                            {/* Información del usuario */}
+                            <View style={styles.infoContainer}>
+                                <Text style={styles.name}>{user.nombre}</Text>
+                                <Text style={styles.username}>@{user.username}</Text>
+                                <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
+                                <Text style={styles.description}>{user.descripcion}</Text>
+                            </View>
                         </View>
-                        : <></>}
+                        {/* Separador */}
+                        <View style={styles.separator} />
+    
+                        <View style={styles.downContainer}>
+                            {/* Información profesional */}
+                            <Text style={styles.sectionTitle}>Información Profesional</Text>
+                            <Text style={styles.info}>
+                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                            </Text>
+                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
+                            {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
+                            {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+                            {user.curriculum &&
+                                <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
+                                    <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                                </TouchableOpacity>
+                            }
+                        </View>
+    
+                        <TouchableOpacity
+                            style={styles.deleteAccountButton}
+                            onPress={() => setShowDeleteModal(true)}
+                        >
+                            <MaterialIcons name="delete" size={20} color={colors.white} />
+                            <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
+                        </TouchableOpacity>
+    
+                        <View style={styles.separator} />
+    
+                        <View style={styles.reseñasContainer}>
+                            <Text style={styles.sectionTitle}>Reseñas</Text>
+                            {resenas.length > 0 ? (
+                                valoracionMedia !== null && (
+                                    <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
+                                        ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
+                                    </Text>
+                                )
+                            ) : (
+                                <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
+                                    Valoración media: No hay datos suficientes
+                                </Text>
+                            )}
+    
+                            {resenas.length === 0 ? (
+                                <Text style={styles.info}>Todavía no tienes reseñas.</Text>
+                            ) : (
+                                resenas.map((resena) => (
+                                    <View key={resena.id} style={styles.reseñaCard}>
+                                        <Text style={styles.reseñaAutor}>
+                                            <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
+                                        </Text>
+                                        <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
+                                        <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
+                                    </View>
+                                ))
+                            )}
+                        </View>
+    
+                        {/* Botón de eliminar anuncios */}
+                        {user.ads ?
+                            <View>
+                                <View style={styles.separator} />
+                                <View>
+                                    <TouchableOpacity
+                                        style={styles.mejorarPlanButton}
+                                        onPress={handleRemoveAds}
+                                    >
+                                        <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                                        <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            : <></>}
+                    </View>
+                </View>
+    
+                {/* Right Ad Placeholder */}
+                <View style={styles.adContainer}>
+                    <Image
+                        source={require("../../assets/images/truck_mockup_ad.jpg")}
+                        style={styles.adImage}
+                        resizeMode="contain"
+                    />
                 </View>
             </View>
-
+    
             <ConfirmDeleteModal
                 isVisible={showDeleteModal}
                 onConfirm={handleDeleteAccount}
                 onCancel={() => setShowDeleteModal(false)}
                 message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
             />
-
+    
             <ErrorModal
                 isVisible={errorModalVisible}
                 message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
             />
-
+    
             <SuccessModal
                 isVisible={successModalVisible}
                 onClose={() => setSuccessModalVisible(false)}
                 message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
             />
-
         </ScrollView >
     );
 };
@@ -390,6 +410,25 @@ const styles = StyleSheet.create({
         color: colors.white,
         fontWeight: "bold",
         marginLeft: 10,
+    },
+    pageContainer: {
+        flexDirection: "row", // Arrange items in a row
+        justifyContent: "space-between", // Space between ads and main content
+        flexGrow: 1,
+        backgroundColor: colors.white,
+    },
+    adContainer: {
+        width: "15%",
+        minWidth: 100,
+        backgroundColor: colors.lightGray,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    adImage: {
+        flex: 1, 
+        width: "100%",
+        height: "200%",
+        resizeMode: "cover",
     },
 });
 
