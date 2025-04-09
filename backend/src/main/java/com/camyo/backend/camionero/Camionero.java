@@ -48,7 +48,6 @@ public class Camionero{
 
     @Column(name = "dni", unique = true)
     @NotBlank
-    @Pattern(regexp = "^\\d{8}[A-Z]$")
     private String dni;
 
     @NotEmpty
