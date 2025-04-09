@@ -201,20 +201,12 @@ const EmpresaRegisterScreen = () => {
 
     // Validación del NIF
     if (!formData.nif) {
-      setErrorMessage("El campo número de identificación es obligatorio.");
-      return;
-    }
-    if (!/^[A-Z]\d{8}$/.test(formData.nif)) {
-      setErrorMessage("El formato del número de identificación no es válido.");
+      setErrorMessage("El campo numero de identificación es obligatorio.");
       return;
     }
 
-    const nifLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
-    const nifNumber = parseInt(formData.nif.slice(0, 8), 10);
-    const nifLetter = formData.nif.slice(8);
-
-    if (nifLetters[nifNumber % 23] !== nifLetter) {
-      setErrorMessage("El NIF no es válido. La letra no coincide");
+    if (!/^[A-HJNPQRSUVW]\d{7}[0-9A-J]$/.test(formData.nif.toUpperCase())) {
+      setErrorMessage("El formato del NIF de empresa no es válido.");
       return;
     }
 
