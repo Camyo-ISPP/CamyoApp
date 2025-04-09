@@ -7,25 +7,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,24 +24,17 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.camyo.backend.camionero.Camionero;
-import com.camyo.backend.camionero.Disponibilidad;
-import com.camyo.backend.camionero.Licencia;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.oferta.Oferta;
 import com.camyo.backend.oferta.OfertaService;
-import com.camyo.backend.resena.Resena;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.Suscripcion;
 import com.camyo.backend.suscripcion.SuscripcionService;
@@ -58,7 +42,6 @@ import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stripe.Stripe;
 import com.stripe.model.Customer;
 import com.stripe.model.Invoice;
 import com.stripe.model.PaymentIntent;
@@ -96,9 +79,11 @@ public class PagoControllerTests {
     Usuario u1;
     Usuario u2;
     Usuario u3;
+    Usuario u4;
     Empresa e1;
     Empresa e2;
     Empresa e3;
+    Camionero c1;
     Suscripcion s2;
     Suscripcion s3;
     SubscriptionCreateParams sp;
@@ -113,7 +98,9 @@ public class PagoControllerTests {
          */
 
         Authorities authEmp = new Authorities();
-        authEmp.setAuthority("Empresa");
+        authEmp.setAuthority("EMPRESA");
+        Authorities authCam = new Authorities();
+        authCam.setAuthority("CAMIONERO");
 
         /*
          * Crea tres usuarios de empresa, cada uno con un plan propio
@@ -190,6 +177,17 @@ public class PagoControllerTests {
         o.setPromoted(false);
         o.setEmpresa(e1);
         
+        u4 = new Usuario();
+        u4.setId(4);
+        u4.setNombre("Juan Sir Anuncios");
+        u4.setTelefono("987654321");
+        u4.setUsername("siranuncios");
+        u4.setPassword("12");
+        u4.setEmail("siranuncios@example.com");
+        u4.setAuthority(authCam);
+
+        c1 = new Camionero();
+        c1.setUsuario(u4);
     }
 
     @Test
@@ -204,9 +202,9 @@ public class PagoControllerTests {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
-/* 
+ 
     @Test
-    void debeModificarAnuncios() throws Exception {
+    void debeModificarAnunciosIntegrada() throws Exception {
         Compra compra = Compra.ELIMINAR_ANUNCIOS;
         Pago request = new Pago();
         request.setCompra(compra);
@@ -216,7 +214,39 @@ public class PagoControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
-    }*/
+    }
+    @Test
+    void debeModificarAnunciosMock() throws Exception {
+        Compra compra = Compra.ELIMINAR_ANUNCIOS;
+        Pago pago = new Pago();
+        pago.setCompra(compra);
+
+        Customer mockCustomer = Mockito.mock(Customer.class);
+        PaymentIntent mockPaymentIntent = Mockito.mock(PaymentIntent.class);
+
+        // Mock llamadas no estáticas
+        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u1);
+        when(mockPaymentIntent.getClientSecret()).thenReturn("mock-stripe-api-key");
+
+        // Mock llamadas estáticas de Stripe
+        try (
+            MockedStatic<CustomerUtil> clienteStatic = mockStatic(CustomerUtil.class);
+            MockedStatic<PaymentIntent> paymentIntentStatic = mockStatic(PaymentIntent.class);
+        ) {
+
+            paymentIntentStatic.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class)))
+                .thenReturn(mockPaymentIntent);
+            clienteStatic.when(() -> CustomerUtil.findOrCreateCustomer(anyString(), anyString()))
+                .thenReturn(mockCustomer);
+
+            mockMvc.perform(post(BASE_URL_PAGO + "/integrated")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(pago)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("mock-stripe-api-key"));
+        }
+    }
+
 
     //Testing para crear subscripciones
     @Test
@@ -248,6 +278,21 @@ public class PagoControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(pago)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void debeNoCrearSubscripción() throws Exception {
+        Compra compra = Compra.PREMIUM;
+        Pago pago = new Pago();
+        pago.setCompra(compra);
+
+        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u4);
+        
+        mockMvc.perform(post(BASE_URL_PAGO + "/integrated")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(pago)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Compra inválida"));
     }
 
     @Test
@@ -341,9 +386,7 @@ public class PagoControllerTests {
         requestDto.setCompra(Compra.PATROCINAR);
         requestDto.setOfertaId(1);
          
-        Invoice mockInvoice = Mockito.mock(Invoice.class);
         PaymentIntent mockPaymentIntent = Mockito.mock(PaymentIntent.class);
-        Customer mockCustomer = Mockito.mock(Customer.class);
 
         when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u1);
         when(mockPaymentIntent.getStatus()).thenReturn(("succeeded"));
@@ -370,9 +413,7 @@ public class PagoControllerTests {
         requestDto.setIntent("client_secret");
         requestDto.setCompra(Compra.PREMIUM);
 
-        Invoice mockInvoice = Mockito.mock(Invoice.class);
         PaymentIntent mockPaymentIntent = Mockito.mock(PaymentIntent.class);
-        Customer mockCustomer = Mockito.mock(Customer.class);
 
         when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u1);
         when(mockPaymentIntent.getStatus()).thenReturn(("succeeded"));
@@ -392,21 +433,18 @@ public class PagoControllerTests {
                     .andExpect(content().string("Suscripción aplicada con éxito"));
         }
     }
-/* 
+
     @Test
-    void debeAplicaNoAnunciosMock() throws Exception { 
+    void debeAplicaEliminarAnunciosMock() throws Exception { 
         RequestDTO requestDto = new RequestDTO();
         requestDto.setIntent("client_secret");
-        requestDto.setCompra(Compra.PATROCINAR);
-         
-        Invoice mockInvoice = Mockito.mock(Invoice.class);
+        requestDto.setCompra(Compra.ELIMINAR_ANUNCIOS);
+
         PaymentIntent mockPaymentIntent = Mockito.mock(PaymentIntent.class);
-        Customer mockCustomer = Mockito.mock(Customer.class);
 
         when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u1);
         when(mockPaymentIntent.getStatus()).thenReturn(("succeeded"));
-        when(ofertaService.obtenerOfertaPorId(requestDto.getOfertaId())).thenReturn(o);
-        when(ofertaService.patrocinarOferta(requestDto.getOfertaId())).thenReturn(o);
+        when(this.usuarioService.eliminarAnuncios(u1.getId())).thenReturn(u1);
 
         try (
             MockedStatic<PaymentIntent> paymentIntentStatic = mockStatic(PaymentIntent.class);
@@ -418,7 +456,55 @@ public class PagoControllerTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(requestDto)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Patrocinio aplicado con éxito"));
+                    .andExpect(content().string("Anuncios eliminados correctamente"));
         }
-    }*/
+    }
+
+    @Test
+    void debeFallarAplicarCompraPorIntent() throws Exception { 
+        RequestDTO requestDto = new RequestDTO();
+        requestDto.setIntent("client_secret");
+        requestDto.setCompra(Compra.ELIMINAR_ANUNCIOS);
+
+        PaymentIntent mockPaymentIntent = Mockito.mock(PaymentIntent.class);
+
+        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u1);
+        when(mockPaymentIntent.getStatus()).thenReturn("requires_payment_method");//real state of a intent
+
+        try (
+            MockedStatic<PaymentIntent> paymentIntentStatic = mockStatic(PaymentIntent.class);
+        ) {
+            paymentIntentStatic.when(() -> PaymentIntent.retrieve("client_secret")).thenReturn(mockPaymentIntent);
+
+            mockMvc.perform(post(BASE_URL_PAGO + "/apply_compra")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(requestDto)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Acción denegada"));
+        }
+    }
+
+    @Test
+    void debeFallarAplicarCompraPorPermiso() throws Exception { 
+        RequestDTO requestDto = new RequestDTO();
+        requestDto.setIntent("client_secret");
+        requestDto.setCompra(Compra.PATROCINAR);
+
+        PaymentIntent mockPaymentIntent = Mockito.mock(PaymentIntent.class);
+
+        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u1);
+        when(mockPaymentIntent.getStatus()).thenReturn("succeeded");//real state of a intent
+
+        try (
+            MockedStatic<PaymentIntent> paymentIntentStatic = mockStatic(PaymentIntent.class);
+        ) {
+            paymentIntentStatic.when(() -> PaymentIntent.retrieve("client_secret")).thenReturn(mockPaymentIntent);
+
+            mockMvc.perform(post(BASE_URL_PAGO + "/apply_compra")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(requestDto)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Acción denegada"));
+        }
+    }
 }

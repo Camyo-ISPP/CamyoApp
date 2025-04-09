@@ -1,48 +1,25 @@
 package com.camyo.backend.pago;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.MockedStatic;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.camyo.backend.camionero.Camionero;
-import com.camyo.backend.camionero.CamioneroService;
-import com.camyo.backend.camionero.Disponibilidad;
-import com.camyo.backend.camionero.Licencia;
-import com.camyo.backend.resena.Resena;
-import com.camyo.backend.resena.ResenaService;
-import com.camyo.backend.usuario.Authorities;
-import com.camyo.backend.usuario.AuthoritiesService;
-import com.camyo.backend.usuario.Usuario;
-import com.camyo.backend.usuario.UsuarioService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.CustomerSearchResult;
-import com.stripe.model.Subscription;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerSearchParams;
-import com.stripe.param.SubscriptionCreateParams;
+
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
