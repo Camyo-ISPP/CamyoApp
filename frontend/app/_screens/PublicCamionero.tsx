@@ -264,20 +264,7 @@ const PublicCamionero = ({ userId }) => {
                                 <Text style={styles.username}>@{user2?.username}</Text>
                                 <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
                                 <Text style={styles.description}>{user2?.descripcion}</Text>
-                                {user && user.rol === "EMPRESA" && fueAsignado && !yaEscribioResena && (
-                                    <TouchableOpacity
-                                        style={[styles.publishButton, { marginTop: 10 }]}
-                                        onPress={() => {
-                                            setResenaForm({ valoracion: 5, comentarios: "" });
-                                            setEditResenaId(null);
-                                            setShowResenaModal(true);
-                                        }}
-                                    >
-                                        <FontAwesome name="star" size={16} color="white" style={styles.plusIcon} />
-                                        <Text style={styles.publishButtonText}>Escribir Reseña</Text>
-                                    </TouchableOpacity>
-
-                                )}
+                                
                                 {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
                     {user && user.rol == "EMPRESA" && (
                     <TouchableOpacity

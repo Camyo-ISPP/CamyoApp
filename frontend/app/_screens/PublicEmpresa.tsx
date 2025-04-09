@@ -282,21 +282,7 @@ const PublicEmpresa = ({ userId }) => {
                       <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
                       <Text style={styles.publishButtonText}>Contactar</Text>
                     </TouchableOpacity>
-                    {user && user.rol === "CAMIONERO" && fueAsignado && !yaEscribioResena && (
-                      <TouchableOpacity
-                        style={[styles.publishButton, { marginTop: 10 }]}
-                        onPress={() => {
-                          setResenaForm({ valoracion: 5, comentarios: "" });
-                          setEditResenaId(null);
-                          setShowResenaModal(true);
-                        }}
-
-                      >
-                        <FontAwesome name="star" size={16} color="white" style={styles.plusIcon} />
-                        <Text style={styles.publishButtonText}>Escribir Reseña</Text>
-                      </TouchableOpacity>
-                    )}
-
+                    
                   </View>
                 )}
 
