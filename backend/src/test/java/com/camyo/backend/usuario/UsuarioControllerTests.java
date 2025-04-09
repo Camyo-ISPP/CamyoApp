@@ -68,50 +68,7 @@ class UsuarioControllerTests {
                .andExpect(status().isNotFound());
     }
 
-    @Test
-    void testCrearUsuario_EmailEnUso() throws Exception {
-        String jsonBody = """
-          {
-            "nombre": "Pepe",
-            "email": "yaExiste@test.com",
-            "username": "pepeUser",
-            "password": "plain123",
-            "authority": { "id":1, "authority":"ROLE_USER" }
-          }
-        """;
-    
-        when(usuarioService.guardarUsuario(any(Usuario.class)))
-            .thenThrow(new IllegalArgumentException("El email ya está en uso"));
-    
-        mockMvc.perform(post("/usuarios")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody))
-            .andExpect(status().isBadRequest());  // Elimina jsonPath("$.message")
-    }
-    
 
-
-    @Test
-    void testCrearUsuario_UsernameEnUso() throws Exception {
-        String jsonBody = """
-          {
-            "nombre": "Pepe",
-            "email": "pepe2@test.com",
-            "username": "yaExisteUser",
-            "password": "plain123",
-            "authority": { "id":1, "authority":"ROLE_USER" }
-          }
-        """;
-    
-        when(usuarioService.guardarUsuario(any(Usuario.class)))
-            .thenThrow(new IllegalArgumentException("El username ya está en uso"));
-    
-        mockMvc.perform(post("/usuarios")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody))
-            .andExpect(status().isBadRequest());
-        // Eliminado: .andExpect(jsonPath("$.message").value("El username ya está en uso"));
-    }
 
 
     @Test

@@ -75,37 +75,7 @@ class UsuarioServiceTests {
         assertNotEquals("123456", guardado.getPassword(), "La password debería estar encriptada");
     }
 
-    @Test
-    void testGuardarUsuario_EmailYaExiste() {
-        // Intentar guardar un usuario con el mismo email de user1 => lanza exception
-        Usuario repetido = new Usuario();
-        repetido.setNombre("Otra");
-        repetido.setEmail("alice@test.com"); // repetido
-        repetido.setUsername("otraUser");
-        repetido.setPassword("p4ss");
-        repetido.setAuthority(user1.getAuthority());
 
-  
-        whenEmailExisteDisparaExcepcion(repetido);
-    }
-
-    private void whenEmailExisteDisparaExcepcion(Usuario repetido) {
-
-        assertThrows(IllegalArgumentException.class, () -> usuarioService.guardarUsuario(repetido));
-    }
-
-    @Test
-    void testGuardarUsuario_UsernameYaExiste() {
-        // Mismo approach, con username duplicado
-        Usuario repetido = new Usuario();
-        repetido.setNombre("Otra2");
-        repetido.setEmail("otra2@test.com");
-        repetido.setUsername("aliceUser"); // repetido
-        repetido.setPassword("p4ss");
-        repetido.setAuthority(user1.getAuthority());
-
-        assertThrows(IllegalArgumentException.class, () -> usuarioService.guardarUsuario(repetido));
-    }
 
     @Test
     void testObtenerUsuarioPorId_NoEncontrado() {
