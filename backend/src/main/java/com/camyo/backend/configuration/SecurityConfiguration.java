@@ -54,7 +54,7 @@ public class SecurityConfiguration {
 			.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 			//.requestMatchers("/resources/**", "/webjars/**", "/static/**", "/swagger-resources/**").permitAll()			
 			//.requestMatchers( "/","/auth/**","/swagger-ui.html","/swagger-ui/**").permitAll()
-			.requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasAuthority("ADMIN")
+			.requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasAnyAuthority("ADMIN","CAMIONERO","EMPRESA")
 			.requestMatchers("/usuarios/**").permitAll()
 			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/desaplicar/**").hasAuthority("CAMIONERO")
 			.requestMatchers(HttpMethod.PUT, "/ofertas/{id}/aplicar/**").hasAuthority("CAMIONERO")

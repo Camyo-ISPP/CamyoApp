@@ -130,6 +130,25 @@ const EditarPerfilCamionero = () => {
       setErrorMessage("El campo nombre y apellidos es demasiado largo.");
       return;
     }
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos solo pueden contener letras, espacios y guiones.");
+      return;
+    }
+
+    if (!/[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos deben contener al menos dos letras.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos deben comenzar con una letra.");
+      return;
+    }
+
+    formData.nombre = formData.nombre
+      .split(/\s+/)
+      .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
+      .join(" ");
 
     // Validación de correo electrónico
     if (!formData.email) {
@@ -164,6 +183,15 @@ const EditarPerfilCamionero = () => {
       setErrorMessage("El campo localización es demasiado largo.");
       return;
     }
+    if (formData.localizacion.length < 2) {
+      setErrorMessage("El campo localización es demasiado pequeño.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.nombre)) {
+      setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
+      return;
+    }
 
     // Validación de la descripción
     if (formData.descripcion && formData.descripcion.length > 500) {
@@ -177,7 +205,16 @@ const EditarPerfilCamionero = () => {
       return;
     }
     if (!/^\d{8}[A-Z]$/.test(formData.dni)) {
-      setErrorMessage("El formato del DNI no es válido.");
+      setErrorMessage("El formato del DNI no es válido, está compuesto por 8 números y una letra.");
+      return;
+    }
+
+    const dniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+    const dniNumber = parseInt(formData.dni.slice(0, 8), 10);
+    const dniLetter = formData.dni.slice(8);
+
+    if (dniLetters[dniNumber % 23] !== dniLetter) {
+      setErrorMessage("El DNI no es válido. La letra no coincide");
       return;
     }
 
@@ -201,6 +238,11 @@ const EditarPerfilCamionero = () => {
       return;
     }
 
+    if (formData.experiencia > 100) {
+      setErrorMessage("¿Has nacido trabajando? El campo años de experiencia debe ser menor que 100.");
+      return;
+    }
+
     // Validación de fecha de expiración del CAP
     if (formData.tieneCAP) {
       if (!formData.expiracionCAP) {
@@ -208,7 +250,31 @@ const EditarPerfilCamionero = () => {
         return;
       }
       if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.expiracionCAP)) {
-        setErrorMessage("El formato de la fecha de expiración del CAP no es válido.");
+        setErrorMessage("El formato de la fecha de expiración del CAP no es válido. Comprueba que sea dd-mm-YYYY");
+        return;
+      }
+
+      const [day, month, year] = formData.expiracionCAP.split("-").map(num => parseInt(num, 10));
+      const currentYear = new Date().getFullYear();
+
+      if (month < 1 || month > 12) {
+        setErrorMessage("El mes de la fecha de expiración del CAP no es válido.");
+        return;
+      }
+
+      const maxDays = new Date(year, month, 0).getDate();
+      if (day < 1 || day > maxDays) {
+        setErrorMessage("El día de la fecha de expiración del CAP no es válido.");
+        return;
+      }
+
+      if (year < currentYear) {
+        setErrorMessage("El año de la fecha de expiración del CAP no puede estar en el pasado.");
+        return;
+      }
+
+      if (year > currentYear + 6) {
+        setErrorMessage("El año de la fecha de expiración del CAP no puede ser más de 5 años en el futuro.");
         return;
       }
     }

@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Alert } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
@@ -8,16 +8,23 @@ import BackButton from "../_components/BackButton";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { usePayment } from "@/contexts/PaymentContext";
+import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
+import ErrorModal from "../_components/ErrorModal";
+import SuccessModal from "../_components/SuccessModal";
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-    const { user } = useAuth();
     const { setId } = usePayment();
+    const { user, userToken, logout } = useAuth();
     const router = useRouter();
 
     const [resenas, setResenas] = useState([]);
     const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
+
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchResenas = async () => {
@@ -38,8 +45,33 @@ const MiPerfilCamionero = () => {
         }
     }, [user]);
 
+    const handleDeleteAccount = async () => {
+        try {
+            const response = await axios.delete(`${BACKEND_URL}/usuarios/${user.userId}`, {
+                headers: { Authorization: `Bearer ${userToken}` },
+            });
+
+            if (response.status === 200) {
+                setSuccessModalVisible(true);
+                setTimeout(() => {
+                    setSuccessModalVisible(false);
+                    logout();
+                }, 2500);
+            }
+
+        } catch (error) {
+            console.error("Error al eliminar la cuenta:", error);
+            setErrorModalVisible(true);
+            setTimeout(() => {
+                setErrorModalVisible(false);
+            }, 2500);
+        } finally {
+            setShowDeleteModal(false);
+        }
+    };
+
     const descargarPDF = async () => {
-        const base64Data = user.curriculum; 
+        const base64Data = user.curriculum;
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -105,8 +137,17 @@ const MiPerfilCamionero = () => {
                             <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
                                 <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
                             </TouchableOpacity>
-                        }                       
+                        }
                     </View>
+
+                    <TouchableOpacity
+                        style={styles.deleteAccountButton}
+                        onPress={() => setShowDeleteModal(true)}
+                    >
+                        <MaterialIcons name="delete" size={20} color={colors.white} />
+                        <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
+                    </TouchableOpacity>
+
                     <View style={styles.separator} />
 
                     <View style={styles.reseñasContainer}>
@@ -156,6 +197,25 @@ const MiPerfilCamionero = () => {
                         : <></>}
                 </View>
             </View>
+
+            <ConfirmDeleteModal
+                isVisible={showDeleteModal}
+                onConfirm={handleDeleteAccount}
+                onCancel={() => setShowDeleteModal(false)}
+                message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
+            />
+
+            <ErrorModal
+                isVisible={errorModalVisible}
+                message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
+            />
+
+            <SuccessModal
+                isVisible={successModalVisible}
+                onClose={() => setSuccessModalVisible(false)}
+                message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
+            />
+
         </ScrollView >
     );
 };
@@ -317,7 +377,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    deleteAccountButton: {
+        backgroundColor: colors.red,
+        padding: 12,
+        borderRadius: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 20,
+    },
+    deleteAccountButtonText: {
+        color: colors.white,
+        fontWeight: "bold",
+        marginLeft: 10,
+    },
 });
-
 
 export default MiPerfilCamionero;
