@@ -175,11 +175,6 @@ const EmpresaRegisterScreen = () => {
       return;
     }
 
-    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.localizacion)) {
-      setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
-      return;
-    }
-
     // Validación de la descripción
     if (formData.descripcion && formData.descripcion.length > 500) {
       setErrorMessage("El campo descripción es demasiado largo.");
@@ -205,7 +200,7 @@ const EmpresaRegisterScreen = () => {
       return;
     }
 
-    if (!/^[A-HJNPQRSUVW]\d{7}[0-9A-J]$/.test(formData.nif.toUpperCase())) {
+    if (!/^[A-HJNPQRSUVW]\d{7}\d$/.test(formData.nif.toUpperCase())) {
       setErrorMessage("El formato del NIF de empresa no es válido.");
       return;
     }
