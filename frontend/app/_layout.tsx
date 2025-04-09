@@ -29,7 +29,8 @@ function RootLayout() {
         chat:"Mis Mensajes",
         "pago/checkout": "Pago",
         suscripcion: "Planes de Suscripción",
-        misofertas: "Mis Ofertas"
+        misofertas: "Mis Ofertas",
+        admin: "Panel de Administración",
       };
 
       const currentSegment = segments.join("/");
@@ -72,7 +73,7 @@ function RootLayout() {
         
         <Stack.Screen name="suscripcion" />
 
-        <Stack.Screen name="(admin)/workinprogress" />
+        <Stack.Screen name="(admin)/admin" />
         <Stack.Screen name="(public)/forbidden" />
 
         <Stack.Screen name="pago/checkout" />
