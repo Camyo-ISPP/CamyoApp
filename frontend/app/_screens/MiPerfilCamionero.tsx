@@ -11,9 +11,10 @@ import AddResenaModal from "../components/AddResenaModal";
 import ResenaModal from "../_components/ResenaModal";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const MiPerfilCamionero = () => {
+    const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
     const { user, userToken } = useAuth();
     const router = useRouter();
 
@@ -25,12 +26,10 @@ const MiPerfilCamionero = () => {
     const [empresasRecientes, setEmpresasRecientes] = useState([]);
     const [empresaAResenar, setEmpresaAResenar] = useState(null);
     const [hoverRating, setHoverRating] = useState(0);
-    const [resenados,setResenados] = useState([]);
+    const [resenados, setResenados] = useState([]);
 
     const fetchCamionero = async () => {
         try {
-
-
             const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
 
             if (response.data) {
@@ -43,25 +42,22 @@ const MiPerfilCamionero = () => {
 
     const fetchOfertasCamionero = async () => {
         try {
-
             const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${camionero.id}`);
             setOfertasCamionero(response.data[2]);
 
             // Extraer empresas de las ofertas
             const empresasUnicas = response.data[2].reduce((acc, oferta) => {
                 if (oferta.empresa && !acc.some(e => e.id === oferta.empresa.id)) {
-                    acc.push({...oferta.empresa,
-                        userId:oferta.empresa.usuario.id}
+                    acc.push({
+                        ...oferta.empresa,
+                        userId: oferta.empresa.usuario.id
+                    }
 
                     );
                 }
                 return acc;
             }, []);
-            console.log("empresas uinicaas",empresasUnicas)
-
-
             setEmpresasRecientes(empresasUnicas);
-
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 404) {
@@ -74,6 +70,7 @@ const MiPerfilCamionero = () => {
             }
         }
     };
+
     const fetchEmpresasResenados = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
@@ -82,9 +79,8 @@ const MiPerfilCamionero = () => {
         } catch (error) {
             console.error("Error al obtener los camioneros reseñados:", error);
             return [];
-        } 
+        }
     }
-    
 
     const fetchResenas = async () => {
         try {
@@ -147,7 +143,7 @@ const MiPerfilCamionero = () => {
     }, [user]);
 
     const descargarPDF = async () => {
-        const base64Data = user.curriculum; 
+        const base64Data = user.curriculum;
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -173,15 +169,15 @@ const MiPerfilCamionero = () => {
 
     const handleSubmitResenaWrapper = async (resenaData: any) => {
         try {
-          await handleAddResena(resenaData);
-          await fetchOfertasCamionero();
-          await fetchEmpresasResenados();
-          setShowResenaModal(false);
-          setEmpresaAResenar(null);
+            await handleAddResena(resenaData);
+            await fetchOfertasCamionero();
+            await fetchEmpresasResenados();
+            setShowResenaModal(false);
+            setEmpresaAResenar(null);
         } catch (error) {
-          console.error("Error en el proceso completo:", error);
+            console.error("Error en el proceso completo:", error);
         }
-      };
+    };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.container}>
@@ -219,8 +215,9 @@ const MiPerfilCamionero = () => {
                             <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
                                 <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
                             </TouchableOpacity>
-                        }                       
+                        }
                     </View>
+                    
                     <View style={styles.separator} />
 
                     <View style={styles.empresasSection}>
@@ -230,72 +227,71 @@ const MiPerfilCamionero = () => {
                             <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
                         ) : (
                             empresasRecientes
-                            .filter(empresa => !(resenados.includes(empresa.userId)))
-                            .map(empresa => (
-
-                                < View key={`empresa-${empresa.id}`} style={styles.empresaCard}>
-                                    {/* Header con imagen y nombre */}
-                                    <View style={styles.empresaHeader}>
-                                        {empresa.usuario?.foto ? (
-                                            <Image
-                                                source={{ uri: `data:image/png;base64,${empresa.usuario.foto}` }}
-                                                style={styles.empresaAvatar}
-                                            />
-                                        ) : (
-                                            <View style={styles.empresaAvatarPlaceholder}>
-                                                <FontAwesome5 name="building" size={20} color={colors.white} />
+                                .filter(empresa => !(resenados.includes(empresa.userId)))
+                                .map(empresa => (
+                                    < View key={`empresa-${empresa.id}`} style={styles.empresaCard}>
+                                        {/* Header con imagen y nombre */}
+                                        <View style={styles.empresaHeader}>
+                                            {empresa.usuario?.foto ? (
+                                                <Image
+                                                    source={{ uri: `data:image/png;base64,${empresa.usuario.foto}` }}
+                                                    style={styles.empresaAvatar}
+                                                />
+                                            ) : (
+                                                <View style={styles.empresaAvatarPlaceholder}>
+                                                    <FontAwesome5 name="building" size={20} color={colors.white} />
+                                                </View>
+                                            )}
+                                            <View style={styles.empresaInfo}>
+                                                <Text style={styles.empresaNombre}>{empresa.usuario?.nombre}</Text>
+                                                <Text style={styles.empresaUbicacion}>
+                                                    <MaterialIcons name="location-on" size={14} color={colors.secondary} />
+                                                    {empresa.usuario?.localizacion || 'Ubicación no disponible'}
+                                                </Text>
                                             </View>
-                                        )}
-                                        <View style={styles.empresaInfo}>
-                                            <Text style={styles.empresaNombre}>{empresa.usuario?.nombre}</Text>
-                                            <Text style={styles.empresaUbicacion}>
-                                                <MaterialIcons name="location-on" size={14} color={colors.secondary} />
-                                                {empresa.usuario?.localizacion || 'Ubicación no disponible'}
-                                            </Text>
+                                        </View>
+
+                                        {/* Sección de valoración */}
+                                        <View style={styles.valoracionSection}>
+                                            <View style={styles.starsContainer}>
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <TouchableOpacity
+                                                        key={`star-${star}`}
+                                                        onPress={() => {
+                                                            setEmpresaAResenar(empresa);
+                                                            setShowResenaModal(true);
+                                                        }}
+                                                        onPressIn={() => setHoverRating(star)}
+                                                        onPressOut={() => setHoverRating(0)}
+                                                        activeOpacity={1}
+                                                    >
+                                                        <FontAwesome
+                                                            name={star <= hoverRating ? "star" : "star-o"}
+                                                            size={27}
+                                                            color={star <= hoverRating ? colors.primary : colors.primaryLight}
+                                                            style={styles.starIcon}
+                                                        />
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        </View>
+
+                                        {/* Botones de acción */}
+                                        <View style={styles.actionsContainer}>
+                                            <TouchableOpacity
+                                                style={styles.fullWidthButton}
+                                                onPress={() => router.push(`/empresa/${empresa.id}`)}
+                                            >
+                                                <FontAwesome5 name="building" size={14} color={colors.white} />
+                                                <Text style={styles.actionButtonText}>Ver empresa</Text>
+                                            </TouchableOpacity>
                                         </View>
                                     </View>
-
-                                    {/* Sección de valoración */}
-                                    <View style={styles.valoracionSection}>
-                                        <View style={styles.starsContainer}>
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <TouchableOpacity
-                                                    key={`star-${star}`}
-                                                    onPress={() => {
-                                                        setEmpresaAResenar(empresa);
-                                                        setShowResenaModal(true);
-                                                    }}
-                                                    onPressIn={() => setHoverRating(star)}
-                                                    onPressOut={() => setHoverRating(0)}
-                                                    activeOpacity={1}
-                                                >
-                                                    <FontAwesome
-                                                        name={star <= hoverRating ? "star" : "star-o"}
-                                                        size={27}
-                                                        color={star <= hoverRating ? colors.primary : colors.primaryLight}
-                                                        style={styles.starIcon}
-                                                    />
-                                                </TouchableOpacity>
-                                            ))}
-                                        </View>
-                                    </View>
-
-                                    {/* Botones de acción */}
-                                    <View style={styles.actionsContainer}>
-                                        <TouchableOpacity
-                                            style={styles.fullWidthButton}
-                                            onPress={() => router.push(`/empresa/${empresa.id}`)}
-                                        >
-                                            <FontAwesome5 name="building" size={14} color={colors.white} />
-                                            <Text style={styles.actionButtonText}>Ver empresa</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            ))
+                                ))
                         )}
                     </View>
                     <View style={styles.reviewsContainer}>
-                        <Text style={styles.sectionTitle}>Reseñas de tus camioneros</Text>
+                        <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
 
                         {/* Valoración media con estrellas */}
                         <View style={styles.ratingSummary}>
@@ -716,37 +712,37 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginTop: 25,
         marginBottom: 30,
-      },
-      ratingSummary: {
+    },
+    ratingSummary: {
         flexDirection: 'column',
         alignItems: 'center',
         marginBottom: 25,
-      },
-      averageRatingText: {
+    },
+    averageRatingText: {
         fontSize: 18,
         fontWeight: '600',
         color: colors.secondary,
-      },
-      reviewCount: {
+    },
+    reviewCount: {
         fontSize: 16,
         color: colors.mediumGray,
         fontWeight: '400',
-      },
-      emptyReviews: {
+    },
+    emptyReviews: {
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 40,
         backgroundColor: colors.extraLightGray,
         borderRadius: 12,
         marginTop: 10,
-      },
-      emptyText: {
+    },
+    emptyText: {
         marginTop: 15,
         fontSize: 16,
         color: colors.mediumGray,
         textAlign: 'center',
-      },
-      reviewCard: {
+    },
+    reviewCard: {
         backgroundColor: colors.white,
         borderRadius: 12,
         padding: 20,
@@ -758,21 +754,21 @@ const styles = StyleSheet.create({
         elevation: 2,
         borderWidth: 1,
         borderColor: colors.lightGray,
-      },
-      reviewHeader: {
+    },
+    reviewHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 15,
-      },
-      reviewAvatar: {
+    },
+    reviewAvatar: {
         width: 48,
         height: 48,
         borderRadius: 24,
         marginRight: 12,
         borderWidth: 1,
         borderColor: colors.lightGray,
-      },
-      avatarPlaceholder: {
+    },
+    avatarPlaceholder: {
         width: 48,
         height: 48,
         borderRadius: 24,
@@ -780,33 +776,33 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
-      },
-      reviewAuthor: {
+    },
+    reviewAuthor: {
         fontSize: 16,
         fontWeight: '600',
         color: colors.secondary,
         marginBottom: 4,
-      },
-      reviewDate: {
+    },
+    reviewDate: {
         fontSize: 13,
         color: colors.mediumGray,
-      },
-      reviewStars: {
+    },
+    reviewStars: {
         flexDirection: 'row',
         marginBottom: 12,
-      },
-      reviewComment: {
+    },
+    reviewComment: {
         fontSize: 15,
         lineHeight: 22,
         color: colors.darkGray,
         marginBottom: 15,
-      },
-      reviewDivider: {
+    },
+    reviewDivider: {
         height: 1,
         backgroundColor: colors.extraLightGray,
         marginHorizontal: -20,
-      },
-    
+    },
+
 });
 
 export default MiPerfilCamionero;

@@ -35,7 +35,7 @@ const MiPerfilEmpresa = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
   const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
-  const [resenados,setResenados] = useState([]);
+  const [resenados, setResenados] = useState([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -115,49 +115,49 @@ const MiPerfilEmpresa = () => {
   };
   const fetchCamionerosResenados = async () => {
     try {
-        const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
-        const ids = response.data.map(camionero => camionero.id);
-        console.log(ids); 
-        console.log(response.data)
-        setResenados(ids)
+      const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
+      const ids = response.data.map(camionero => camionero.id);
+      console.log(ids);
+      console.log(response.data)
+      setResenados(ids)
     } catch (error) {
-        console.error("Error al obtener los camioneros reseñados:", error);
-        return [];
-    } 
-}
-
-const fetchOffers = async () => {
-  try {
-    const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-    
-
-    const ofertasCerradas = response.data.filter((offer: any) => offer.estado === "CERRADA");
-
-    setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-    
-    console.log("Ofertas cerradas:", ofertasCerradas);
-
-    const camionerosUnicos = ofertasCerradas.reduce((acc, oferta) => {
-      if (oferta.camionero && !acc.some(c => c.id === oferta.camionero.id)) {
-        acc.push({
-          ...oferta.camionero,
-          id: oferta.camionero.id,
-          usuario: oferta.camionero.usuario,
-          userId:oferta.camionero.usuario.id
-        });
-      }
-      return acc;
-    }, []);
-    
-    console.log("Camioneros únicos de ofertas cerradas:", camionerosUnicos);
-    setCamioneros(camionerosUnicos);
-    
-  } catch (error) {
-    console.error("Error al cargar las ofertas:", error);
-  } finally {
-    setLoading(false);
+      console.error("Error al obtener los camioneros reseñados:", error);
+      return [];
+    }
   }
-};
+
+  const fetchOffers = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+
+
+      const ofertasCerradas = response.data.filter((offer: any) => offer.estado === "CERRADA");
+
+      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+
+      console.log("Ofertas cerradas:", ofertasCerradas);
+
+      const camionerosUnicos = ofertasCerradas.reduce((acc, oferta) => {
+        if (oferta.camionero && !acc.some(c => c.id === oferta.camionero.id)) {
+          acc.push({
+            ...oferta.camionero,
+            id: oferta.camionero.id,
+            usuario: oferta.camionero.usuario,
+            userId: oferta.camionero.usuario.id
+          });
+        }
+        return acc;
+      }, []);
+
+      console.log("Camioneros únicos de ofertas cerradas:", camionerosUnicos);
+      setCamioneros(camionerosUnicos);
+
+    } catch (error) {
+      console.error("Error al cargar las ofertas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     fetchOffers();
     fetchCamionerosResenados();
@@ -326,71 +326,71 @@ const fetchOffers = async () => {
           {/* Recent Truckers */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Camioneros Recientes</Text>
-            {camioneros.length === 0? (
+            {camioneros.length === 0 ? (
               <Text style={styles.emptyMessage}>No has trabajado con camioneros recientemente</Text>
             ) : (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {camioneros
-                .filter(camionero => !(resenados.includes(camionero.userId)))
-                .map(camionero => (
-                  <View key={`camionero-${camionero.id}`} style={styles.personCard}>
-                    <View style={styles.personHeader}>
-                      {camionero.usuario?.foto ? (
-                        <Image
-                          source={{ uri: `data:image/png;base64,${camionero.usuario.foto}` }}
-                          style={styles.personAvatar}
-                        />
-                      ) : (
-                        <View style={styles.personAvatarPlaceholder}>
-                          <FontAwesome5 name="truck" size={20} color={colors.white} />
-                        </View>
-                      )}
-                      <View style={styles.personInfo}>
-                        <Text style={styles.personName}>{camionero.usuario?.nombre}</Text>
-                        <View style={styles.locationRow}>
-                          <MaterialIcons name="location-on" size={14} color={colors.secondary} />
-                          <Text style={styles.locationText}>{camionero.usuario?.localizacion || 'Ubicación no disponible'}</Text>
+                  .filter(camionero => !(resenados.includes(camionero.userId)))
+                  .map(camionero => (
+                    <View key={`camionero-${camionero.id}`} style={styles.personCard}>
+                      <View style={styles.personHeader}>
+                        {camionero.usuario?.foto ? (
+                          <Image
+                            source={{ uri: `data:image/png;base64,${camionero.usuario.foto}` }}
+                            style={styles.personAvatar}
+                          />
+                        ) : (
+                          <View style={styles.personAvatarPlaceholder}>
+                            <FontAwesome5 name="truck" size={20} color={colors.white} />
+                          </View>
+                        )}
+                        <View style={styles.personInfo}>
+                          <Text style={styles.personName}>{camionero.usuario?.nombre}</Text>
+                          <View style={styles.locationRow}>
+                            <MaterialIcons name="location-on" size={14} color={colors.secondary} />
+                            <Text style={styles.locationText}>{camionero.usuario?.localizacion || 'Ubicación no disponible'}</Text>
+                          </View>
                         </View>
                       </View>
-                    </View>
 
-                    <View style={styles.ratingContainer}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <TouchableOpacity
-                          key={`star-${star}`}
-                          onPress={() => {
-                            setCamioneroAResenar(camionero);
-                            setShowResenaModal(true);
-                          }}
-                          onPressIn={() => setHoverRating(star)}
-                          onPressOut={() => setHoverRating(0)}
-                          activeOpacity={1}
-                        >
-                          <FontAwesome
-                            name={star <= hoverRating ? "star" : "star-o"}
-                            size={24}
-                            color={star <= hoverRating ? colors.primary : colors.primaryLight}
-                          />
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                      <View style={styles.ratingContainer}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <TouchableOpacity
+                            key={`star-${star}`}
+                            onPress={() => {
+                              setCamioneroAResenar(camionero);
+                              setShowResenaModal(true);
+                            }}
+                            onPressIn={() => setHoverRating(star)}
+                            onPressOut={() => setHoverRating(0)}
+                            activeOpacity={1}
+                          >
+                            <FontAwesome
+                              name={star <= hoverRating ? "star" : "star-o"}
+                              size={24}
+                              color={star <= hoverRating ? colors.primary : colors.primaryLight}
+                            />
+                          </TouchableOpacity>
+                        ))}
+                      </View>
 
-                    <TouchableOpacity
-                      style={styles.profileButton}
-                      onPress={() => router.push(`/camionero/${camionero.id}`)}
-                    >
-                      <FontAwesome5 name="user" size={14} color={colors.white} />
-                      <Text style={styles.profileButtonText}>Ver perfil</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
+                      <TouchableOpacity
+                        style={styles.profileButton}
+                        onPress={() => router.push(`/camionero/${camionero.id}`)}
+                      >
+                        <FontAwesome5 name="user" size={14} color={colors.white} />
+                        <Text style={styles.profileButtonText}>Ver perfil</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
               </ScrollView>
             )}
 
             <View style={styles.separator} />
 
             <View style={styles.reseñasContainer}>
-              <Text style={styles.sectionTitle}>Reseñas</Text>
+              <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
               {resenas.length > 0 ? (
                 valoracionMedia !== null && (
                   <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
@@ -464,7 +464,7 @@ const fetchOffers = async () => {
           comentadorId={user?.userId}
           comentadoId={camioneroAResenar?.usuario?.id}
         />
-    </View>
+      </View>
     </ScrollView >
   );
 };
