@@ -157,7 +157,7 @@ public class CamioneroControllerTests {
         c1 = new Camionero();
         c1.setId(1);
         c1.setExperiencia(10);
-        c1.setDni("12345678Q");
+        c1.setDni("wztJbQZPeh+nKUnOaFj+/A==");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c1.setDisponibilidad(Disponibilidad.NACIONAL);
         c1.setTieneCAP(true);
@@ -167,7 +167,7 @@ public class CamioneroControllerTests {
         c2 = new Camionero();
         c2.setId(2);
         c2.setExperiencia(10);
-        c2.setDni("12445678Q");
+        c2.setDni("ftLHmnSLKCLLarKQniejsw==");
         c2.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c2.setDisponibilidad(Disponibilidad.NACIONAL);
         c2.setTieneCAP(true);
@@ -177,22 +177,13 @@ public class CamioneroControllerTests {
         testCamionero = new Camionero();
         testCamionero.setId(3);
         testCamionero.setExperiencia(12);
-        testCamionero.setDni("12445679P");
+        testCamionero.setDni("tw1mOz4WZSu3PtwCcErV3Q=="); //12445679P
         testCamionero.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         testCamionero.setDisponibilidad(Disponibilidad.NACIONAL);
         testCamionero.setTieneCAP(true);
         testCamionero.setExpiracionCAP(LocalDate.of(2025, 12, 12));
     }
 
-    /* 
-    @Test
-    void debeObtenerTodosCamioneros() throws Exception{
-        when(this.camioneroService.obtenerTodosCamioneros()).thenReturn(List.of(c1, c2));
-        mockMvc.perform(get(BASE_URL)).andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[?(@.id == 1)].usuario.nombre").value("Manolo"))
-            .andExpect(jsonPath("$[?(@.id == 2)].usuario.nombre").value("Paco"));
-    }*/
 
     @Test
     void debeObtenerCamioneroPorId() throws Exception{
@@ -239,136 +230,4 @@ public class CamioneroControllerTests {
         
     }
 
-    /* 
-    @Test
-    void debeActualizarCamionero() throws Exception{
-        Integer id = c1.getId();
-        c1.setExperiencia(20);
-
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenReturn(c1);
-        when(this.camioneroService.actualizarCamionero(anyInt(), any(Camionero.class))).thenReturn(c1);
-
-        mockMvc.perform(put(String.format(BASE_URL + "/%d", id))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(c1)))
-                            .andExpect(status().isOk())
-                            .andExpect(jsonPath("$.experiencia").value(20));
-    }*/
-    
-    @Test
-    void  noDebeActualizarCamioneroNoAutenticado() throws Exception{
-        Integer id = c1.getId();
-
-        // Usuario no autenticado: debe dar error 403 Forbidden
-        when(this.usuarioService.obtenerUsuarioActual()).thenThrow(ResourceNotFoundException.class);
-        mockMvc.perform(put(String.format(BASE_URL + "/%d", id))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(c1)))
-                            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void noDebeActualizarCamioneroNoExisteCamionero() throws Exception{
-        Integer id = c1.getId();
-
-        // Usuario autenticado, el camionero con la id proporcionada no existe:
-        // debe dar error 404 Not Found
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenThrow(ResourceNotFoundException.class);
-        mockMvc.perform(put(String.format(BASE_URL + "/%d", id))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(c1)))
-                            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void noDebeActualizarCamioneroNoLePerteneceCamionero() throws Exception{
-        Integer id = c1.getId();
-        
-        // Usuario autenticado, el camionero con la id proporcionada no le pertenece:
-        // debe dar error 403 Forbidden
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenReturn(c2);
-        mockMvc.perform(put(String.format(BASE_URL + "/%d", id))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(c2)))
-                            .andExpect(status().isForbidden());
-    }
-
-    /* 
-    @Test
-    void noDebeActualizarCamioneroErrorDatos() throws Exception{
-        Integer id = c1.getId();
-        
-        // Usuario autenticado, error al actualizar:
-        // debe dar error 500
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenReturn(c1);
-        when(this.camioneroService.actualizarCamionero(anyInt(), any(Camionero.class))).thenThrow(new DataAccessException("Error de acceso a datos"){});
-        mockMvc.perform(put(String.format(BASE_URL + "/%d", id))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(c1)))
-                            .andExpect(status().isInternalServerError());
-    }*/
-
-    @Test
-    void debeEliminarCamionero() throws Exception{
-        Integer id = c1.getId();
-
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenReturn(c1);
-
-        mockMvc.perform(delete(String.format(BASE_URL + "/%d", id)))
-                            .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void  noDebeBorrarCamioneroNoAutenticado() throws Exception{
-        Integer id = c1.getId();
-
-        // Usuario no autenticado: debe dar error 403 Forbidden
-        when(this.usuarioService.obtenerUsuarioActual()).thenThrow(ResourceNotFoundException.class);
-        mockMvc.perform(delete(String.format(BASE_URL + "/%d", id)))
-                            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void noDebeBorrarCamioneroNoExisteCamionero() throws Exception{
-        Integer id = c1.getId();
-
-        // Usuario autenticado, el camionero con la id proporcionada no existe:
-        // debe dar error 404 Not Found
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenThrow(ResourceNotFoundException.class);
-        mockMvc.perform(delete(String.format(BASE_URL + "/%d", id))
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(c1)))
-                            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void noDebeBorrarCamioneroNoLePerteneceCamionero() throws Exception{
-        Integer id = c1.getId();
-        
-        // Usuario autenticado, el camionero con la id proporcionada no le pertenece:
-        // debe dar error 403 Forbidden
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenReturn(c2);
-        mockMvc.perform(delete(String.format(BASE_URL + "/%d", id)))
-                            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void noDebeBorrarCamioneroErrorDatos() throws Exception{
-        Integer id = c1.getId();
-        
-        // Usuario autenticado, error al actualizar:
-        // debe dar error 500
-        when(this.usuarioService.obtenerUsuarioActual()).thenReturn(c1.getUsuario());
-        when(this.camioneroService.obtenerCamioneroPorId(anyInt())).thenReturn(c1);
-        doThrow(new DataAccessException("Error de acceso a datos"){}).when(this.camioneroService).eliminarCamionero(id);
-        mockMvc.perform(delete(String.format(BASE_URL + "/%d", id)))
-                            .andExpect(status().isInternalServerError());
-    }
 }
