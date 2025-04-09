@@ -258,6 +258,7 @@ const EditarPerfilCamionero = () => {
           experiencia: userData.experiencia,
           expiracionCAP: userData.expiracionCAP,
           foto: userData.foto,
+          ads: user.ads,
           id: user.id,
           isAutonomo: formData.isAutonomo,
           licencias: userData.licencias,
@@ -316,7 +317,7 @@ const EditarPerfilCamionero = () => {
       </View>
     </View>
   );
-
+  console.log(user)
   return (
     <ImageBackground
       source={require('../../assets/images/auth-bg.png')}

@@ -57,7 +57,7 @@ function IntegratedCheckout() {
     }
 
     return <>
-        {id === 'BASICO' || id === 'PREMIUM' || id === 'PATROCINAR' ?
+        {id === 'BASICO' || id === 'PREMIUM' || id === 'PATROCINAR' || id === 'ELIMINAR_ANUNCIOS' ?
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
@@ -74,7 +74,7 @@ function IntegratedCheckout() {
                             
                             <View style={styles.planInfo}>
                                 <Text style={styles.planName}>{Products.get(id).name}</Text>
-                                <Text style={styles.planPrice}>{Products.get(id).price}€{id !== "PATROCINAR" ? "/mes" : ""}</Text>
+                                <Text style={styles.planPrice}>{Products.get(id).price}€{id !== "PATROCINAR" && id !== "ELIMINAR_ANUNCIOS" ? "/mes" : ""}</Text>
                             </View>
 
                             <View style={styles.featuresList}>
@@ -121,7 +121,7 @@ function IntegratedCheckout() {
                         <Text style={styles.legalLink} onPress={openTermsLink}>Términos y Condiciones</Text>{' '}
                         y nuestra{' '}
                         <Text style={styles.legalLink} onPress={openPrivacyLink}>Política de Privacidad</Text>.
-                        El pago se renovará automáticamente cada mes hasta que canceles tu suscripción.
+                        {id !== "PATROCINAR" && id !== "ELIMINAR_ANUNCIOS" ? "El pago se renovará automáticamente cada mes hasta que canceles tu suscripción." : ""}
                     </Text>
                 </View>
             </ScrollView>

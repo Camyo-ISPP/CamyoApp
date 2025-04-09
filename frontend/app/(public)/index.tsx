@@ -5,22 +5,19 @@ import axios from 'axios';
 import React, { useEffect, useState, useRef } from "react";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-const defaultCompanyLogo = require("../../assets/images/defaultCompImg.png");
-const truckImage = require("../../assets/images/camion.png");
 const heroBackground = require("../../assets/images/lonely-road.jpg");
 import { useAuth } from "../../contexts/AuthContext";
 import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
+import AdSense from "../_components/AdSense";
 
 export default function Index() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const { user, logout } = useAuth();
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCompact, setIsCompact] = useState(Dimensions.get("window").width < 1040);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [offers, setOffers] = useState<any[]>([]);
@@ -122,7 +119,10 @@ export default function Index() {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-
+    <head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4434133815240639"
+     crossOrigin="anonymous"></script>
+     </head>
       <View style={styles.webContainer}>
         <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
           {/* Hero Section */}
@@ -182,10 +182,16 @@ export default function Index() {
                     )}
                   </>
                 ) : (
-                  <TouchableOpacity style={styles.primaryButton} onPress={() => logout()}>
-                    <MaterialIcons name="logout" size={20} color="white" style={{ marginRight: 8 }} />
-                    <Text style={styles.buttonText}>Cerrar sesión</Text>
+                  <>
+                    <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/admin")}>
+                    <FontAwesome5 name="wrench" size={18} color="white" style={{ marginRight: 8 }} />
+                    <Text style={styles.buttonText}>Panel de Administración</Text>
                   </TouchableOpacity>
+                    <TouchableOpacity style={styles.secondaryButton} onPress={() => logout()}>
+                      <MaterialIcons name="logout" size={20} color="#f15025" style={{ marginRight: 8 }} />
+                      <Text style={styles.secondaryButtonText}>Cerrar sesión</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
 
               </View>
@@ -267,7 +273,8 @@ export default function Index() {
               </Text>
             </TouchableOpacity>
           </View>
-
+          {/* Renderiza el anuncio */}
+      <AdSense />
           <WebFooter />
 
         </ScrollView>

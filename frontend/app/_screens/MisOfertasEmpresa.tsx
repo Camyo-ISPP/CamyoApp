@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     headerSubtitle: {
-        fontSize: 16,
+        fontSize: 18,
         color: colors.white,
         opacity: 0.9,
     },

@@ -1,7 +1,9 @@
 package com.camyo.backend.suscripcion;
 
 import java.time.LocalDate;
+
 import com.camyo.backend.empresa.Empresa;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -17,9 +19,8 @@ public class Suscripcion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotNull
-    @OneToOne
-    @JoinColumn(name = "empresa_id", nullable = false)
+    @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE }, orphanRemoval = true)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
     private Empresa empresa;
 
     @NotNull

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Entypo, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { Entypo, FontAwesome, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
 import { router } from 'expo-router';
 import { useAuth } from "../../../contexts/AuthContext"
@@ -27,6 +27,13 @@ const OptionsDropdown = () => {
           <TouchableOpacity onPress={() => setDropdownVisible(false)} style={styles.closeButton}>
             <Entypo name="cross" size={20} color={colors.primary} />
           </TouchableOpacity>
+
+          {user && user.rol == "ADMIN" && (
+            <TouchableOpacity onPress={() => router.push('/admin')} style={styles.dropdownButton}>
+              <FontAwesome5 name="wrench" size={18} style={[styles.dropdownButtonIcon, {marginRight: 6}]} />
+              <Text style={styles.dropdownButtonText}>Admin</Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity onPress={() => router.push('/empresas')} style={styles.dropdownButton}>
             <MaterialIcons name="domain" size={20} style={styles.dropdownButtonIcon} />
@@ -100,6 +107,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.secondary,
     paddingHorizontal: 4,
+  },
+  dropdownButtonIcon: {
+    width: 24,
+    color: colors.secondary,
   },
   dropdownButtonIcon: {
     width: 24,
