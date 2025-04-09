@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
@@ -205,7 +205,11 @@ export default function OfertaDetalleScreen() {
 
     const renderOfferCard = () => {
         return (
-            <View style={styles.card}>
+            <View style={[
+                styles.card,
+                offerData.estado === 'CERRADA' && user && user.rol === 'CAMIONERO' && offerData.camionero?.id === user.id && styles.assignedCard,
+                user && user.rol === 'CAMIONERO' && offerData.rechazados.some((c: { id: string }) => c.id === user.id) && styles.rejectedCard
+            ]}>
                 <View style={styles.header}>
                     <BackButton />
                     <Image
@@ -258,23 +262,48 @@ export default function OfertaDetalleScreen() {
 
                 </View>
 
+                {/*Banner de estado*/}
+                {offerData.estado === 'CERRADA' && user && user.rol === 'CAMIONERO' && offerData.camionero?.id === user.id && (
+                    <View style={[styles.statusBanner, styles.assignedBanner]}>
+                        <MaterialCommunityIcons name="check-circle-outline" size={24} color="#28a745" style={styles.statusIcon}/>
+                        <Text style={[styles.statusText, styles.assignedText]}>
+                            ¡Felicidades! Has sido asignado a esta oferta
+                        </Text>
+                    </View>
+                )}
+
+                {user && user.rol === 'CAMIONERO' && offerData.rechazados.some((c: { id: string }) => c.id === user.id) && (
+                    <View style={[styles.statusBanner, styles.rejectedBanner]}>
+                        <MaterialCommunityIcons name="close-circle-outline"size={24}color="#dc3545"style={styles.statusIcon}/>
+                        <Text style={[styles.statusText, styles.rejectedText]}>
+                            Lo sentimos, no has sido seleccionado para esta oferta
+                        </Text>
+                    </View>
+                )}
+
                 {offerData.estado === 'ABIERTA' ? (
                     user ? (
                         user.rol === 'CAMIONERO' ? (
                             !offerData.rechazados.some((camionero: { id: string }) => camionero.id === user.id) ? (
                                 offerData.aplicados.some((camionero: { id: string }) => camionero.id === user.id) ? (
-                                    <TouchableOpacity style={styles.solicitarButton} onPress={handleDesaplicarOferta}>
-                                        <Text style={styles.solicitarButtonText}>Cancelar Solicitud</Text>
+                                    <TouchableOpacity style={[styles.solicitarButton, styles.pendingButton]} onPress={handleDesaplicarOferta}>
+                                        <View style={styles.buttonContent}>
+                                            <MaterialCommunityIcons name="clock-outline" size={20} color="white" />
+                                            <Text style={styles.solicitarButtonText}>Cancelar Solicitud</Text>
+                                        </View>
                                     </TouchableOpacity>
                                 ) : (
                                     <TouchableOpacity style={styles.solicitarButton} onPress={handleSolicitarOferta}>
-                                        <Text style={styles.solicitarButtonText}>Solicitar Oferta</Text>
+                                        <View style={styles.buttonContent}>
+                                            <MaterialCommunityIcons name="briefcase-plus-outline" size={20} color="white" />
+                                            <Text style={styles.solicitarButtonText}>Solicitar Oferta</Text>
+                                        </View>
                                     </TouchableOpacity>
                                 )
                             ) : <></>
                         ) : <></>
                     ) : (
-                        <TouchableOpacity style={styles.solicitarButton} onPress={handleLoginRedirect}>
+                        <TouchableOpacity style={[styles.solicitarButton, styles.secondaryButton]} onPress={handleLoginRedirect}>
                             <Text style={styles.solicitarButtonText}>Inicia sesión para solicitar</Text>
                         </TouchableOpacity>
                     )
@@ -569,20 +598,18 @@ const styles = StyleSheet.create({
         color: '#0b4f6c',
         marginTop: 0,
     },
+    buttonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
     solicitarButton: {
-        width: '40%',
+        width: '35%',
         paddingVertical: 10,
         borderRadius: 20,
         alignSelf: 'center',
         backgroundColor: colors.primary,
-        marginVertical: 15,
-    },
-    solicitarButton2: {
-        width: '40%',
-        paddingVertical: 10,
-        borderRadius: 20,
-        alignSelf: 'center',
-        backgroundColor: '#FBC02D',
         marginVertical: 15,
     },
     solicitarButtonText: {
@@ -590,6 +617,12 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    secondaryButton: {
+        backgroundColor: colors.secondary,
+    },
+    pendingButton: {
+        backgroundColor: '#FFA500',
     },
     separator: {
         height: 1,
@@ -599,7 +632,6 @@ const styles = StyleSheet.create({
         width: '100%',
         alignSelf: 'center',
     },
-
     subTitulo: {
         fontSize: 22,
         fontWeight: 'bold',
@@ -609,20 +641,17 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginLeft: '0%',
     },
-
     detailRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginVertical: 5,
         marginLeft: '2%',
     },
-
     detalles: {
         fontSize: 16,
         marginLeft: 8,
         color: '#333',
     },
-
     detallesLabel: {
         fontWeight: '600',
         color: colors.secondary,
@@ -815,4 +844,58 @@ const styles = StyleSheet.create({
     estadoCerradaText: {
         color: '#C62828',
     },
+
+    assignedCard: {
+        borderWidth: 2,
+        borderColor: '#28a745',
+        backgroundColor: 'rgba(40, 167, 69, 0.02)',
+        shadowColor: '#28a745',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    rejectedCard: {
+        borderWidth: 2,
+        borderColor: '#dc3545',
+        backgroundColor: 'rgba(220, 53, 69, 0.02)',
+        shadowColor: '#dc3545',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    statusContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    statusIcon: {
+        marginRight: 10,
+    },
+    statusBanner: {
+        width: '100%',
+        padding: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 20,
+        borderRadius: 8,
+        flexDirection: 'row',
+    },
+    assignedBanner: {
+        backgroundColor: 'rgba(40, 167, 69, 0.2)',
+    },
+    rejectedBanner: {
+        backgroundColor: 'rgba(220, 53, 69, 0.2)',
+    },
+    statusText: {
+        fontSize: 18,
+        fontWeight: 'bold'
+    },
+    assignedText: {
+        color: '#28a745'
+    },
+    rejectedText: {
+        color: '#dc3545'
+    }
 });
