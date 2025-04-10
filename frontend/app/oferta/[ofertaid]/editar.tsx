@@ -16,6 +16,7 @@ import { useSubscriptionRules } from "../../../utils/useSubscriptionRules";
 import DatePicker from "@/app/_components/DatePicker";
 import { useFocusEffect } from "expo-router";
 import CityPicker from "../../_components/CityPicker";
+import ConfirmDeleteModal from "../../_components/ConfirmDeleteModal";
 
 const EditarOfertaScreen = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -28,6 +29,7 @@ const EditarOfertaScreen = () => {
     const [tipoOferta, setTipoOferta] = useState("TRABAJO");
     const [errorMessage, setErrorMessage] = useState("");
     const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [offers, setOffers] = useState<any[]>([]);
     const [drafts, setDrafts] = useState<any[]>([]);
 
@@ -86,7 +88,7 @@ const EditarOfertaScreen = () => {
     useEffect(() => {
         fetchOffers();
     }, []);
-    
+
     const canCreateNewOffer = () => {
         const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
         return activeOffersCount < rules.maxActiveOffers;
@@ -417,6 +419,22 @@ const EditarOfertaScreen = () => {
                     router.replace("/miperfil");
                 }, 1000);
             }
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+                setErrorMessage(error.response.data.message);
+            }
+        }
+    };
+    const handleDelete = async () => {
+        try {
+            const response = await axios.delete(`${BACKEND_URL}/ofertas/${ofertaid}`, {
+                headers: { Authorization: `Bearer ${userToken}` },
+            });
+
+
+            setShowDeleteModal(false)
+            router.replace("/(protected)/misofertas")
+
         } catch (error) {
             if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
                 setErrorMessage(error.response.data.message);
@@ -945,6 +963,9 @@ const EditarOfertaScreen = () => {
                                     {canCreateNewOffer() ? 'Publicar' : 'Máximo Alcanzado'}
                                 </Text>
                             </TouchableOpacity>
+                            <TouchableOpacity style={[styles.draftButton, { backgroundColor: colors.red }]} onPress={() => setShowDeleteModal(true)}>
+                                <Text style={styles.draftButtonText}>Eliminar</Text>
+                            </TouchableOpacity>
                         </View>
 
                         <SuccessModal
@@ -955,6 +976,12 @@ const EditarOfertaScreen = () => {
                     </View>
                 </View>
             </ScrollView>
+            <ConfirmDeleteModal
+                isVisible={showDeleteModal}
+                onConfirm={handleDelete}
+                onCancel={() => setShowDeleteModal(false)}
+                message="Esta acción eliminará permanentemente tu borrador. ¿Deseas continuar?"
+            />
         </EmpresaRoute>
     );
 };
