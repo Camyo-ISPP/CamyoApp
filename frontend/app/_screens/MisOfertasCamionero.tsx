@@ -34,8 +34,11 @@ const MisOfertasCamionero = () => {
                 try {
                     setLoading(true);
                     const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${user.id}`);
+
+                    const pendingOffers = response.data[0].filter((offer: any) => offer.estado === "ABIERTA");
+
                     setAceptedOffers(response.data[2]);
-                    setPendingOffers(response.data[0]);
+                    setPendingOffers(pendingOffers);
                     setRejectedOffers(response.data[1]);
                     setError(null);
                 } catch (error) {
@@ -127,7 +130,7 @@ const MisOfertasCamionero = () => {
                 return (
                     <View style={styles.emptyContainer}>
                         <MaterialCommunityIcons name="close-circle-outline" size={48} color={colors.mediumGray} />
-                        <Text style={styles.emptyTitle}>No hay ofertas descartadas</Text>
+                        <Text style={styles.emptyTitle}>No hay ofertas rechazadas</Text>
                         <Text style={styles.emptySubtitle}>
                             No has rechazado ninguna oferta hasta el momento.
                         </Text>
@@ -207,7 +210,7 @@ const MisOfertasCamionero = () => {
                                         ]}>
                                             {t === "PENDIENTE" ? "Pendientes" : 
                                              t === "ACEPTADA" ? "Asignadas" : 
-                                             "Descartadas"}
+                                             "Rechazadas"}
                                         </Text>
                                         <View style={[
                                             styles.tabBadge,
