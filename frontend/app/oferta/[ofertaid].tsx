@@ -39,6 +39,12 @@ export default function OfertaDetalleScreen() {
                 try {
                     const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
                     const data = await response.json();
+
+                    if (data.estado === "BORRADOR") {
+                        router.push("/forbidden")
+                        return;
+                    }
+
                     setOfferData(data);
 
                     if (data.tipoOferta === "TRABAJO") {
