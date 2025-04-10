@@ -685,8 +685,6 @@ const CrearOfertaScreen = () => {
         setErrorMessage(error.response.data.message);
       }
     }
-
-    console.log("Guardando como borrador...");
   };
 
   // Función para renderizar cada input del formulario
