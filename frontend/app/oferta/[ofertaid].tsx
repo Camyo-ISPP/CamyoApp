@@ -65,7 +65,7 @@ export default function OfertaDetalleScreen() {
 
     if (loading) {
         return (
-            <View style={styles.container}>
+            <View style={styles.loadingContainer}>
                 <MapLoader />
             </View>
         );
@@ -605,6 +605,12 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         paddingVertical: 20,
     },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white
+      },
     scrollContainer: {
         flex: 1,
         backgroundColor: colors.white,
