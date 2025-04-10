@@ -10,6 +10,7 @@ import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 import WebFooter from "../_components/_layout/WebFooter";
 import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
+import MapLoader from "../_components/MapLoader";
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -62,10 +63,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     }, [data]);
 
     useEffect(() => {
-        if(loading){
-            fetchData();
-        }
-    }, [loading]);
+        fetchData();
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -78,6 +77,12 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             setLoading(false);
         }
     };
+
+    if (loading) return (
+        <View style={styles.loadingContainer}>
+          <MapLoader />
+        </View>
+    );
 
     const handleSearch = (query = searchQuery) => {
         const normalizedQuery = query.toLowerCase();
@@ -959,5 +964,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         lineHeight: 24,
     },
-    contenedorOfertas: { width: '100%' }
+    contenedorOfertas: { width: '100%' },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white
+    },
 });
