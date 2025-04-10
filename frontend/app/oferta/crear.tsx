@@ -17,6 +17,7 @@ import DatePicker from "@/app/_components/DatePicker";
 import { useFocusEffect } from "expo-router";
 import CityPicker from "../_components/CityPicker";
 
+
 const CrearOfertaScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -34,7 +35,7 @@ const CrearOfertaScreen = () => {
     experiencia: null,
     licencia: "",
     notas: "",
-    estado: "ABIERTA",
+    estado: "BORRADOR",
     sueldo: null,
     localizacion: "",
     fechaPublicacion: new Date().toISOString(),
@@ -364,6 +365,7 @@ const CrearOfertaScreen = () => {
 
     }
 
+
     // Construcción del objeto base de la oferta
     let ofertaData: any = {
       oferta: {
@@ -371,7 +373,7 @@ const CrearOfertaScreen = () => {
         experiencia: Number(formData.experiencia), // Convertir a número
         licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
         notas: formData.notas,
-        estado: formData.estado || "ABIERTA",
+        estado: "ABIERTA",
         sueldo: parseFloat(formData.sueldo).toFixed(2), // Convertir a float con 2 decimal
         localizacion: formData.localizacion,
         fechaPublicacion: formatDate(new Date()), // Fecha en formato correcto sin Z y sin decimales
@@ -430,6 +432,265 @@ const CrearOfertaScreen = () => {
       }
     }
 
+  };
+
+  const handleDraft = async () => {
+    // Validación de título
+    if (!formData.titulo) {
+      setErrorMessage("El campo título es obligatorio para guardar un borrador.");
+      return;
+    }
+    if (formData.titulo.length > 255) {
+      setErrorMessage("El campo titulo es demasiado largo.");
+      return;
+    }
+
+    // Validación de experiencia OPCIONAL
+    if (formData.experiencia) {
+      if (isNaN(formData.experiencia)) {
+        setErrorMessage("El campo años de experiencia debe ser un número.");
+        return;
+      }
+      if (formData.experiencia < 0) {
+        setErrorMessage("El campo años de experiencia debe ser 0 o mayor.");
+        return;
+      }
+    }
+
+
+    //Validación para licencia
+    if (!formData.licencia) {
+      setErrorMessage("El campo licencia es obligatorio para guardar un borrador.");
+      return;
+    }
+    // Validación de la descripción
+    if (!formData.notas) {
+      setErrorMessage("El campo descripción es obligatorio para guardar un borrador.");
+      return;
+    }
+    if (formData.notas.length > 500) {
+      setErrorMessage("El campo descripción es demasiado largo.");
+      return;
+    }
+
+
+    // Validación de sueldo OPCIONAL
+    if (formData.sueldo) {
+      if (isNaN(formData.sueldo)) {
+        setErrorMessage("El campo sueldo debe ser un número.");
+        return;
+      }
+      if (formData.sueldo <= 0) {
+        setErrorMessage("El campo sueldo debe ser mayor a 0.0.");
+        return;
+      }
+    }
+
+
+    // Validación de localización
+    if (!formData.localizacion) {
+      setErrorMessage("El campo localización es obligatorio para guardar un borrador.");
+      return;
+    }
+    if (formData.localizacion.length > 255) {
+      setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    if (tipoOferta === "TRABAJO") {
+      // Validación fecha de incorporación
+      if (!formData.fechaIncorporacion) {
+        setErrorMessage("El campo fecha de incorporación es obligatorio para guardar el borrador.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.fechaIncorporacion)) {
+        setErrorMessage("El formato de la fecha de incorporación no es válido.");
+        return;
+      }
+      const fechaI = convertirFecha(formData.fechaIncorporacion);
+      if (fechaI < hoy) {
+        setErrorMessage("La fecha de incorporación no puede ser anterior a hoy.");
+        return;
+      }
+
+      // Validación de jornada no, OPCIONAL
+    }
+
+    if (tipoOferta === "CARGA") {
+      // Validación de mercancía
+      if (!formData.mercancia) {
+        setErrorMessage("El campo mercancía es obligatorio para guardar el borrador.");
+        return;
+      }
+      if (formData.mercancia.length > 255) {
+        setErrorMessage("El campo mercancía es demasiado largo.");
+        return;
+      }
+
+      // Validación de peso OPCIONAL
+      if (formData.peso) {
+        if (isNaN(formData.peso)) {
+          setErrorMessage("El campo peso debe ser un número.");
+          return;
+        }
+        if (formData.peso <= 0) {
+          setErrorMessage("El campo peso debe ser mayor a 0.0.");
+          return;
+        }
+      }
+
+
+      // Validación de origen
+      if (!formData.origen) {
+        setErrorMessage("El campo origen es obligatorio para guardar el borrador.");
+        return;
+      }
+      if (formData.origen.length > 255) {
+        setErrorMessage("El campo origen es demasiado largo.");
+        return;
+      }
+
+      // Validación de destino
+      if (!formData.destino) {
+        setErrorMessage("El campo destino es obligatorio para guardar el borrador.");
+        return;
+      }
+      if (formData.destino.length > 255) {
+        setErrorMessage("El campo destino es demasiado largo.");
+        return;
+      }
+
+      // Validación de distancia OPCIONAL?
+      if (formData.distancia) {
+        if (isNaN(formData.distancia)) {
+          setErrorMessage("El campo distancia debe ser un número.");
+          return;
+        }
+        if (formData.distancia <= 0) {
+          setErrorMessage("El campo distancia debe ser mayor a 0.");
+          return;
+        }
+      }
+
+      // Validación inicio
+      if (!formData.inicio) {
+        setErrorMessage("El campo inicio es obligatorio para guardar el borrador.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.inicio)) {
+        setErrorMessage("El formato de la fecha de inicio no es válido.");
+        return;
+      }
+      const fechaI = convertirFecha(formData.inicio);
+      if (fechaI < hoy) {
+        setErrorMessage("La fecha de inicio no puede ser anterior a hoy.");
+        return;
+      }
+
+
+      // Validación fin mínimo
+      if (!formData.finMinimo) {
+        setErrorMessage("El campo fin mínino es obligatorio para guardar el borrador.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.finMinimo)) {
+        setErrorMessage("El formato de la fecha de fin mínimo no es válido.");
+        return;
+      }
+
+
+      // Validación fin máximo
+      if (!formData.finMaximo) {
+        setErrorMessage("El campo fin máximo es obligatorio para guardar el borrador.");
+        return;
+      }
+      if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.finMaximo)) {
+        setErrorMessage("El formato de la fecha de fin máximo no es válido.");
+        return;
+      }
+      const fechaFMin = convertirFecha(formData.finMinimo);
+      const fechaFMax = convertirFecha(formData.finMaximo);
+      if (fechaI > fechaFMin) {
+        setErrorMessage("La fecha de inicio no puede ser posterior a la fecha de fin mínimo.");
+        return;
+      }
+      if (fechaFMin > fechaFMax) {
+        setErrorMessage("La fecha de fin mínimo no puede ser posterior a la fecha de fin máximo.");
+        return;
+      }
+    }
+
+    // Construcción del objeto base de la oferta
+    let ofertaData: any = {
+      oferta: {
+        titulo: formData.titulo,
+        experiencia: Number(formData.experiencia), // Convertir a número
+        licencia: Array.isArray(formData.licencia) ? formData.licencia[0] : formData.licencia, // Convertir a string
+        notas: formData.notas,
+        estado: formData.estado || "BORRADOR",
+        sueldo: formData.sueldo ? parseFloat(formData.sueldo).toFixed(2) : null, // Convertir a float con 2 decimal
+        localizacion: formData.localizacion,
+        fechaPublicacion: null, // Fecha en formato correcto sin Z y sin decimales
+        empresa: { id: user?.id ?? null },
+        tipoOferta: tipoOferta
+      }
+    };
+
+
+    // Agregar detalles según el tipo de oferta
+    if (tipoOferta === "TRABAJO") {
+      ofertaData = {
+        ...ofertaData,
+        trabajo: {
+          fechaIncorporacion: formData.fechaIncorporacion.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          jornada: formData.jornada ? formData.jornada : null
+        }
+      };
+    } else if (tipoOferta === "CARGA") {
+      ofertaData = {
+        ...ofertaData,
+        carga: {
+          mercancia: formData.mercancia,
+          peso: formData.peso ? Number(formData.peso) : null, // Convertir a número
+          origen: formData.origen,
+          destino: formData.destino,
+          distancia: formData.distancia ? Number(formData.distancia) : null, // Convertir a número
+          inicio: formData.inicio.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          finMinimo: formData.finMinimo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'),
+          finMaximo: formData.finMaximo.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1')
+        }
+      };
+    }
+
+    try {
+      const response = await axios.post(`${BACKEND_URL}/ofertas`, ofertaData, {
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (response.status === 201) {
+        setErrorMessage("")
+
+        setSuccessModalVisible(true);
+        setTimeout(() => {
+          setSuccessModalVisible(false);
+          router.replace("/miperfil");
+        }, 1000);
+      }
+
+    } catch (error) {
+      console.error('Error en la solicitud', error);
+      if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      }
+    }
+
+    console.log("Guardando como borrador...");
   };
 
   // Función para renderizar cada input del formulario
@@ -634,9 +895,16 @@ const CrearOfertaScreen = () => {
               </Text>
             ) : null}
 
-            <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
-              <Text style={styles.publishButtonText}>Publicar oferta</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+              {/* Botón de guardar borrador */}
+              <TouchableOpacity style={styles.draftButton} onPress={handleDraft}>
+                <Text style={styles.draftButtonText}>Guardar borrador</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.publishButton} onPress={handlePublish}>
+                <Text style={styles.publishButtonText}>Publicar oferta</Text>
+              </TouchableOpacity>
+            </View>
 
             <SuccessModal
               isVisible={successModalVisible}
@@ -688,6 +956,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   publishButton: {
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    marginTop: 25,
+    width: "100%",
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  publishButtonText: {
+    color: colors.white,
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  draftButton: {
     backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 12,
@@ -695,8 +980,12 @@ const styles = StyleSheet.create({
     marginTop: 25,
     width: "100%",
     alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    marginHorizontal: 10,
   },
-  publishButtonText: {
+  draftButtonText: {
     color: colors.white,
     fontSize: 20,
     fontWeight: "bold",
