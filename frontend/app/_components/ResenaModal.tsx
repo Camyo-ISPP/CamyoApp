@@ -44,7 +44,7 @@ const ResenaModal: React.FC<ResenaModalProps> = ({
             setError("Por favor selecciona una valoración");
             return;
         }
-        if (comentario.length > 502) {
+        if (comentario.length >= 501) {
             setError("El comentario no puede tener más de 500 caracteres");
             return;
         }
@@ -87,7 +87,7 @@ const ResenaModal: React.FC<ResenaModalProps> = ({
                         onChangeText={setComentario}
                     />
 
-                    <Text style={{ textAlign: "right", marginBottom: 10 }}>
+                    <Text style={{ textAlign: "right", marginBottom: 10, color:colors.mediumGray2,marginRight:5}}>
                         {comentario.length}/500
                     </Text>
 
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
         borderColor: colors.mediumGray,
         borderRadius: 10,
         padding: 15,
-        marginBottom: 20,
+        marginBottom: 5,
         minHeight: 120,
         textAlignVertical: "top",
         fontSize: 16,
