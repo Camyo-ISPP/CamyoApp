@@ -12,7 +12,7 @@ import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
-import withNavigationGuardTanque from "@/hoc/withNavigationGuardTanque";
+import withNavigationGuard from "@/hoc/withNavigationGuard";
 
 const Index = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -719,4 +719,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withNavigationGuardTanque(Index);
+export default withNavigationGuard(Index);
