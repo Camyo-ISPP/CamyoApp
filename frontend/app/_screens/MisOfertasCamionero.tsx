@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 import axios from "axios";
@@ -9,6 +9,7 @@ import { useCallback } from "react";
 import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import WebFooter from "../_components/_layout/WebFooter";
+import MapLoader from "../_components/MapLoader";
 
 const MisOfertasCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -56,7 +57,7 @@ const MisOfertasCamionero = () => {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <MapLoader />
             </View>
         );
     }
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.white
     },
     errorContainer: {
         flex: 1,

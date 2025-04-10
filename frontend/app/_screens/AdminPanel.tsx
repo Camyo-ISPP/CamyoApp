@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Dimensions, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Dimensions, TouchableOpacity, StyleSheet } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import colors from "@/assets/styles/colors";
 import { FontAwesome5, MaterialIcons, AntDesign, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import SuccessModal from "../_components/SuccessModal";
+import MapLoader from "../_components/MapLoader";
 
 const { width } = Dimensions.get('window');
 
@@ -202,7 +203,7 @@ const AdminPanel = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <MapLoader />
       </View>
     );
   }
@@ -312,10 +313,10 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.white,
-  },
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white
+},
   errorContainer: {
     flex: 1,
     justifyContent: "center",

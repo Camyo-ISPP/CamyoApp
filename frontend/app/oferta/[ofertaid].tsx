@@ -1,4 +1,4 @@
-import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import defaultCompanyLogo from "frontend/assets/images/defaultCompImg.png"
 import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 import { RouteMap } from "../_components/Maps";
+import MapLoader from "../_components/MapLoader";
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
@@ -64,8 +65,8 @@ export default function OfertaDetalleScreen() {
 
     if (loading) {
         return (
-            <View style={styles.container}>
-                <ActivityIndicator size="large" color="#0000ff" />
+            <View style={styles.loadingContainer}>
+                <MapLoader />
             </View>
         );
     };
@@ -596,13 +597,18 @@ export default function OfertaDetalleScreen() {
     );
 }
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
         backgroundColor: colors.white,
         paddingVertical: 20,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white
     },
     scrollContainer: {
         flex: 1,

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Animated, Easing, ActivityIndicator, Image } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Animated, Easing, Image, ActivityIndicator } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import SuccessModal from "../../_components/SuccessModal";
 import WebFooter from "@/app/_components/_layout/WebFooter";
+import MapLoader from "@/app/_components/MapLoader";
 
 const SubscriptionPlans = () => {
     const { user, userToken } = useAuth();
@@ -69,7 +70,7 @@ const SubscriptionPlans = () => {
     if (!isAuthLoaded) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <MapLoader />
             </View>
         );
     }
@@ -208,7 +209,7 @@ const SubscriptionPlans = () => {
                     onPress={() => onChangePlan(planLevel)}
                 >
                     {loadingPlan && isCurrentPlan ? (
-                        <ActivityIndicator size="small" color={colors.white} />
+                        <ActivityIndicator size="large" color={colors.primary} />
                     ) : (
                         <Text style={styles.buttonText}>{buttonText}</Text>
                     )}
@@ -327,6 +328,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: colors.white
     },
     container: {
         flex: 1,

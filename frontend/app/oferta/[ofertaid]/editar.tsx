@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-    View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet,
-    ActivityIndicator, ScrollView as RNScrollView
+    View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, ScrollView as RNScrollView
 } from "react-native";
 import axios from "axios";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -17,6 +16,7 @@ import DatePicker from "@/app/_components/DatePicker";
 import { useFocusEffect } from "expo-router";
 import CityPicker from "../../_components/CityPicker";
 import ConfirmDeleteModal from "../../_components/ConfirmDeleteModal";
+import MapLoader from "@/app/_components/MapLoader";
 
 const EditarOfertaScreen = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -702,7 +702,7 @@ const EditarOfertaScreen = () => {
     if (loading) {
         return (
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <ActivityIndicator size="large" color="#0000ff" />
+                <MapLoader />
             </View>
         );
     }
@@ -788,7 +788,7 @@ const EditarOfertaScreen = () => {
                             }
                         }}
                     />
-                    {loadingPicker && <ActivityIndicator size="small" color={colors.primary} />}
+                    {loadingPicker && <ActivityIndicator size="large" color={colors.primary} />}
                 </View>
                 {cities.length > 0 && (
                     <View style={{

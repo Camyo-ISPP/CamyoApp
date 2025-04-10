@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, Animated, Dimensions, ScrollView, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, Animated, Dimensions, ScrollView } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Picker } from '@react-native-picker/picker';
 import colors from "frontend/assets/styles/colors";
