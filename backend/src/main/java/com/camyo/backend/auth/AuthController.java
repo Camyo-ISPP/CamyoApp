@@ -92,8 +92,8 @@ public class AuthController {
 
 			return ResponseEntity.ok().body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
 		} catch (BadCredentialsException exception) {
-		return new ResponseEntity<>("Credenciales incorrectas!", HttpStatus.UNAUTHORIZED);
-	}
+			return new ResponseEntity<>("Credenciales incorrectas!", HttpStatus.UNAUTHORIZED);
+		}
 	}
 
 	@Operation(summary = "Validar token JWT", description = "Verifica si un token JWT es válido.")
