@@ -149,7 +149,7 @@ const PublicEmpresa = ({ userId }) => {
 
             <View style={styles.downContainer}>
               {/* Información empresarial */}
-              <Text style={styles.sectionTitle}>Información Empresarial</Text>
+              <Text style={styles.sectionTitle2}>Información Empresarial</Text>
               <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {empresa?.web}</Text>
             </View>
 
@@ -518,6 +518,13 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     marginBottom: 15,
     textAlign: "center",
+  },
+  sectionTitle2: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 15,
+    textAlign: "left",
   },
   downContainer: {
     paddingHorizontal: 30,

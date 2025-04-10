@@ -12,8 +12,9 @@ import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
+import withNavigationGuard from "@/hoc/withNavigationGuard";
 
-export default function Index() {
+const Index = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const { user, logout } = useAuth();
   const [data, setData] = useState<any[]>([]);
@@ -717,3 +718,5 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 });
+
+export default withNavigationGuard(Index);
