@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, ScrollView, ActivityIndicator, Dimensions, Animated, Easing } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, ScrollView, Dimensions, Animated, Easing } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from "react";
@@ -12,7 +12,7 @@ import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
-import withNavigationGuard from "@/hoc/withNavigationGuard";
+import MapLoader from "../_components/MapLoader";
 
 const Index = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -84,7 +84,7 @@ const Index = () => {
   if (generalLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.secondary} />
+        <MapLoader />
       </View>
     );
   }
@@ -719,4 +719,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withNavigationGuard(Index);
+export default Index;

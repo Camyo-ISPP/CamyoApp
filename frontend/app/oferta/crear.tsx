@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet,
-  ActivityIndicator
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import axios from "axios";
 import { FontAwesome5 } from "@expo/vector-icons";
 import colors from "../../assets/styles/colors";
@@ -16,7 +13,7 @@ import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import DatePicker from "@/app/_components/DatePicker";
 import { useFocusEffect } from "expo-router";
 import CityPicker from "../_components/CityPicker";
-
+import MapLoader from "../_components/MapLoader";
 
 const CrearOfertaScreen = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -109,7 +106,7 @@ const CrearOfertaScreen = () => {
   if (isLoading || rulesLoading) {
     return (
       <View style={styles.fullScreenLoading}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <MapLoader />
         <Text style={styles.loadingText}>Verificando suscripción...</Text>
       </View>
     );

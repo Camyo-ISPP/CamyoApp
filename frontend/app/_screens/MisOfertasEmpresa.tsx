@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -12,6 +12,7 @@ import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import WebFooter from "../_components/_layout/WebFooter";
 import { useSearchParams } from "expo-router/build/hooks";
+import MapLoader from "../_components/MapLoader";
 
 const MisOfertasEmpresa = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -79,7 +80,7 @@ const MisOfertasEmpresa = () => {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <MapLoader />
             </View>
         );
     }
