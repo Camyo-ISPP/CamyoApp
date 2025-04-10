@@ -46,23 +46,13 @@ const MiPerfilEmpresa = () => {
   useFocusEffect(
     useCallback(() => {
       refreshSubscriptionLevel();
+      fetchOffers();
+      fetchCamionerosResenados(); 
     }, [])
   );
 
   useEffect(() => {
-    const fetchResenas = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
-        setResenas(response.data);
-
-        // Obtener valoración media del backend
-        const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
-        setValoracionMedia(mediaResponse.data);
-      } catch (error) {
-        console.error("Error al cargar las reseñas o valoración:", error);
-      }
-    };
-
+   
     if (user?.id) {
       fetchResenas();
     }

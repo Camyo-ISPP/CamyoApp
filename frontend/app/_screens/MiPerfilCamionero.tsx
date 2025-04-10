@@ -1,11 +1,11 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Alert } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { FontAwesome5, MaterialIcons, Feather, FontAwesome } from "@expo/vector-icons";
 import defaultImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import AddResenaModal from "../components/AddResenaModal";
 import ResenaModal from "../_components/ResenaModal";
@@ -29,6 +29,13 @@ const MiPerfilCamionero = () => {
     const [hoverRating, setHoverRating] = useState(0);
     const [resenados, setResenados] = useState([]);
 
+    useFocusEffect(
+        useCallback(() => {
+            fetchCamionero();
+            fetchOfertasCamionero(); 
+            fetchEmpresasResenados();
+        }, [])
+      );
     const fetchCamionero = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
