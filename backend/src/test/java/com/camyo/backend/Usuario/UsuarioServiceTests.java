@@ -1,5 +1,6 @@
 package com.camyo.backend.Usuario;
 
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.resena.Resena;
 import com.camyo.backend.usuario.Authorities;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -132,20 +134,22 @@ class UsuarioServiceTests{
     }
 
     @Test
-    void debeGuardarUsuario() {
+    void debeGuardarUsuario() throws DataAccessException, InvalidPhoneNumberException {
         when(passwordEncoder.encode("raw")).thenReturn("encpass");
         when(usuarioRepository.save(any())).thenReturn(usuario);
 
         usuario.setPassword("raw");
+        usuario.setTelefono("666666666");
         Usuario guardado = usuarioService.guardarUsuario(usuario);
         assertEquals("encpass", guardado.getPassword());
         verify(usuarioRepository).save(usuario);
     }
 
     @Test
-    void debeGuardarUsuarioSinEncode() {
+    void debeGuardarUsuarioSinEncode() throws DataAccessException, InvalidPhoneNumberException {
         when(usuarioRepository.save(any())).thenReturn(usuario);
         usuario.setPassword("plaintext");
+        usuario.setTelefono("666666667");
         Usuario guardado = usuarioService.guardarUsuarioSinEncode(usuario);
         assertEquals("plaintext", guardado.getPassword());
         verify(usuarioRepository).save(usuario);

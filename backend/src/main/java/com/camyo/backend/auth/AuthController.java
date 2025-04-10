@@ -34,6 +34,8 @@ import com.camyo.backend.configuration.jwt.JwtUtils;
 import com.camyo.backend.configuration.services.UserDetailsImpl;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.exceptions.InvalidNifException;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
@@ -126,7 +128,13 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(
 					new MessageResponse("El DNI '" + signUpRequest.getDni() + "' ya está asociado a otra cuenta."));
 		}
-		authService.createCamionero(signUpRequest);
+		try {
+			authService.createCamionero(signUpRequest);
+		} catch (InvalidNifException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
+		}
 		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
 	}
 
@@ -150,7 +158,13 @@ public class AuthController {
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' ya está registrado."));
 		}
-		authService.createEmpresa(signUpRequest);
+		try {
+			authService.createEmpresa(signUpRequest);
+		} catch (InvalidNifException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
+		}
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
 	}
 
@@ -162,7 +176,7 @@ public class AuthController {
 	})
 	@PutMapping("/edit/camionero")
 	public ResponseEntity<MessageResponse> editCamionero(@Valid @RequestBody EditRequestCamionero editRequest)
-			throws DataAccessException, IOException {
+			throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		Usuario usuario = null;
 		try {
 			usuario = usuarioService.obtenerUsuarioActual();
@@ -224,7 +238,13 @@ public class AuthController {
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse("El NIF '" + editRequest.getNif() + "' ya está registrado."));
 		}
-		authService.editEmpresa(editRequest, usuario, empresa);
+		try {
+			authService.editEmpresa(editRequest, usuario, empresa);
+		} catch (InvalidNifException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + editRequest.getTelefono() + "' es inválido."));
+		}
 		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}
 
