@@ -26,16 +26,16 @@ public class ImagenSeeder implements CommandLineRunner {
         asignarImagenes(202, 10, "empresa");
         asignarImagenes(203, 1, "admin");
 
-        asignarImagenConcreta(239L, "gato.png");
-        asignarImagenConcreta(240L, "mopa.png");
-        asignarImagenConcreta(246L, "camyo.png");
+        asignarImagenConcreta(239L, "gato.webp");
+        asignarImagenConcreta(240L, "mopa.webp");
+        asignarImagenConcreta(246L, "camyo.webp");
     }
 
     private void asignarImagenes(int authorityId, int numImagenes, String tipo) {
         // Cachear las imágenes en memoria
         HashMap<Integer, byte[]> imagenesCache = new HashMap<>();
         for (int i = 1; i <= numImagenes; i++) {
-            String filename = "seed-imagenes/" + tipo + i + ".png";
+            String filename = "seed-imagenes/" + tipo + i + ".webp";
             try {
                 ClassPathResource resource = new ClassPathResource(filename);
                 try (InputStream in = resource.getInputStream()) {

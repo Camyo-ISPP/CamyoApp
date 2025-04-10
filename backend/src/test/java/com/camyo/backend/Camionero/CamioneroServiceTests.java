@@ -36,6 +36,7 @@ import com.camyo.backend.usuario.AuthoritiesService;
 
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
+import com.camyo.backend.util.EncryptionService;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -54,6 +55,9 @@ class CamioneroServiceTests {
 
     @Autowired
     protected AuthoritiesService authoritiesService;
+
+    @Autowired
+    protected EncryptionService encryptionService;
 
      /*
     * Declaramos las variables que vayamos a usar fuera del setup 
@@ -138,7 +142,7 @@ class CamioneroServiceTests {
 
         Camionero c1 = new Camionero();
         c1.setExperiencia(10);
-        c1.setDni("12345678Q");
+        c1.setDni("wztJbQZPeh+nKUnOaFj+/A==");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c1.setDisponibilidad(Disponibilidad.NACIONAL);
         c1.setTieneCAP(true);
@@ -148,7 +152,7 @@ class CamioneroServiceTests {
 
         Camionero c2 = new Camionero();
         c2.setExperiencia(10);
-        c2.setDni("12445678Q");
+        c2.setDni("ftLHmnSLKCLLarKQniejsw==");
         c2.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c2.setDisponibilidad(Disponibilidad.NACIONAL);
         c2.setTieneCAP(true);
@@ -164,14 +168,6 @@ class CamioneroServiceTests {
         camioneroIds = List.of(c1.getId(), c2.getId());
     }
 
-    /* 
-    @Test
-    @Transactional(readOnly = true)
-    void debeObtenerTodos(){
-        List<Camionero> camioneros= camioneroService.obtenerTodosCamioneros();
-        Assert.notEmpty(camioneros, "La lista de camioneros está vacía");
-        assertEquals(2, camioneros.size());
-    }*/
 
     @Test
     @Transactional
@@ -208,13 +204,13 @@ class CamioneroServiceTests {
 
     @Test
     @Transactional(readOnly = true)
-    void debeObtenerCamioneroPorDNI(){
+    void debeObtenerCamioneroPorDNI() throws Exception{
         Integer idEsperada = camioneroIds.get(0);
         Camionero c1 = camioneroService.obtenerCamioneroPorId(idEsperada);
         String dniEsperado = c1.getDni();
 
 
-        Optional<Camionero> optCam = camioneroService.obtenerCamioneroPorDNI(dniEsperado);
+        Optional<Camionero> optCam = camioneroService.obtenerCamioneroPorDNI(encryptionService.decrypt(dniEsperado));
         assertTrue(optCam.isPresent());
 
         Camionero camioneroRecogido = optCam.get();
@@ -231,35 +227,6 @@ class CamioneroServiceTests {
         assertTrue(camioneroService.obtenerCamioneroPorDNI(dni).isEmpty());;
     }
 
-    /*
-    @Test
-    @Transactional(readOnly = true)
-    void debeActualizarCamionero(){
-        Integer id = camioneroIds.get(0);
-        Camionero camNuevo = camioneroService.obtenerCamioneroPorId(id);
-
-        Disponibilidad newDisponibilidad = Disponibilidad.INTERNACIONAL;
-        camNuevo.setDisponibilidad(newDisponibilidad);
-
-        int newExperiencia = 20;
-        camNuevo.setExperiencia(newExperiencia);
-
-        LocalDate newDate = LocalDate.of(2026, 12, 01);
-        camNuevo.setExpiracionCAP(newDate);
-
-        //Para poder ser actualizarse, las licencias deben ser mutables
-        //es decir, no pueden crearse solamente con un Set.of() porque eso crea un Set inmutable
-        Set<Licencia> newLicencias = new HashSet<Licencia>(Set.of(Licencia.C, Licencia.C_E));
-        camNuevo.setLicencias(newLicencias);
-
-        Camionero camioneroActualizado = camioneroService.actualizarCamionero(id, camNuevo);
-
-        assertEquals(newLicencias, camioneroActualizado.getLicencias());
-        assertEquals(newExperiencia, camioneroActualizado.getExperiencia());
-        assertEquals(newDate, camioneroActualizado.getExpiracionCAP());
-        assertEquals(id, camioneroActualizado.getId());
-
-    }*/
 
     @Test
     @Transactional
