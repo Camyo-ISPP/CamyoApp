@@ -1,37 +1,58 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ImageBackground, ActivityIndicator, Dimensions, Image } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import colors from "../../assets/styles/colors";
-import { useRouter } from "expo-router";
+import { useRouter, SearchParams } from "expo-router";
+import ListadoOfertasBorrador from "../_components/ListadoOfertasBorrador";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
-import { MaterialCommunityIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import WebFooter from "../_components/_layout/WebFooter";
+import { useSearchParams } from "expo-router/build/hooks";
 
 const MisOfertasEmpresa = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-    const { user, userToken } = useAuth();
+    const { user } = useAuth();
     const router = useRouter();
+    const [currentTab, setCurrentTab] = useState<"ABIERTA" | "CERRADA" | "BORRADOR">();
+    const searchParams = useSearchParams();
+    const tab = searchParams.get("tab"); 
+    console.log("Tab:", tab); 
 
-    const [tab, setTab] = useState("ABIERTA");
+
+    useEffect(() => {
+        if (tab) {
+            setCurrentTab(tab);
+        } else {
+            setCurrentTab("ABIERTA"); 
+        }
+    }, [tab]);
+
     const [allOffers, setAllOffers] = useState<any[]>([]);
     const [openOffers, setOpenOffers] = useState<any[]>([]);
     const [closedOffers, setClosedOffers] = useState<any[]>([]);
+    const [draftOffers, setDraftOffers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { rules } = useSubscriptionRules();
+    const { canCreateNewOffer } = useSubscriptionRules();
 
-    const { rules, canCreateNewOffer } = useSubscriptionRules();
-
-    const noOffersInAllCategories = openOffers.length === 0 && closedOffers.length === 0;
+    const noOffersInAllCategories =
+        openOffers.length === 0 &&
+        closedOffers.length === 0 &&
+        draftOffers.length === 0;
 
     useFocusEffect(
         useCallback(() => {
             fetchOffers();
         }, [])
     );
+    console.log(tab)
+
+
 
     const fetchOffers = async () => {
         try {
@@ -40,6 +61,7 @@ const MisOfertasEmpresa = () => {
             setAllOffers(response.data);
             setOpenOffers(response.data.filter((o: any) => o.estado === "ABIERTA"));
             setClosedOffers(response.data.filter((o: any) => o.estado === "CERRADA"));
+            setDraftOffers(response.data.filter((o: any) => o.estado === "BORRADOR"));
             setError(null);
         } catch (error) {
             console.error("Error al cargar las ofertas:", error);
@@ -82,145 +104,161 @@ const MisOfertasEmpresa = () => {
             );
         }
 
-        if (tab === "ABIERTA") {
-            if (openOffers.length === 0) {
+        switch (currentTab) {
+            case "ABIERTA":
+                if (openOffers.length === 0) {
+                    return (
+                        <View style={styles.emptyContainer}>
+                            <MaterialCommunityIcons name="briefcase-check-outline" size={48} color={colors.mediumGray} />
+                            <Text style={styles.emptyTitle}>No tienes ofertas abiertas</Text>
+                            <Text style={styles.emptySubtitle}>
+                                Todas tus ofertas están cerradas o aún no has creado ninguna.
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.emptyButton}
+                                onPress={() => router.push("/oferta/crear")}
+                            >
+                                <MaterialCommunityIcons name="plus-circle-outline" size={20} color="white" />
+                                <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
+                            </TouchableOpacity>
+                        </View>
+                    );
+                }
                 return (
-                    <View style={styles.emptyContainer}>
-                        <MaterialCommunityIcons name="briefcase-check-outline" size={48} color={colors.mediumGray} />
-                        <Text style={styles.emptyTitle}>No tienes ofertas abiertas</Text>
-                        <Text style={styles.emptySubtitle}>
-                            Todas tus ofertas están cerradas o aún no has creado ninguna.
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.emptyButton}
-                            onPress={() => router.push("/oferta/crear")}
-                        >
-                            <MaterialCommunityIcons name="plus-circle-outline" size={20} color="white" />
-                            <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
-                        </TouchableOpacity>
+                    <View style={styles.offersContainer}>
+                        <ListadoOfertasEmpresa
+                            offers={openOffers}
+                            canPromoteNewOffer={canPromoteNewOffer}
+                            canCancelPromotedOffer={true}
+                            fetchOffers={fetchOffers}
+                        />
                     </View>
                 );
-            }
-            return (
-                <View style={styles.offersContainer}>
-                    <ListadoOfertasEmpresa
-                        offers={openOffers}
-                        canPromoteNewOffer={canPromoteNewOffer}
-                        canCancelPromotedOffer={true}
-                        fetchOffers={fetchOffers}
-                    />
-                </View>
-            );
-        }
 
-        if (tab === "CERRADA") {
-            if (closedOffers.length === 0) {
+            case "CERRADA":
+                if (closedOffers.length === 0) {
+                    return (
+                        <View style={styles.emptyContainer}>
+                            <MaterialCommunityIcons name="archive-outline" size={48} color={colors.mediumGray} />
+                            <Text style={styles.emptyTitle}>No tienes ofertas cerradas</Text>
+                            <Text style={styles.emptySubtitle}>
+                                Todas tus ofertas están abiertas o aún no has creado ninguna.
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.emptyButton}
+                                onPress={() => router.push("/oferta/crear")}
+                            >
+                                <MaterialCommunityIcons name="plus-circle-outline" size={20} color="white" />
+                                <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
+                            </TouchableOpacity>
+                        </View>
+                    );
+                }
                 return (
-                    <View style={styles.emptyContainer}>
-                        <MaterialCommunityIcons name="archive-outline" size={48} color={colors.mediumGray} />
-                        <Text style={styles.emptyTitle}>No tienes ofertas cerradas</Text>
-                        <Text style={styles.emptySubtitle}>
-                            Todas tus ofertas están abiertas o aún no has creado ninguna.
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.emptyButton}
-                            onPress={() => router.push("/oferta/crear")}
-                        >
-                            <MaterialCommunityIcons name="plus-circle-outline" size={20} color="white" />
-                            <Text style={styles.emptyButtonText}>Crear nueva oferta</Text>
-                        </TouchableOpacity>
+                    <View style={styles.offersContainer}>
+                        <ListadoOfertasEmpresa
+                            offers={closedOffers}
+                            canPromoteNewOffer={() => false}
+                            canCancelPromotedOffer={false}
+                            fetchOffers={fetchOffers}
+                        />
                     </View>
                 );
-            }
-            return (
-                <View style={styles.offersContainer}>
-                    <ListadoOfertasEmpresa
-                        offers={closedOffers}
-                        canPromoteNewOffer={() => false}
-                        canCancelPromotedOffer={false}
-                        fetchOffers={fetchOffers}
-                    />
-                </View>
-            );
-        }
 
-        return null;
+            case "BORRADOR":
+                if (draftOffers.length === 0) {
+                    return <Text style={styles.emptyTitle}>No tienes ofertas en modo borrador.</Text>;
+                }
+                return <ListadoOfertasBorrador data={draftOffers} />;
+
+            default:
+                return null;
+        }
+    };
+
+    const getActiveTabStyle = (type: string) => {
+        switch (type) {
+            case "ABIERTA":
+                return { backgroundColor: "#28AD60FF" };
+            case "CERRADA":
+                return { backgroundColor: "#e74c3c" };
+            case "BORRADOR":
+                return { backgroundColor: "#f39c12" };
+            default:
+                return {};
+        }
+    };
+
+    const getTabLabel = (type: string) => {
+        switch (type) {
+            case "ABIERTA":
+                return ` Abiertas(Sin Asignar)`;
+            case "CERRADA":
+                return `Cerradas(Asignadas) `;
+            case "BORRADOR":
+                return `Borradores `;
+            default:
+                return "";
+        }
     };
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.webContainer}>
-            {/* Hero Section */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Mis Ofertas</Text>
                 <Text style={styles.headerSubtitle}>Gestiona todas tus ofertas publicadas</Text>
             </View>
 
-            {/* Main Content */}
             <View style={styles.mainContent}>
                 {!noOffersInAllCategories && (
                     <View style={styles.tabContainer}>
-                        {["ABIERTA", "CERRADA"].map((t) => {
-                            const isActive = tab === t;
-                            const count = t === "ABIERTA" ? openOffers.length : closedOffers.length;
+                        {["ABIERTA", "BORRADOR", "CERRADA"].map((t) => {
+                            const isActive = currentTab === t;
+                            const count = t === "ABIERTA" ? openOffers.length : t === "CERRADA" ? closedOffers.length : draftOffers.length;
                             return (
                                 <TouchableOpacity
                                     key={t}
-                                    onPress={() => setTab(t)}
-                                    style={[
-                                        styles.tabButton,
-                                        isActive && t === "ABIERTA" && styles.activeTabOpen,
-                                        isActive && t === "CERRADA" && styles.activeTabClosed
-                                    ]}
+                                    onPress={() => setCurrentTab(t)}
+                                    style={[styles.tabButton, isActive && getActiveTabStyle(t)]}
                                 >
-                                    <View style={styles.tabContent}>
-                                        <MaterialCommunityIcons
-                                            name={t === "ABIERTA" ? "lock-open-outline" : "lock-outline"}
-                                            size={20}
-                                            color={isActive ? 'white' : colors.darkGray}
-                                        />
-                                        <Text style={[
-                                            styles.tabText,
-                                            isActive && styles.activeTabText
-                                        ]}>
-                                            {t === "ABIERTA" ? `Abiertas` : `Cerradas`}
-                                        </Text>
+                                    <MaterialCommunityIcons
+                                        name={t === "ABIERTA" ? "lock-open-outline" : t === "CERRADA" ? "archive-outline" : "briefcase-outline"}
+                                        size={20}
+                                        color={isActive ? 'white' : colors.mediumGray}
+                                    />
+                                    <Text style={[styles.tabText, isActive && { color: 'white' }]}>
+                                        {getTabLabel(t)}
+                                    </Text>
+                                    {count > 0 && (
                                         <View style={[
-                                            styles.tabBadge,
-                                            isActive && styles.tabBadgeActive
+                                            styles.tagContainer,
+                                            isActive
+                                                ? { backgroundColor: 'rgba(0,0,0,0.2)' }
+                                                : { backgroundColor: colors.mediumGray }
                                         ]}>
                                             <Text style={[
-                                                styles.tabBadgeText,
-                                                isActive && styles.tabBadgeTextActive
+                                                styles.tagText,
+                                                isActive
+                                                    ? { color: 'white' }
+                                                    : { color: colors.darkGray }
                                             ]}>
                                                 {count}
                                             </Text>
                                         </View>
-                                    </View>
+                                    )}
                                 </TouchableOpacity>
                             );
                         })}
                     </View>
                 )}
 
-                {canCreateNewOffer(allOffers) && (
-                    <TouchableOpacity
-                        style={styles.createButton}
-                        onPress={() => router.push("/oferta/crear")}
-                    >
-                        <MaterialCommunityIcons name="plus-circle" size={24} color="white" />
-                        <Text style={styles.createButtonText}>Nueva oferta</Text>
-                    </TouchableOpacity>
-                )}
-
                 {renderOfferList()}
             </View>
-            </View>
-        <WebFooter />
+            </View>        <WebFooter />
         </ScrollView>
     );
 };
-
 const styles = StyleSheet.create({
     scrollContainer: {
         flexGrow: 1,
@@ -292,7 +330,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 25,
+        marginBottom: 50,
         backgroundColor: 'transparent',
         borderRadius: 25,
         padding: 5,
@@ -300,7 +338,9 @@ const styles = StyleSheet.create({
     tabButton: {
         flex: 1,
         paddingVertical: 12,
+        flexDirection: "row",
         paddingHorizontal: 16,
+        justifyContent: "center",
         borderRadius: 20,
         marginHorizontal: 4,
     },
@@ -319,7 +359,7 @@ const styles = StyleSheet.create({
     tabText: {
         fontSize: 16,
         fontWeight: '600',
-        color: colors.darkGray,
+        color: colors.mediumGray2,
     },
     activeTabText: {
         color: 'white',
@@ -411,8 +451,24 @@ const styles = StyleSheet.create({
     createButtonText: {
         color: 'white',
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 14,
+    },tagContainer: {
+        borderRadius: 12,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        marginLeft: 8,
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minWidth: 24, 
+        height: 24, 
     },
+    
+    tagText: {
+        fontWeight: 'bold',
+        fontSize: 12,
+        color: 'white', 
+    }
+
 });
 
 export default MisOfertasEmpresa;

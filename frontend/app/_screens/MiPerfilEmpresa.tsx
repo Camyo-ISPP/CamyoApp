@@ -15,6 +15,7 @@ import ResenaModal from "../_components/ResenaModal";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
+import DraftModal from "../_components/DraftModal";
 
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -26,7 +27,6 @@ const MiPerfilEmpresa = () => {
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
-  const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
   const [camioneros, setCamioneros] = useState([]);
   const [showResenaModal, setShowResenaModal] = useState(false);
   const [camioneroAResenar, setCamioneroAResenar] = useState(null);
@@ -36,13 +36,15 @@ const MiPerfilEmpresa = () => {
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   //const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
   const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
-  const [resenados, setResenados] = useState([]);
+  const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
+  const [drafts, setDrafts] = useState<any[]>([]);  const [resenados, setResenados] = useState([]);
   const [selectedRating, setSelectedRating] = useState(0);
 
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [successDeleteAccModalVisible, setSuccessDeleteAccModalVisible] = useState(false);
+  const [showDraftsChoiceModal, setShowDraftsChoiceModal] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -148,6 +150,7 @@ const MiPerfilEmpresa = () => {
       console.log("Camioneros únicos de ofertas cerradas:", camionerosUnicos);
       setCamioneros(camionerosUnicos);
 
+      setDrafts(response.data.filter((offer: any) => offer.estado === "BORRADOR"));
     } catch (error) {
       console.error("Error al cargar las ofertas:", error);
     } finally {
@@ -213,6 +216,29 @@ const MiPerfilEmpresa = () => {
     }
   };
 
+  const handlePublishButtonPress = () => {
+    if (!canCreateNewOffer()) {
+      alert(`Has alcanzado el límite de ofertas abiertas (${rules.maxActiveOffers}).`);
+      return;
+    }
+
+    if (drafts.length > 0) {
+      setShowDraftsChoiceModal(true);
+    } else {
+      router.push(`/oferta/crear`);
+    }
+  };
+
+   const handleViewDrafts = () => {
+      setShowDraftsChoiceModal(false);
+   
+      router.push({ pathname: "/misofertas", params: { tab: "BORRADOR" } });
+  };
+  const handleCreateNew = () => {
+    setShowDraftsChoiceModal(false);
+    router.push(`/oferta/crear`);
+  };
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -260,13 +286,7 @@ const MiPerfilEmpresa = () => {
               <View>
                 <TouchableOpacity
                   style={[styles.publishButton, !canCreateNewOffer() && styles.disabledButton]}
-                  onPress={() => {
-                    if (canCreateNewOffer()) {
-                      router.push(`/oferta/crear`);
-                    } else {
-                      alert(`Has alcanzado el límite de ofertas abiertas (${rules.maxActiveOffers}).`);
-                    }
-                  }}
+                  onPress={handlePublishButtonPress}
                   disabled={!canCreateNewOffer()}
                 >
                   {canCreateNewOffer() &&
@@ -533,6 +553,12 @@ const MiPerfilEmpresa = () => {
         isVisible={successModalVisible}
         onClose={() => setSuccessModalVisible(false)}
         message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
+      />
+      <DraftModal
+        isVisible={showDraftsChoiceModal}
+        onClose={() => setShowDraftsChoiceModal(false)}
+        onViewDrafts={handleViewDrafts}
+        onCreateNew={handleCreateNew}
       />
     </ScrollView >
   );
@@ -1095,6 +1121,13 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 16,
     fontWeight: "500",
+  },
+  draftMessageText: {
+    fontSize: 16,
+    color: colors.primary,
+    textAlign: "center",
+    marginTop: 10,
+    textDecorationLine: "underline",
   },
   deleteAccountButton: {
     backgroundColor: colors.red,
