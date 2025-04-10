@@ -145,7 +145,7 @@ const MiPerfilEmpresa = () => {
         return acc;
       }, []);
 
-
+      setCamioneros(camionerosUnicos)
       setDrafts(response.data.filter((offer: any) => offer.estado === "BORRADOR"));
     } catch (error) {
       console.error("Error al cargar las ofertas:", error);
