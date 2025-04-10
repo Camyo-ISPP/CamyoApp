@@ -203,8 +203,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.lightGray,
-  },
+    backgroundColor: colors.white
+},
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
