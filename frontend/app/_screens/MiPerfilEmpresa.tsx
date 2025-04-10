@@ -533,11 +533,13 @@ const MiPerfilEmpresa = () => {
           setShowResenaModal(false);
           setCamioneroAResenar(null);
           setSelectedRating(false);
+          
         }}
         initialRating={selectedRating}
         onSubmit={handleSubmitResenaWrapper}
         comentadorId={user?.userId}
         comentadoId={camioneroAResenar?.usuario?.id}
+        isEditing={false}
       />
 
       <ConfirmDeleteModal

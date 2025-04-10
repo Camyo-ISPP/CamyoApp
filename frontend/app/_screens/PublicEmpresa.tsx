@@ -92,20 +92,20 @@ const PublicEmpresa = ({ userId }) => {
 
   const handleDeleteReview = async () => {
     try {
-        const res = await axios.delete(`${BACKEND_URL}/resenas/${resenaAEliminar}`, {
-            headers: { Authorization: `Bearer ${userToken}` },
-        });
-        
-        if (res.status === 200 || res.status === 204) {
-            fetchResenas();
-            setConfirmDeleteModalVisible(false);
-            setResenaAEliminar(null);
-            // Opcional: mostrar mensaje de éxito
-            Alert.alert("Éxito", "La reseña ha sido eliminada correctamente");
-        }
+      const res = await axios.delete(`${BACKEND_URL}/resenas/${resenaAEliminar}`, {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+
+      if (res.status === 200 || res.status === 204) {
+        fetchResenas();
+        setConfirmDeleteModalVisible(false);
+        setResenaAEliminar(null);
+        // Opcional: mostrar mensaje de éxito
+        Alert.alert("Éxito", "La reseña ha sido eliminada correctamente");
+      }
     } catch (error) {
-        console.error("Error al eliminar reseña:", error);
-        Alert.alert("Error", "No se pudo eliminar la reseña. Por favor, inténtalo de nuevo.");
+      console.error("Error al eliminar reseña:", error);
+      Alert.alert("Error", "No se pudo eliminar la reseña. Por favor, inténtalo de nuevo.");
     }
   };
 
@@ -169,13 +169,13 @@ const PublicEmpresa = ({ userId }) => {
             <View style={styles.downContainer}>
               {/* Información empresarial */}
               <Text style={styles.sectionTitle2}>Información Empresarial</Text>
-                <Text style={styles.info}>
-                  <FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: 
-                  {' '}
-                  <TouchableOpacity onPress={() => Linking.openURL(empresa?.web)}>
-                    <Text style={{ color: colors.primary, textDecorationLine: 'underline' }}>{empresa?.web}</Text>
-                  </TouchableOpacity>
-                </Text>
+              <Text style={styles.info}>
+                <FontAwesome5 name="globe" size={18} color={colors.primary} /> Web:
+                {' '}
+                <TouchableOpacity onPress={() => Linking.openURL(empresa?.web)}>
+                  <Text style={{ color: colors.primary, textDecorationLine: 'underline' }}>{empresa?.web}</Text>
+                </TouchableOpacity>
+              </Text>
             </View>
 
             <View style={styles.separator} />
@@ -287,7 +287,7 @@ const PublicEmpresa = ({ userId }) => {
                         </TouchableOpacity>
                       </View>
                     )}
-                                        <ResenaModal
+                    <ResenaModal
                       visible={showResenaModal}
                       onClose={() => {
                         setShowResenaModal(false);
@@ -327,6 +327,7 @@ const PublicEmpresa = ({ userId }) => {
                       comentadoId={empresa?.userId}
                       initialRating={editResenaId ? resena.valoracion : 5}
                       initialComment={editResenaId ? resena.comentarios : ""}
+                      isEditing={true}
                     />
                   </View>
 
@@ -343,51 +344,51 @@ const PublicEmpresa = ({ userId }) => {
             onClose={() => setSuccessModalVisible(false)}
             message="¡Reseña enviada con exito!"
           />
-                    <Modal 
-                        visible={confirmDeleteModalVisible} 
-                        transparent 
-                        animationType="fade"
-                        onRequestClose={() => setConfirmDeleteModalVisible(false)}
+          <Modal
+            visible={confirmDeleteModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setConfirmDeleteModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <MaterialIcons
+                    name="warning"
+                    size={32}
+                    color={colors.red}
+                    style={styles.warningIcon}
+                  />
+
+                  <Text style={styles.modalTitle}>
+                    Confirmar eliminación
+                  </Text>
+
+                  <Text style={styles.modalText}>
+                    ¿Estás seguro de que deseas eliminar esta reseña? Esta acción no se puede deshacer.
+                  </Text>
+
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      onPress={() => setConfirmDeleteModalVisible(false)}
+                      style={[styles.buttonModal, styles.cancelButton]}
+                      activeOpacity={0.8}
                     >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.modalContent}>
-                                    <MaterialIcons 
-                                        name="warning" 
-                                        size={32} 
-                                        color={colors.red} 
-                                        style={styles.warningIcon}
-                                    />
-                                    
-                                    <Text style={styles.modalTitle}>
-                                        Confirmar eliminación
-                                    </Text>
-                                    
-                                    <Text style={styles.modalText}>
-                                        ¿Estás seguro de que deseas eliminar esta reseña? Esta acción no se puede deshacer.
-                                    </Text>
+                      <Text style={styles.cancelButtonText}>Cancelar</Text>
+                    </TouchableOpacity>
 
-                                    <View style={styles.buttonContainer}>
-                                        <TouchableOpacity
-                                            onPress={() => setConfirmDeleteModalVisible(false)}
-                                            style={[styles.buttonModal, styles.cancelButton]}
-                                            activeOpacity={0.8}
-                                        >
-                                            <Text style={styles.cancelButtonText}>Cancelar</Text>
-                                        </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                            onPress={handleDeleteReview}
-                                            style={[styles.buttonModal, styles.deleteButton]}
-                                            activeOpacity={0.8}
-                                        >
-                                            <Text style={styles.deleteButtonText}>Eliminar</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    </Modal>
+                    <TouchableOpacity
+                      onPress={handleDeleteReview}
+                      style={[styles.buttonModal, styles.deleteButton]}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.deleteButtonText}>Eliminar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </View>
       </ScrollView>
     </>
@@ -778,71 +779,71 @@ const styles = StyleSheet.create({
     color: colors.secondary,
   },
   modalOverlay: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0, 0, 0, 0.6)",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
   modalContainer: {
-      width: "80%",
-      maxWidth: 400,
-      minHeight: 220,
+    width: "80%",
+    maxWidth: 400,
+    minHeight: 220,
   },
   modalContent: {
-      backgroundColor: colors.white,
-      borderRadius: 16,
-      padding: 24,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      elevation: 10,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 10,
   },
   warningIcon: {
-      alignSelf: "center",
-      marginBottom: 16,
+    alignSelf: "center",
+    marginBottom: 16,
   },
   modalTitle: {
-      fontSize: 20,
-      fontWeight: "600",
-      marginBottom: 8,
-      color: colors.darkText,
-      textAlign: "center"
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 8,
+    color: colors.darkText,
+    textAlign: "center"
   },
   modalText: {
-      fontSize: 16,
-      color: colors.mediumText,
-      textAlign: "center",
-      marginBottom: 24,
-      lineHeight: 22,
+    fontSize: 16,
+    color: colors.mediumText,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
   },
   buttonContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   buttonModal: {
-      flex: 1,
-      paddingVertical: 12,
-      borderRadius: 8,
-      alignItems: "center",
-      justifyContent: "center",
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   cancelButton: {
-      backgroundColor: colors.lightGray,
-      marginRight: 12,
+    backgroundColor: colors.lightGray,
+    marginRight: 12,
   },
   deleteButton: {
-      backgroundColor: colors.red,
+    backgroundColor: colors.red,
   },
   cancelButtonText: {
-      color: colors.black,
-      fontWeight: "600",
-      fontSize: 16,
+    color: colors.black,
+    fontWeight: "600",
+    fontSize: 16,
   },
   deleteButtonText: {
-      color: colors.white,
-      fontWeight: "600",
-      fontSize: 16,
+    color: colors.white,
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
 

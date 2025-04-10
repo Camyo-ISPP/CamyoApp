@@ -16,6 +16,7 @@ interface ResenaModalProps {
     comentadoId: string;
     initialRating?: number;
     initialComment?: string;
+    isEditing?: boolean;
 }
 
 const ResenaModal: React.FC<ResenaModalProps> = ({
@@ -25,7 +26,8 @@ const ResenaModal: React.FC<ResenaModalProps> = ({
     comentadorId,
     comentadoId,
     initialRating = 0,
-    initialComment = ""
+    initialComment = "",
+    isEditing = false
 }) => {
     const [valoracion, setValoracion] = useState(initialRating);
     const [comentario, setComentario] = useState(initialComment);
@@ -62,12 +64,16 @@ const ResenaModal: React.FC<ResenaModalProps> = ({
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>
-                        {initialRating ? "Editar Reseña" : "Añadir Reseña"}
+                        {isEditing ? "Editar Reseña" : "Añadir Reseña"}
                     </Text>
 
                     <View style={styles.starsContainer}>
                         {[1, 2, 3, 4, 5].map((star) => (
-                            <TouchableOpacity key={star} onPress={() => setValoracion(star)}>
+                            <TouchableOpacity 
+                                key={star} 
+                                onPress={() => setValoracion(star)}
+                                activeOpacity={0.7}
+                            >
                                 <FontAwesome
                                     name={star <= valoracion ? "star" : "star-o"}
                                     size={30}
@@ -85,21 +91,29 @@ const ResenaModal: React.FC<ResenaModalProps> = ({
                         placeholder="Escribe tu experiencia..."
                         value={comentario}
                         onChangeText={setComentario}
+                        maxLength={500}
                     />
 
-                    <Text style={{ textAlign: "right", marginBottom: 10, color:colors.mediumGray2,marginRight:5}}>
+                    <Text style={styles.charCounter}>
                         {comentario.length}/500
                     </Text>
-
 
                     {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
                     <View style={styles.buttonsContainer}>
-                        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                        <TouchableOpacity 
+                            style={styles.cancelButton} 
+                            onPress={onClose}
+                            activeOpacity={0.7}
+                        >
                             <Text style={styles.buttonText}>Cancelar</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                            <Text style={styles.buttonText}>{initialRating ? "Actualizar" : "Enviar"}</Text>
+                        <TouchableOpacity 
+                            style={styles.submitButton} 
+                            onPress={handleSubmit}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.buttonText}>{isEditing ? "Actualizar" : "Enviar"}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -150,6 +164,12 @@ const styles = StyleSheet.create({
         minHeight: 120,
         textAlignVertical: "top",
         fontSize: 16,
+    },
+    charCounter: {
+        textAlign: "right", 
+        marginBottom: 10, 
+        color: colors.mediumGray2,
+        marginRight: 5
     },
     errorText: {
         color: colors.red,

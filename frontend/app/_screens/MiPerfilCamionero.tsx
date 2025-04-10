@@ -32,10 +32,10 @@ const MiPerfilCamionero = () => {
     useFocusEffect(
         useCallback(() => {
             fetchCamionero();
-            fetchOfertasCamionero(); 
+            fetchOfertasCamionero();
             fetchEmpresasResenados();
         }, [])
-      );
+    );
     const fetchCamionero = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
@@ -268,7 +268,7 @@ const MiPerfilCamionero = () => {
                     <View style={styles.empresasSection}>
                         <Text style={styles.sectionTitle}>Empresas Recientes</Text>
 
-                        {empresasRecientes.filter(empresa => !(resenados.includes(empresa.userId))).length === 0 ? (
+                        {empresasRecientes.filter(empresa => !(resenados.includes(empresa.userId))).length === 0 ? (
                             <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
                         ) : (
                             empresasRecientes
@@ -429,6 +429,7 @@ const MiPerfilCamionero = () => {
                 onSubmit={handleSubmitResenaWrapper}
                 comentadorId={user?.userId}
                 comentadoId={empresaAResenar?.usuario?.id}
+                isEditing={false}
             />
 
             <ConfirmDeleteModal

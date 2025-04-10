@@ -326,6 +326,7 @@ const PublicCamionero = ({ userId }) => {
                                                 comentadoId={user2?.userId}
                                                 initialRating={editResenaId ? resena.valoracion : 5}
                                                 initialComment={editResenaId ? resena.comentarios : ""}
+                                                isEditing={true}
                                             />
 
                                             {/* Divider */}
