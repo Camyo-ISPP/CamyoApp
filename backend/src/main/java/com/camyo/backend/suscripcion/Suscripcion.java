@@ -1,7 +1,12 @@
 package com.camyo.backend.suscripcion;
 
 import java.time.LocalDate;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.camyo.backend.empresa.Empresa;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -17,9 +22,9 @@ public class Suscripcion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotNull
-    @OneToOne
-    @JoinColumn(name = "empresa_id", nullable = false)
+    @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE }, orphanRemoval = true)
+    @JoinColumn(name = "empresa_id", referencedColumnName = "id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Empresa empresa;
 
     @NotNull

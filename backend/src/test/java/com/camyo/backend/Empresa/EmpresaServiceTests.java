@@ -200,25 +200,6 @@ class EmpresaServiceTests {
         assertTrue(empresaService.obtenerEmpresaPorNif(nif).isEmpty());
     }
 
-    @Test
-    @Transactional(readOnly = true)
-    void debeActualizarEmpresa() {
-        Empresa empNuevo = empresaService.obtenerEmpresaPorId(e1.getId());
-
-        String newNif = "C12345674";
-        empNuevo.setNif(newNif);
-
-        String newWeb = "https://prueba.es";
-        empNuevo.setWeb(newWeb);
-
-        assertDoesNotThrow(() -> empresaService.actualizarEmpresa(empNuevo, e1.getId()));
-        Empresa empActualizada = empresaService.obtenerEmpresaPorId(e1.getId());
-
-        assertEquals(newNif, empActualizada.getNif());
-        assertEquals(newWeb, empActualizada.getWeb());
-        assertEquals(e1.getId(), empActualizada.getId());
-
-    }
 
     @Test
     @Transactional

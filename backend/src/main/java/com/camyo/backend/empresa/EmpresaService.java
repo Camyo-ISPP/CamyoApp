@@ -7,7 +7,6 @@ import com.camyo.backend.exceptions.InvalidNifException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.util.Validators;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -50,14 +49,6 @@ public class EmpresaService {
         empresaRepository.save(empresa);
         return empresa;
     }
-
-	@Transactional
-	public Empresa actualizarEmpresa(Empresa empresa, int id) throws DataAccessException, InvalidNifException {
-		Validators.comprobarNif(empresa.getNif());
-		Empresa toUpdate = obtenerEmpresaPorId(id);
-		BeanUtils.copyProperties(empresa, toUpdate, "id", "usuario");
-		return guardarEmpresa(toUpdate);
-	}
 
 	@Transactional
 	public void eliminarEmpresa(int id) throws DataAccessException {

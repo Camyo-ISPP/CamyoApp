@@ -49,7 +49,7 @@ const CamioneroRegisterScreen = () => {
   const handleInputChange = (field: string, value: string | boolean | any[]) => {
     setFormData((prevState) => ({ ...prevState, [field]: value }));
   };
-login
+  login
   const handlePickImage = async () => {
     const base64Image = await pickImageAsync();
     if (base64Image) {
@@ -105,6 +105,9 @@ login
     const licenciasBackend = formData.licencias.map((licencia) => licencias_backend[licencias.indexOf(licencia)]);
 
     // Validación de nombre y apellidos
+
+    formData.nombre = formData.nombre.trim();
+
     if (!formData.nombre) {
       setErrorMessage("El campo nombre y apellidos es obligatorio.");
       return;
@@ -114,9 +117,33 @@ login
       return;
     }
 
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos solo pueden contener letras, espacios y guiones.");
+      return;
+    }
+
+    if (!/[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos deben contener al menos dos letras.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(formData.nombre)) {
+      setErrorMessage("El nombre y apellidos deben comenzar con una letra.");
+      return;
+    }
+
+    formData.nombre = formData.nombre
+      .split(/\s+/)
+      .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
+      .join(" ");
+
     // Validación de nombre de usuario
     if (!formData.username) {
       setErrorMessage("El campo nombre de usuario es obligatorio.");
+      return;
+    }
+    if (formData.username.length < 2) {
+      setErrorMessage("El campo nombre de usuario es demasiado pequeño.");
       return;
     }
     if (formData.username.length > 30) {
@@ -144,13 +171,43 @@ login
       return;
     }
 
+    if (formData.password.length < 8) {
+      setErrorMessage("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    if (formData.password.length > 255) {
+      setErrorMessage("La contraseña no puede tener más de 255 caracteres.");
+      return;
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos una letra minúscula.");
+      return;
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos una letra mayúscula.");
+      return;
+    }
+
+    if (!/[0-9!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos un número o un carácter especial.");
+      return;
+    }
+
+    if (formData.password.toLowerCase().includes(formData.username.toLowerCase()) || formData.password.toLowerCase().includes(formData.nombre.toLowerCase())) {
+      setErrorMessage("La contraseña no puede contener el nombre de usuario ni el correo electrónico.");
+      return;
+    }
+
     // Validación de número de teléfono
     if (!formData.telefono) {
       setErrorMessage("El campo teléfono es obligatorio.");
       return;
     }
     if (!/^\d{9}$/.test(formData.telefono)) {
-      setErrorMessage("El número de teléfono debe tener 9 dígitos.");
+      setErrorMessage("El número de teléfono debe tener 9 dígitos numéricos.");
       return;
     }
 
@@ -161,6 +218,16 @@ login
     }
     if (formData.localizacion.length > 200) {
       setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+
+    if (formData.localizacion.length < 2) {
+      setErrorMessage("El campo localización es demasiado pequeño.");
+      return;
+    }
+
+    if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s-]+$/.test(formData.localizacion)) {
+      setErrorMessage("La localizacion solo puede contener letras, espacios y guiones.");
       return;
     }
 
@@ -176,7 +243,16 @@ login
       return;
     }
     if (!/^\d{8}[A-Z]$/.test(formData.dni)) {
-      setErrorMessage("El formato del DNI no es válido.");
+      setErrorMessage("El formato del DNI no es válido, está compuesto por 8 números y una letra.");
+      return;
+    }
+
+    const dniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
+    const dniNumber = parseInt(formData.dni.slice(0, 8), 10);
+    const dniLetter = formData.dni.slice(8);
+
+    if (dniLetters[dniNumber % 23] !== dniLetter) {
+      setErrorMessage("El DNI no es válido. La letra no coincide");
       return;
     }
 
@@ -200,6 +276,11 @@ login
       return;
     }
 
+    if (formData.experiencia > 100) {
+      setErrorMessage("¿Has nacido trabajando? El campo años de experiencia debe ser menor que 100.");
+      return;
+    }
+
     // Validación de fecha de expiración del CAP
     if (formData.tieneCAP) {
       if (!formData.expiracionCAP) {
@@ -207,7 +288,31 @@ login
         return;
       }
       if (!/^\d{2}-\d{2}-\d{4}$/.test(formData.expiracionCAP)) {
-        setErrorMessage("El formato de la fecha de expiración del CAP no es válido.");
+        setErrorMessage("El formato de la fecha de expiración del CAP no es válido. Comprueba que sea dd-mm-YYYY");
+        return;
+      }
+
+      const [day, month, year] = formData.expiracionCAP.split("-").map(num => parseInt(num, 10));
+      const currentYear = new Date().getFullYear();
+
+      if (month < 1 || month > 12) {
+        setErrorMessage("El mes de la fecha de expiración del CAP no es válido.");
+        return;
+      }
+
+      const maxDays = new Date(year, month, 0).getDate();
+      if (day < 1 || day > maxDays) {
+        setErrorMessage("El día de la fecha de expiración del CAP no es válido.");
+        return;
+      }
+
+      if (year < currentYear) {
+        setErrorMessage("El año de la fecha de expiración del CAP no puede estar en el pasado.");
+        return;
+      }
+
+      if (year > currentYear + 6) {
+        setErrorMessage("El año de la fecha de expiración del CAP no puede ser más de 5 años en el futuro.");
         return;
       }
     }
@@ -554,7 +659,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     minHeight: '100%',
-    marginTop: 50,
   },
   formContainer: {
     width: "90%",

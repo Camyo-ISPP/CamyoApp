@@ -1,5 +1,8 @@
 package com.camyo.backend.resena;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.camyo.backend.usuario.Usuario;
 
 import jakarta.persistence.Entity;
@@ -35,9 +38,11 @@ public class Resena {
 
     @ManyToOne
     @JoinColumn(name = "comentador_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Usuario comentador;
 
     @ManyToOne
     @JoinColumn(name = "comentado_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Usuario comentado;
 }

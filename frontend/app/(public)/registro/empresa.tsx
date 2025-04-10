@@ -72,10 +72,13 @@ const EmpresaRegisterScreen = () => {
 
   const handleRegister = async () => {
     // Validación de nombre de empresa
+    formData.nombre = formData.nombre.trim();
+
     if (!formData.nombre) {
       setErrorMessage("El campo nombre de empresa es obligatorio.");
       return;
     }
+
     if (formData.nombre.length > 100) {
       setErrorMessage("El campo nombre de empresa es demasiado largo.");
       return;
@@ -86,6 +89,12 @@ const EmpresaRegisterScreen = () => {
       setErrorMessage("El campo nombre de usuario es obligatorio.");
       return;
     }
+    
+    if (formData.username.length < 2) {
+      setErrorMessage("El campo nombre de usuario es demasiado pequeño.");
+      return;
+    }
+
     if (formData.username.length > 30) {
       setErrorMessage("El campo nombre de usuario es demasiado largo.");
       return;
@@ -111,13 +120,43 @@ const EmpresaRegisterScreen = () => {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setErrorMessage("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    if (formData.password.length > 255) {
+      setErrorMessage("La contraseña no puede tener más de 255 caracteres.");
+      return;
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos una letra minúscula.");
+      return;
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos una letra mayúscula.");
+      return;
+    }
+
+    if (!/[0-9!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      setErrorMessage("La contraseña debe contener al menos un número o un carácter especial.");
+      return;
+    }
+
+    if (formData.password.toLowerCase().includes(formData.username.toLowerCase()) || formData.password.toLowerCase().includes(formData.nombre.toLowerCase())) {
+      setErrorMessage("La contraseña no puede contener el nombre de usuario ni el correo electrónico.");
+      return;
+    }
+
     // Validación de número de teléfono
     if (!formData.telefono) {
       setErrorMessage("El campo teléfono es obligatorio.");
       return;
     }
     if (!/^\d{9}$/.test(formData.telefono)) {
-      setErrorMessage("El número de teléfono debe tener 9 dígitos.");
+      setErrorMessage("El número de teléfono debe tener 9 dígitos numéricos.");
       return;
     }
 
@@ -128,6 +167,11 @@ const EmpresaRegisterScreen = () => {
     }
     if (formData.localizacion.length > 200) {
       setErrorMessage("El campo localización es demasiado largo.");
+      return;
+    }
+    
+    if (formData.localizacion.length < 2) {
+      setErrorMessage("El campo localización es demasiado pequeño.");
       return;
     }
 
@@ -142,23 +186,22 @@ const EmpresaRegisterScreen = () => {
       setErrorMessage("El campo página web es obligatorio.");
       return;
     }
-    let correctedWeb = formData.web;
     if (!formData.web.startsWith('http://') && !formData.web.startsWith('https://')) {
       if (!/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(formData.web)) {
         setErrorMessage('El formato de la URL de la página web no es válido.');
         return;
       }
-      correctedWeb = 'https://' + formData.web;
+      formData.web = 'https://' + formData.web; // Añadir https:// si no tiene esquema
     }
 
     // Validación del NIF
     if (!formData.nif) {
-      setErrorMessage("El campo número de identificación es obligatorio.");
+      setErrorMessage("El campo numero de identificación es obligatorio.");
       return;
     }
-    // TODO: Buscar regex para NIF
-    if (!/^[A-HP-SU-W]|J|N[0-9]{7}[A-J]$/.test(formData.nif)) {
-      setErrorMessage("El formato del número de identificación no es válido.");
+
+    if (!/^[A-HJNPQRSUVW]\d{7}\d$/.test(formData.nif.toUpperCase())) {
+      setErrorMessage("El formato del NIF de empresa no es válido.");
       return;
     }
 
@@ -178,7 +221,7 @@ const EmpresaRegisterScreen = () => {
       descripcion: formData.descripcion,
       foto: formData.foto ? formData.foto : null,
       password: formData.password,
-      web: correctedWeb,
+      web: formData.web,
       nif: formData.nif
     };
 
@@ -410,7 +453,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     minHeight: '100%',
-    marginTop: 50,
   },
   formContainer: {
     width: "90%",

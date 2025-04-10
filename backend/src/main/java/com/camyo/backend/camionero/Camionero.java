@@ -8,7 +8,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.camyo.backend.camion.Camion;
 import com.camyo.backend.oferta.Oferta;
 import com.camyo.backend.usuario.Usuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -50,7 +49,6 @@ public class Camionero{
 
     @Column(name = "dni", unique = true)
     @NotBlank
-    @Pattern(regexp = "^\\d{8}[A-Z]$")
     private String dni;
 
     @NotEmpty
@@ -77,10 +75,6 @@ public class Camionero{
 	@JoinColumn(name = "usuario_id", referencedColumnName = "id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Usuario usuario;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "camionero", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Camion> camiones;
 
     @JsonIgnore
     @OneToMany(mappedBy = "camionero", cascade = CascadeType.REMOVE, orphanRemoval = true)
