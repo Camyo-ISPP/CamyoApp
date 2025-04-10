@@ -68,6 +68,7 @@ const MiPerfilEmpresa = () => {
       setResenas(response.data);
       const resenasFiltradas = response.data.filter(resena =>
         resena.comentado.id === user.userId
+
       );
       const mediaResponse = await axios.get(`${BACKEND_URL}/usuarios/${user.userId}/valoracion`);
       setValoracionMedia(mediaResponse.data);
@@ -115,8 +116,6 @@ const MiPerfilEmpresa = () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
       const ids = response.data.map(camionero => camionero.id);
-      console.log(ids);
-      console.log(response.data)
       setResenados(ids)
     } catch (error) {
       console.error("Error al obtener los camioneros reseñados:", error);
@@ -133,7 +132,6 @@ const MiPerfilEmpresa = () => {
 
       setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
 
-      console.log("Ofertas cerradas:", ofertasCerradas);
 
       const camionerosUnicos = ofertasCerradas.reduce((acc, oferta) => {
         if (oferta.camionero && !acc.some(c => c.id === oferta.camionero.id)) {
@@ -147,8 +145,6 @@ const MiPerfilEmpresa = () => {
         return acc;
       }, []);
 
-      console.log("Camioneros únicos de ofertas cerradas:", camionerosUnicos);
-      setCamioneros(camionerosUnicos);
 
       setDrafts(response.data.filter((offer: any) => offer.estado === "BORRADOR"));
     } catch (error) {
@@ -515,6 +511,7 @@ const MiPerfilEmpresa = () => {
                     </View>
 
                     <Text style={styles.reviewComment}>{resena.comentarios}</Text>
+
                   </View>
                 ))
               )}

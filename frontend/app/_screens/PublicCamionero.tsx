@@ -235,6 +235,7 @@ const PublicCamionero = ({ userId }) => {
                                             </View>
 
                                             {/* Comentario */}
+                                            <Text style={styles.reviewComment}>{resena.comentarios}</Text>
                                             {user?.userId === resena.comentador?.id && (
                                                 <View style={{ flexDirection: "row", justifyContent: "center", gap: 10, marginTop: 8 }}>
 
