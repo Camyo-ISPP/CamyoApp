@@ -21,6 +21,7 @@ const ListadoOfertasPublico = ({
             ) : (
                 <View style={styles.offersList}>
                     {offers.map((item: any) => (
+                        console.log(item),
                         <View key={item.id} style={[
                             styles.offerCard,
                             showPromoted && item.promoted && styles.promotedOfferCard
@@ -55,7 +56,7 @@ const ListadoOfertasPublico = ({
                                         <View style={styles.companyInfo}>
                                             <TouchableOpacity
                                                 style={{ flexDirection: 'row', alignItems: 'center' }}
-                                                onPress={() => router.push(`/empresa/${item.empresa.id}`)}
+                                                onPress={() => router.push(`/empresa/${item.empresa?.id ?? item.idUsuarioEmpresa}`)}
                                             >
                                                 <FontAwesome5 name="building" size={14} color={colors.primary} />
                                                 <Text style={styles.companyName}>

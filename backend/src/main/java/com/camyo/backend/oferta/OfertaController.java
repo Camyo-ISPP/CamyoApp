@@ -56,6 +56,8 @@ public class OfertaController {
             dto.setPromoted(oferta.getPromoted() != null ? oferta.getPromoted() : false);
             dto.setFoto(oferta.getEmpresa().getUsuario().getFoto());
             dto.setTipoOferta(oferta.getTipoOferta());
+            dto.setIdUsuarioEmpresa(oferta.getEmpresa().getId());
+
             if (oferta.getEmpresa() != null && oferta.getEmpresa().getUsuario() != null) {
                 dto.setNombreEmpresa(oferta.getEmpresa().getUsuario().getNombre());
             }

@@ -33,7 +33,6 @@ const EditarPerfilCamionero = () => {
     fotoUri: null,
     licencias: [],
     experiencia: null,
-    dni: "",
     tieneCAP: false,
     expiracionCAP: "",
     isAutonomo: false,
@@ -54,7 +53,6 @@ const EditarPerfilCamionero = () => {
         licencias: user.licencias.map((licencia) => licencias[licencias_backend.indexOf(licencia)]),
         disponibilidad: "NACIONAL",
         experiencia: user.experiencia,
-        dni: user.dni,
         tieneCAP: user.tieneCAP,
         expiracionCAP: user.expiracionCAP ? user.expiracionCAP.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3-$2-$1') : null,
         isAutonomo: user.isAutonomo,
@@ -199,25 +197,6 @@ const EditarPerfilCamionero = () => {
       return;
     }
 
-    // Validación del DNI
-    if (!formData.dni) {
-      setErrorMessage("El campo DNI es obligatorio.");
-      return;
-    }
-    if (!/^\d{8}[A-Z]$/.test(formData.dni)) {
-      setErrorMessage("El formato del DNI no es válido, está compuesto por 8 números y una letra.");
-      return;
-    }
-
-    const dniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
-    const dniNumber = parseInt(formData.dni.slice(0, 8), 10);
-    const dniLetter = formData.dni.slice(8);
-
-    if (dniLetters[dniNumber % 23] !== dniLetter) {
-      setErrorMessage("El DNI no es válido. La letra no coincide");
-      return;
-    }
-
     // Validación de licencias
     if (formData.licencias.length === 0) {
       setErrorMessage("Debe elegir al menos una licencia.");
@@ -296,7 +275,6 @@ const EditarPerfilCamionero = () => {
       descripcion: formData.descripcion,
       foto: formData.foto ? formData.foto : null,
       curriculum: formData.curriculum ? formData.curriculum : null,
-      dni: formData.dni,
       licencias: licenciasBackend,
       disponibilidad: "NACIONAL",
       experiencia: parseInt(formData.experiencia),
@@ -319,7 +297,7 @@ const EditarPerfilCamionero = () => {
         const usuarioData = {
           descripcion: userData.descripcion,
           disponibilidad: "NACIONAL",
-          dni: userData.dni,
+          dni: user.dni,
           email: userData.email,
           experiencia: userData.experiencia,
           expiracionCAP: userData.expiracionCAP,
@@ -451,9 +429,6 @@ const EditarPerfilCamionero = () => {
           {renderInput("Teléfono", "telefono", <MaterialIcons name="phone" size={20} color={colors.primary} />, "phone-pad", false, false, "987654321")}
           {renderInput("Localización", "localizacion", <MaterialIcons name="location-pin" size={20} color={colors.primary} />)}
           {renderInput("Descripción", "descripcion", <FontAwesome5 name="align-left" size={20} color={colors.primary} />, "default", false, true)}
-
-          {/* Campos específicos de camionero */}
-          {renderInput("DNI", "dni", <FontAwesome5 name="address-card" size={20} color={colors.primary} />, "default", false, false, "12345678A")}
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Selecciona tu(s) licencia(s) de conducción:</Text>

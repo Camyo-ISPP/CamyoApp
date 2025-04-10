@@ -38,9 +38,6 @@ public class EditRequestCamionero {
 
 	private String descripcion;
 
-	@NotBlank
-	private String dni;
-
     @NotNull
     private Set<Licencia> licencias;
 
