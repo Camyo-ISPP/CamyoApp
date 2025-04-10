@@ -25,36 +25,10 @@ const CrearOfertaScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const { rules, loading } = useSubscriptionRules();
+  const { rules, loading: rulesLoading } = useSubscriptionRules();
   const [offers, setOffers] = useState<any[]>([]);
-
-  const fetchOffers = async () => {
-    try {
-      const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-      setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-    } catch (error) {
-      console.error("Error al cargar las ofertas:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchOffers();
-  }, []);
-
-
-  const canCreateNewOffer = () => {
-    const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA').length;
-    return activeOffersCount < rules.maxActiveOffers;
-  };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      if (!loading && !canCreateNewOffer()) {
-        router.push("/suscripcion");
-      }
-    }, [loading, offers, rules])
-  );
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [canCreateOffer, setCanCreateOffer] = useState(false);
   const [formData, setFormData] = useState({
     titulo: "",
     experiencia: null,
@@ -63,12 +37,10 @@ const CrearOfertaScreen = () => {
     estado: "ABIERTA",
     sueldo: null,
     localizacion: "",
-    fechaPublicacion: new Date().toISOString(), // Fecha actual del sistema
+    fechaPublicacion: new Date().toISOString(),
     empresa: { id: user?.id ?? null },
-    // Trabajo
     fechaIncorporacion: "",
     jornada: "",
-    // Carga
     mercancia: "",
     peso: null,
     origen: "",
@@ -85,10 +57,6 @@ const CrearOfertaScreen = () => {
     }
   }, [user, router]);
 
-  if (!user || !user.rol) {
-    return null;
-  }
-
   // Cuando `user` cambie, actualizar `empresa.id`
   useEffect(() => {
     if (user?.id) {
@@ -98,6 +66,57 @@ const CrearOfertaScreen = () => {
       }));
     }
   }, [user]);
+
+  // Fetch all required data in one effect
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // 1. Check if user is logged in
+        if (!user || !user.rol) {
+          router.replace("/login");
+          return;
+        }
+
+        // 2. Fetch offers
+        const offersResponse = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+        const activeOffers = offersResponse.data.filter((offer: any) => offer.estado === "ABIERTA");
+        setOffers(activeOffers);
+
+        // 3. Check subscription rules (already loading via useSubscriptionRules)
+        if (!rulesLoading && rules) {
+          const canCreate = activeOffers.length < rules.maxActiveOffers;
+          setCanCreateOffer(canCreate);
+          
+          if (!canCreate) {
+            router.push("/suscripcion");
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user, rules, rulesLoading]);
+
+  // Block UI while loading
+  if (isLoading || rulesLoading) {
+    return (
+      <View style={styles.fullScreenLoading}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Verificando suscripción...</Text>
+      </View>
+    );
+  }
+
+  if (!canCreateOffer || !user || !user.rol) {
+    return null;
+  }
 
   const handleInputChange = (field, value) => {
     let formattedValue = value;
@@ -445,154 +464,6 @@ const CrearOfertaScreen = () => {
       </View>
     );
   };
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  const renderPicker = (label, field, icon) => {
-    const [cities, setCities] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchText, setSearchText] = useState('');
-
-    // Función para buscar ciudades con Nominatim
-    const searchCities = async (query) => {
-      if (query.length < 3) return; // No buscar con menos de 3 caracteres
-
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?`,
-          {
-            params: {
-              q: query,
-              format: 'json',
-              addressdetails: 1,
-              limit: 10,
-              countrycodes: 'es', // Filtra por España (puedes quitarlo si quieres internacional)
-            }
-          }
-        );
-
-        // Procesar los resultados
-        const uniqueCities = [];
-        const seen = new Set();
-
-        response.data.forEach(item => {
-          const cityName = item.address.city || item.address.town || item.address.village;
-          if (cityName && !seen.has(cityName)) {
-            seen.add(cityName);
-            uniqueCities.push({
-              name: cityName,
-              state: item.address.state,
-              country: item.address.country
-            });
-          }
-        });
-
-        setCities(uniqueCities);
-      } catch (error) {
-        console.error('Error fetching cities:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Debounce para evitar muchas llamadas mientras se escribe
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        if (searchText) {
-          searchCities(searchText);
-        }
-      }, 500); // Espera 500ms después de la última tecla
-
-      return () => clearTimeout(timer);
-    }, [searchText]);
-
-    return (
-      <View style={{ width: '90%', marginBottom: 15 }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: colors.secondary,
-            marginLeft: 8,
-            marginBottom: -6,
-            backgroundColor: colors.white,
-            alignSelf: 'flex-start',
-            paddingHorizontal: 5,
-            zIndex: 1
-          }}
-        >
-          {label}
-        </Text>
-        <View style={styles.inputContainerStyle}>
-          {React.cloneElement(icon, { color: colors.primary })}
-
-          {/* Cambiamos el Picker por un TextInput con lista de sugerencias */}
-          <TextInput
-            style={{
-              flex: 1,
-              height: 40,
-              paddingLeft: 8,
-              color: colors.primary,
-            }}
-            placeholder="Busca una ciudad..."
-            value={searchText}
-            onChangeText={(text) => {
-              setSearchText(text);
-              if (text === '') {
-                handleInputChange(field, '');
-                setCities([]);
-              }
-            }}
-          />
-
-          {loading && <ActivityIndicator size="small" color={colors.primary} />}
-        </View>
-
-        {/* Lista de sugerencias */}
-        {cities.length > 0 && (
-          <View style={{
-            maxHeight: 200,
-            borderWidth: 1,
-            borderColor: colors.lightGray,
-            borderRadius: 5,
-            marginTop: 5,
-            backgroundColor: colors.white,
-            zIndex: 1000
-          }}>
-            <ScrollView>
-              {cities.map((city, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={{
-                    padding: 10,
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.lightGray
-                  }}
-                  onPress={() => {
-                    handleInputChange(field, city.name);
-                    setSearchText(city.name);
-                    setCities([]);
-                  }}
-                >
-                  <Text style={{ color: colors.primary }}>
-                    {city.name}
-                    {city.state && `, ${city.state}`}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        )}
-      </View>
-    );
-  };
-
 
   return (
     <EmpresaRoute>
@@ -942,6 +813,17 @@ const styles = StyleSheet.create({
   },
   jornadaTextSelected: {
     color: colors.white,
+  },
+  fullScreenLoading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+  },
+  loadingText: {
+    marginTop: 20,
+    color: colors.secondary,
+    fontSize: 16,
   },
 });
 
