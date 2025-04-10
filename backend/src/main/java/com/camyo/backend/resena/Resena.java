@@ -36,8 +36,8 @@ public class Resena {
     @Max(value = 5)
     @Min(value = 0)
     private Integer valoracion;
-    @Column(name="comentarios", length = 501)
-    @Size(max = 501)
+    @Column(name="comentarios", length = 500)
+    @Size(max = 500)
     private String comentarios;
 
     @ManyToOne
