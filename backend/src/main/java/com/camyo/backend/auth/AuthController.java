@@ -176,7 +176,7 @@ public class AuthController {
 	})
 	@PutMapping("/edit/camionero")
 	public ResponseEntity<MessageResponse> editCamionero(@Valid @RequestBody EditRequestCamionero editRequest)
-			throws DataAccessException, IOException {
+			throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		Usuario usuario = null;
 		try {
 			usuario = usuarioService.obtenerUsuarioActual();
@@ -198,16 +198,8 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(
 					new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
 		}
-		if (!camionero.getDni().equals(editRequest.getDni()) && camioneroService.obtenerCamioneroPorDNI(editRequest.getDni()).isPresent()) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + editRequest.getDni() + "' ya está asociado a otra cuenta."));
-		}
-		try {
-			authService.editCamionero(editRequest, usuario, camionero);
-		} catch (InvalidNifException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + editRequest.getDni() + "' es inválido."));
-		} catch (InvalidPhoneNumberException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + editRequest.getTelefono() + "' es inválido."));
-		}
+
+		authService.editCamionero(editRequest, usuario, camionero);
 		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}
 
