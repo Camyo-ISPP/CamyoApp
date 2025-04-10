@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, Modal, ScrollView } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput, Modal, ScrollView, Alert } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
@@ -102,6 +102,25 @@ const PublicCamionero = ({ userId }) => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const handleDeleteReview = async () => {
+        try {
+            const res = await axios.delete(`${BACKEND_URL}/resenas/${resenaAEliminar}`, {
+                headers: { Authorization: `Bearer ${userToken}` },
+            });
+            
+            if (res.status === 200 || res.status === 204) {
+                fetchResenas();
+                setConfirmDeleteModalVisible(false);
+                setResenaAEliminar(null);
+                // Opcional: mostrar mensaje de éxito
+                Alert.alert("Éxito", "La reseña ha sido eliminada correctamente");
+            }
+        } catch (error) {
+            console.error("Error al eliminar reseña:", error);
+            Alert.alert("Error", "No se pudo eliminar la reseña. Por favor, inténtalo de nuevo.");
+        }
     };
 
     return (
@@ -323,77 +342,47 @@ const PublicCamionero = ({ userId }) => {
                         onClose={() => setSuccessModalVisible(false)}
                         message="¡Reseña creada con exito!"
                     />
-                    <Modal visible={confirmDeleteModalVisible} transparent animationType="fade">
-                        <View style={{
-                            flex: 1,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            backgroundColor: "rgba(0,0,0,0.5)",
-                        }}>
-                            <View style={{
-                                backgroundColor: colors.white,
-                                paddingVertical: 16,
-                                paddingHorizontal: 10,
-                                borderRadius: 12,
-                                width: "30%",
-                                height:"20%",
-                                shadowColor: "#000",
-                                shadowOffset: { width: 0, height: 4 },
-                                shadowOpacity: 0.3,
-                                shadowRadius: 6,
-                                elevation: 10,
-                            }}>
-                                <Text style={{
-                                    fontSize: 20,
-                                    fontWeight: "bold",
-                                    marginBottom: 20,
-                                    color: colors.secondary,
-                                    textAlign: "center"
-                                }}>
-                                    ¿Estás seguro de que quieres eliminar esta reseña?
-                                </Text>
+                    <Modal 
+                        visible={confirmDeleteModalVisible} 
+                        transparent 
+                        animationType="fade"
+                        onRequestClose={() => setConfirmDeleteModalVisible(false)}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.modalContent}>
+                                    <MaterialIcons 
+                                        name="warning" 
+                                        size={32} 
+                                        color={colors.red} 
+                                        style={styles.warningIcon}
+                                    />
+                                    
+                                    <Text style={styles.modalTitle}>
+                                        Confirmar eliminación
+                                    </Text>
+                                    
+                                    <Text style={styles.modalText}>
+                                        ¿Estás seguro de que deseas eliminar esta reseña? Esta acción no se puede deshacer.
+                                    </Text>
 
-                                <View style={{ flexDirection: "row",alignItems:"flex-end" }}>
-                                    <TouchableOpacity
-                                        onPress={() => setConfirmDeleteModalVisible(false)}
-                                        style={{
-                                            flex: 1,
-                                            backgroundColor: colors.mediumGray,
-                                            padding: 12,
-                                            borderRadius: 10,
-                                            marginRight: 10,
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <Text style={{ color: "black", fontWeight: "bold" }}>Cancelar</Text>
-                                    </TouchableOpacity>
+                                    <View style={styles.buttonContainer}>
+                                        <TouchableOpacity
+                                            onPress={() => setConfirmDeleteModalVisible(false)}
+                                            style={[styles.buttonModal, styles.cancelButton]}
+                                            activeOpacity={0.8}
+                                        >
+                                            <Text style={styles.cancelButtonText}>Cancelar</Text>
+                                        </TouchableOpacity>
 
-                                    <TouchableOpacity
-                                        onPress={async () => {
-                                            try {
-                                                const res = await axios.delete(`${BACKEND_URL}/resenas/${resenaAEliminar}`, {
-                                                    headers: { Authorization: `Bearer ${userToken}` },
-                                                });
-                                                if (res.status === 200 || res.status === 204) {
-                                                    fetchResenas();
-                                                    setConfirmDeleteModalVisible(false);
-                                                    setResenaAEliminar(null);
-                                                }
-                                            } catch (error) {
-                                                console.error("Error al eliminar reseña:", error);
-                                                alert("No se pudo eliminar la reseña.");
-                                            }
-                                        }}
-                                        style={{
-                                            flex: 1,
-                                            backgroundColor:colors.red,
-                                            padding: 12,
-                                            borderRadius: 10,
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <Text style={{ color: "white", fontWeight: "bold" }}>Eliminar</Text>
-                                    </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={handleDeleteReview}
+                                            style={[styles.buttonModal, styles.deleteButton]}
+                                            activeOpacity={0.8}
+                                        >
+                                            <Text style={styles.deleteButtonText}>Eliminar</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         </View>
@@ -679,6 +668,73 @@ const styles = StyleSheet.create({
     starsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+    },
+    modalContainer: {
+        width: "80%",
+        maxWidth: 400,
+        minHeight: 220,
+    },
+    modalContent: {
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        padding: 24,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 10,
+    },
+    warningIcon: {
+        alignSelf: "center",
+        marginBottom: 16,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "600",
+        marginBottom: 8,
+        color: colors.darkText,
+        textAlign: "center"
+    },
+    modalText: {
+        fontSize: 16,
+        color: colors.mediumText,
+        textAlign: "center",
+        marginBottom: 24,
+        lineHeight: 22,
+    },
+    buttonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    buttonModal: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    cancelButton: {
+        backgroundColor: colors.lightGray,
+        marginRight: 12,
+    },
+    deleteButton: {
+        backgroundColor: colors.red,
+    },
+    cancelButtonText: {
+        color: colors.black,
+        fontWeight: "600",
+        fontSize: 16,
+    },
+    deleteButtonText: {
+        color: colors.white,
+        fontWeight: "600",
+        fontSize: 16,
     },
 });
 
