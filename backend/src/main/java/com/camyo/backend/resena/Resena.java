@@ -5,6 +5,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.camyo.backend.usuario.Usuario;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +17,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,6 +36,8 @@ public class Resena {
     @Max(value = 5)
     @Min(value = 0)
     private Integer valoracion;
+    @Column(name="comentarios", length = 501)
+    @Size(max = 501)
     private String comentarios;
 
     @ManyToOne
