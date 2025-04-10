@@ -63,14 +63,13 @@ const withNavigationGuard = (Component: React.ComponentType<any>) => {
         if (p >= 100) {
           setTimeout(() => {
             setReady(true);
-            // Marcar que ya no es la primera carga
             if (firstLoad) {
               AsyncStorage.setItem('hasLoadedBefore', 'true');
             }
-          }, firstLoad ? 500 : 0); // Retraso más corto para cargas posteriores
+          }, firstLoad ? 500 : 0);
         }
       });
-
+    
       return () => {
         fuelAnim.removeListener(listener);
         waveAnim.removeAllListeners();
@@ -79,9 +78,8 @@ const withNavigationGuard = (Component: React.ComponentType<any>) => {
 
     useEffect(() => {
       if (navigationState?.key) {
-        // Animación más rápida para cargas posteriores
-        const duration = firstLoad ? 2000 : 800;
-        const toValue = firstLoad ? 1 : 1; // Siempre al 100% pero más rápido
+        const duration = firstLoad ? 4000 : 800;
+        const toValue = firstLoad ? 1 : 1;
 
         Animated.timing(fuelAnim, {
           toValue,
@@ -94,7 +92,7 @@ const withNavigationGuard = (Component: React.ComponentType<any>) => {
         if (firstLoad) {
           Animated.timing(fuelAnim, {
             toValue: 0.7,
-            duration: 3000,
+            duration: 4000,
             easing: Easing.out(Easing.sin),
             useNativeDriver: false,
           }).start();
@@ -172,7 +170,7 @@ const withNavigationGuard = (Component: React.ComponentType<any>) => {
                   ? "Optimizando rutas..."
                   : percentage < 100
                     ? "¡Últimos ajustes!"
-                    : "¡Listo para salir!"}
+                    : "¡Gracias por tu paciencia! Estamos cargando datos..."}
             </Text>
             <View style={styles.progressBarContainer}>
               <Animated.View
