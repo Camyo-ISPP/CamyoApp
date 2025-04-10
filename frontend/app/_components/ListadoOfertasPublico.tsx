@@ -21,7 +21,6 @@ const ListadoOfertasPublico = ({
             ) : (
                 <View style={styles.offersList}>
                     {offers.map((item: any) => (
-                        console.log(item),
                         <View key={item.id} style={[
                             styles.offerCard,
                             showPromoted && item.promoted && styles.promotedOfferCard
