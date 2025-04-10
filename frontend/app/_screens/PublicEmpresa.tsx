@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, Modal } from "react-native";
+import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, Modal, Linking } from "react-native";
 import colors from "../../assets/styles/colors";
 import { useRouter } from "expo-router";
 import { FontAwesome, FontAwesome5, MaterialIcons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -150,7 +150,13 @@ const PublicEmpresa = ({ userId }) => {
             <View style={styles.downContainer}>
               {/* Información empresarial */}
               <Text style={styles.sectionTitle2}>Información Empresarial</Text>
-              <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {empresa?.web}</Text>
+                <Text style={styles.info}>
+                  <FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: 
+                  {' '}
+                  <TouchableOpacity onPress={() => Linking.openURL(empresa?.web)}>
+                    <Text style={{ color: colors.primary, textDecorationLine: 'underline' }}>{empresa?.web}</Text>
+                  </TouchableOpacity>
+                </Text>
             </View>
 
             <View style={styles.separator} />

@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -346,7 +346,13 @@ const MiPerfilEmpresa = () => {
           <View style={styles.downContainer}>
             {/* Información empresarial */}
             <Text style={styles.sectionTitle2}>Información Empresarial</Text>
-            <Text style={styles.info}><FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: {user.web}</Text>
+            <Text style={styles.info}>
+              <FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: 
+              {' '}
+              <TouchableOpacity onPress={() => Linking.openURL(user.web)}>
+                <Text style={{ color: colors.primary, textDecorationLine: 'underline' }}>{user.web}</Text>
+              </TouchableOpacity>
+            </Text>
           </View>
 
           <TouchableOpacity
