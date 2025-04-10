@@ -15,7 +15,7 @@ import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
 
 const PublicEmpresa = ({ userId }) => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-  
+
   const router = useRouter();
 
   const [empresa, setEmpresa] = useState(null);
@@ -40,7 +40,7 @@ const PublicEmpresa = ({ userId }) => {
 
   useEffect(() => {
     if (user?.id == userId) {
-      if (user.rol == "EMPRESA"){
+      if (user.rol == "EMPRESA") {
         router.push("/miperfil");
         return;
       }
@@ -50,7 +50,7 @@ const PublicEmpresa = ({ userId }) => {
       try {
         const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${userId}`);
         setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-        if(user && user.rol === 'CAMIONERO'){
+        if (user && user.rol === 'CAMIONERO') {
           setFueAsignado(response.data.filter((offer: any) => offer.estado === "CERRADA").some((offer: any) => offer.camionero.id === user.id))
         }
       } catch (error) {
@@ -282,7 +282,7 @@ const PublicEmpresa = ({ userId }) => {
                       <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
                       <Text style={styles.publishButtonText}>Contactar</Text>
                     </TouchableOpacity>
-                    
+
                   </View>
                 )}
 
@@ -302,74 +302,79 @@ const PublicEmpresa = ({ userId }) => {
             {/* Lista de ofertas de la empresa */}
             <View style={styles.offersContainer}>
               <Text style={styles.sectionTitle}>Ofertas Abiertas</Text>
-              
+
               <ListadoOfertasPublico offers={offers} showPromoted={true} />
-              
+
             </View>
             <View style={styles.separator} />
 
             <View style={styles.reseñasContainer}>
-              <Text style={styles.sectionTitle}>Reseñas</Text>
-              {resenas.length > 0 ? (
-                valoracionMedia !== null && (
-                  <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
-                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
-                  </Text>
-                )
-              ) : (
-                <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
-                  Valoración media: No hay datos suficientes
+              <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
+              {/* Valoración media con estrellas */}
+              <View style={styles.ratingSummary}>
+                <View style={styles.starsContainer}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FontAwesome
+                      key={star}
+                      name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
+                      size={24}
+                      color={colors.primary}
+                      style={styles.starIcon}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.averageRatingText}>
+                  {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
+                  {resenas.length > 0 && (
+                    <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                  )}
                 </Text>
-              )}
+              </View>
 
 
               {resenas.length === 0 ? (
-                <Text style={styles.info}>Todavía no hay reseñas.</Text>
+                <View style={styles.emptyReviews}>
+                  <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
+                  <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
+                </View>
               ) : (
                 resenas.map((resena) => (
-                  <View key={resena.id} style={styles.reseñaCard}>
-                    <Text style={styles.reseñaAutor}>
-                      <FontAwesome5 name="user" size={14} color={colors.primary} /> {resena.comentador?.nombre}
-                    </Text>
-                    <Text style={styles.reseñaValoracion}>⭐ {resena.valoracion}/5</Text>
-                    <Text style={styles.reseñaComentario}>{resena.comentarios}</Text>
-                    {user?.userId === resena.comentador?.id && (
-                      <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 10, marginTop: 8 }}>
-
-                        <TouchableOpacity
-                          onPress={() => {
-                            setResenaForm({
-                              valoracion: resena.valoracion,
-                              comentarios: resena.comentarios,
-                            });
-                            setEditResenaId(resena.id);
-                            setShowResenaModal(true);
-                          }}
-                          style={[styles.button, { marginTop: 8, alignSelf: 'flex-end' }]}>
-
-                          <Text style={styles.buttonText}>
-                            Editar reseña
-                          </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          onPress={() => {
-                            setResenaAEliminar(resena.id);
-                            setConfirmDeleteModalVisible(true);
-                          }}
-                          style={[
-                            styles.button,
-                            {
-                              marginTop: 8,
-                              alignSelf: 'flex-end',
-                              backgroundColor: '#D14F45',
-                            },
-                          ]}
-                        >
-                          <Text style={styles.buttonText}>Eliminar reseña</Text>
-                        </TouchableOpacity>
+                  <View key={resena.id} style={styles.reviewCard}>
+                    <View style={styles.reviewHeader}>
+                      {resena.comentador?.foto ? (
+                        <Image
+                          source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
+                          style={styles.reviewAvatar}
+                        />
+                      ) : (
+                        <View style={styles.avatarPlaceholder}>
+                          <FontAwesome5 name="user" size={20} color="white" />
+                        </View>
+                      )}
+                      <View>
+                        <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
+                        <Text style={styles.reviewDate}>
+                          {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </Text>
                       </View>
-                    )}
+                    </View>
+
+                    <View style={styles.reviewStars}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <FontAwesome
+                          key={star}
+                          name={star <= resena.valoracion ? "star" : "star-o"}
+                          size={16}
+                          color={colors.primary}
+                        />
+                      ))}
+                    </View>
+
+                    <Text style={styles.reviewComment}>{resena.comentarios}</Text>
                   </View>
                 ))
               )}
@@ -747,7 +752,97 @@ const styles = StyleSheet.create({
   reseñaComentario: {
     fontSize: 14,
     color: colors.darkGray,
+  }, ratingSummary: {
+    alignItems: "center",
+    marginBottom: 20,
   },
+  starsContainer: {
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  averageRating: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.secondary,
+  },
+  reviewCount: {
+    fontSize: 16,
+    color: colors.mediumGray,
+    fontWeight: "400",
+  },
+  emptyReviews: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+    backgroundColor: colors.extraLightGray,
+    borderRadius: 12,
+  },
+  emptyText: {
+    marginTop: 15,
+    fontSize: 16,
+    color: colors.mediumGray,
+  },
+  reviewCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  reviewHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  reviewAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+  },
+  avatarPlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  reviewAuthor: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.secondary,
+    marginBottom: 4,
+  },
+  reviewDate: {
+    fontSize: 13,
+    color: colors.mediumGray,
+  },
+  reviewStars: {
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  reviewComment: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.darkGray,
+  },
+  starIcon: {
+    marginHorizontal: 4,
+    transitionDuration: '400ms',
+},
+averageRatingText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.secondary,
+},
 });
 
 export default PublicEmpresa;

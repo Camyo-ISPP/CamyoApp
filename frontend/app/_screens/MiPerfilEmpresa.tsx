@@ -429,17 +429,26 @@ const MiPerfilEmpresa = () => {
 
             <View style={styles.reseñasContainer}>
               <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
-              {resenas.length > 0 ? (
-                valoracionMedia !== null && (
-                  <Text style={{ fontSize: 16, color: colors.primary, textAlign: 'center', marginBottom: 10 }}>
-                    ⭐ Valoración media: {valoracionMedia.toFixed(1)} / 5
-                  </Text>
-                )
-              ) : (
-                <Text style={{ fontSize: 16, color: colors.mediumGray, textAlign: 'center', marginBottom: 10 }}>
-                  Valoración media: No hay datos suficientes
+              {/* Valoración media con estrellas */}
+              <View style={styles.ratingSummary}>
+                <View style={styles.starsContainer}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FontAwesome
+                      key={star}
+                      name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
+                      size={24}
+                      color={colors.primary}
+                      style={styles.starIcon}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.averageRatingText}>
+                  {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
+                  {resenas.length > 0 && (
+                    <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                  )}
                 </Text>
-              )}
+              </View>
 
 
               {resenas.length === 0 ? (
@@ -495,15 +504,15 @@ const MiPerfilEmpresa = () => {
 
       {/* Modals */}
       <ResenaModal
-          visible={showResenaModal}
-          onClose={() => {
-            setShowResenaModal(false);
-            setCamioneroAResenar(null);
-          }}
-          onSubmit={handleSubmitResenaWrapper}
-          comentadorId={user?.userId}
-          comentadoId={camioneroAResenar?.usuario?.id}
-        />
+        visible={showResenaModal}
+        onClose={() => {
+          setShowResenaModal(false);
+          setCamioneroAResenar(null);
+        }}
+        onSubmit={handleSubmitResenaWrapper}
+        comentadorId={user?.userId}
+        comentadoId={camioneroAResenar?.usuario?.id}
+      />
 
       <ConfirmDeleteModal
         isVisible={showDeleteModal}
@@ -1090,6 +1099,15 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: "bold",
     marginLeft: 10,
+  },
+  starIcon: {
+    marginHorizontal: 4,
+    transitionDuration: '400ms',
+  },
+  averageRatingText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.secondary,
   },
 });
 
