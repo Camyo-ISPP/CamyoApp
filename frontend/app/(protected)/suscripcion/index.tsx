@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Animated, Easing, Image } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Animated, Easing, Image, ActivityIndicator } from "react-native";
 import colors from "frontend/assets/styles/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import withNavigationGuard from "@/hoc/withNavigationGuard";
@@ -209,7 +209,7 @@ const SubscriptionPlans = () => {
                     onPress={() => onChangePlan(planLevel)}
                 >
                     {loadingPlan && isCurrentPlan ? (
-                        <MapLoader />
+                        <ActivityIndicator size="large" color={colors.primary} />
                     ) : (
                         <Text style={styles.buttonText}>{buttonText}</Text>
                     )}

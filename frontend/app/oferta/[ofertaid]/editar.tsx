@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-    View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ScrollView as RNScrollView
+    View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, ScrollView as RNScrollView
 } from "react-native";
 import axios from "axios";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -788,7 +788,7 @@ const EditarOfertaScreen = () => {
                             }
                         }}
                     />
-                    {loadingPicker && <MapLoader />}
+                    {loadingPicker && <ActivityIndicator size="large" color={colors.primary} />}
                 </View>
                 {cities.length > 0 && (
                     <View style={{

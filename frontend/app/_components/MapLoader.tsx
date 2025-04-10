@@ -3,7 +3,11 @@ import { View, StyleSheet, Animated, Text } from 'react-native';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import colors from 'frontend/assets/styles/colors';
 
-const MapLoader = () => {
+type MapLoaderProps = {
+  message?: string;
+};
+
+const MapLoader: React.FC<MapLoaderProps> = ({ message = 'Trazando la mejor ruta para ti...' }) => {
   const [activeDot, setActiveDot] = useState(0);
   const fadeAnim = new Animated.Value(0);
 
@@ -54,7 +58,7 @@ const MapLoader = () => {
           style={styles.truckIcon}
         />
       </View>
-      <Text style={styles.text}>Trazando la mejor ruta para ti...</Text>
+      <Text style={styles.text}>{message}</Text>
     </View>
   );
 };

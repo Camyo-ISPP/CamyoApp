@@ -106,8 +106,7 @@ const CrearOfertaScreen = () => {
   if (isLoading || rulesLoading) {
     return (
       <View style={styles.fullScreenLoading}>
-        <MapLoader />
-        <Text style={styles.loadingText}>Verificando suscripción...</Text>
+        <MapLoader message="Gracias por tu paciencia, estamos verificando tu suscripción..." />
       </View>
     );
   }
