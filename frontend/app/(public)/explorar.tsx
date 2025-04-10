@@ -27,7 +27,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     const [minSalaryFilter, setMinSalaryFilter] = useState('');
     const [jornadaFilter, setJornadaFilter] = useState('');
     const [licenciaFilter, setLicenciaFilter] = useState<string[]>([]);
-    const [presupuestoFilter, setPresupuestoFilter] = useState('');
     const [maxDistanceFilter, setMaxDistanceFilter] = useState('');
 
     // Posibles valores para los filtros
@@ -63,8 +62,10 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     }, [data]);
 
     useEffect(() => {
-        fetchData();
-    }, [selectedOfertaType]);
+        if(loading){
+            fetchData();
+        }
+    }, [loading]);
 
     const fetchData = async () => {
         try {
@@ -121,9 +122,9 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             }
 
             // Presupuesto Filter
-            if (presupuestoFilter) {
+            if (minSalaryFilter) {
                 filteredResults = filteredResults.filter(
-                    (item) => item.sueldo >= parseFloat(presupuestoFilter)
+                    (item) => item.sueldo >= parseFloat(minSalaryFilter)
                 );
             }
 
@@ -207,6 +208,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     };
 
     const clearFilters = () => {
+        setSelectedOfertaType(null);
         setSearchQuery('');
         setOrigenFilter('');
         setDestinoFilter('');
@@ -216,9 +218,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         setMinSalaryFilter('');
         setJornadaFilter('');
         setLicenciaFilter([]);
-        setPresupuestoFilter('');
         setMaxDistanceFilter('');
-        handleSearch('');
+        setFilteredData(data);
     };
 
     return (
@@ -335,18 +336,18 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 <MaterialIcons name="euro-symbol" size={16} color="#555" />
                                                 <Text style={styles.filterLabel}>Presupuesto mínimo</Text>
                                             </View>
-                                            <Text style={styles.sliderValue}>{presupuestoFilter}€</Text>
+                                            <Text style={styles.sliderValue}>{minSalaryFilter}€</Text>
                                             <Slider
                                                 style={styles.rangeSlider}
                                                 minimumValue={0}
                                                 maximumValue={10000}
                                                 step={10}
-                                                value={presupuestoFilter ? parseFloat(presupuestoFilter) : 0}
+                                                value={minSalaryFilter ? parseFloat(minSalaryFilter) : 0}
                                                 minimumTrackTintColor={colors.primary}
                                                 maximumTrackTintColor="#e0e0e0"
                                                 thumbTintColor={colors.primary}
                                                 onValueChange={(value: number) => {
-                                                    setPresupuestoFilter(value.toString());
+                                                    setMinSalaryFilter(value.toString());
                                                 }}
                                             />
                                         </View>

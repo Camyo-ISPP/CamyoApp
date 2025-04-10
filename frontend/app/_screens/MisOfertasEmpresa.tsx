@@ -21,7 +21,6 @@ const MisOfertasEmpresa = () => {
     const [currentTab, setCurrentTab] = useState<"ABIERTA" | "CERRADA" | "BORRADOR">();
     const searchParams = useSearchParams();
     const tab = searchParams.get("tab"); 
-    console.log("Tab:", tab); 
 
 
     useEffect(() => {
@@ -51,7 +50,6 @@ const MisOfertasEmpresa = () => {
             fetchOffers();
         }, [])
     );
-    console.log(tab)
 
 
 

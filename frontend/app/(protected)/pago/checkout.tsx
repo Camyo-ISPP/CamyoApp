@@ -166,7 +166,6 @@ const CheckoutForm = (transactionClientSecret: any) => {
             redirect: "if_required",
         })
         if (result.error) {
-            console.log(result.error.message);
             setError(result.error.message);
             setLoading(false);
         }
