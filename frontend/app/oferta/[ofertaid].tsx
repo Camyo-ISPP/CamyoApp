@@ -496,28 +496,34 @@ export default function OfertaDetalleScreen() {
                                     </View>
                                 ))}
                             </View>
-                            <View style={styles.separator} />
-                            <Text style={styles.subTitulo}>Camioneros rechazados</Text>
-                            <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                                {offerData && offerData.rechazados.map((item) => (
-                                    <View key={item.id} style={styles.camCard}>
-                                        <Image
-                                            source={item?.usuario.foto ? { uri: `data:image/png;base64,${item.usuario.foto}` } : defaultCamImage}
-                                            style={styles.logo}
-                                        />
 
-                                        <View style={{ flex: 1 }}>
-                                            <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
-                                        </View>
-                                        <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
-                                            <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
-                                                <MaterialCommunityIcons name="eye" size={15} color="white" />
-                                                <Text style={styles.buttonText}> Ver Detalles</Text>
-                                            </TouchableOpacity>
-                                        </View>
+                            {offerData && offerData.rechazados && offerData.rechazados.length > 0 && (
+                                <>
+                                    <View style={styles.separator} />
+                                    <Text style={styles.subTitulo}>Camioneros rechazados</Text>
+                                    <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                                        {offerData.rechazados.map((item) => (
+                                            <View key={item.id} style={styles.camCard}>
+                                                <Image
+                                                    source={item?.usuario.foto ? { uri: `data:image/png;base64,${item.usuario.foto}` } : defaultCamImage}
+                                                    style={styles.logo}
+                                                />
+
+                                                <View style={{ flex: 1 }}>
+                                                    <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
+                                                </View>
+                                                <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
+                                                    <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
+                                                        <MaterialCommunityIcons name="eye" size={15} color="white" />
+                                                        <Text style={styles.buttonText}> Ver Detalles</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        ))}
                                     </View>
-                                ))}
-                            </View>
+                                </>
+                            )}
+
                             <View style={styles.separator} />
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <TouchableOpacity
