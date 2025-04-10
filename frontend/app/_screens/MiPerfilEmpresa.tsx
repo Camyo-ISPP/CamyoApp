@@ -14,6 +14,7 @@ import ListadoOfertasEmpresa from "../_components/ListadoOfertasEmpresa";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
+import DraftModal from "../_components/DraftModal";
 
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -31,6 +32,7 @@ const MiPerfilEmpresa = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [showDraftsChoiceModal, setShowDraftsChoiceModal] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -119,6 +121,29 @@ const MiPerfilEmpresa = () => {
     }
   };
 
+  const handlePublishButtonPress = () => {
+    if (!canCreateNewOffer()) {
+      alert(`Has alcanzado el límite de ofertas abiertas (${rules.maxActiveOffers}).`);
+      return;
+    }
+
+    if (drafts.length > 0) {
+      setShowDraftsChoiceModal(true);
+    } else {
+      router.push(`/oferta/crear`);
+    }
+  };
+
+   const handleViewDrafts = () => {
+      setShowDraftsChoiceModal(false);
+   
+      router.push({ pathname: "/misofertas", params: { tab: "BORRADOR" } });
+  };
+  const handleCreateNew = () => {
+    setShowDraftsChoiceModal(false);
+    router.push(`/oferta/crear`);
+  };
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -166,13 +191,7 @@ const MiPerfilEmpresa = () => {
               <View>
                 <TouchableOpacity
                   style={[styles.publishButton, !canCreateNewOffer() && styles.disabledButton]}
-                  onPress={() => {
-                    if (canCreateNewOffer()) {
-                      router.push(`/oferta/crear`);
-                    } else {
-                      alert(`Has alcanzado el límite de ofertas abiertas (${rules.maxActiveOffers}).`);
-                    }
-                  }}
+                  onPress={handlePublishButtonPress}
                   disabled={!canCreateNewOffer()}
                 >
                   {canCreateNewOffer() &&
@@ -183,13 +202,6 @@ const MiPerfilEmpresa = () => {
                     {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
                   </Text>
                 </TouchableOpacity>
-                {drafts.length > 0 && (
-                    <TouchableOpacity onPress={() => router.push("/misofertas")}>
-                    <Text style={styles.limitMessage}>
-                      Haz Click Aquí para ver tus borradores
-                    </Text>
-                    </TouchableOpacity>
-                )}
 
               </View>
 
@@ -315,6 +327,12 @@ const MiPerfilEmpresa = () => {
         isVisible={successModalVisible}
         onClose={() => setSuccessModalVisible(false)}
         message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
+      />
+      <DraftModal
+        isVisible={showDraftsChoiceModal}
+        onClose={() => setShowDraftsChoiceModal(false)}
+        onViewDrafts={handleViewDrafts}
+        onCreateNew={handleCreateNew}
       />
     </ScrollView >
   );
