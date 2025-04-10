@@ -377,7 +377,7 @@ const MiPerfilEmpresa = () => {
           {/* Recent Truckers */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Camioneros Recientes</Text>
-            {camioneros.length === 0 ? (
+            {camioneros.filter(camionero => !(resenados.includes(camionero.userId))).length === 0 ? (
               <Text style={styles.emptyMessage}>No has trabajado con camioneros recientemente</Text>
             ) : (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>

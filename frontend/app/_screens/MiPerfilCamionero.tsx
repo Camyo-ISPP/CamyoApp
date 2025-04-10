@@ -268,7 +268,7 @@ const MiPerfilCamionero = () => {
                     <View style={styles.empresasSection}>
                         <Text style={styles.sectionTitle}>Empresas Recientes</Text>
 
-                        {empresasRecientes.length === 0 ? (
+                        {empresasRecientes.filter(empresa => !(resenados.includes(empresa.userId))).length === 0 ? (
                             <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
                         ) : (
                             empresasRecientes
