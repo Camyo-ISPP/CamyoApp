@@ -37,6 +37,7 @@ const MiPerfilEmpresa = () => {
   //const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
   const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
   const [resenados, setResenados] = useState([]);
+  const [selectedRating, setSelectedRating] = useState(0);
 
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -47,12 +48,12 @@ const MiPerfilEmpresa = () => {
     useCallback(() => {
       refreshSubscriptionLevel();
       fetchOffers();
-      fetchCamionerosResenados(); 
+      fetchCamionerosResenados();
     }, [])
   );
 
   useEffect(() => {
-   
+
     if (user?.id) {
       fetchResenas();
     }
@@ -387,6 +388,7 @@ const MiPerfilEmpresa = () => {
                           <TouchableOpacity
                             key={`star-${star}`}
                             onPress={() => {
+                              setSelectedRating(star); // Guarda la estrella seleccionada
                               setCamioneroAResenar(camionero);
                               setShowResenaModal(true);
                             }}
@@ -395,9 +397,17 @@ const MiPerfilEmpresa = () => {
                             activeOpacity={1}
                           >
                             <FontAwesome
-                              name={star <= hoverRating ? "star" : "star-o"}
+                              name={
+                                star <= (hoverRating || selectedRating) // Muestra rellena si está en hover O seleccionada
+                                  ? "star"
+                                  : "star-o"
+                              }
                               size={24}
-                              color={star <= hoverRating ? colors.primary : colors.primaryLight}
+                              color={
+                                star <= (hoverRating || selectedRating)
+                                  ? colors.primary
+                                  : colors.primaryLight
+                              }
                             />
                           </TouchableOpacity>
                         ))}
@@ -427,6 +437,7 @@ const MiPerfilEmpresa = () => {
                       key={star}
                       name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
                       size={24}
+
                       color={colors.primary}
                       style={styles.starIcon}
                     />
@@ -498,7 +509,9 @@ const MiPerfilEmpresa = () => {
         onClose={() => {
           setShowResenaModal(false);
           setCamioneroAResenar(null);
+          setSelectedRating(false);
         }}
+        initialRating={selectedRating}
         onSubmit={handleSubmitResenaWrapper}
         comentadorId={user?.userId}
         comentadoId={camioneroAResenar?.usuario?.id}
