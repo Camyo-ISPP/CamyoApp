@@ -184,11 +184,7 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(
 					new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
 		}
-		if (!camionero.getDni().equals(editRequest.getDni())
-				&& camioneroService.obtenerCamioneroPorDNI(editRequest.getDni()).isPresent()) {
-			return ResponseEntity.badRequest()
-					.body(new MessageResponse("El DNI '" + editRequest.getDni() + "' ya está asociado a otra cuenta."));
-		}
+
 		authService.editCamionero(editRequest, usuario, camionero);
 		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}

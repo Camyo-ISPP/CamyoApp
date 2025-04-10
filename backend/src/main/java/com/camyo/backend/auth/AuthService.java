@@ -114,7 +114,6 @@ public class AuthService {
 		}
 		usuarioService.guardarUsuarioSinEncode(usuario);
 
-		camionero.setDni(request.getDni());
 		camionero.setLicencias(request.getLicencias());
 		camionero.setDisponibilidad(request.getDisponibilidad());
 		camionero.setTieneCAP(request.getTieneCAP());
