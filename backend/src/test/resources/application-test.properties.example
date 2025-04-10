@@ -18,3 +18,5 @@ spring.jpa.show-sql=true
 # JWT Config
 camyo.app.jwtSecret=CAMYO_APP_JWT_SECRET_TEST
 camyo.app.jwtExpirationMs=86400000
+AES_KEY=your_secret_key_here
+AES_IV=your_secret_key_here

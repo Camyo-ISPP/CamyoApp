@@ -204,6 +204,7 @@ const MisOfertasEmpresa = () => {
 
     return (
         <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.webContainer}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Mis Ofertas</Text>
                 <Text style={styles.headerSubtitle}>Gestiona todas tus ofertas publicadas</Text>
@@ -254,7 +255,7 @@ const MisOfertasEmpresa = () => {
 
                 {renderOfferList()}
             </View>
-            <WebFooter />
+            </View>        <WebFooter />
         </ScrollView>
     );
 };
@@ -262,6 +263,12 @@ const styles = StyleSheet.create({
     scrollContainer: {
         flexGrow: 1,
         backgroundColor: "#ffffff",
+    },
+    webContainer: {
+        flex: 1,
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: 30,
     },
     loadingContainer: {
         flex: 1,
