@@ -86,7 +86,7 @@ public class PagoController {
                         }
                 };
 
-                if (pago.getCompra()==Compra.PATROCINAR && cliente.getAuthority().getAuthority()=="EMPRESA") {
+                if (pago.getCompra()==Compra.PATROCINAR) {
                         // Create a PaymentIntent and send its client secret to the client
                         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                                 .setAmount(499L)
@@ -103,7 +103,7 @@ public class PagoController {
 
                         secret = paymentIntent.getClientSecret();
 
-                } else if (suscripciones.contains(pago.getCompra()) && cliente.getAuthority().getAuthority()=="EMPRESA"){
+                } else if (suscripciones.contains(pago.getCompra()) ){
 
                         SubscriptionCreateParams.PaymentSettings paymentSettings = SubscriptionCreateParams.PaymentSettings
                                 .builder()
@@ -155,13 +155,12 @@ public class PagoController {
                 Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
                 PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
 
-                if (paymentIntent.getStatus().equals("succeeded") && suscripciones.contains(requestDto.getCompra()) &&  usuarioActual.getAuthority().getAuthority()=="EMPRESA") {
+                if (paymentIntent.getStatus().equals("succeeded") && suscripciones.contains(requestDto.getCompra())) {
 
                         suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), 9999);
                         return ResponseEntity.ok("Suscripción aplicada con éxito");
 
-                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra() && requestDto.getOfertaId() != null 
-                &&  usuarioActual.getAuthority().getAuthority()=="EMPRESA"){
+                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra() && requestDto.getOfertaId() != null){
                         // ofertaId puede ser null, por lo que la comprobación se realiza aquí
                         System.out.println( ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual));
                        
