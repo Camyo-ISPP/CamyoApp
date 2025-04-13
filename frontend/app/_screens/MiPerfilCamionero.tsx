@@ -219,6 +219,17 @@ const MiPerfilCamionero = () => {
     };
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <View style={styles.pageContainer}>
+        {/* Left Ad */}
+        {user?.ads && (
+            <View style={styles.adContainer}>
+                <Image
+                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your left ad image path
+                    style={styles.adImage}
+                    resizeMode="cover"
+                />
+            </View>
+        )}
             <View style={styles.container}>
                 <View style={styles.card}>
                     <View style={styles.rowContainer}>
@@ -419,15 +430,7 @@ const MiPerfilCamionero = () => {
                     </View>
 
                 </View>
-    
-                {/* Right Ad Placeholder */}
-                <View style={styles.adContainer}>
-                    <Image
-                        source={require("../../assets/images/truck_mockup_ad.jpg")}
-                        style={styles.adImage}
-                        resizeMode="cover"
-                    />
-                </View>
+
             </View>
     
 
@@ -461,6 +464,17 @@ const MiPerfilCamionero = () => {
                 onClose={() => setSuccessModalVisible(false)}
                 message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
             />
+            {/* Right Ad */}
+        {user?.ads && (
+            <View style={styles.adContainer}>
+                <Image
+                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your right ad image path
+                    style={styles.adImage}
+                    resizeMode="cover"
+                />
+            </View>
+        )}
+    </View>
         </ScrollView >
     );
 };
