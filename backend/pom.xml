@@ -99,6 +99,12 @@
             <artifactId>stripe-java</artifactId>
             <version>28.4.0</version>
         </dependency>
+		<dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>5.2.0</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 	<build>

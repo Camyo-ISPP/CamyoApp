@@ -1,6 +1,7 @@
 import { useRootNavigationState } from "expo-router";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text } from "react-native";
 import { useEffect } from "react";
+import MapLoader from "@/app/_components/MapLoader";
 
 const withNavigationGuard = (Component: React.ComponentType<any>) => {
   return function WrappedComponent(props: any) {
@@ -14,8 +15,7 @@ const withNavigationGuard = (Component: React.ComponentType<any>) => {
     if (!navigationState?.key) {
       return (
         <View>
-          <ActivityIndicator size="large" />
-          <Text>Cargando navegación...</Text>
+          <MapLoader />
         </View>
       );
     }

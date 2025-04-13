@@ -59,12 +59,21 @@ public class PagoController {
                 Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 String secret = null;
 
+                if (pago.getCompra() == null) {
+                        return new ResponseEntity<>("No hay ningún tipo de compra seleccionada", HttpStatus.BAD_REQUEST);
+                }
+
+
                 // Start by finding an existing customer record from Stripe or creating a new
                 // one if needed
                 Usuario cliente = usuarioService.obtenerUsuarioActual();
                 Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
 
                 String precio_id = null;
+
+                // Integer empresaId = empresaService.obtenerEmpresaPorUsuario(cliente.getId()).get().getId();
+                // suscripcionService.obtenerSuscripcionActiva(empresaId);
+
                 switch (pago.getCompra()) {
                         case BASICO -> {
                                 precio_id="price_1R7E7wIRKHnhkuSfhBa5XZVS";
@@ -94,7 +103,7 @@ public class PagoController {
 
                         secret = paymentIntent.getClientSecret();
 
-                } else if (suscripciones.contains(pago.getCompra())){
+                } else if (suscripciones.contains(pago.getCompra()) ){
 
                         SubscriptionCreateParams.PaymentSettings paymentSettings = SubscriptionCreateParams.PaymentSettings
                                 .builder()
@@ -117,7 +126,7 @@ public class PagoController {
 
                         secret = subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret();
 
-                } else if (pago.getCompra()==Compra.ELIMINAR_ANUNCIOS) {
+                } /*  else if (pago.getCompra()==Compra.ELIMINAR_ANUNCIOS) {
                         // Create a PaymentIntent and send its client secret to the client
                         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                                 .setAmount(499L)
@@ -133,8 +142,8 @@ public class PagoController {
                         PaymentIntent paymentIntent = PaymentIntent.create(params);
 
                         secret = paymentIntent.getClientSecret();
-                } else {
-                        return new ResponseEntity<>("Este tipo de compra no existe", HttpStatus.FORBIDDEN);
+                }*/  else {
+                        return new ResponseEntity<>("Compra inválida", HttpStatus.BAD_REQUEST);
                 }
                 return new ResponseEntity<>(secret, HttpStatus.OK);
         }
@@ -153,17 +162,19 @@ public class PagoController {
 
                 } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra() && requestDto.getOfertaId() != null){
                         // ofertaId puede ser null, por lo que la comprobación se realiza aquí
+                        System.out.println( ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual));
+                       
                         if (ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual)) {
                                 ofertaService.patrocinarOferta(requestDto.getOfertaId());
-                                return ResponseEntity.ok("Compra aplicada con éxito");
+                                return ResponseEntity.ok("Patrocinio aplicado con éxito");
                         }
                         
-                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.ELIMINAR_ANUNCIOS == requestDto.getCompra()){
+                } /*else if (paymentIntent.getStatus().equals("succeeded") && Compra.ELIMINAR_ANUNCIOS == requestDto.getCompra()){
                         Integer userId = usuarioService.obtenerUsuarioActual().getId();
                         usuarioService.eliminarAnuncios(userId);
                         return ResponseEntity.ok("Anuncios eliminados correctamente");
-                }
-                return ResponseEntity.badRequest().build();
+                }*/
+                return ResponseEntity.badRequest().body("Acción denegada");
                 
         }
 

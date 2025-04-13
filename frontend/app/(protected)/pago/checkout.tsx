@@ -1,4 +1,4 @@
-import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Linking} from "react-native";
+import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Linking} from "react-native";
 import {useContext, useEffect, useState} from "react";
 import CartItem, {ItemData} from "../../_components/CartItem";
 import TotalFooter from "../../_components/TotalFooter";
@@ -12,6 +12,7 @@ import { Products } from "../../../utils/productDetails";
 import colors from "@/assets/styles/colors";
 import globalStyles from "@/assets/styles/globalStyles";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MapLoader from "@/app/_components/MapLoader";
 
 function IntegratedCheckout() {
     const { id, setId, ofertaId, setOfertaId } = usePayment();
@@ -165,7 +166,6 @@ const CheckoutForm = (transactionClientSecret: any) => {
             redirect: "if_required",
         })
         if (result.error) {
-            console.log(result.error.message);
             setError(result.error.message);
             setLoading(false);
         }
@@ -213,7 +213,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
                   style={[styles.payButton, loading && styles.payButtonDisabled]}
               >
                   {loading ? (
-                      <ActivityIndicator color={colors.white} />
+                      <MapLoader />
                   ) : (
                       <>
                           <Text style={styles.payButtonText}>Confirmar pago</Text>

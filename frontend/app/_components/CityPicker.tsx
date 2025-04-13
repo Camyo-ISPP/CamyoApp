@@ -1,15 +1,18 @@
 // Componente independiente CityPicker.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import colors from '@/assets/styles/colors';
-
 
 const CityPicker = ({ label, field, icon, formData, handleInputChange }) => {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
-
+  
+  useEffect(() => {
+    setSearchText(formData[field] ?? "");
+  }, [formData[field]]);
+  
   // Función para buscar ciudades con Nominatim
   const searchCities = async (query) => {
     if (query.length < 3) return;
@@ -99,7 +102,7 @@ const CityPicker = ({ label, field, icon, formData, handleInputChange }) => {
           }}
         />
         
-        {loading && <ActivityIndicator size="small" color={colors.primary} />}
+        {loading && <ActivityIndicator size="large" color={colors.primary} />}
       </View>
       
       {cities.length > 0 && (

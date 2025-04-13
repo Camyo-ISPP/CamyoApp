@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Linking, StyleSheet, ActivityIndicator, TouchableOpacity, ImageBackground, Dimensions } from "react-native";
+import { View, Text, ScrollView, Linking, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from "react-native";
 import { FontAwesome, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from '@/assets/styles/colors';
@@ -9,6 +9,7 @@ import { Image } from "react-native";
 import defaultImage from "@/assets/images/empresa.jpg";
 import WebFooter from "../_components/_layout/WebFooter";
 import { LinearGradient } from "expo-linear-gradient";
+import MapLoader from "../_components/MapLoader";
 
 const { width } = Dimensions.get('window');
 
@@ -50,7 +51,7 @@ const EmpresasLista = () => {
 
   if (loading) return (
     <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color={colors.primary} />
+      <MapLoader />
     </View>
   );
 
@@ -219,8 +220,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.lightGray,
-  },
+    backgroundColor: colors.white
+},
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
