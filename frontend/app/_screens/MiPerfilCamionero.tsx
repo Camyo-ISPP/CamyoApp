@@ -214,7 +214,7 @@ const MiPerfilCamionero = () => {
                     <Image
                         source={require("../../assets/images/truck_mockup_ad.jpg")}
                         style={styles.adImage}
-                        resizeMode="contain"
+                        resizeMode="cover"
                     />
                 </View>
             </View>
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     adContainer: {
-        width: "15%",
+        width: "25%",
         minWidth: 100,
         backgroundColor: colors.lightGray,
         alignItems: "center",

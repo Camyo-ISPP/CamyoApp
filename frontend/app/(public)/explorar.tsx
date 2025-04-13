@@ -10,10 +10,11 @@ import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 import WebFooter from "../_components/_layout/WebFooter";
 import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
+    const { user } = useAuth();
     const [data, setData] = useState<any[]>([]);
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -302,6 +303,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                             </View>
                         </View>
 
+                        
+
                         {/* Placeholder cuando no hay tipo seleccionado */}
                         {!selectedOfertaType && (
                             <View style={styles.emptyFilterState}>
@@ -350,6 +353,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 }}
                                             />
                                         </View>
+                                        
 
                                         {/* Experience Filter */}
                                         <View style={styles.filterGroup}>
@@ -575,16 +579,47 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                         </View>
                                     </View>
                                 )}
+                                
                             </View>
+                            
                         )}
+                        
                     </View>
+                    {/* Ad Section - Wrap ads in a column */}
+                    {user?.ads && (
+                        <View style={styles.adsContainer}>
+                            {/* First Ad */}
+                            <View style={styles.adContainer}>
+                                <Image
+                                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+                                    style={styles.adImage}
+                                    resizeMode="contain"
+                                />
+                            </View>
+
+                            {/* Second Ad */}
+                            <View style={styles.adContainer}>
+                                <Image
+                                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with another ad image path
+                                    style={styles.adImage}
+                                    resizeMode="contain"
+                                />
+                            </View>
+
+                            {/* Add more ads as needed */}
+                        </View>
+                    )}
+                        
+                    
 
                     {/* Offer Cards Section */}
                     <View style={styles.offersSection}>
                         <ListadoOfertasPublico offers={filteredData} showPromoted={true} />
                     </View>
                 </View>
+                
             </View>
+            
             <WebFooter />
         </ScrollView>
     );
@@ -958,5 +993,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         lineHeight: 24,
     },
-    contenedorOfertas: { width: '100%' }
+    contenedorOfertas: { width: '100%' },
+    adsContainer: {
+        marginTop: 20,
+        justifyContent: "flex-start", // Stack ads vertically
+        gap: 20, // Add spacing between ads
+        position: "relative",
+        right: 375,
+        top: 500,
+        width: "10%",
+    },
+    adContainer: {
+        width: "10%", // Adjust width as needed
+   
+    },
+    adImage: {
+        width: 408, // Adjust width as needed
+        height: 612, // Adjust height as needed
+        borderRadius: 10,
+    },
 });

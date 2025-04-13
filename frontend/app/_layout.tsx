@@ -4,9 +4,12 @@ import CamyoWebNavBar from "./_components/_layout/CamyoNavBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
+import { useAuth } from "../contexts/AuthContext";
+import { PopupAdProvider } from "./_components/PopUpAd";
 
 function RootLayout() {
   const segments = useSegments();
+  const { user } = useAuth();
  
   useEffect(() => {
       const pageTitles: Record<string, string> = {
@@ -39,6 +42,7 @@ function RootLayout() {
   }, [segments]);
 
   return (
+    <PopupAdProvider user={user}>
       <>
         <CamyoWebNavBar
           onSearch={(query: string) => {
@@ -83,7 +87,7 @@ function RootLayout() {
       </SubscriptionProvider>
       </PaymentProvider>
     </>
-
+    </PopupAdProvider>
   );
 }
 

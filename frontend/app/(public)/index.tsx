@@ -200,6 +200,15 @@ export default function Index() {
 
           {/* Stats Section */}
           <StatsSection />
+          {user?.ads && (
+          <View style={styles.adContainer}>
+            <Image
+              source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+              style={styles.adImage}
+              resizeMode="cover"
+            />
+          </View>
+        )}
 
           {/* Ofertas Section */}
           <View style={styles.section}>
@@ -720,5 +729,14 @@ const styles = StyleSheet.create({
   searchIcon: {
     color: colors.primary,
     marginRight: 10,
+  },
+  adContainer: {
+    marginTop: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  adImage: {
+    width: "100%", // Adjust width as needed
+    borderRadius: 10,
   },
 });
