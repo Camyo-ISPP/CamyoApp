@@ -3,7 +3,10 @@ package com.camyo.backend.Auth;
 import java.time.LocalDate;
 import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -25,6 +28,8 @@ import com.camyo.backend.camionero.Licencia;
 import com.camyo.backend.camionero.Tarjetas;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.exceptions.InvalidNifException;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesService;
@@ -68,7 +73,7 @@ class AuthServiceTest {
     Authorities empresaAuth;
 
 
-    @BeforeAll
+    @BeforeEach
     @Transactional
     void setup(){
         camioneroAuth = new Authorities();
@@ -141,6 +146,30 @@ class AuthServiceTest {
 
     @Test
     @Transactional(readOnly = false)
+    void noDebeCrearCamioneroConDniInvalido(){
+        //Longitud distinta a 9
+        signupRequestCamionero.setDni("1234567891015");
+        assertThrows(InvalidNifException.class, () -> authService.createCamionero(signupRequestCamionero));
+
+        //Letra incorrecta
+        signupRequestCamionero.setDni("23456789A");
+        assertThrows(InvalidNifException.class, () -> authService.createCamionero(signupRequestCamionero));
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    void noDebeCrearCamioneroConTelefonoInvalido(){
+        //Longitud distinta a 9
+        signupRequestCamionero.setTelefono("1234567891015");
+        assertThrows(InvalidPhoneNumberException.class, () -> authService.createCamionero(signupRequestCamionero));
+
+        //Primeros números incorrectos
+        signupRequestCamionero.setTelefono("012345678");
+        assertThrows(InvalidPhoneNumberException.class, () -> authService.createCamionero(signupRequestCamionero));
+    }
+
+    @Test
+    @Transactional(readOnly = false)
     void debeCrearEmpresaSinDatosOpcionales(){
         assertDoesNotThrow(() -> authService.createEmpresa(signupRequestEmpresa));
     }
@@ -149,6 +178,30 @@ class AuthServiceTest {
     void debeCrearEmpresaConDatosOpcionales(){
         signupRequestEmpresa.setDescripcion("Descripción");
         assertDoesNotThrow(() -> authService.createEmpresa(signupRequestEmpresa));
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    void noDebeCrearEmpresaConNifInvalido(){
+        //Longitud distinta a 9
+        signupRequestEmpresa.setNif("1234567891015");
+        assertThrows(InvalidNifException.class, () -> authService.createEmpresa(signupRequestEmpresa));
+
+        //Letra incorrecta
+        signupRequestEmpresa.setNif("23456789A");
+        assertThrows(InvalidNifException.class, () -> authService.createEmpresa(signupRequestEmpresa));
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    void noDebeCrearEmpresaConTelefonoInvalido(){
+        //Longitud distinta a 9
+        signupRequestEmpresa.setTelefono("1234567891015");
+        assertThrows(InvalidPhoneNumberException.class, () -> authService.createEmpresa(signupRequestEmpresa));
+
+        //Primeros números incorrectos
+        signupRequestEmpresa.setTelefono("012345678");
+        assertThrows(InvalidPhoneNumberException.class, () -> authService.createEmpresa(signupRequestEmpresa));
     }
 
     @Test
