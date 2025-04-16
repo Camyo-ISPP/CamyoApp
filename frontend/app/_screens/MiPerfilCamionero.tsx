@@ -14,6 +14,7 @@ import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
 
+
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -147,7 +148,7 @@ const MiPerfilCamionero = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
-    console.log(user.ads)
+    
     useEffect(() => {
         if (user?.userId) {
             fetchCamionero();
@@ -217,6 +218,13 @@ const MiPerfilCamionero = () => {
             console.error("Error en el proceso completo:", error);
         }
     };
+
+    const handleRemoveAds = () => {
+        setId("ELIMINAR_ANUNCIOS");
+        router.push("/pago/checkout");
+      }
+
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.pageContainer}>
@@ -249,7 +257,23 @@ const MiPerfilCamionero = () => {
                             <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
                             <Text style={styles.description}>{user.descripcion}</Text>
                         </View>
+                        
                     </View>
+                     {/* Botón de eliminar anuncios */}
+                     {user.ads ?
+                         <View>
+                             <View style={styles.separator} />
+                             <View>
+                                 <TouchableOpacity
+                                     style={styles.mejorarPlanButton}
+                                     onPress={handleRemoveAds}
+                                 >
+                                     <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                                     <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                                 </TouchableOpacity>
+                             </View>
+                         </View>
+                         : <></>}
                     <View style={styles.separator} />
 
                     <View style={styles.downContainer}>
