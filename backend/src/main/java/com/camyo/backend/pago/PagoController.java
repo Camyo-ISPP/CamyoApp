@@ -89,7 +89,7 @@ public class PagoController {
                 if (pago.getCompra()==Compra.PATROCINAR) {
                         // Create a PaymentIntent and send its client secret to the client
                         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                                .setAmount(499L)
+                                .setAmount(999L)
                                 .setCurrency("eur")
                                 .setCustomer(clienteStripe.getId())
                                 .setAutomaticPaymentMethods(
@@ -103,7 +103,7 @@ public class PagoController {
 
                         secret = paymentIntent.getClientSecret();
 
-                } else if (suscripciones.contains(pago.getCompra()) ){
+                } else if (suscripciones.contains(pago.getCompra())){
 
                         SubscriptionCreateParams.PaymentSettings paymentSettings = SubscriptionCreateParams.PaymentSettings
                                 .builder()
@@ -126,7 +126,7 @@ public class PagoController {
 
                         secret = subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret();
 
-                } /*  else if (pago.getCompra()==Compra.ELIMINAR_ANUNCIOS) {
+                }  else if (pago.getCompra()==Compra.ELIMINAR_ANUNCIOS) {
                         // Create a PaymentIntent and send its client secret to the client
                         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                                 .setAmount(499L)
@@ -142,7 +142,7 @@ public class PagoController {
                         PaymentIntent paymentIntent = PaymentIntent.create(params);
 
                         secret = paymentIntent.getClientSecret();
-                }*/  else {
+                }  else {
                         return new ResponseEntity<>("Compra inválida", HttpStatus.BAD_REQUEST);
                 }
                 return new ResponseEntity<>(secret, HttpStatus.OK);
@@ -169,11 +169,11 @@ public class PagoController {
                                 return ResponseEntity.ok("Patrocinio aplicado con éxito");
                         }
                         
-                } /*else if (paymentIntent.getStatus().equals("succeeded") && Compra.ELIMINAR_ANUNCIOS == requestDto.getCompra()){
+                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.ELIMINAR_ANUNCIOS == requestDto.getCompra()){
                         Integer userId = usuarioService.obtenerUsuarioActual().getId();
                         usuarioService.eliminarAnuncios(userId);
                         return ResponseEntity.ok("Anuncios eliminados correctamente");
-                }*/
+                }
                 return ResponseEntity.badRequest().body("Acción denegada");
                 
         }
