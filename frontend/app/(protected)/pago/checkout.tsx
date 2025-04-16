@@ -144,7 +144,7 @@ function IntegratedCheckout() {
 
 const CheckoutForm = (transactionClientSecret: any) => {
     const stripe = useStripe();
-    const { user, userToken } = useAuth();
+    const { user, userToken, updateUser } = useAuth();
     const { setId, ofertaId } = usePayment();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
@@ -185,6 +185,10 @@ const CheckoutForm = (transactionClientSecret: any) => {
             })
                 .then(res => {
                     if (res.status == 200) {
+                        res.json().then(data => {
+                            user.ads = data.ads
+                            updateUser(user)
+                        })
                         setSuccessModalVisible(true);
                         setTimeout(() => {
                                 setSuccessModalVisible(false);

@@ -149,7 +149,7 @@ public class PagoController {
         }
 
         @PostMapping("/apply_compra")
-        public ResponseEntity<String> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
+        public ResponseEntity<?> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
 
                 Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
@@ -158,7 +158,7 @@ public class PagoController {
                 if (paymentIntent.getStatus().equals("succeeded") && suscripciones.contains(requestDto.getCompra())) {
 
                         suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), 9999);
-                        return ResponseEntity.ok("Suscripción aplicada con éxito");
+                        return ResponseEntity.ok(usuarioService.obtenerUsuarioActual());
 
                 } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra() && requestDto.getOfertaId() != null){
                         // ofertaId puede ser null, por lo que la comprobación se realiza aquí
@@ -166,13 +166,13 @@ public class PagoController {
                        
                         if (ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual)) {
                                 ofertaService.patrocinarOferta(requestDto.getOfertaId());
-                                return ResponseEntity.ok("Patrocinio aplicado con éxito");
+                                return ResponseEntity.ok(usuarioService.obtenerUsuarioActual());
                         }
                         
                 } else if (paymentIntent.getStatus().equals("succeeded") && Compra.ELIMINAR_ANUNCIOS == requestDto.getCompra()){
                         Integer userId = usuarioService.obtenerUsuarioActual().getId();
                         usuarioService.eliminarAnuncios(userId);
-                        return ResponseEntity.ok("Anuncios eliminados correctamente");
+                        return ResponseEntity.ok(usuarioService.obtenerUsuarioActual());
                 }
                 return ResponseEntity.badRequest().body("Acción denegada");
                 
