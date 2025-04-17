@@ -135,7 +135,7 @@ public class AuthController {
 		} catch (InvalidPhoneNumberException e) {
             return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
 		}
-		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
+		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
 	}
 
 	@Operation(summary = "Registrar empresa", description = "Registra una nueva empresa en el sistema.")
@@ -161,9 +161,9 @@ public class AuthController {
 		try {
 			authService.createEmpresa(signUpRequest);
 		} catch (InvalidNifException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' es inválido."));
+            	return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' es inválido."));
 		} catch (InvalidPhoneNumberException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
+            	return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
 		}
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
 	}
@@ -199,8 +199,19 @@ public class AuthController {
 					new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
 		}
 
-		authService.editCamionero(editRequest, usuario, camionero);
-		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
+		try {
+			authService.editCamionero(editRequest, usuario, camionero);			
+		} catch (InvalidPhoneNumberException e) { // No hace falta comprobar InvalidNifException porque no se puede editar el DNI
+			return ResponseEntity.badRequest().body( 
+					new MessageResponse("El número de teléfono '" + editRequest.getTelefono() + "' no es válido."));
+		} catch (DataAccessException e) {												//Atrapa los demás errores genéricos, por si acaso
+			return ResponseEntity.badRequest().body(
+					new MessageResponse("Error al acceder a los datos: " + e.getMessage()));
+		} catch (Exception e) { //Atrapa los demás errores genéricos, por si acaso
+			return ResponseEntity.badRequest().body(
+					new MessageResponse("Error en la edición del camionero: " + e.getMessage()));
+		}
+		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}
 
 	@Operation(summary = "Editar usuario empresa", description = "Edita los datos de un usuario y su empresa.")
@@ -244,6 +255,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' es inválido."));
 		} catch (InvalidPhoneNumberException e) {
             return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + editRequest.getTelefono() + "' es inválido."));
+		} catch (DataAccessException e) {												
+			return ResponseEntity.badRequest().body(new MessageResponse("Error al acceder a los datos: " + e.getMessage()));
+		} catch (Exception e) {	//Atrapa los demás errores genéricos, por si acaso
+            return ResponseEntity.badRequest().body(new MessageResponse("Error en la edición de la empresa: " + e.getMessage()));
 		}
 		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}

@@ -23,6 +23,7 @@ import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesService;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
+import com.camyo.backend.util.Validators;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -49,6 +50,9 @@ public class AuthService {
 
 	@Transactional
 	public void createCamionero(@Valid SignupRequestCamionero request) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
+		Validators.comprobarNif(request.getDni());
+		Validators.comprobarTelefono(request.getTelefono());
+
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.getUsername());
 		usuario.setPassword(request.getPassword());
@@ -82,6 +86,9 @@ public class AuthService {
 
 	@Transactional
 	public void createEmpresa(@Valid SignupRequestEmpresa request) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
+		Validators.comprobarNif(request.getNif());
+		Validators.comprobarTelefono(request.getTelefono());
+		
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.getUsername());
 		usuario.setPassword(request.getPassword());

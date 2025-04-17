@@ -1,6 +1,7 @@
 package com.camyo.backend.Camionero;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,13 +25,13 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-
 import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.camionero.Disponibilidad;
 import com.camyo.backend.camionero.Licencia;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.oferta.Oferta;
+import com.camyo.backend.oferta.OfertaRepository;
 import com.camyo.backend.resena.Resena;
 import com.camyo.backend.resena.ResenaService;
 import com.camyo.backend.usuario.Authorities;
@@ -64,6 +67,9 @@ class CamioneroServiceTests {
   */ 
     static List<Integer> camioneroIds = List.of();
     static List<Integer> usuarioIds = List.of(); 
+
+    private Camionero c1;
+    private Camionero c2;
 
     @BeforeAll
     @Transactional
@@ -140,7 +146,7 @@ class CamioneroServiceTests {
         * Creamos los usuarios camioneros 
       */ 
 
-        Camionero c1 = new Camionero();
+        c1 = new Camionero();
         c1.setExperiencia(10);
         c1.setDni("VUmZsSSWmTQDw7V42LJm5w==");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
@@ -150,7 +156,7 @@ class CamioneroServiceTests {
         c1.setUsuario(u1);
         assertDoesNotThrow(() -> camioneroService.guardarCamionero(c1));
 
-        Camionero c2 = new Camionero();
+        c2 = new Camionero();
         c2.setExperiencia(10);
         c2.setDni("q9lJi9ibG2ayvdvh4vjoiQ==");
         c2.setLicencias(Set.of(Licencia.C, Licencia.C_E));
@@ -224,9 +230,8 @@ class CamioneroServiceTests {
     @ValueSource(strings = {"", " ", "21436587F"})
     @Transactional(readOnly = true)
     void noDebeObtenerCamioneroPorDNI(String dni){
-        assertTrue(camioneroService.obtenerCamioneroPorDNI(dni).isEmpty());;
+        assertTrue(camioneroService.obtenerCamioneroPorDNI(dni).isEmpty());
     }
-
 
     @Test
     @Transactional
@@ -261,5 +266,40 @@ class CamioneroServiceTests {
     @Transactional(readOnly = true)
     void debeObtenerValoracionMedia(){
         assertEquals(4.0, camioneroService.obtenerValoracionMedia(camioneroIds.get(0)));
+    }
+
+    @Test
+    @Transactional
+    void debeEliminarCamioneroDeOfertas(){
+      Oferta o1 = new Oferta();
+      o1.setAplicados(new HashSet<>(Set.of(c1,c2)));
+      o1.setTitulo("test1");
+      o1.setNotas("test1");
+      o1.setLocalizacion("test1");
+
+      Oferta o2 = new Oferta();
+      o2.setAplicados(new HashSet<>(Set.of(c1,c2)));
+      o2.setTitulo("test2");
+      o2.setNotas("test2");
+      o2.setLocalizacion("test2");
+
+      List<Oferta> aplicadas = List.of(o1, o2);
+
+      Oferta o3 = new Oferta();
+      o3.setRechazados(new HashSet<>(Set.of(c1,c2)));
+      o3.setTitulo("test3");
+      o3.setNotas("test3");
+      o3.setLocalizacion("test3");
+
+      Oferta o4 = new Oferta();
+      o4.setRechazados(new HashSet<>(Set.of(c1,c2)));
+      o4.setTitulo("test4");
+      o4.setNotas("test4");
+      o4.setLocalizacion("test4");
+      
+      List<Oferta> rechazadas = List.of(o3, o4);
+
+      assertDoesNotThrow(() -> camioneroService.eliminarCamioneroDeOfertas(c1, aplicadas, rechazadas));
+
     }
 }
