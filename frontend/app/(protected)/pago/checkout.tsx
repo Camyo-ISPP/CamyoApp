@@ -1,4 +1,4 @@
-import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Linking} from "react-native";
+import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator} from "react-native";
 import {useContext, useEffect, useState} from "react";
 import CartItem, {ItemData} from "../../_components/CartItem";
 import TotalFooter from "../../_components/TotalFooter";
@@ -213,7 +213,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
                   style={[styles.payButton, loading && styles.payButtonDisabled]}
               >
                   {loading ? (
-                      <MapLoader />
+                      <ActivityIndicator size="large" color={colors.primary} />
                   ) : (
                       <>
                           <Text style={styles.payButtonText}>Confirmar pago</Text>
