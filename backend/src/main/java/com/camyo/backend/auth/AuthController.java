@@ -34,6 +34,8 @@ import com.camyo.backend.configuration.jwt.JwtUtils;
 import com.camyo.backend.configuration.services.UserDetailsImpl;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.exceptions.InvalidNifException;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
@@ -48,7 +50,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/auth")
 @Tag(name = "Autenticación", description = "API de autenticación")
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
+	private final AuthenticationManager authenticationManager;
 	private final UsuarioService usuarioService;
 	private final JwtUtils jwtUtils;
 	private final AuthService authService;
@@ -66,8 +68,7 @@ public class AuthController {
 		this.camioneroService = camioneroService;
 	}
 
-
-    @Operation(summary = "Iniciar sesión", description = "Autentica a un usuario y devuelve un token JWT.")
+	@Operation(summary = "Iniciar sesión", description = "Autentica a un usuario y devuelve un token JWT.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Autenticación exitosa"),
         @ApiResponse(responseCode = "401", description = "Credenciales incorrectas")
@@ -75,143 +76,176 @@ public class AuthController {
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		try {
+			if (!usuarioService.existeUsuarioPorUsername(loginRequest.getUsername())) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body("El usuario '" + loginRequest.getUsername() + "' no está registrado.");
+			}
+
 			Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-	
+
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String jwt = jwtUtils.generateJwtToken(authentication);
-	
+
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 			List<String> roles = userDetails.getAuthorities().stream()
 				.map(item -> item.getAuthority())
 				.collect(Collectors.toList());
-	
+
 			return ResponseEntity.ok().body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
 		} catch (BadCredentialsException exception) {
-			return new ResponseEntity<String>("Credenciales incorrectas!", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>("Credenciales incorrectas!", HttpStatus.UNAUTHORIZED);
 		}
 	}
 
 	@Operation(summary = "Validar token JWT", description = "Verifica si un token JWT es válido.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Token válido o inválido")
-    })
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Token válido o inválido")
+	})
 	@GetMapping("/validate")
 	public ResponseEntity<Boolean> validateToken(@RequestParam String token) {
 		Boolean isValid = jwtUtils.validateJwtToken(token);
 		return ResponseEntity.ok(isValid);
 	}
-	
+
 	@Operation(summary = "Registrar camionero", description = "Registra un nuevo camionero en el sistema.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Registro existoso"),
-        @ApiResponse(responseCode = "400", description = "Error en el registro")
-    })
-	@PostMapping("/signup/camionero")	
-	public ResponseEntity<MessageResponse> registerCamionero(@Valid @RequestBody SignupRequestCamionero signUpRequest) throws DataAccessException, IOException {
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Registro existoso"),
+			@ApiResponse(responseCode = "400", description = "Error en el registro")
+	})
+	@PostMapping("/signup/camionero")
+	public ResponseEntity<MessageResponse> registerCamionero(@Valid @RequestBody SignupRequestCamionero signUpRequest)
+			throws DataAccessException, IOException {
 		if (usuarioService.existeUsuarioPorUsername(signUpRequest.getUsername()).equals(true)) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El nombre de usuario '" + signUpRequest.getUsername() + "' ya está en uso. Por favor, elige otro."));
+			return ResponseEntity.badRequest().body(new MessageResponse("El nombre de usuario '"
+					+ signUpRequest.getUsername() + "' ya está en uso. Por favor, elige otro."));
 		}
 		if (usuarioService.existeUsuarioPorEmail(signUpRequest.getEmail()).equals(true)) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + signUpRequest.getEmail() + "' ya está registrado."));
+			return ResponseEntity.badRequest().body(new MessageResponse(
+					"El correo electrónico '" + signUpRequest.getEmail() + "' ya está registrado."));
 		}
 		if (camioneroService.obtenerCamioneroPorDNI(signUpRequest.getDni()).isPresent()) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' ya está asociado a otra cuenta."));
+			return ResponseEntity.badRequest().body(
+					new MessageResponse("El DNI '" + signUpRequest.getDni() + "' ya está asociado a otra cuenta."));
 		}
-		authService.createCamionero(signUpRequest);
+		try {
+			authService.createCamionero(signUpRequest);
+		} catch (InvalidNifException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + signUpRequest.getDni() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
+		}
 		return ResponseEntity.ok(new MessageResponse("Registro existoso!"));
 	}
 
 	@Operation(summary = "Registrar empresa", description = "Registra una nueva empresa en el sistema.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Registro exitoso"),
-        @ApiResponse(responseCode = "400", description = "Error en el registro")
-    })
-	@PostMapping("/signup/empresa")	
-	public ResponseEntity<MessageResponse> registerEmpresa(@Valid @RequestBody SignupRequestEmpresa signUpRequest) throws DataAccessException, IOException {
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Registro exitoso"),
+			@ApiResponse(responseCode = "400", description = "Error en el registro")
+	})
+	@PostMapping("/signup/empresa")
+	public ResponseEntity<MessageResponse> registerEmpresa(@Valid @RequestBody SignupRequestEmpresa signUpRequest)
+			throws DataAccessException, IOException {
 		if (usuarioService.existeUsuarioPorUsername(signUpRequest.getUsername()).equals(true)) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El nombre de usuario '" + signUpRequest.getUsername() + "' ya está en uso. Por favor, elige otro."));
+			return ResponseEntity.badRequest().body(new MessageResponse("El nombre de usuario '"
+					+ signUpRequest.getUsername() + "' ya está en uso. Por favor, elige otro."));
 		}
-        if (usuarioService.existeUsuarioPorEmail(signUpRequest.getEmail()).equals(true)) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + signUpRequest.getEmail() + "' ya está registrado."));
+		if (usuarioService.existeUsuarioPorEmail(signUpRequest.getEmail()).equals(true)) {
+			return ResponseEntity.badRequest().body(new MessageResponse(
+					"El correo electrónico '" + signUpRequest.getEmail() + "' ya está registrado."));
 		}
 		if (empresaService.obtenerEmpresaPorNif(signUpRequest.getNif()).isPresent()) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' ya está registrado."));
+			return ResponseEntity.badRequest()
+					.body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' ya está registrado."));
 		}
-		authService.createEmpresa(signUpRequest);
+		try {
+			authService.createEmpresa(signUpRequest);
+		} catch (InvalidNifException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + signUpRequest.getNif() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + signUpRequest.getTelefono() + "' es inválido."));
+		}
 		return ResponseEntity.ok(new MessageResponse("Registro exitoso!"));
 	}
 
 	@Operation(summary = "Editar usuario camionero", description = "Edita los datos de un usuario y su camionero.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Edición existosa"),
-		@ApiResponse(responseCode = "403", description = "Acceso restringido"),
-        @ApiResponse(responseCode = "400", description = "Error en la edición")
-    })
-	@PutMapping("/edit/camionero")	
-	public ResponseEntity<MessageResponse> editCamionero(@Valid @RequestBody EditRequestCamionero editRequest) throws DataAccessException, IOException {
-        Usuario usuario = null;
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Edición existosa"),
+			@ApiResponse(responseCode = "403", description = "Acceso restringido"),
+			@ApiResponse(responseCode = "400", description = "Error en la edición")
+	})
+	@PutMapping("/edit/camionero")
+	public ResponseEntity<MessageResponse> editCamionero(@Valid @RequestBody EditRequestCamionero editRequest)
+			throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
+		Usuario usuario = null;
 		try {
 			usuario = usuarioService.obtenerUsuarioActual();
 		} catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(
-                new MessageResponse("Debe iniciar sesión para editar su usuario."), 
-                HttpStatus.FORBIDDEN
-            );
-        }
-
-		if(!usuario.getAuthority().getAuthority().equals("CAMIONERO")){
 			return new ResponseEntity<>(
-				new MessageResponse("Debe iniciar sesión con un camionero para editar su usuario."), 
-				HttpStatus.FORBIDDEN
-			);
+					new MessageResponse("Debe iniciar sesión para editar su usuario."),
+					HttpStatus.FORBIDDEN);
+		}
+
+		if (!usuario.getAuthority().getAuthority().equals("CAMIONERO")) {
+			return new ResponseEntity<>(
+					new MessageResponse("Debe iniciar sesión con un camionero para editar su usuario."),
+					HttpStatus.FORBIDDEN);
 		}
 		Camionero camionero = camioneroService.obtenerCamioneroPorUsuario(usuario.getId());
 
-		if (!usuario.getEmail().equals(editRequest.getEmail()) && usuarioService.existeUsuarioPorEmail(editRequest.getEmail()).equals(true)) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
+		if (!usuario.getEmail().equals(editRequest.getEmail())
+				&& usuarioService.existeUsuarioPorEmail(editRequest.getEmail()).equals(true)) {
+			return ResponseEntity.badRequest().body(
+					new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
 		}
-		if (!camionero.getDni().equals(editRequest.getDni()) && camioneroService.obtenerCamioneroPorDNI(editRequest.getDni()).isPresent()) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El DNI '" + editRequest.getDni() + "' ya está asociado a otra cuenta."));
-		}
+
 		authService.editCamionero(editRequest, usuario, camionero);
 		return ResponseEntity.ok(new MessageResponse("Edición existosa!"));
 	}
 
 	@Operation(summary = "Editar usuario empresa", description = "Edita los datos de un usuario y su empresa.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Edición exitosa"),
-		@ApiResponse(responseCode = "403", description = "Acceso restringido"),
-        @ApiResponse(responseCode = "400", description = "Error en la edición")
-    })
-	@PutMapping("/edit/empresa")	
-	public ResponseEntity<MessageResponse> editEmpresa(@Valid @RequestBody EditRequestEmpresa editRequest) throws DataAccessException, IOException {
-        Usuario usuario = null;
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Edición exitosa"),
+			@ApiResponse(responseCode = "403", description = "Acceso restringido"),
+			@ApiResponse(responseCode = "400", description = "Error en la edición")
+	})
+	@PutMapping("/edit/empresa")
+	public ResponseEntity<MessageResponse> editEmpresa(@Valid @RequestBody EditRequestEmpresa editRequest)
+			throws DataAccessException, IOException {
+		Usuario usuario = null;
 		try {
 			usuario = usuarioService.obtenerUsuarioActual();
 		} catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(
-                new MessageResponse("Debe iniciar sesión para editar su usuario."), 
-                HttpStatus.FORBIDDEN
-            );
-        }
-
-		if(!usuario.getAuthority().getAuthority().equals("EMPRESA")){
 			return new ResponseEntity<>(
-				new MessageResponse("Debe iniciar sesión con una empresa para editar su usuario."), 
-				HttpStatus.FORBIDDEN
-			);
+					new MessageResponse("Debe iniciar sesión para editar su usuario."),
+					HttpStatus.FORBIDDEN);
+		}
+
+		if (!usuario.getAuthority().getAuthority().equals("EMPRESA")) {
+			return new ResponseEntity<>(
+					new MessageResponse("Debe iniciar sesión con una empresa para editar su usuario."),
+					HttpStatus.FORBIDDEN);
 		}
 		Empresa empresa = empresaService.obtenerEmpresaPorUsuario(usuario.getId()).get();
-		
-		if (!usuario.getEmail().equals(editRequest.getEmail()) && usuarioService.existeUsuarioPorEmail(editRequest.getEmail()).equals(true)) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
+
+		if (!usuario.getEmail().equals(editRequest.getEmail())
+				&& usuarioService.existeUsuarioPorEmail(editRequest.getEmail()).equals(true)) {
+			return ResponseEntity.badRequest().body(
+					new MessageResponse("El correo electrónico '" + editRequest.getEmail() + "' ya está registrado."));
 		}
-		if (!empresa.getNif().equals(editRequest.getNif()) && empresaService.obtenerEmpresaPorNif(editRequest.getNif()).isPresent()) {
-			return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' ya está registrado."));
+		if (!empresa.getNif().equals(editRequest.getNif())
+				&& empresaService.obtenerEmpresaPorNif(editRequest.getNif()).isPresent()) {
+			return ResponseEntity.badRequest()
+					.body(new MessageResponse("El NIF '" + editRequest.getNif() + "' ya está registrado."));
 		}
-		authService.editEmpresa(editRequest, usuario, empresa);
+		try {
+			authService.editEmpresa(editRequest, usuario, empresa);
+		} catch (InvalidNifException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El NIF '" + editRequest.getNif() + "' es inválido."));
+		} catch (InvalidPhoneNumberException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El número de teléfono '" + editRequest.getTelefono() + "' es inválido."));
+		}
 		return ResponseEntity.ok(new MessageResponse("Edición exitosa!"));
 	}
-    
+
 }

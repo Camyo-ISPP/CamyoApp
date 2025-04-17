@@ -75,21 +75,21 @@ class EmpresaServiceTests {
          */
         Usuario u1 = new Usuario();
         u1.setNombre("Manolo");
-        u1.setTelefono("123456879");
+        u1.setTelefono("620300400");
         u1.setUsername("Robertongo");
         u1.setPassword("12");
         u1.setEmail("robertongo@gmail.com");
         u1.setAuthority(authEmp);
-        usuarioService.guardarUsuario(u1);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u1));
 
         Usuario u2 = new Usuario();
         u2.setNombre("Paco");
-        u2.setTelefono("123456872");
+        u2.setTelefono("620300401");
         u2.setUsername("Pacolongo");
         u2.setPassword("12");
         u2.setEmail("pacolongo@gmail.com");
         u2.setAuthority(authEmp);
-        usuarioService.guardarUsuario(u2);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u2));
 
         /*
          * Creamos las ofertas y se las asignamos a la primera empresa
@@ -113,17 +113,17 @@ class EmpresaServiceTests {
 
         e1 = new Empresa();
         e1.setWeb("https://e1.com");
-        e1.setNif("A12345678");
+        e1.setNif("A12345674");
         e1.setUsuario(u1);
         // e1.setOfertas(List.of(o1, o2));
-        empresaService.guardarEmpresa(e1);
+        assertDoesNotThrow(() -> empresaService.guardarEmpresa(e1));
 
         e2 = new Empresa();
         e2.setWeb("https://e2.com");
-        e2.setNif("B12345678");
+        e2.setNif("B12345674");
         e2.setUsuario(u2);
         // e1.setOfertas(List.of(o1, o2));
-        empresaService.guardarEmpresa(e2);
+        assertDoesNotThrow(() -> empresaService.guardarEmpresa(e2));
 
         /*
          * Guardamos los ids de los empresas y de sus usuarios
@@ -200,25 +200,6 @@ class EmpresaServiceTests {
         assertTrue(empresaService.obtenerEmpresaPorNif(nif).isEmpty());
     }
 
-    /*
-    @Test
-    @Transactional(readOnly = true)
-    void debeActualizarEmpresa() {
-        Empresa empNuevo = empresaService.obtenerEmpresaPorId(e1.getId());
-
-        String newNif = "T87564321";
-        empNuevo.setNif(newNif);
-
-        String newWeb = "https://prueba.es";
-        empNuevo.setWeb(newWeb);
-
-        Empresa empActualizada = empresaService.actualizarEmpresa(empNuevo, e1.getId());
-
-        assertEquals(newNif, empActualizada.getNif());
-        assertEquals(newWeb, empActualizada.getWeb());
-        assertEquals(e1.getId(), empActualizada.getId());
-
-    }*/
 
     @Test
     @Transactional
@@ -229,18 +210,18 @@ class EmpresaServiceTests {
 
         Usuario u3 = new Usuario();
         u3.setNombre("José");
-        u3.setTelefono("123455879");
+        u3.setTelefono("954010203");
         u3.setUsername("Joselingo");
         u3.setPassword("12");
         u3.setEmail("joselingo@gmail.com");
         u3.setAuthority(authEmp);
-        usuarioService.guardarUsuario(u3);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u3));
 
         Empresa e3 = new Empresa();
-        e3.setNif("V12345688");
+        e3.setNif("D12345674");
         e3.setWeb("https://prueba.com");
         e3.setUsuario(u3);
-        empresaService.guardarEmpresa(e3);
+        assertDoesNotThrow(() -> empresaService.guardarEmpresa(e3));
 
         assertDoesNotThrow(() -> empresaService.eliminarEmpresa(e3.getId()));
     }

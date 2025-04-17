@@ -36,6 +36,7 @@ import com.camyo.backend.usuario.AuthoritiesService;
 
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
+import com.camyo.backend.util.EncryptionService;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -54,6 +55,9 @@ class CamioneroServiceTests {
 
     @Autowired
     protected AuthoritiesService authoritiesService;
+
+    @Autowired
+    protected EncryptionService encryptionService;
 
      /*
     * Declaramos las variables que vayamos a usar fuera del setup 
@@ -81,30 +85,30 @@ class CamioneroServiceTests {
       */ 
         Usuario u1 = new Usuario();
         u1.setNombre("Manolo");
-        u1.setTelefono("123456879");
+        u1.setTelefono("651239235");
         u1.setUsername("Manolongo");
         u1.setPassword("12");
         u1.setEmail("manolongo@gmail.com");
         u1.setAuthority(authCam);
-        usuarioService.guardarUsuario(u1);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u1));
 
         Usuario u2 = new Usuario();
         u2.setNombre("Paco");
-        u2.setTelefono("123456872");
+        u2.setTelefono("701443950");
         u2.setUsername("Pacomé");
         u2.setPassword("12");
         u2.setEmail("pacome@gmail.com");
         u2.setAuthority(authCam);
-        usuarioService.guardarUsuario(u2);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u2));
 
         Usuario u3 = new Usuario();
         u3.setNombre("José");
-        u3.setTelefono("341256872");
+        u3.setTelefono("954010203");
         u3.setUsername("Joselito");
         u3.setPassword("12");
         u3.setEmail("pa23@gmail.com");
         u3.setAuthority(authEmp);
-        usuarioService.guardarUsuario(u3);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u3));
 
         Usuario u4 = new Usuario();
         u4.setNombre("Carlos");
@@ -113,7 +117,7 @@ class CamioneroServiceTests {
         u4.setPassword("12");
         u4.setEmail("caralingo@gmail.com");
         u4.setAuthority(authEmp);
-        usuarioService.guardarUsuario(u4);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u4));
 
          /*
         * Creamos las reseñas y se las asignamos al primer usuario camionero 
@@ -138,23 +142,23 @@ class CamioneroServiceTests {
 
         Camionero c1 = new Camionero();
         c1.setExperiencia(10);
-        c1.setDni("12345678Q");
+        c1.setDni("VUmZsSSWmTQDw7V42LJm5w==");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c1.setDisponibilidad(Disponibilidad.NACIONAL);
         c1.setTieneCAP(true);
         c1.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c1.setUsuario(u1);
-        camioneroService.guardarCamionero(c1);
+        assertDoesNotThrow(() -> camioneroService.guardarCamionero(c1));
 
         Camionero c2 = new Camionero();
         c2.setExperiencia(10);
-        c2.setDni("12445678Q");
+        c2.setDni("q9lJi9ibG2ayvdvh4vjoiQ==");
         c2.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c2.setDisponibilidad(Disponibilidad.NACIONAL);
         c2.setTieneCAP(true);
         c2.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c2.setUsuario(u2);
-        camioneroService.guardarCamionero(c2);
+        assertDoesNotThrow(() -> camioneroService.guardarCamionero(c2));
 
          /*
         * Guardamos los ids de los camioneros y de sus usuarios 
@@ -164,14 +168,6 @@ class CamioneroServiceTests {
         camioneroIds = List.of(c1.getId(), c2.getId());
     }
 
-    /* 
-    @Test
-    @Transactional(readOnly = true)
-    void debeObtenerTodos(){
-        List<Camionero> camioneros= camioneroService.obtenerTodosCamioneros();
-        Assert.notEmpty(camioneros, "La lista de camioneros está vacía");
-        assertEquals(2, camioneros.size());
-    }*/
 
     @Test
     @Transactional
@@ -208,13 +204,13 @@ class CamioneroServiceTests {
 
     @Test
     @Transactional(readOnly = true)
-    void debeObtenerCamioneroPorDNI(){
+    void debeObtenerCamioneroPorDNI() throws Exception{
         Integer idEsperada = camioneroIds.get(0);
         Camionero c1 = camioneroService.obtenerCamioneroPorId(idEsperada);
         String dniEsperado = c1.getDni();
 
 
-        Optional<Camionero> optCam = camioneroService.obtenerCamioneroPorDNI(dniEsperado);
+        Optional<Camionero> optCam = camioneroService.obtenerCamioneroPorDNI(encryptionService.decrypt(dniEsperado));
         assertTrue(optCam.isPresent());
 
         Camionero camioneroRecogido = optCam.get();
@@ -231,35 +227,6 @@ class CamioneroServiceTests {
         assertTrue(camioneroService.obtenerCamioneroPorDNI(dni).isEmpty());;
     }
 
-    /*
-    @Test
-    @Transactional(readOnly = true)
-    void debeActualizarCamionero(){
-        Integer id = camioneroIds.get(0);
-        Camionero camNuevo = camioneroService.obtenerCamioneroPorId(id);
-
-        Disponibilidad newDisponibilidad = Disponibilidad.INTERNACIONAL;
-        camNuevo.setDisponibilidad(newDisponibilidad);
-
-        int newExperiencia = 20;
-        camNuevo.setExperiencia(newExperiencia);
-
-        LocalDate newDate = LocalDate.of(2026, 12, 01);
-        camNuevo.setExpiracionCAP(newDate);
-
-        //Para poder ser actualizarse, las licencias deben ser mutables
-        //es decir, no pueden crearse solamente con un Set.of() porque eso crea un Set inmutable
-        Set<Licencia> newLicencias = new HashSet<Licencia>(Set.of(Licencia.C, Licencia.C_E));
-        camNuevo.setLicencias(newLicencias);
-
-        Camionero camioneroActualizado = camioneroService.actualizarCamionero(id, camNuevo);
-
-        assertEquals(newLicencias, camioneroActualizado.getLicencias());
-        assertEquals(newExperiencia, camioneroActualizado.getExperiencia());
-        assertEquals(newDate, camioneroActualizado.getExpiracionCAP());
-        assertEquals(id, camioneroActualizado.getId());
-
-    }*/
 
     @Test
     @Transactional
@@ -270,22 +237,22 @@ class CamioneroServiceTests {
 
         Usuario u1 = new Usuario();
         u1.setNombre("José");
-        u1.setTelefono("123455879");
+        u1.setTelefono("854549822");
         u1.setUsername("Joselingo");
         u1.setPassword("12");
         u1.setEmail("joselingo@gmail.com");
         u1.setAuthority(authCam);
-        usuarioService.guardarUsuario(u1);
+        assertDoesNotThrow(() -> usuarioService.guardarUsuario(u1));
         
         Camionero c1 = new Camionero();
         c1.setExperiencia(10);
-        c1.setDni("12345688V");
+        c1.setDni("21084571B");
         c1.setLicencias(Set.of(Licencia.C, Licencia.C_E));
         c1.setDisponibilidad(Disponibilidad.NACIONAL);
         c1.setTieneCAP(true);
         c1.setExpiracionCAP(LocalDate.of(2025, 12, 12));
         c1.setUsuario(u1);
-        camioneroService.guardarCamionero(c1);
+        assertDoesNotThrow(() -> camioneroService.guardarCamionero(c1));
 
         assertDoesNotThrow(() -> camioneroService.eliminarCamionero(c1.getId()));
     }

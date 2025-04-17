@@ -29,6 +29,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -48,7 +49,6 @@ public class Camionero{
 
     @Column(name = "dni", unique = true)
     @NotBlank
-    @Pattern(regexp = "^\\d{8}[A-Z]$")
     private String dni;
 
     @NotEmpty
@@ -68,6 +68,7 @@ public class Camionero{
     private Set<Tarjetas> tarjetasAutonomo;
 
     @Lob
+    @Size(max = 5242880, message = "El tamaño del currículum no puede ser mayor que 5 MB")
     private byte[] curriculum;
 
     @OneToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE })
