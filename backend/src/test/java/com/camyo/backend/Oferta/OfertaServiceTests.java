@@ -357,6 +357,26 @@ public class OfertaServiceTests {
     }
 
     @Test
+    void modificarOferta_conEmpresaPeroSinId_noTocaLaEmpresa() {
+        Oferta datosNuevos = new Oferta();
+        Empresa empresaSinId = new Empresa();         
+        datosNuevos.setEmpresa(empresaSinId);
+        datosNuevos.setTitulo("Título actualizado");
+
+        when(ofertaRepository.findById(1)).thenReturn(Optional.of(oferta));
+        when(ofertaRepository.save(any())).thenReturn(oferta);
+
+        Oferta resultado = ofertaService.modificarOferta(datosNuevos, 1);
+
+        assertEquals(empresa, resultado.getEmpresa(), 
+                    "La empresa original NO debe cambiar");
+        assertEquals("Título actualizado", resultado.getTitulo());
+
+        verify(empresaRepository, never()).findById(any());
+    }
+
+
+    @Test
     void debePatrocinarOfertaConPlanPremium() {
         when(ofertaRepository.findById(1)).thenReturn(Optional.of(oferta));
         when(suscripcionService.obtenerNivelSuscripcion(empresa.getId())).thenReturn(PlanNivel.PREMIUM);
@@ -473,4 +493,18 @@ public class OfertaServiceTests {
             throw new RuntimeException(e.getCause().getMessage());
         }
     }
+
+    @Test
+    void patrocinarOfertaPlanPremiumSinLimite() {
+        when(ofertaRepository.findById(1)).thenReturn(Optional.of(oferta));
+        when(suscripcionService.obtenerNivelSuscripcion(empresa.getId()))
+                .thenReturn(PlanNivel.PREMIUM);     
+        when(ofertaRepository.countByEmpresaIdPromotedTrue(empresa.getId()))
+                .thenReturn(0);                     
+        when(ofertaRepository.save(any())).thenReturn(oferta);
+
+        Oferta r = ofertaService.patrocinarOferta(1);
+        assertTrue(r.getPromoted());
+    }
+
 }
