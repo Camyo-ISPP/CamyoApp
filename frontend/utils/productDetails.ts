@@ -28,6 +28,6 @@ Products.set("ELIMINAR_ANUNCIOS", {
     description: "Elimina los anuncios en Camyo permanentemente.",
     image: "/assets/images/icon.png",
     name: "Eliminar anuncios",
-    price: 9.99,
+    price: 4.99,
     id: "ELIMINAR_ANUNCIOS"
 })
