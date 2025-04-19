@@ -191,11 +191,11 @@ const MisOfertasEmpresa = () => {
     const getTabLabel = (type: string) => {
         switch (type) {
             case "ABIERTA":
-                return ` Abiertas(Sin Asignar)`;
+                return ` Abiertas (Sin Asignar)`;
             case "CERRADA":
-                return `Cerradas(Asignadas) `;
+                return ` Cerradas (Asignadas) `;
             case "BORRADOR":
-                return `Borradores `;
+                return ` Borradores `;
             default:
                 return "";
         }
