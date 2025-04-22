@@ -12,6 +12,7 @@ import Testimonios from "../_components/Testimonios";
 import WebFooter from "../_components/_layout/WebFooter";
 import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 import ListadoOfertasPublicoSmall from "../_components/ListadoOfertasPublicoSmall";
+import AdSense from "../_components/AdSense";
 import MapLoader from "../_components/MapLoader";
 
 const Index = () => {
@@ -119,7 +120,10 @@ const Index = () => {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-
+    <head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4434133815240639"
+     crossOrigin="anonymous"></script>
+     </head>
       <View style={styles.webContainer}>
         <ScrollView style={styles.scrollview} showsVerticalScrollIndicator={false}>
           {/* Hero Section */}
@@ -197,6 +201,15 @@ const Index = () => {
 
           {/* Stats Section */}
           <StatsSection />
+          {(!user || user?.ads) && (
+          <View style={styles.adContainer}>
+            <Image
+              source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+              style={styles.adImage}
+              resizeMode="cover"
+            />
+          </View>
+        )}
 
           {/* Ofertas Section */}
           <View style={styles.section}>
@@ -270,7 +283,8 @@ const Index = () => {
               </Text>
             </TouchableOpacity>
           </View>
-
+          {/* Renderiza el anuncio */}
+      <AdSense />
           <WebFooter />
 
         </ScrollView>
@@ -717,6 +731,20 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginRight: 10,
   },
+  adContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    outlineColor: "black",
+    outlineStyle: "solid",
+  },
+  adImage: {
+    width: "100%", // Adjust width as needed
+    outlineColor: "black",
+    outlineStyle: "solid",
+  },
+
 });
 
 export default Index;

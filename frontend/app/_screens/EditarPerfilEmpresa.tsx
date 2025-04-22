@@ -187,6 +187,7 @@ const EditarPerfilEmpresa = () => {
           descripcion: userData.descripcion,
           email: userData.email,
           foto: userData.foto,
+          ads: user.ads,
           id: user.id,
           localizacion: userData.localizacion,
           nif: userData.nif,

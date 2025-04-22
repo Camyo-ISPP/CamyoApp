@@ -106,4 +106,11 @@ public class UsuarioService {
         return usuarioRepository.findEmpresaIdByUsuarioId(empresaId)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el empresaId: " + empresaId));
     }  
+
+    @Transactional
+    public Usuario eliminarAnuncios(Integer id) {
+        Usuario usuario = obtenerUsuarioPorId(id);
+        usuario.setAds(false);
+        return usuarioRepository.save(usuario);
+    }
 }
