@@ -1,0 +1,36 @@
+name: Java CI - Test Automático
+
+on:
+  push:
+    branches:
+      - backend/tarea_15/testing_automatico
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Ejecutar tests con Maven
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache de dependencias Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven
+
+      - name: Ejecutar tests
+        run: mvn clean verify
+
