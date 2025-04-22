@@ -33,4 +33,4 @@ jobs:
 
       - name: Ejecutar tests
         run: mvn clean verify
-
+        working-directory: ./backend
