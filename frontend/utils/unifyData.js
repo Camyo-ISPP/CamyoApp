@@ -16,6 +16,7 @@ const unifyUserData = (data) => {
       localizacion: data.usuario.localizacion,
       descripcion: data.usuario.descripcion,
       foto: data.usuario.foto,
+      ads: data.usuario.ads
     };
   
     // Si el usuario es un CAMIONERO

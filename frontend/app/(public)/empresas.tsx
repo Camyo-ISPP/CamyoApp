@@ -78,7 +78,17 @@ const EmpresasLista = () => {
           <Text style={styles.heroSubtitle}>Conoce a las empresas líderes en el sector</Text>
         </LinearGradient>
       </ImageBackground>
-
+      <View style={styles.adsAndListContainer}>
+    {/* Left Ad */}
+    {(!user || user.ads) && (
+      <View style={styles.adContainer}>
+        <Image
+          source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
+          style={styles.adImage}
+          resizeMode="cover"
+        />
+      </View>
+    )}
       {/* Empresas List */}
       <View style={styles.listContainer}>
         {empresas.map((empresa) => (
@@ -153,6 +163,16 @@ const EmpresasLista = () => {
           </View>
         ))}
       </View>
+      {(!user || user.ads) && (
+      <View style={styles.adContainer}>
+        <Image
+          source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
+          style={styles.adImage}
+          resizeMode="cover"
+        />
+      </View>
+    )}
+</View>
 
       <WebFooter />
     </ScrollView>
@@ -250,7 +270,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   listContainer: {
-    width: '80%',
+    width: '70%',
     alignSelf: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -402,6 +422,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
   },
+  adsAndListContainer: {
+    flexDirection: 'row', // Arrange ads and list in a row
+    width: '100%',
+    paddingHorizontal: 20,
+},
+adContainer: {
+  marginTop: 20,
+    width: '15%', // Adjust width of the ad container
+    height: "95%",
+
+},
+adImage: {
+  width: '100%', // Adjust width as needed
+  height: '95%', // Adjust height as needed
+
+
+},
 });
 
 export default EmpresasLista;

@@ -55,6 +55,9 @@ public class Usuario {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @Column(nullable = false)
+    private Boolean ads = true;
+
 	@NotNull
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "authority")
