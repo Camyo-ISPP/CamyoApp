@@ -173,7 +173,11 @@ const MiPerfilEmpresa = () => {
   const canPromoteNewOffer = () => {
     const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
     return activeOffersCount < rules.maxSponsoredOffers;
+  };
 
+  const handleRemoveAds = () => {
+    setId("ELIMINAR_ANUNCIOS");
+    router.push("/pago/checkout");
   }
   const handleSubmitResenaWrapper = async (resenaData: any) => {
     try {
@@ -249,6 +253,17 @@ const MiPerfilEmpresa = () => {
 
   return (
     <ScrollView>
+      <View style={styles.pageContainer}>
+    {/* Left Ad */}
+    {user?.ads && (
+      <View style={styles.adContainer}>
+        <Image
+          source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+          style={styles.adImage}
+          resizeMode="cover"
+        />
+      </View>
+    )}
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.rowContainer}>
@@ -336,8 +351,24 @@ const MiPerfilEmpresa = () => {
                 </TouchableOpacity>
               </View>
 
+<<<<<<< HEAD
+=======
+              {/* Botón de eliminar anuncios */}
+              {user.ads ?
+                <View>
+                  <TouchableOpacity
+                      style={styles.mejorarPlanButton}
+                      onPress={handleRemoveAds}
+                    >
+                      <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                      <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                    </TouchableOpacity>
+                </View>
+              : <></>}
+>>>>>>> main
             </View>
           </View>
+          
 
           {/* Separador */}
           <View style={styles.separator} />
@@ -556,6 +587,17 @@ const MiPerfilEmpresa = () => {
         onViewDrafts={handleViewDrafts}
         onCreateNew={handleCreateNew}
       />
+      {/* Right Ad */}
+    {user?.ads && (
+      <View style={styles.adContainer}>
+        <Image
+          source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+          style={styles.adImage}
+          resizeMode="cover"
+        />
+      </View>
+    )}
+  </View>
     </ScrollView >
   );
 };
@@ -729,7 +771,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 1,
     backgroundColor: colors.mediumGray,
-    marginVertical: 20,
+    marginVertical: 55,
   },
   downContainer: {
     paddingHorizontal: 30,
@@ -1170,6 +1212,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.secondary,
+  },
+  pageContainer: {
+    flexDirection: "row", // Arrange ads and main content in a row
+    justifyContent: "space-between", // Space between ads and main content
+    alignItems: "flex-start", // Align items at the top
+    backgroundColor: colors.white,
+    paddingHorizontal: 10, // Add padding on both sides
+  },
+  adContainer: {
+    width: "10%", // Adjust width of the ad container
+    minWidth: 100, // Ensure a minimum width for smaller screens
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  adImage: {
+    width: "100%",
+    height: 700, // Adjust height as needed
+    borderRadius: 10,
   },
 });
 

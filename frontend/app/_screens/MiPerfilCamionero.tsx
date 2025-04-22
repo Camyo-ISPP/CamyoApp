@@ -7,15 +7,18 @@ import defaultImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { usePayment } from "@/contexts/PaymentContext";
 import AddResenaModal from "../components/AddResenaModal";
 import ResenaModal from "../_components/ResenaModal";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
 
+
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+    const { setId } = usePayment();
     const { user, userToken, logout } = useAuth();
     const router = useRouter();
 
@@ -145,7 +148,7 @@ const MiPerfilCamionero = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
-
+    
     useEffect(() => {
         if (user?.userId) {
             fetchCamionero();
@@ -215,8 +218,26 @@ const MiPerfilCamionero = () => {
             console.error("Error en el proceso completo:", error);
         }
     };
+
+    const handleRemoveAds = () => {
+        setId("ELIMINAR_ANUNCIOS");
+        router.push("/pago/checkout");
+      }
+
+
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <View style={styles.pageContainer}>
+        {/* Left Ad */}
+        {user?.ads && (
+            <View style={styles.adContainer}>
+                <Image
+                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your left ad image path
+                    style={styles.adImage}
+                    resizeMode="cover"
+                />
+            </View>
+        )}
             <View style={styles.container}>
                 <View style={styles.card}>
                     <View style={styles.rowContainer}>
@@ -249,7 +270,23 @@ const MiPerfilCamionero = () => {
                             <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
                             <Text style={styles.description}>{user.descripcion}</Text>
                         </View>
+                        
                     </View>
+                     {/* Botón de eliminar anuncios */}
+                     {user.ads ?
+                         <View>
+                             <View style={styles.separator} />
+                             <View>
+                                 <TouchableOpacity
+                                     style={styles.mejorarPlanButton}
+                                     onPress={handleRemoveAds}
+                                 >
+                                     <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                                     <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                                 </TouchableOpacity>
+                             </View>
+                         </View>
+                         : <></>}
                     <View style={styles.separator} />
 
                     <View style={styles.downContainer}>
@@ -422,7 +459,9 @@ const MiPerfilCamionero = () => {
                     </View>
 
                 </View>
+
             </View>
+    
 
             {/* Modal para añadir reseñas */}
             <ResenaModal
@@ -443,18 +482,28 @@ const MiPerfilCamionero = () => {
                 onCancel={() => setShowDeleteModal(false)}
                 message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
             />
-
+    
             <ErrorModal
                 isVisible={errorModalVisible}
                 message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
             />
-
+    
             <SuccessModal
                 isVisible={successModalVisible}
                 onClose={() => setSuccessModalVisible(false)}
                 message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
             />
-
+            {/* Right Ad */}
+        {user?.ads && (
+            <View style={styles.adContainer}>
+                <Image
+                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your right ad image path
+                    style={styles.adImage}
+                    resizeMode="cover"
+                />
+            </View>
+        )}
+    </View>
         </ScrollView >
     );
 };
@@ -604,6 +653,22 @@ const styles = StyleSheet.create({
     pdfButtonText: {
         color: colors.white,
         fontWeight: "bold",
+    },
+    plusIcon: {
+        marginRight: 6,
+    },
+        publishButtonText: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    mejorarPlanButton: {
+        backgroundColor: '#0993A8FF',
+        padding: 10,
+        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     resenaFecha: {
         fontSize: 12,
@@ -896,6 +961,26 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         marginLeft: 5,
         fontSize: 14,
+    },
+    pageContainer: {
+        flexDirection: "row", // Arrange items in a row
+        justifyContent: "space-between", // Space between ads and main content
+        flexGrow: 1,
+        backgroundColor: colors.white,
+    },
+    adContainer: {
+        width: "25%",
+        minWidth: 100,
+        backgroundColor: colors.lightGray,
+        alignItems: "center",
+        justifyContent: "center",
+        
+    },
+    adImage: {
+        flex: 1, 
+        width: "100%",
+        height: "200%",
+        resizeMode: "cover",
     },
 });
 
