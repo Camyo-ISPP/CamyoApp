@@ -351,8 +351,6 @@ const MiPerfilEmpresa = () => {
                 </TouchableOpacity>
               </View>
 
-<<<<<<< HEAD
-=======
               {/* Botón de eliminar anuncios */}
               {user.ads ?
                 <View>
@@ -365,7 +363,6 @@ const MiPerfilEmpresa = () => {
                     </TouchableOpacity>
                 </View>
               : <></>}
->>>>>>> main
             </View>
           </View>
           
