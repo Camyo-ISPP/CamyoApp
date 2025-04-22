@@ -44,5 +44,41 @@ public interface OfertaRepository extends JpaRepository<Oferta,Integer>{
     @Query("SELECT COUNT(o) FROM Oferta o WHERE o.estado = 'ABIERTA' AND o.promoted = true AND o.empresa.id = :empresaId")
     Integer countByEmpresaIdPromotedTrue(Integer empresaId);
 
+    @Query("""
+    SELECT new com.camyo.backend.oferta.OfertaConTodaInformacionPlanarDTO(
+        o.id,
+        o.tipoOferta,
+        o.localizacion,
+        u.nombre,
+        o.titulo,
+        o.experiencia,
+        o.licencia,
+        o.notas,
+        o.fechaPublicacion,
+        o.sueldo,
+        o.promoted,
+        u.foto,
+        e.id,
+        t.fechaIncorporacion,
+        t.jornada,
+        c.mercancia,
+        c.peso,
+        c.origen,
+        c.destino,
+        c.distancia,
+        c.inicio,
+        c.finMinimo,
+        c.finMaximo
+    )
+    FROM Oferta o
+    JOIN o.empresa e
+    JOIN e.usuario u
+    LEFT JOIN Carga c ON c.oferta.id = o.id
+    LEFT JOIN Trabajo t ON t.oferta.id = o.id
+    WHERE o.estado = 'ABIERTA'
+    ORDER BY o.promoted DESC, o.fechaPublicacion DESC
+    """)
+    List<OfertaConTodaInformacionPlanarDTO> obtenerOfertasConTodaInformacion();
+
 
 }

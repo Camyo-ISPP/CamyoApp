@@ -85,6 +85,11 @@ public class OfertaController {
         }).toList();
     }
 
+    @GetMapping("/info/op")
+    public List<OfertaConTodaInformacionPlanarDTO> obtenerOfertasConInformacionOptimizado() {
+        return ofertaService.obtenerOfertasConTodaInformacion();
+    }
+
     /**
      * GET: Obtener oferta por ID
      * 
