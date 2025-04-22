@@ -10,22 +10,17 @@ export const PopupAdProvider = ({ children, user }: { children: React.ReactNode;
     const navigationState = useNavigationState((state) => state); // Get navigation state
 
     useEffect(() => {
-        if (user?.ads) {
+        if (!user || user?.ads) {
             // Show popup every 5 minutes
             const interval = setInterval(() => {
                 setIsVisible(true);
-            }, 300000);
+            }, 240000);
 
             return () => clearInterval(interval); // Cleanup on unmount
         }
     }, [user?.ads]);
 
-    useEffect(() => {
-        if (user?.ads) {
-            // Show popup whenever the navigation state changes (page change)
-            setIsVisible(true);
-        }
-    }, [navigationState]); // Trigger on navigation state change
+
 
     const closePopup = () => {
         setIsVisible(false);

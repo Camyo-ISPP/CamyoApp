@@ -80,13 +80,15 @@ const EmpresasLista = () => {
       </ImageBackground>
       <View style={styles.adsAndListContainer}>
     {/* Left Ad */}
-    <View style={styles.adContainer}>
+    {(!user || user.ads) && (
+      <View style={styles.adContainer}>
         <Image
-            source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
-            style={styles.adImage}
-            resizeMode="cover"
+          source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
+          style={styles.adImage}
+          resizeMode="cover"
         />
-    </View>
+      </View>
+    )}
       {/* Empresas List */}
       <View style={styles.listContainer}>
         {empresas.map((empresa) => (
@@ -161,14 +163,15 @@ const EmpresasLista = () => {
           </View>
         ))}
       </View>
-        {/* Right Ad */}
-    <View style={styles.adContainer}>
+      {(!user || user.ads) && (
+      <View style={styles.adContainer}>
         <Image
-            source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your right ad image path
-            style={styles.adImage}
-            resizeMode="cover"
+          source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
+          style={styles.adImage}
+          resizeMode="cover"
         />
-    </View>
+      </View>
+    )}
 </View>
 
       <WebFooter />
@@ -425,7 +428,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
 },
 adContainer: {
+  marginTop: 20,
     width: '15%', // Adjust width of the ad container
+    height: "95%",
 
 },
 adImage: {

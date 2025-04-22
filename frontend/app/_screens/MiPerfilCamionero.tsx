@@ -959,6 +959,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.lightGray,
         alignItems: "center",
         justifyContent: "center",
+        
     },
     adImage: {
         flex: 1, 

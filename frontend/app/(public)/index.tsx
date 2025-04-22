@@ -201,7 +201,7 @@ const Index = () => {
 
           {/* Stats Section */}
           <StatsSection />
-          {user?.ads && (
+          {(!user || user?.ads) && (
           <View style={styles.adContainer}>
             <Image
               source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
@@ -733,12 +733,16 @@ const styles = StyleSheet.create({
   },
   adContainer: {
     marginTop: 20,
+    marginBottom: 20,
     alignItems: "center",
     justifyContent: "center",
+    outlineColor: "black",
+    outlineStyle: "solid",
   },
   adImage: {
     width: "100%", // Adjust width as needed
-    borderRadius: 10,
+    outlineColor: "black",
+    outlineStyle: "solid",
   },
 
 });
