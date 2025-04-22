@@ -221,15 +221,28 @@ const MiPerfilCamionero = () => {
                 <View style={styles.card}>
                     <View style={styles.rowContainer}>
                         <BackButton />
-                        <View style={styles.profileContainer}>
-                            <Image
-                                source={user?.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
-                                style={styles.profileImage}
-                            />
-                            <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
-                                <Feather name="edit-3" size={22} color={colors.white} />
+
+                        <View>
+                            <View style={styles.profileContainer}>
+                                <Image
+                                    source={user?.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
+                                    style={styles.profileImage}
+                                />
+                                <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
+                                    <Feather name="edit-3" size={22} color={colors.white} />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Botón de eliminar cuenta */}
+                            <TouchableOpacity
+                                style={styles.deleteAccountButton}
+                                onPress={() => setShowDeleteModal(true)}
+                            >
+                                <MaterialIcons name="delete" size={20} color={colors.white} />
+                                <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
                             </TouchableOpacity>
                         </View>
+
                         <View style={styles.infoContainer}>
                             <Text style={styles.name}>{user.nombre}</Text>
                             <Text style={styles.username}>@{user.username}</Text>
@@ -254,14 +267,6 @@ const MiPerfilCamionero = () => {
                             </TouchableOpacity>
                         }
                     </View>
-
-                    <TouchableOpacity
-                        style={styles.deleteAccountButton}
-                        onPress={() => setShowDeleteModal(true)}
-                    >
-                        <MaterialIcons name="delete" size={20} color={colors.white} />
-                        <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
-                    </TouchableOpacity>
 
                     <View style={styles.separator} />
 
@@ -867,20 +872,30 @@ const styles = StyleSheet.create({
         backgroundColor: colors.extraLightGray,
         marginHorizontal: -20,
     },
-
     deleteAccountButton: {
         backgroundColor: colors.red,
-        padding: 12,
+        padding: 8,
         borderRadius: 10,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 20,
+        marginTop: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: "#d32f2f",
+        width: '70%',
+        maxWidth: 250,
+        alignSelf: "center",
     },
     deleteAccountButtonText: {
         color: colors.white,
-        fontWeight: "bold",
-        marginLeft: 10,
+        fontWeight: "600",
+        marginLeft: 5,
+        fontSize: 14,
     },
 });
 
