@@ -188,7 +188,7 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
           <SuccessModal
             isVisible={successModalVisible}
             onClose={() => setSuccessModalVisible(false)}
-            message="¡Oferta patrocinada con éxito!"
+            message={offerToCancel ? "¡Patrocinio cancelado con éxito!" : "¡Oferta patrocinada con éxito!"}
           />
 
           <SubscriptionModal
@@ -196,7 +196,7 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
             onConfirm={confirmUnpromote}
             onCancel={() => setShowCancelConfirmation(false)}
             title="¿Cancelar patrocinio?"
-            message="Al cancelar el patrocinio, la oferta perderá visibilidad privilegiada. El dinero no será reembolsable. ¿Deseas continuar?"
+            message="Al cancelar el patrocinio, la oferta perderá visibilidad destacada. El importe abonado no será reembolsado. ¿Deseas continuar?"
           />
 
         </View>
