@@ -28,6 +28,7 @@ const MiPerfilCamionero = () => {
     const [empresaAResenar, setEmpresaAResenar] = useState(null);
     const [hoverRating, setHoverRating] = useState(0);
     const [resenados, setResenados] = useState([]);
+    const [selectedRating, setSelectedRating] = useState(0);
 
     useFocusEffect(
         useCallback(() => {
@@ -303,6 +304,7 @@ const MiPerfilCamionero = () => {
                                                     <TouchableOpacity
                                                         key={`star-${star}`}
                                                         onPress={() => {
+                                                            setSelectedRating(star);
                                                             setEmpresaAResenar(empresa);
                                                             setShowResenaModal(true);
                                                         }}
@@ -311,9 +313,9 @@ const MiPerfilCamionero = () => {
                                                         activeOpacity={1}
                                                     >
                                                         <FontAwesome
-                                                            name={star <= hoverRating ? "star" : "star-o"}
+                                                            name={star <= (hoverRating || selectedRating) ? "star" : "star-o"}
                                                             size={27}
-                                                            color={star <= hoverRating ? colors.primary : colors.primaryLight}
+                                                            color={star <= (hoverRating || selectedRating) ? colors.primary : colors.primaryLight}
                                                             style={styles.starIcon}
                                                         />
                                                     </TouchableOpacity>
@@ -425,7 +427,9 @@ const MiPerfilCamionero = () => {
                 onClose={() => {
                     setShowResenaModal(false);
                     setEmpresaAResenar(null);
+                    setSelectedRating(false);
                 }}
+                initialRating={selectedRating}
                 onSubmit={handleSubmitResenaWrapper}
                 comentadorId={user?.userId}
                 comentadoId={empresaAResenar?.usuario?.id}
