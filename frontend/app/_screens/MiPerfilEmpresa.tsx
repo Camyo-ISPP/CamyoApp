@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert, Linking, Dimensions } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import colors from "../../assets/styles/colors";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -16,6 +16,8 @@ import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
 import DraftModal from "../_components/DraftModal";
+
+const windowWidth = Dimensions.get('window').width;
 
 const MiPerfilEmpresa = () => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -37,9 +39,8 @@ const MiPerfilEmpresa = () => {
   //const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
   const { subscriptionLevel, refreshSubscriptionLevel } = useSubscription();
   const [selectedOfferId, setSelectedOfferId] = useState<number | null>(null);
-  const [drafts, setDrafts] = useState<any[]>([]);  const [resenados, setResenados] = useState([]);
+  const [drafts, setDrafts] = useState<any[]>([]); const [resenados, setResenados] = useState([]);
   const [selectedRating, setSelectedRating] = useState(0);
-
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -55,7 +56,6 @@ const MiPerfilEmpresa = () => {
   );
 
   useEffect(() => {
-
     if (user?.id) {
       fetchResenas();
     }
@@ -229,382 +229,375 @@ const MiPerfilEmpresa = () => {
     }
   };
 
-   const handleViewDrafts = () => {
-      setShowDraftsChoiceModal(false);
-   
-      router.push({ pathname: "/misofertas", params: { tab: "BORRADOR" } });
+  const handleViewDrafts = () => {
+    setShowDraftsChoiceModal(false);
+
+    router.push({ pathname: "/misofertas", params: { tab: "BORRADOR" } });
   };
   const handleCreateNew = () => {
     setShowDraftsChoiceModal(false);
     router.push(`/oferta/crear`);
   };
 
+  const getUpgradeMessage = () => {
+    if (!canCreateNewOffer() && !canPromoteNewOffer()) {
+      return "Límite de ofertas activas y patrocinadas alcanzado";
+    } else if (!canPromoteNewOffer()) {
+      return "Límite de ofertas patrocinadas alcanzado";
+    } else if (!canCreateNewOffer()) {
+      return "Límite de ofertas activas alcanzado";
+    }
+    return null;
+  };
+  const upgradeMessage = getUpgradeMessage();
+
   return (
     <ScrollView>
       <View style={styles.pageContainer}>
-    {/* Left Ad */}
-    {user?.ads && (
-      <View style={styles.adContainer}>
-        <Image
-          source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
-          style={styles.adImage}
-          resizeMode="cover"
-        />
-      </View>
-    )}
-      <View style={styles.container}>
-        <View style={styles.card}>
-          <View style={styles.rowContainer}>
-            <BackButton />
+        {/* Left Ad */}
+        {user?.ads && (
+          <View style={styles.adContainer}>
+            <Image
+              source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+              style={styles.adImage}
+              resizeMode="cover"
+            />
+          </View>
+        )}
+        <View style={styles.container}>
+          <View style={styles.card}>
+            <View style={styles.rowContainer}>
+              <BackButton />
 
-            {/* Logo de empresa */}
-            <View style={styles.profileContainer}>
-              <Image
-                source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
-                style={styles.profileImage}
-              />
-              {/* Botón de edición */}
-              <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
-                <Feather name="edit-3" size={22} color={colors.white} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Información de la empresa */}
-            <View style={styles.infoContainer}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.name}>{user.nombre}</Text>
-                {subscriptionLevel === 'PREMIUM' && (
-                  <View style={styles.verifiedBadgePremium}>
-                    <MaterialIcons name="verified" size={20} color="#FFD700" />
-                  </View>
-                )}
-                {subscriptionLevel === 'BASICO' && (
-                  <View style={styles.verifiedBadgeBasic}>
-                    <MaterialIcons name="verified" size={20} color="#C0C0C0" />
-                  </View>
-                )}
-              </View>
-              <Text style={styles.username}>@{user.username}</Text>
-              <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user.email}</Text>
-              <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user.telefono}</Text>
-              <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
-              <Text style={styles.description}>{user.descripcion}</Text>
-            </View>
-
-            <View style={styles.buttonsWrapper}>
-
-              {/* Botón de publicar nueva oferta */}
               <View>
+                {/* Logo de empresa */}
+                <View style={styles.profileContainer}>
+                  <Image
+                    source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
+                    style={styles.profileImage}
+                  />
+                  {/* Botón de edición */}
+                  <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
+                    <Feather name="edit-3" size={22} color={colors.white} />
+                  </TouchableOpacity>
+
+                </View>
+
+                {/* Botón de eliminar cuenta */}
                 <TouchableOpacity
-                  style={[styles.publishButton, !canCreateNewOffer() && styles.disabledButton]}
-                  onPress={handlePublishButtonPress}
-                  disabled={!canCreateNewOffer()}
+                  style={styles.deleteAccountButton}
+                  onPress={() => setShowDeleteModal(true)}
                 >
-                  {canCreateNewOffer() &&
-                    <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
-                  }
-
-                  <Text style={styles.publishButtonText}>
-                    {canCreateNewOffer() ? 'Publicar Nueva Oferta' : 'Máximo Alcanzado'}
-                  </Text>
+                  <MaterialIcons name="delete" size={20} color={colors.white} />
+                  <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
                 </TouchableOpacity>
-
               </View>
 
+              {/* Información de la empresa */}
+              <View style={styles.infoContainer}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.name}>{user.nombre}</Text>
+                  {subscriptionLevel === 'PREMIUM' && (
+                    <View style={styles.verifiedBadgePremium}>
+                      <MaterialIcons name="verified" size={20} color="#FFD700" />
+                    </View>
+                  )}
+                  {subscriptionLevel === 'BASICO' && (
+                    <View style={styles.verifiedBadgeBasic}>
+                      <MaterialIcons name="verified" size={20} color="#C0C0C0" />
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.username}>@{user.username}</Text>
+                <Text style={styles.info}><MaterialIcons name="email" size={18} color={colors.primary} /> {user.email}</Text>
+                <Text style={styles.info}><MaterialIcons name="phone" size={18} color={colors.primary} /> {user.telefono}</Text>
+                <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
+                <Text style={styles.description}>{user.descripcion}</Text>
+              </View>
 
-              {/* Botón de mejorar plan */}
-              <View>
-                {(() => {
-                  if (!canCreateNewOffer() && !canPromoteNewOffer()) {
-                    return (
-                      <Text style={styles.limitMessage}>
-                        Has alcanzado tu límite de{'\n'}
-                        ofertas abiertas ({rules.maxActiveOffers}) y patrocinadas ({rules.maxSponsoredOffers}).{'\n'}
-                        ¿Quieres más opciones?
-                      </Text>
-                    );
-                  } else if (!canCreateNewOffer()) {
-                    return (
-                      <Text style={styles.limitMessage}>
-                        Has alcanzado tu límite de{'\n'}
-                        ofertas abiertas ({rules.maxActiveOffers}).{'\n'}
-                        ¿Quieres más opciones?
-                      </Text>
-                    );
-                  } else if (!canPromoteNewOffer()) {
-                    return (
-                      <Text style={styles.limitMessage}>
-                        Has alcanzado tu límite de{'\n'}
-                        ofertas patrocinadas ({rules.maxSponsoredOffers}).{'\n'}
-                        ¿Quieres más opciones?
-                      </Text>
-                    );
-                  }
-                  return null;
-                })()}
+              <View style={styles.buttonsWrapper}>
 
+                {/* Botón de publicar nueva oferta */}
+                {canCreateNewOffer() &&
+                  <View>
+                    <TouchableOpacity
+                      style={styles.publishButton}
+                      onPress={handlePublishButtonPress}
+                      disabled={!canCreateNewOffer()}
+                    >
+                      <FontAwesome5 name="plus" size={16} color="white" style={styles.plusIcon} />
+                      <Text style={styles.publishButtonText}>Publicar Nueva Oferta</Text>
+                    </TouchableOpacity>
+                  </View>
+                }
 
-                <TouchableOpacity
-                  style={styles.mejorarPlanButton}
-                  onPress={() => router.push(`/suscripcion`)}
-                >
-                  <FontAwesome5 name="rocket" size={16} color="white" style={styles.plusIcon} />
-                  <Text style={styles.publishButtonText}>Mejora tu plan aquí</Text>
-                </TouchableOpacity>
+                {/* Botón de mejorar plan */}
+                <View>
+                  {upgradeMessage && (
+                    <View style={styles.upgradeCard}>
+                      <View style={styles.upgradeHeader}>
+                        <MaterialIcons name="error-outline" size={24} color={colors.primary} />
+                        <Text style={styles.upgradeTitle}>{upgradeMessage}</Text>
+                      </View>
+                    </View>
+                  )}
+
+                  <TouchableOpacity
+                    style={styles.mejorarPlanButton}
+                    onPress={() => router.push(`/suscripcion`)}
+                  >
+                    <FontAwesome5 name="crown" size={16} color="white" />
+                    <Text style={styles.upgradeButtonText}>
+                      {!canCreateNewOffer() || !canPromoteNewOffer() ? "Mejora tu plan aquí" : "Gestiona tu plan aquí"}
+                    </Text>
+
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {/* Botón de eliminar anuncios */}
-              {user.ads ?
+              {user.ads &&
                 <View>
                   <TouchableOpacity
-                      style={styles.mejorarPlanButton}
-                      onPress={handleRemoveAds}
-                    >
-                      <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
-                      <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
-                    </TouchableOpacity>
+                    style={styles.mejorarPlanButton}
+                    onPress={handleRemoveAds}
+                  >
+                    <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                    <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                  </TouchableOpacity>
                 </View>
-              : <></>}
+              }
             </View>
-          </View>
-          
 
-          {/* Separador */}
-          <View style={styles.separator} />
 
-          <View style={styles.downContainer}>
-            {/* Información empresarial */}
-            <Text style={styles.sectionTitle2}>Información Empresarial</Text>
-            <Text style={styles.info}>
-              <FontAwesome5 name="globe" size={18} color={colors.primary} /> Web: 
-              {' '}
-              <TouchableOpacity onPress={() => Linking.openURL(user.web)}>
-                <Text style={{ color: colors.primary, textDecorationLine: 'underline' }}>{user.web}</Text>
-              </TouchableOpacity>
-            </Text>
-          </View>
+            {/* Separador */}
+            <View style={styles.separator} />
 
-          <TouchableOpacity
-            style={styles.deleteAccountButton}
-            onPress={() => setShowDeleteModal(true)}
-          >
-            <MaterialIcons name="delete" size={20} color={colors.white} />
-            <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
-          </TouchableOpacity>
-
-          <View style={styles.separator} />
-
-          <View style={styles.offersContainer}>
-            <Text style={styles.sectionTitle}>Ofertas Activas</Text>
-            <ListadoOfertasEmpresa
-              offers={offers}
-              canPromoteNewOffer={canPromoteNewOffer}
-              canCancelPromotedOffer={true}
-              fetchOffers={fetchOffers}
-            />
-          </View>
-          {/* Recent Truckers */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Camioneros Recientes</Text>
-            {camioneros.filter(camionero => !(resenados.includes(camionero.userId))).length === 0 ? (
-              <Text style={styles.emptyMessage}>No has trabajado con camioneros recientemente</Text>
-            ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {camioneros
-                  .filter(camionero => !(resenados.includes(camionero.userId)))
-                  .map(camionero => (
-                    <View key={`camionero-${camionero.id}`} style={styles.personCard}>
-                      <View style={styles.personHeader}>
-                        {camionero.usuario?.foto ? (
-                          <Image
-                            source={{ uri: `data:image/png;base64,${camionero.usuario.foto}` }}
-                            style={styles.personAvatar}
-                          />
-                        ) : (
-                          <View style={styles.personAvatarPlaceholder}>
-                            <FontAwesome5 name="truck" size={20} color={colors.white} />
-                          </View>
-                        )}
-                        <View style={styles.personInfo}>
-                          <Text style={styles.personName}>{camionero.usuario?.nombre}</Text>
-                          <View style={styles.locationRow}>
-                            <MaterialIcons name="location-on" size={14} color={colors.secondary} />
-                            <Text style={styles.locationText}>{camionero.usuario?.localizacion || 'Ubicación no disponible'}</Text>
-                          </View>
-                        </View>
-                      </View>
-
-                      <View style={styles.ratingContainer}>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <TouchableOpacity
-                            key={`star-${star}`}
-                            onPress={() => {
-                              setSelectedRating(star); // Guarda la estrella seleccionada
-                              setCamioneroAResenar(camionero);
-                              setShowResenaModal(true);
-                            }}
-                            onPressIn={() => setHoverRating(star)}
-                            onPressOut={() => setHoverRating(0)}
-                            activeOpacity={1}
-                          >
-                            <FontAwesome
-                              name={
-                                star <= (hoverRating || selectedRating) // Muestra rellena si está en hover O seleccionada
-                                  ? "star"
-                                  : "star-o"
-                              }
-                              size={24}
-                              color={
-                                star <= (hoverRating || selectedRating)
-                                  ? colors.primary
-                                  : colors.primaryLight
-                              }
-                            />
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-
-                      <TouchableOpacity
-                        style={styles.profileButton}
-                        onPress={() => router.push(`/camionero/${camionero.id}`)}
-                      >
-                        <FontAwesome5 name="user" size={14} color={colors.white} />
-                        <Text style={styles.profileButtonText}>Ver perfil</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-              </ScrollView>
-            )}
+            <View style={styles.downContainer}>
+              {/* Información empresarial */}
+              <Text style={styles.sectionTitle2}>Información Empresarial</Text>
+              <Text style={styles.info}>
+                <FontAwesome5 name="globe" size={18} color={colors.primary} /> Web:
+                {' '}
+                <TouchableOpacity onPress={() => Linking.openURL(user.web)}>
+                  <Text style={{ color: colors.secondary, textDecorationLine: 'underline' }}>{user.web}</Text>
+                </TouchableOpacity>
+              </Text>
+            </View>
 
             <View style={styles.separator} />
 
-            <View style={styles.reseñasContainer}>
-              <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
-              {/* Valoración media con estrellas */}
-              <View style={styles.ratingSummary}>
-                <View style={styles.starsContainer}>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <FontAwesome
-                      key={star}
-                      name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
-                      size={24}
-
-                      color={colors.primary}
-                      style={styles.starIcon}
-                    />
-                  ))}
-                </View>
-                <Text style={styles.averageRatingText}>
-                  {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
-                  {resenas.length > 0 && (
-                    <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
-                  )}
-                </Text>
-              </View>
-
-
-              {resenas.length === 0 ? (
-                <View style={styles.emptyReviews}>
-                  <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
-                  <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
-                </View>
-              ) : (
-                resenas.map((resena) => (
-                  <View key={resena.id} style={styles.reviewCard}>
-                    <View style={styles.reviewHeader}>
-                      {resena.comentador?.foto ? (
-                        <Image
-                          source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
-                          style={styles.reviewAvatar}
-                        />
-                      ) : (
-                        <View style={styles.avatarPlaceholder}>
-                          <FontAwesome5 name="user" size={20} color="white" />
-                        </View>
-                      )}
-                      <View>
-                        <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
-                        <Text style={styles.reviewDate}>
-                          {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.reviewStars}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <FontAwesome
-                          key={star}
-                          name={star <= resena.valoracion ? "star" : "star-o"}
-                          size={16}
-                          color={colors.primary}
-                        />
-                      ))}
-                    </View>
-
-                    <Text style={styles.reviewComment}>{resena.comentarios}</Text>
-
-                  </View>
-                ))
-              )}
+            <View style={styles.offersContainer}>
+              <Text style={styles.sectionTitle}>Ofertas Activas</Text>
+              <ListadoOfertasEmpresa
+                offers={offers}
+                canPromoteNewOffer={canPromoteNewOffer}
+                canCancelPromotedOffer={true}
+                fetchOffers={fetchOffers}
+              />
             </View>
+            {/* Recent Truckers */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Camioneros Recientes</Text>
+              {camioneros.filter(camionero => !(resenados.includes(camionero.userId))).length === 0 ? (
+                <Text style={styles.emptyMessage}>No has trabajado con camioneros recientemente</Text>
+              ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {camioneros
+                    .filter(camionero => !(resenados.includes(camionero.userId)))
+                    .map(camionero => (
+                      <View key={`camionero-${camionero.id}`} style={styles.personCard}>
+                        <View style={styles.personHeader}>
+                          {camionero.usuario?.foto ? (
+                            <Image
+                              source={{ uri: `data:image/png;base64,${camionero.usuario.foto}` }}
+                              style={styles.personAvatar}
+                            />
+                          ) : (
+                            <View style={styles.personAvatarPlaceholder}>
+                              <FontAwesome5 name="truck" size={20} color={colors.white} />
+                            </View>
+                          )}
+                          <View style={styles.personInfo}>
+                            <Text style={styles.personName}>{camionero.usuario?.nombre}</Text>
+                            <View style={styles.locationRow}>
+                              <MaterialIcons name="location-on" size={14} color={colors.secondary} />
+                              <Text style={styles.locationText}>{camionero.usuario?.localizacion || 'Ubicación no disponible'}</Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        <View style={styles.ratingContainer}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <TouchableOpacity
+                              key={`star-${star}`}
+                              onPress={() => {
+                                setSelectedRating(star); // Guarda la estrella seleccionada
+                                setCamioneroAResenar(camionero);
+                                setShowResenaModal(true);
+                              }}
+                              onPressIn={() => setHoverRating(star)}
+                              onPressOut={() => setHoverRating(0)}
+                              activeOpacity={1}
+                            >
+                              <FontAwesome
+                                name={
+                                  star <= (hoverRating || selectedRating) // Muestra rellena si está en hover O seleccionada
+                                    ? "star"
+                                    : "star-o"
+                                }
+                                size={24}
+                                color={
+                                  star <= (hoverRating || selectedRating)
+                                    ? colors.primary
+                                    : colors.primaryLight
+                                }
+                              />
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+
+                        <TouchableOpacity
+                          style={styles.profileButton}
+                          onPress={() => router.push(`/camionero/${camionero.id}`)}
+                        >
+                          <FontAwesome5 name="user" size={14} color={colors.white} />
+                          <Text style={styles.profileButtonText}>Ver perfil</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                </ScrollView>
+              )}
+
+              <View style={styles.separator} />
+
+              <View style={styles.reseñasContainer}>
+                <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
+                {/* Valoración media con estrellas */}
+                <View style={styles.ratingSummary}>
+                  <View style={styles.starsContainer}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FontAwesome
+                        key={star}
+                        name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
+                        size={24}
+
+                        color={colors.primary}
+                        style={styles.starIcon}
+                      />
+                    ))}
+                  </View>
+                  <Text style={styles.averageRatingText}>
+                    {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
+                    {resenas.length > 0 && (
+                      <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                    )}
+                  </Text>
+                </View>
+
+
+                {resenas.length === 0 ? (
+                  <View style={styles.emptyReviews}>
+                    <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
+                    <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
+                  </View>
+                ) : (
+                  resenas.map((resena) => (
+                    <View key={resena.id} style={styles.reviewCard}>
+                      <View style={styles.reviewHeader}>
+                        {resena.comentador?.foto ? (
+                          <Image
+                            source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
+                            style={styles.reviewAvatar}
+                          />
+                        ) : (
+                          <View style={styles.avatarPlaceholder}>
+                            <FontAwesome5 name="user" size={20} color="white" />
+                          </View>
+                        )}
+                        <View>
+                          <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
+                          <Text style={styles.reviewDate}>
+                            {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.reviewStars}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <FontAwesome
+                            key={star}
+                            name={star <= resena.valoracion ? "star" : "star-o"}
+                            size={16}
+                            color={colors.primary}
+                          />
+                        ))}
+                      </View>
+
+                      <Text style={styles.reviewComment}>{resena.comentarios}</Text>
+
+                    </View>
+                  ))
+                )}
+              </View>
+            </View >
           </View >
         </View >
-      </View >
 
-      {/* Modals */}
-      <ResenaModal
-        visible={showResenaModal}
-        onClose={() => {
-          setShowResenaModal(false);
-          setCamioneroAResenar(null);
-          setSelectedRating(false);
-          
-        }}
-        initialRating={selectedRating}
-        onSubmit={handleSubmitResenaWrapper}
-        comentadorId={user?.userId}
-        comentadoId={camioneroAResenar?.usuario?.id}
-        isEditing={false}
-      />
+        {/* Modals */}
+        <ResenaModal
+          visible={showResenaModal}
+          onClose={() => {
+            setShowResenaModal(false);
+            setCamioneroAResenar(null);
+            setSelectedRating(false);
 
-      <ConfirmDeleteModal
-        isVisible={showDeleteModal}
-        onConfirm={handleDeleteAccount}
-        onCancel={() => setShowDeleteModal(false)}
-        message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
-      />
-
-      <ErrorModal
-        isVisible={errorModalVisible}
-        message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
-      />
-
-      <SuccessModal
-        isVisible={successModalVisible}
-        onClose={() => setSuccessModalVisible(false)}
-        message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
-      />
-      <DraftModal
-        isVisible={showDraftsChoiceModal}
-        onClose={() => setShowDraftsChoiceModal(false)}
-        onViewDrafts={handleViewDrafts}
-        onCreateNew={handleCreateNew}
-      />
-      {/* Right Ad */}
-    {user?.ads && (
-      <View style={styles.adContainer}>
-        <Image
-          source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
-          style={styles.adImage}
-          resizeMode="cover"
+          }}
+          initialRating={selectedRating}
+          onSubmit={handleSubmitResenaWrapper}
+          comentadorId={user?.userId}
+          comentadoId={camioneroAResenar?.usuario?.id}
+          isEditing={false}
         />
+
+        <ConfirmDeleteModal
+          isVisible={showDeleteModal}
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setShowDeleteModal(false)}
+          message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
+        />
+
+        <ErrorModal
+          isVisible={errorModalVisible}
+          message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
+        />
+
+        <SuccessModal
+          isVisible={successModalVisible}
+          onClose={() => setSuccessModalVisible(false)}
+          message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
+        />
+        <DraftModal
+          isVisible={showDraftsChoiceModal}
+          onClose={() => setShowDraftsChoiceModal(false)}
+          onViewDrafts={handleViewDrafts}
+          onCreateNew={handleCreateNew}
+        />
+        {/* Right Ad */}
+        {user?.ads && (
+          <View style={styles.adContainer}>
+            <Image
+              source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+              style={styles.adImage}
+              resizeMode="cover"
+            />
+          </View>
+        )}
       </View>
-    )}
-  </View>
     </ScrollView >
   );
 };
@@ -632,7 +625,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.white,
-    paddingTop: 70,
+    paddingVertical: 40,
     minHeight: "100%",
   },
   card: {
@@ -640,7 +633,7 @@ const styles = StyleSheet.create({
     padding: 30,
     borderRadius: 15,
     elevation: 6,
-    width: "80%",
+    width: windowWidth < 1400 ? '90%' : '80%',
     alignSelf: "center",
     borderWidth: 1,
     borderColor: colors.lightGray,
@@ -708,7 +701,8 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     flexDirection: 'column',
-    gap: 15,
+    gap: 10,
+    maxWidth: windowWidth < 1400 ? 300 : 500,
   },
   publishButton: {
     flexDirection: "row",
@@ -724,15 +718,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
   plusIcon: {
     marginRight: 6,
   },
   publishButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
   mejorarPlanButton: {
@@ -743,10 +734,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  limitMessage: {
-    color: 'red',
-    textAlign: 'center',
+  upgradeCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 8,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  upgradeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+    padding: 2,
+    borderRadius: 8,
+  },
+  upgradeTitle: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  upgradeButtonText: {
+    color: colors.white,
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   separator: {
     width: "100%",
@@ -826,20 +845,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
-  },
-  upgradeText: {
-    fontSize: 14,
-    color: colors.darkGray,
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  upgradeButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.secondary,
-    paddingVertical: 10,
-    borderRadius: 8,
   },
   emptyMessage: {
     textAlign: "center",
@@ -1176,17 +1181,28 @@ const styles = StyleSheet.create({
   },
   deleteAccountButton: {
     backgroundColor: colors.red,
-    padding: 12,
+    padding: 8,
     borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#d32f2f",
+    width: '70%',
+    maxWidth: 250,
+    alignSelf: "center",
   },
   deleteAccountButtonText: {
     color: colors.white,
-    fontWeight: "bold",
-    marginLeft: 10,
+    fontWeight: "600",
+    marginLeft: 5,
+    fontSize: 14,
   },
   starIcon: {
     marginHorizontal: 4,
