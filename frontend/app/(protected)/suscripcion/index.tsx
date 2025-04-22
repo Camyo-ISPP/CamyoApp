@@ -12,6 +12,7 @@ import axios from "axios";
 import SuccessModal from "../../_components/SuccessModal";
 import WebFooter from "@/app/_components/_layout/WebFooter";
 import MapLoader from "@/app/_components/MapLoader";
+import SubscriptionModal from "@/app/_components/SubscriptionModal";
 
 const SubscriptionPlans = () => {
     const { user, userToken } = useAuth();
@@ -20,6 +21,8 @@ const SubscriptionPlans = () => {
     const [isAuthLoaded, setIsAuthLoaded] = useState(false);
     const [isUserLoading, setIsUserLoading] = useState(true);
     const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [loadingPlan, setLoadingPlan] = useState<boolean>(true);
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
     const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -65,8 +68,6 @@ const SubscriptionPlans = () => {
 
     }, [id])
 
-
-
     if (!isAuthLoaded) {
         return (
             <View style={styles.loadingContainer}>
@@ -77,34 +78,43 @@ const SubscriptionPlans = () => {
 
     const handleChangePlan = async (planLevel: string) => {
         if (!user || !user.id || !userToken) return;
-
-        try {
-            setLoadingPlan(true);
-            const response = await axios.post(
-                `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${userToken}`,
-                    },
-                }
-            );
-
-            if (response.status === 201) {
-                setCurrentPlan(planLevel);
-                setSuccessModalVisible(true);
-                setTimeout(() => {
-                    setSuccessModalVisible(false);
-                }, 2000);
-            } else {
-                alert("No se pudo cambiar el plan.");
-            }
-        } catch (error) {
-            alert("Ocurrió un error al cambiar el plan.");
-        } finally {
-            setLoadingPlan(false);
+      
+        if (planLevel === "GRATIS" && currentPlan && currentPlan !== "GRATIS") {
+          setSelectedPlan(planLevel);
+          setShowConfirmationModal(true);
+          return;
         }
-    };
+      
+        await processPlanChange(planLevel);
+      };
+      
+      const processPlanChange = async (planLevel: string) => {
+        try {
+          setLoadingPlan(true);
+          const response = await axios.post(
+            `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+              },
+            }
+          );
+      
+          if (response.status === 201) {
+            setCurrentPlan(planLevel);
+            setSuccessModalVisible(true);
+            setTimeout(() => {
+              setSuccessModalVisible(false);
+            }, 2000);
+          }
+        } catch (error) {
+          alert("Ocurrió un error al cambiar el plan.");
+        } finally {
+          setLoadingPlan(false);
+          setShowConfirmationModal(false);
+        }
+      };
 
     const formatPlanLevel = (plan: string): string => {
         switch (plan.toUpperCase()) {
@@ -317,6 +327,15 @@ const SubscriptionPlans = () => {
                     isVisible={successModalVisible}
                     onClose={() => setSuccessModalVisible(false)}
                     message="¡Plan actualizado con éxito!"
+                />
+                <SubscriptionModal
+                visible={showConfirmationModal}
+                onConfirm={() => selectedPlan && processPlanChange(selectedPlan)}
+                onCancel={() => setShowConfirmationModal(false)}
+                title="Confirmar cambio de plan"
+                message="¿Estás seguro de que deseas cambiar al plan gratuito? Ten en cuenta que perderás acceso a las funcionalidades de tu plan actual y el cambio será efectivo inmediatamente."
+                confirmText="Confirmar cambio"
+                cancelText="Mantener mi plan"
                 />
             </View>
         </EmpresaRoute>

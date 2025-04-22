@@ -192,6 +192,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
                         setSuccessModalVisible(true);
                         setTimeout(() => {
                                 setSuccessModalVisible(false);
+                                setId("");
                                 router.push("/");
                             }, 1000);
                     } else {
