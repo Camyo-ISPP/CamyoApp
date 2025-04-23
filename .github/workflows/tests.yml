@@ -2,7 +2,7 @@ name: Java CI - Tests
 
 on:
   push:
-    branches: [ backend/tarea_16/test_workflow ]
+    branches: [ backend/tarea_17/test_workflow ]
   pull_request:
     branches: [ main ]
 
