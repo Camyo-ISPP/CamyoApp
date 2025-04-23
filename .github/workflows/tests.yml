@@ -32,14 +32,6 @@ jobs:
             ${{ runner.os }}-maven
 
       - name: Ejecutar tests excluyendo pago (manual por ruta)
-        run: |
-          TESTS=$(find src/test/java/com/camyo/backend \
-            -type f -name "*Test.java" \
-            ! -path "*pago*" \
-            -exec basename {} .java \; \
-            | paste -sd, -)
-        
-          echo "Ejecutando tests: $TESTS"
-          mvn -B test -Dtest="$TESTS"
+        run:  mvn clean test -Dtest=AuthControllerTests,AuthServiceTest,CamioneroControllerTests,CamioneroServiceTests,EmpresaControllerTests,EmpresaServiceTests,CargaServiceTest,OfertaControllerTests,OfertaServiceTests,TrabajoServiceTests,ResenaControllerTests,ResenaServiceTests,SuscripcionControllerTests,SuscripcionServiceTests,AuthoritiesServiceTests,UsuarioControllerTests,UsuarioEntityTests,UsuarioServiceTests,BackendApplicationTests
         working-directory: ./backend
           
