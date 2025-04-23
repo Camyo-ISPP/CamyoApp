@@ -1,8 +1,8 @@
-name: Java CI – Tests
+name: Java CI - Tests
 
 on:
   push:
-    branches: [ backend/tarea_17/test_workflow ]
+    branches: [ backend/tarea_16/test_workflow ]
   pull_request:
     branches: [ main ]
 
@@ -10,41 +10,41 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    env:
-      CAMYO_APP_JWT_SECRET: dummy_token_for_ci
-      SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
-      SPRING_DATASOURCE_USERNAME: sa
-      SPRING_DATASOURCE_PASSWORD: ""
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
-      SPRING_SQL_INIT_MODE: never      
-      STRIPE_API_KEY: sk_test_4eC39HqLyjWDarjtT1zdp7dc
-
     steps:
-    - name: Checkout del código
-      uses: actions/checkout@v3
+      - name: Checkout del código
+        uses: actions/checkout@v3
 
-    - name: Configurar JDK 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 17
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
 
-    - name: Cache de Maven
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-maven
+      - name: Cache de Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
 
-    - name: Generar .env para CI
-      run: |
-        cat > .env <<EOF
-        CAMYO_APP_JWT_SECRET=$CAMYO_APP_JWT_SECRET
-        STRIPE_API_KEY=$STRIPE_API_KEY
-        EOF
+      - name: Generar .env para los tests
+        working-directory: ./backend
+        run: |
+          cat > .env <<'EOF'
+          # 🔒 Variables sólo para CI.  Cambia las tuyas en local.
+          CAMYO_APP_JWT_SECRET=dummy_token_for_ci
+          STRIPE_API_KEY=sk_test_4eC39HqLyjWDarjtT1zdp7dc
+          EOF
+          echo "Contenido de backend/.env:"
+          cat .env
 
-    - name: Ejecutar tests
-      working-directory: ./backend
-      run: mvn --batch-mode clean test
+      - name: Ejecutar tests
+        working-directory: ./backend
+        run: |
+          mvn --batch-mode clean test \
+            -Dspring.datasource.url=jdbc:h2:mem:testdb \
+            -Dspring.datasource.driver-class-name=org.h2.Driver \
+            -Dspring.datasource.username=sa \
+            -Dspring.datasource.password= \
+            -Dspring.jpa.database-platform=org.hibernate.dialect.H2Dialect \
+            -Dspring.jpa.hibernate.ddl-auto=create-drop
