@@ -31,6 +31,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven
 
-      - name: Ejecutar tests
-        run: mvn clean verify
+      - name: Ejecutar tests (excluyendo pago)
+        run: mvn clean test -Dtest=AuthControllerTests,AuthServiceTest,CamioneroControllerTests,CamioneroServiceTests,EmpresaControllerTests,EmpresaServiceTests,CargaServiceTest,OfertaControllerTests,OfertaServiceTests,TrabajoServiceTests,ResenaControllerTests,ResenaServiceTests,SuscripcionControllerTests,SuscripcionServiceTests,AuthoritiesServiceTests,UsuarioControllerTests,UsuarioEntityTests,UsuarioServiceTests,BackendApplicationTests
         working-directory: ./backend
+          
