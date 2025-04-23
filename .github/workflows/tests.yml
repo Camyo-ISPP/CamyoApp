@@ -33,11 +33,13 @@ jobs:
 
       - name: Ejecutar tests excluyendo pago (manual por ruta)
         run: |
-          find src/test/java/com/camyo/backend \
+          TESTS=$(find src/test/java/com/camyo/backend \
             -type f -name "*Test.java" \
             ! -path "*pago*" \
             -exec basename {} .java \; \
-            | paste -sd, - \
-            | xargs -I {} mvn -B test -Dtest="{}"
+            | paste -sd, -)
+        
+          echo "Ejecutando tests: $TESTS"
+          mvn -B test -Dtest="$TESTS"
         working-directory: ./backend
           
