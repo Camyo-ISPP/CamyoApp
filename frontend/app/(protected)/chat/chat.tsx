@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView } from 'react-native';
-import { Bubble, GiftedChat, InputToolbar, Send, Time } from 'react-native-gifted-chat';
-import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc, increment } from 'firebase/firestore';
+import { Bubble, Composer, ComposerProps, GiftedChat, IMessage, InputToolbar, Send, SendProps, Time } from 'react-native-gifted-chat';
+import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc, increment, limit } from 'firebase/firestore';
 import { database } from '../../../firebase';
 import { useAuth } from '../../../contexts/AuthContext';
 import colors from '@/assets/styles/colors';
@@ -37,7 +37,7 @@ function ChatComponent({ chat }: ChatComponentProps) {
   const chatRef = useRef<any>();
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const [otherUser, setOtherUser] = useState<any>(null);
-  const [textHeight, setTextHeight] = useState(70); // Altura inicial del TextInput
+  const [textHeight, setTextHeight] = useState(500); // Altura inicial del TextInput
 
   useEffect(() => {
     if (!chat || !user) return;
@@ -219,6 +219,30 @@ function ChatComponent({ chat }: ChatComponentProps) {
     setTextHeight(contentHeight); // Actualizar la altura dinámicamente
   };
 
+  const ChatComposer = (
+    props: ComposerProps & {
+      // GiftedChat passes its props to all of its `render*()`
+      onSend: SendProps<IMessage>['onSend'];
+      text: SendProps<IMessage>['text'];
+    },
+  ) => (
+    <Composer
+      {...props}
+      textInputProps={{
+        ...props.textInputProps,
+        // for enabling the Return key to send a message only on web
+        blurOnSubmit: Platform.OS === 'web',
+        onSubmitEditing:
+          Platform.OS === 'web'
+            ? () => {
+                if (props.text && props.onSend) {
+                  props.onSend({text: props.text.trim()}, true);
+                }
+              }
+            : undefined,
+      }}
+    />
+  );
   
 
   return (
@@ -245,6 +269,7 @@ function ChatComponent({ chat }: ChatComponentProps) {
 
       {/* Chat interface */}
       <GiftedChat
+        renderComposer={ChatComposer}
         inverted={true}
         messages={messages}
         showAvatarForEveryMessage={false}
@@ -263,6 +288,7 @@ function ChatComponent({ chat }: ChatComponentProps) {
               placeholder: 'Escribe un mensaje...',
               placeholderTextColor: colors.gray,
               style: [styles.messageInput, { height: Math.max(40, textHeight) }], // Ajustar altura dinámicamente
+              maxLength: 3000,
               multiline: true,
               onContentSizeChange: handleContentSizeChange, // Detectar cambios en el tamaño del contenido
             }}
