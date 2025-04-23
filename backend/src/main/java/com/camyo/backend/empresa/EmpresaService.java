@@ -3,7 +3,9 @@ package com.camyo.backend.empresa;
 import java.util.List;
 import java.util.Optional;
 
+import com.camyo.backend.exceptions.InvalidNifException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
+import com.camyo.backend.util.Validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -42,7 +44,8 @@ public class EmpresaService {
 	}
 
     @Transactional
-    public Empresa guardarEmpresa(Empresa empresa) throws DataAccessException {
+    public Empresa guardarEmpresa(Empresa empresa) throws DataAccessException, InvalidNifException {
+		Validators.comprobarNif(empresa.getNif());
         empresaRepository.save(empresa);
         return empresa;
     }

@@ -4,15 +4,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.List;
 
+import com.camyo.backend.camionero.Licencia;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
@@ -79,11 +83,9 @@ class OfertaControllerTests {
         usuarioEmpresa = new Usuario();
         usuarioEmpresa.setNombre("EmpresaTest");
         usuarioEmpresa.setFoto(new byte[]{10, 20, 30});
-
         empresa = new Empresa();
         empresa.setId(1);
         empresa.setUsuario(usuarioEmpresa);
-
         oferta1 = new Oferta();
         oferta1.setId(1);
         oferta1.setTitulo("Oferta Nacional");
@@ -91,7 +93,6 @@ class OfertaControllerTests {
         oferta1.setEmpresa(empresa);
         oferta1.setTipoOferta(TipoOferta.CARGA);
         oferta1.setEstado(OfertaEstado.ABIERTA);
-
         oferta2 = new Oferta();
         oferta2.setId(2);
         oferta2.setTitulo("Oferta Internacional");
@@ -99,11 +100,9 @@ class OfertaControllerTests {
         oferta2.setEmpresa(empresa);
         oferta2.setTipoOferta(TipoOferta.TRABAJO);
         oferta2.setEstado(OfertaEstado.ABIERTA);
-
         carga = new Carga();
         carga.setId(1);
         carga.setOferta(oferta1);
-
         trabajo = new Trabajo();
         trabajo.setId(1);
         trabajo.setOferta(oferta2);
@@ -112,19 +111,16 @@ class OfertaControllerTests {
     @Test
     void crearOfertaConCargaRetorna201() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        Oferta nuevaOferta = new Oferta();
-        nuevaOferta.setEmpresa(empresa);
-        nuevaOferta.setTipoOferta(TipoOferta.CARGA);
-        dto.setOferta(nuevaOferta);
-
+        Oferta nueva = new Oferta();
+        nueva.setEmpresa(empresa);
+        nueva.setTipoOferta(TipoOferta.CARGA);
+        dto.setOferta(nueva);
         Carga nuevaCarga = new Carga();
         nuevaCarga.setMercancia("Electrodomésticos");
         dto.setCarga(nuevaCarga);
-
         when(empresaService.obtenerEmpresaPorId(anyInt())).thenReturn(empresa);
-        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(nuevaOferta);
+        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(nueva);
         when(cargaService.guardarCarga(any(Carga.class))).thenReturn(nuevaCarga);
-
         mockMvc.perform(post(BASE_URL)
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -134,19 +130,16 @@ class OfertaControllerTests {
     @Test
     void crearOfertaConTrabajoRetorna201() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        Oferta nuevaOferta = new Oferta();
-        nuevaOferta.setEmpresa(empresa);
-        nuevaOferta.setTipoOferta(TipoOferta.TRABAJO);
-        dto.setOferta(nuevaOferta);
-
+        Oferta nueva = new Oferta();
+        nueva.setEmpresa(empresa);
+        nueva.setTipoOferta(TipoOferta.TRABAJO);
+        dto.setOferta(nueva);
         Trabajo nuevoTrabajo = new Trabajo();
         nuevoTrabajo.setJornada(Jornada.COMPLETA);
         dto.setTrabajo(nuevoTrabajo);
-
         when(empresaService.obtenerEmpresaPorId(anyInt())).thenReturn(empresa);
-        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(nuevaOferta);
+        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(nueva);
         when(trabajoService.guardarTrabajo(any(Trabajo.class))).thenReturn(nuevoTrabajo);
-
         mockMvc.perform(post(BASE_URL)
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -154,14 +147,40 @@ class OfertaControllerTests {
     }
 
     @Test
+    void crearOfertaCargaSinDatosCargaRetorna400() throws Exception {
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+        Oferta o = new Oferta();
+        o.setEmpresa(empresa);
+        o.setTipoOferta(TipoOferta.CARGA);
+        dto.setOferta(o);
+        when(empresaService.obtenerEmpresaPorId(anyInt())).thenReturn(empresa);
+        mockMvc.perform(post(BASE_URL)
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(dto)))
+           .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void crearOfertaTrabajoSinDatosTrabajoRetorna400() throws Exception {
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+        Oferta o = new Oferta();
+        o.setEmpresa(empresa);
+        o.setTipoOferta(TipoOferta.TRABAJO);
+        dto.setOferta(o);
+        when(empresaService.obtenerEmpresaPorId(anyInt())).thenReturn(empresa);
+        mockMvc.perform(post(BASE_URL)
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(dto)))
+           .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void crearOfertaTipoInvalidoRetorna400() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        Oferta nuevaOferta = new Oferta();
-        nuevaOferta.setEmpresa(empresa);
-        dto.setOferta(nuevaOferta);
-
+        Oferta nueva = new Oferta();
+        nueva.setEmpresa(empresa);
+        dto.setOferta(nueva);
         when(empresaService.obtenerEmpresaPorId(anyInt())).thenReturn(empresa);
-
         mockMvc.perform(post(BASE_URL)
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -171,14 +190,12 @@ class OfertaControllerTests {
     @Test
     void crearOfertaEmpresaNoEncontradaRetorna400() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        Oferta nuevaOferta = new Oferta();
-        nuevaOferta.setEmpresa(empresa);
-        nuevaOferta.setTipoOferta(TipoOferta.CARGA);
-        dto.setOferta(nuevaOferta);
-
-        when(empresaService.obtenerEmpresaPorId(1))
+        Oferta nueva = new Oferta();
+        nueva.setEmpresa(empresa);
+        nueva.setTipoOferta(TipoOferta.CARGA);
+        dto.setOferta(nueva);
+        when(empresaService.obtenerEmpresaPorId(anyInt()))
             .thenThrow(new ResourceNotFoundException("Empresa", "ID", 1));
-
         mockMvc.perform(post(BASE_URL)
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -186,10 +203,57 @@ class OfertaControllerTests {
     }
 
     @Test
+    void crearOfertaLanzaErrorInternoRetorna500() throws Exception {
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+        Oferta nueva = new Oferta();
+        nueva.setEmpresa(empresa);
+        nueva.setTipoOferta(TipoOferta.CARGA);
+        dto.setOferta(nueva);
+        Carga c = new Carga();
+        dto.setCarga(c);
+
+        when(empresaService.obtenerEmpresaPorId(anyInt())).thenReturn(empresa);
+        when(ofertaService.guardarOferta(any())).thenThrow(new RuntimeException("Error inesperado"));
+
+        mockMvc.perform(post(BASE_URL)
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(dto)))
+        .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void actualizarOfertaCubreTodosLosIfsRetorna200() throws Exception {
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+
+        Oferta nuevaData = new Oferta();
+        nuevaData.setEmpresa(empresa);
+        nuevaData.setTitulo("Nueva Oferta");
+        nuevaData.setLicencia(Licencia.C); 
+        nuevaData.setSueldo(1800.0);
+        nuevaData.setNotas("Notas de prueba"); 
+        nuevaData.setTipoOferta(TipoOferta.TRABAJO);
+        dto.setOferta(nuevaData);
+
+        Trabajo t = new Trabajo();
+        t.setJornada(Jornada.COMPLETA);
+        dto.setTrabajo(t);
+
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta2);
+        when(empresaService.obtenerEmpresaPorId(empresa.getId())).thenReturn(empresa);
+        when(ofertaService.guardarOferta(any())).thenReturn(oferta2);
+        when(ofertaService.obtenerTrabajo(1)).thenReturn(new Trabajo());
+        when(trabajoService.guardarTrabajo(any())).thenReturn(t);
+
+        mockMvc.perform(put(BASE_URL + "/1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+    }
+
+    @Test
     void actualizarOfertaNoExistenteRetorna404() throws Exception {
         when(ofertaService.obtenerOfertaPorId(999))
             .thenThrow(new ResourceNotFoundException("Oferta", "id", 999));
-
         OfertaRequestDTO dto = new OfertaRequestDTO();
         mockMvc.perform(put(BASE_URL + "/999")
             .contentType("application/json")
@@ -201,11 +265,9 @@ class OfertaControllerTests {
     void actualizarOfertaErrorInternoRetorna500() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
         dto.setOferta(oferta1);
-
         when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
         doThrow(new RuntimeException("Fallo inesperado"))
             .when(ofertaService).guardarOferta(any(Oferta.class));
-
         mockMvc.perform(put(BASE_URL + "/1")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -215,19 +277,15 @@ class OfertaControllerTests {
     @Test
     void actualizarOfertaConCargaRetorna200() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        Oferta ofertaExistente = oferta1;
-        ofertaExistente.setTipoOferta(TipoOferta.CARGA);
-        dto.setOferta(ofertaExistente);
-
-        Carga cargaNueva = new Carga();
-        cargaNueva.setPeso(555.0);
-        dto.setCarga(cargaNueva);
-
-        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(ofertaExistente);
-        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(ofertaExistente);
+        oferta1.setTipoOferta(TipoOferta.CARGA);
+        dto.setOferta(oferta1);
+        Carga nuevaCarga = new Carga();
+        nuevaCarga.setPeso(555.0);
+        dto.setCarga(nuevaCarga);
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
+        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(oferta1);
         when(ofertaService.obtenerCarga(1)).thenReturn(new Carga());
-        when(cargaService.guardarCarga(any(Carga.class))).thenReturn(cargaNueva);
-
+        when(cargaService.guardarCarga(any(Carga.class))).thenReturn(nuevaCarga);
         mockMvc.perform(put(BASE_URL + "/1")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -237,19 +295,15 @@ class OfertaControllerTests {
     @Test
     void actualizarOfertaConTrabajoRetorna200() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        Oferta ofertaExistente = oferta2;
-        ofertaExistente.setTipoOferta(TipoOferta.TRABAJO);
-        dto.setOferta(ofertaExistente);
-
-        Trabajo trabajoNuevo = new Trabajo();
-        trabajoNuevo.setJornada(Jornada.NOCTURNA);
-        dto.setTrabajo(trabajoNuevo);
-
-        when(ofertaService.obtenerOfertaPorId(2)).thenReturn(ofertaExistente);
-        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(ofertaExistente);
+        oferta2.setTipoOferta(TipoOferta.TRABAJO);
+        dto.setOferta(oferta2);
+        Trabajo t = new Trabajo();
+        t.setJornada(Jornada.NOCTURNA);
+        dto.setTrabajo(t);
+        when(ofertaService.obtenerOfertaPorId(2)).thenReturn(oferta2);
+        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(oferta2);
         when(ofertaService.obtenerTrabajo(2)).thenReturn(new Trabajo());
-        when(trabajoService.guardarTrabajo(any(Trabajo.class))).thenReturn(trabajoNuevo);
-
+        when(trabajoService.guardarTrabajo(any(Trabajo.class))).thenReturn(t);
         mockMvc.perform(put(BASE_URL + "/2")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -259,19 +313,15 @@ class OfertaControllerTests {
     @Test
     void actualizarOfertaCargaNuevaCuandoNoExisteRetorna200() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        Oferta existente = oferta1;
-        existente.setTipoOferta(TipoOferta.CARGA);
-        dto.setOferta(existente);
-
+        oferta1.setTipoOferta(TipoOferta.CARGA);
+        dto.setOferta(oferta1);
         Carga nuevaCarga = new Carga();
         nuevaCarga.setPeso(888.0);
         dto.setCarga(nuevaCarga);
-
-        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(existente);
-        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(existente);
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
+        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(oferta1);
         when(ofertaService.obtenerCarga(1)).thenReturn(null);
         when(cargaService.guardarCarga(any(Carga.class))).thenReturn(nuevaCarga);
-
         mockMvc.perform(put(BASE_URL + "/1")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -279,19 +329,33 @@ class OfertaControllerTests {
     }
 
     @Test
-    void actualizarOfertaConEmpresaInexistenteRetorna404() throws Exception {
-        Empresa nuevaEmpresa = new Empresa();
-        nuevaEmpresa.setId(999);
-
-        Oferta ofertaExistente = oferta1;
+    void actualizarOfertaTrabajoNuevoCuandoNoExisteRetorna200() throws Exception {
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        ofertaExistente.setEmpresa(nuevaEmpresa);
-        dto.setOferta(ofertaExistente);
+        oferta2.setTipoOferta(TipoOferta.TRABAJO);
+        dto.setOferta(oferta2);
+        Trabajo nuevoT = new Trabajo();
+        nuevoT.setJornada(Jornada.RELEVOS);
+        dto.setTrabajo(nuevoT);
+        when(ofertaService.obtenerOfertaPorId(2)).thenReturn(oferta2);
+        when(ofertaService.guardarOferta(any(Oferta.class))).thenReturn(oferta2);
+        when(ofertaService.obtenerTrabajo(2)).thenReturn(null);
+        when(trabajoService.guardarTrabajo(any(Trabajo.class))).thenReturn(nuevoT);
+        mockMvc.perform(put(BASE_URL + "/2")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(dto)))
+           .andExpect(status().isOk());
+    }
 
-        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(ofertaExistente);
+    @Test
+    void actualizarOfertaConEmpresaInexistenteRetorna404() throws Exception {
+        Empresa e2 = new Empresa();
+        e2.setId(999);
+        oferta1.setEmpresa(e2);
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+        dto.setOferta(oferta1);
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
         when(empresaService.obtenerEmpresaPorId(999))
             .thenThrow(new ResourceNotFoundException("Empresa", "id", 999));
-
         mockMvc.perform(put(BASE_URL + "/1")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -299,17 +363,14 @@ class OfertaControllerTests {
     }
 
     @Test
-    void actualizarOfertaTipoInvalidoRetorna400() throws Exception {
-        Oferta ofertaExistente = oferta1;
-        ofertaExistente.setTipoOferta(null);
-
+    void actualizarOfertaTipoInvalidoRetorna500() throws Exception {
+        Oferta o = new Oferta();
+        o.setTipoOferta(null);
         OfertaRequestDTO dto = new OfertaRequestDTO();
-        dto.setOferta(ofertaExistente);
-
-        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(ofertaExistente);
+        dto.setOferta(o);
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(o);
         doThrow(new RuntimeException("Tipo de oferta inválido"))
             .when(ofertaService).guardarOferta(any(Oferta.class));
-
         mockMvc.perform(put(BASE_URL + "/1")
             .contentType("application/json")
             .content(objectMapper.writeValueAsString(dto)))
@@ -321,6 +382,114 @@ class OfertaControllerTests {
         when(ofertaService.obtenerUltimas10Ofertas()).thenReturn(List.of(oferta1, oferta2));
         mockMvc.perform(get(BASE_URL + "/recientes"))
            .andExpect(status().isOk());
+    }
+
+    @Test
+    void actualizarOferta_sinEmpresaEnOferta_retorna200() throws Exception {
+        Oferta peticion = new Oferta();
+        peticion.setTipoOferta(TipoOferta.CARGA);  
+        peticion.setEmpresa(null);    
+
+        Carga carga = new Carga();           
+        carga.setPeso(100.0);
+
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+        dto.setOferta(peticion);
+        dto.setCarga(carga);
+
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
+        when(ofertaService.guardarOferta(any())).thenReturn(oferta1);
+        when(ofertaService.obtenerCarga(1)).thenReturn(new Carga());
+        when(cargaService.guardarCarga(any())).thenReturn(carga);
+
+        mockMvc.perform(put(BASE_URL + "/1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+
+        verify(empresaService, never()).obtenerEmpresaPorId(anyInt());
+    }
+
+
+    @Test
+    void actualizarOferta_sinEmpresa_enOferta() throws Exception {
+        Oferta sinEmpresa = new Oferta();
+        sinEmpresa.setTitulo("Sin empresa");
+        sinEmpresa.setTipoOferta(TipoOferta.TRABAJO);   
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+        dto.setOferta(sinEmpresa);
+
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta2);
+        when(ofertaService.guardarOferta(any())).thenReturn(oferta2);
+
+        mockMvc.perform(put("/ofertas/1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void actualizarOferta_actualizaExperienciaYLocalizacion() throws Exception {
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+
+        Oferta nueva = new Oferta();
+        nueva.setEmpresa(empresa);
+        nueva.setTipoOferta(TipoOferta.CARGA);   
+        nueva.setExperiencia(5);                
+        nueva.setLocalizacion("Sevilla");       
+        dto.setOferta(nueva);             
+
+        dto.setCarga(new Carga());
+
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
+        when(ofertaService.guardarOferta(any())).thenReturn(oferta1);
+        when(ofertaService.obtenerCarga(1)).thenReturn(new Carga());
+        when(cargaService.guardarCarga(any())).thenReturn(new Carga());
+
+        mockMvc.perform(put(BASE_URL + "/1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+    }
+
+    
+    @Test
+    void actualizarOferta_cargaSinDTO_ramaTrueFalse() throws Exception {
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+
+        Oferta o = new Oferta();
+        o.setEmpresa(empresa);
+        o.setTipoOferta(TipoOferta.CARGA);  
+        dto.setOferta(o);                
+
+        when(ofertaService.obtenerOfertaPorId(1)).thenReturn(oferta1);
+        when(ofertaService.guardarOferta(any())).thenReturn(oferta1);
+
+        mockMvc.perform(put(BASE_URL + "/1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+
+        verify(cargaService, never()).guardarCarga(any());
+    }
+    @Test
+    void actualizarOferta_trabajoSinDTO_ramaTrueFalse() throws Exception {
+        OfertaRequestDTO dto = new OfertaRequestDTO();
+
+        Oferta o = new Oferta();
+        o.setEmpresa(empresa);
+        o.setTipoOferta(TipoOferta.TRABAJO);  
+        dto.setOferta(o);                     
+
+        when(ofertaService.obtenerOfertaPorId(2)).thenReturn(oferta2);
+        when(ofertaService.guardarOferta(any())).thenReturn(oferta2);
+
+        mockMvc.perform(put(BASE_URL + "/2")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk());
+
+        verify(trabajoService, never()).guardarTrabajo(any());
     }
 
     @Test
@@ -369,33 +538,86 @@ class OfertaControllerTests {
 
     @Test
     void obtenerOfertasConInformacionCargaOk() throws Exception {
-        Oferta ofertaConEmpresa = new Oferta();
-        ofertaConEmpresa.setId(10);
-        ofertaConEmpresa.setTitulo("Oferta con Carga");
-        ofertaConEmpresa.setTipoOferta(TipoOferta.CARGA);
-        ofertaConEmpresa.setEstado(OfertaEstado.ABIERTA);
+        Oferta o = new Oferta();
+        o.setId(10);
+        o.setTitulo("Oferta con Carga");
+        o.setTipoOferta(TipoOferta.CARGA);
+        o.setEstado(OfertaEstado.ABIERTA);
         Empresa e = new Empresa();
         Usuario u = new Usuario();
         u.setNombre("EmpresaPrueba");
         e.setUsuario(u);
-        ofertaConEmpresa.setEmpresa(e);
-
-        when(ofertaService.obtenerOfertas()).thenReturn(List.of(ofertaConEmpresa));
+        o.setEmpresa(e);
         Carga c = new Carga();
         c.setMercancia("Mercancía X");
-        when(ofertaService.obtenerCarga(anyInt())).thenReturn(c);
-
+        when(ofertaService.obtenerOfertas()).thenReturn(List.of(o));
+        when(ofertaService.obtenerCarga(10)).thenReturn(c);
         mockMvc.perform(get(BASE_URL + "/info"))
            .andExpect(status().isOk());
     }
 
     @Test
     void obtenerOfertasConInformacionTrabajoOk() throws Exception {
+        oferta2.setEstado(OfertaEstado.ABIERTA);
+        oferta2.setEmpresa(empresa);                    
         when(ofertaService.obtenerOfertas()).thenReturn(List.of(oferta2));
-        when(ofertaService.obtenerTrabajo(anyInt())).thenReturn(trabajo);
+        when(ofertaService.obtenerTrabajo(2)).thenReturn(trabajo);
+    
         mockMvc.perform(get(BASE_URL + "/info"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$[0].nombreEmpresa").value("EmpresaTest"));
+    }
+    
+
+    @Test
+    void obtenerOfertasConPromotedNullYEmpresaYUsuarioNoNulos() throws Exception {
+    Oferta o = new Oferta();
+    o.setId(50);
+    o.setTitulo("Oferta sin promoted");
+    o.setTipoOferta(TipoOferta.CARGA);
+    o.setEstado(OfertaEstado.ABIERTA);
+    o.setPromoted(null);
+
+    Empresa empresa = new Empresa();
+    Usuario usuario = new Usuario();
+    usuario.setNombre("Empresa X");
+    usuario.setFoto(new byte[]{});
+    empresa.setUsuario(usuario);
+    o.setEmpresa(empresa);
+
+    Carga carga = new Carga();
+    carga.setMercancia("Arena");
+
+    when(ofertaService.obtenerOfertas()).thenReturn(List.of(o));
+    when(ofertaService.obtenerCarga(50)).thenReturn(carga);
+
+    mockMvc.perform(get(BASE_URL + "/info"))
            .andExpect(status().isOk());
     }
+
+    
+    @Test
+    void ofertasConInformacionEstadoNoAbiertaSeOmite() throws Exception {
+        Oferta cerrada = new Oferta();
+        cerrada.setId(99);
+        cerrada.setTitulo("Oferta Cerrada");
+        cerrada.setTipoOferta(TipoOferta.CARGA);
+        cerrada.setEstado(OfertaEstado.CERRADA);
+    
+        Empresa e = new Empresa();
+        Usuario u = new Usuario();
+        u.setNombre("Empresa Cerrada");
+        u.setFoto(new byte[]{1, 2, 3});
+        e.setUsuario(u);
+        cerrada.setEmpresa(e);
+    
+        when(ofertaService.obtenerOfertas()).thenReturn(List.of(cerrada));
+        when(ofertaService.obtenerCarga(anyInt())).thenReturn(new Carga()); 
+    
+        mockMvc.perform(get(BASE_URL + "/info"))
+            .andExpect(status().isOk());
+    }
+    
 
     @Test
     void eliminarOfertaOk() throws Exception {
@@ -431,6 +653,13 @@ class OfertaControllerTests {
         when(ofertaService.desaplicarOferta(1, 1)).thenReturn(oferta1);
         mockMvc.perform(put(BASE_URL + "/1/desaplicar/1"))
            .andExpect(status().isOk());
+    }
+
+    @Test
+    void noDebeDesaplicarOfertaInexistenteRetorna404() throws Exception {
+        when(ofertaService.desaplicarOferta(1, 1)).thenThrow(ResourceNotFoundException.class);
+        mockMvc.perform(put(BASE_URL + "/1/desaplicar/1"))
+           .andExpect(status().isNotFound());
     }
 
     @Test
@@ -504,11 +733,11 @@ class OfertaControllerTests {
     }
 
     @Test
-    void patrocinarOfertaNoExistenteRetorna404() throws Exception {
+    void patrocinarOfertaNoExistenteRetorna400() throws Exception {
         doThrow(new ResourceNotFoundException("Oferta", "id", 99))
             .when(ofertaService).patrocinarOferta(99);
         mockMvc.perform(put(BASE_URL + "/99/patrocinar"))
-           .andExpect(status().isBadRequest()); 
+           .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -519,7 +748,7 @@ class OfertaControllerTests {
     }
 
     @Test
-    void desactivarPatrocinioNoExistenteRetorna404() throws Exception {
+    void desactivarPatrocinioNoExistenteRetorna400() throws Exception {
         doThrow(new ResourceNotFoundException("Oferta", "id", 99))
             .when(ofertaService).desactivarPatrocinio(99);
         mockMvc.perform(put(BASE_URL + "/99/desactivar-patrocinio"))

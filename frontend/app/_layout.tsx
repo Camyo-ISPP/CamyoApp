@@ -4,9 +4,12 @@ import CamyoWebNavBar from "./_components/_layout/CamyoNavBar";
 import withAuthProvider from '../hoc/withAuthProvider'; 
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
+import { useAuth } from "../contexts/AuthContext";
+import { PopupAdProvider } from "./_components/PopUpAd";
 
 function RootLayout() {
   const segments = useSegments();
+  const { user } = useAuth();
  
   useEffect(() => {
       const pageTitles: Record<string, string> = {
@@ -30,6 +33,7 @@ function RootLayout() {
         "pago/checkout": "Pago",
         suscripcion: "Planes de Suscripción",
         misofertas: "Mis Ofertas",
+        "oferta/[ofertaId]/editar": "Editar Oferta",
         admin: "Panel de Administración",
       };
 
@@ -39,6 +43,7 @@ function RootLayout() {
   }, [segments]);
 
   return (
+    <PopupAdProvider user={user}>
       <>
         <CamyoWebNavBar
           onSearch={(query: string) => {
@@ -67,6 +72,7 @@ function RootLayout() {
         
         <Stack.Screen name="oferta/crear" />
         <Stack.Screen name="oferta/[ofertaId]" />
+        <Stack.Screen name="oferta/[ofertaId]/editar" />
         <Stack.Screen name="explorar" />
         <Stack.Screen name="chat" />
         <Stack.Screen name="chat/list" />
@@ -83,7 +89,7 @@ function RootLayout() {
       </SubscriptionProvider>
       </PaymentProvider>
     </>
-
+    </PopupAdProvider>
   );
 }
 

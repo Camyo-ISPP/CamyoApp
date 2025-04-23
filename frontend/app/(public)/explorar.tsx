@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, Animated, Dimensions, ScrollView, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, StatusBar, TextInput, Image, Animated, Dimensions, ScrollView } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Picker } from '@react-native-picker/picker';
 import colors from "frontend/assets/styles/colors";
@@ -10,10 +10,12 @@ import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
 import WebFooter from "../_components/_layout/WebFooter";
 import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
+import { useAuth } from "../../contexts/AuthContext";
+import MapLoader from "../_components/MapLoader";
 
 export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }: { searchQuery?: string }) {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
+    const { user } = useAuth();
     const [data, setData] = useState<any[]>([]);
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -27,7 +29,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     const [minSalaryFilter, setMinSalaryFilter] = useState('');
     const [jornadaFilter, setJornadaFilter] = useState('');
     const [licenciaFilter, setLicenciaFilter] = useState<string[]>([]);
-    const [presupuestoFilter, setPresupuestoFilter] = useState('');
     const [maxDistanceFilter, setMaxDistanceFilter] = useState('');
 
     // Posibles valores para los filtros
@@ -64,7 +65,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
     useEffect(() => {
         fetchData();
-    }, [selectedOfertaType]);
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -77,6 +78,12 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             setLoading(false);
         }
     };
+
+    if (loading) return (
+        <View style={styles.loadingContainer}>
+          <MapLoader />
+        </View>
+    );
 
     const handleSearch = (query = searchQuery) => {
         const normalizedQuery = query.toLowerCase();
@@ -121,9 +128,9 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
             }
 
             // Presupuesto Filter
-            if (presupuestoFilter) {
+            if (minSalaryFilter) {
                 filteredResults = filteredResults.filter(
-                    (item) => item.sueldo >= parseFloat(presupuestoFilter)
+                    (item) => item.sueldo >= parseFloat(minSalaryFilter)
                 );
             }
 
@@ -207,6 +214,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     };
 
     const clearFilters = () => {
+        setSelectedOfertaType(null);
         setSearchQuery('');
         setOrigenFilter('');
         setDestinoFilter('');
@@ -216,9 +224,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         setMinSalaryFilter('');
         setJornadaFilter('');
         setLicenciaFilter([]);
-        setPresupuestoFilter('');
         setMaxDistanceFilter('');
-        handleSearch('');
+        setFilteredData(data);
     };
 
     return (
@@ -229,8 +236,21 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                     <Text style={styles.headerTitle}>Encuentra las mejores ofertas</Text>
                     <Text style={styles.headerSubtitle}>Filtra y encuentra el trabajo perfecto para ti</Text>
                 </View>
-
+                {(!user || user?.ads) && (
+                        <View style={styles.adsContainer}>
+                            {/* First Ad */}
+                            <View style={styles.adContainer}>
+                                <Image
+                                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+                                    style={styles.adImage}
+                                    resizeMode="cover"
+                                />
+                            </View>
+                        </View>
+                    )}
+    
                 <View style={styles.mainContent}>
+
                     {/* Filters and Search Bar Card */}
                     <View style={[styles.filtersCard, { alignSelf: 'flex-start' }]}>
                         {/* Search Section */}
@@ -256,7 +276,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                 </TouchableOpacity>
                             </View>
                         </View>
-
+    
                         {/* Filter Type Toggle */}
                         <View style={styles.filterTypeSection}>
                             <Text style={styles.sectionTitle}>Tipo de Oferta</Text>
@@ -301,7 +321,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                 </TouchableOpacity>
                             </View>
                         </View>
-
+                        
+    
                         {/* Placeholder cuando no hay tipo seleccionado */}
                         {!selectedOfertaType && (
                             <View style={styles.emptyFilterState}>
@@ -316,7 +337,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                 </Text>
                             </View>
                         )}
-
+    
                         {/* Filters Section - Solo se muestra cuando hay tipo seleccionado */}
                         {selectedOfertaType && (
                             <View style={styles.filtersSection}>
@@ -326,7 +347,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                         <Text style={styles.clearFiltersText}>Limpiar filtros</Text>
                                     </TouchableOpacity>
                                 </View>
-
                                 {selectedOfertaType === 'cargas' && (
                                     <View style={styles.filtersContainer}>
                                         {/* Presupuesto Filter */}
@@ -335,22 +355,21 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 <MaterialIcons name="euro-symbol" size={16} color="#555" />
                                                 <Text style={styles.filterLabel}>Presupuesto mínimo</Text>
                                             </View>
-                                            <Text style={styles.sliderValue}>{presupuestoFilter}€</Text>
+                                            <Text style={styles.sliderValue}>{minSalaryFilter}€</Text>
                                             <Slider
                                                 style={styles.rangeSlider}
                                                 minimumValue={0}
                                                 maximumValue={10000}
                                                 step={10}
-                                                value={presupuestoFilter ? parseFloat(presupuestoFilter) : 0}
+                                                value={minSalaryFilter ? parseFloat(minSalaryFilter) : 0}
                                                 minimumTrackTintColor={colors.primary}
                                                 maximumTrackTintColor="#e0e0e0"
                                                 thumbTintColor={colors.primary}
                                                 onValueChange={(value: number) => {
-                                                    setPresupuestoFilter(value.toString());
+                                                    setMinSalaryFilter(value.toString());
                                                 }}
                                             />
                                         </View>
-
                                         {/* Experience Filter */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -373,7 +392,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 <Picker.Item label="10 años de experiencia" value="10" />
                                             </Picker>
                                         </View>
-
                                         {/* Licencia Filter */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -400,7 +418,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 ))}
                                             </View>
                                         </View>
-
                                         {/* Location Filters */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -428,7 +445,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 </View>
                                             </View>
                                         </View>
-
                                         {/* Weight Filters */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -458,7 +474,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 </View>
                                             </View>
                                         </View>
-
                                         {/* Distance Filter */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -476,7 +491,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                         </View>
                                     </View>
                                 )}
-
                                 {selectedOfertaType === 'trabajos' && (
                                     <View style={styles.filtersContainer}>
                                         {/* Salary Filter */}
@@ -500,7 +514,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 }}
                                             />
                                         </View>
-
                                         {/* Experience Filter */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -523,7 +536,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 <Picker.Item label="10 años de experiencia" value="10" />
                                             </Picker>
                                         </View>
-
                                         {/* Jornada Filter */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -546,7 +558,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 ))}
                                             </Picker>
                                         </View>
-
                                         {/* Licencia Filter */}
                                         <View style={styles.filterGroup}>
                                             <View style={styles.filterLabelContainer}>
@@ -573,12 +584,21 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 ))}
                                             </View>
                                         </View>
+                                        
                                     </View>
+                                    
                                 )}
                             </View>
+                            
                         )}
+                        {/* Ad Section - Debajo de los filtros */}
+                    
+                       
                     </View>
-
+                   
+    
+                    
+    
                     {/* Offer Cards Section */}
                     <View style={styles.offersSection}>
                         <ListadoOfertasPublico offers={filteredData} showPromoted={true} />
@@ -958,5 +978,27 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         lineHeight: 24,
     },
-    contenedorOfertas: { width: '100%' }
+    contenedorOfertas: { width: '100%' },
+    adsContainer: {
+
+        marginBottom: 10,
+        width: "100%",
+        outlineColor: "black",
+        outlineStyle: "solid",
+    },
+    adContainer: {
+        width: "100%", // Adjust width as needed
+   
+    },
+    adImage: {
+        width: "100%", // Adjust width as needed
+
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white
+    },
+   
 });

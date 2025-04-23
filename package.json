@@ -6,8 +6,10 @@
     "seed:imagenes": "cd backend && mvn spring-boot:run -Dspring-boot.run.profiles=imagenes"
   },
   "dependencies": {
+    "@types/react-dom": "^19.1.1",
     "firebase": "^11.4.0",
     "firestore": "^1.1.6",
+    "react-dom": "^19.1.0",
     "react-native-gifted-chat": "^2.8.0"
   }
 }

@@ -13,8 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.security.core.Authentication;
 
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.exceptions.ResourceNotFoundException;
 import com.camyo.backend.resena.Resena;
+import com.camyo.backend.util.Validators;
+
+import jakarta.validation.Valid;
 
 @Service
 public class UsuarioService {
@@ -61,14 +65,16 @@ public class UsuarioService {
 	}
 
     @Transactional
-    public Usuario guardarUsuario(Usuario usuario) throws DataAccessException {
+    public Usuario guardarUsuario(Usuario usuario) throws DataAccessException, InvalidPhoneNumberException {
+        Validators.comprobarTelefono(usuario.getTelefono());
         usuario.setPassword(encoder.encode(usuario.getPassword()));
 		usuarioRepository.save(usuario);
 		return usuario;
     }
 
     @Transactional
-    public Usuario guardarUsuarioSinEncode(Usuario usuario) throws DataAccessException {
+    public Usuario guardarUsuarioSinEncode(Usuario usuario) throws DataAccessException, InvalidPhoneNumberException {
+        Validators.comprobarTelefono(usuario.getTelefono());
 		return usuarioRepository.save(usuario);
     }
 
@@ -100,4 +106,11 @@ public class UsuarioService {
         return usuarioRepository.findEmpresaIdByUsuarioId(empresaId)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado para el empresaId: " + empresaId));
     }  
+
+    @Transactional
+    public Usuario eliminarAnuncios(Integer id) {
+        Usuario usuario = obtenerUsuarioPorId(id);
+        usuario.setAds(false);
+        return usuarioRepository.save(usuario);
+    }
 }

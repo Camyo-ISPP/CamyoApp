@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.camyo.backend.resena.Resena;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,7 +31,7 @@ public class Usuario {
     private String telefono;
 
     @Size(max = 30, message = "El nombre de usuario no puede tener más de 30 caracteres")
-    @Column(unique = true)
+    @Pattern(regexp = "^[A-Za-z0-9ÑñÁáÉéÍíÓóÚúÝýÜüÀàÈèÌìÒòÙùÂâÊêÎîÔôÛûÄäËëÏïÖöÜü._-]+$", message = "El nombre de usuario solo puede contener caracteres alfanuméricos, punto, guion y guion bajo")    @Column(unique = true)
 	String username;
     
     @Column(unique = true)
@@ -48,9 +49,14 @@ public class Usuario {
     private String descripcion;
 
     @Lob
+    @Size(max = 5242880, message = "El tamaño de la imagen no puede ser mayor que 5 MB")
     private byte[] foto;
     
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    @Column(nullable = false)
+    private Boolean ads = true;
 
 	@NotNull
 	@ManyToOne(optional = false)

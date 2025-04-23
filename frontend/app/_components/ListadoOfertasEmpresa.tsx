@@ -9,6 +9,7 @@ import SuccessModal from "./SuccessModal";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePayment } from "@/contexts/PaymentContext";
+import SubscriptionModal from "./SubscriptionModal";
 
 interface ListadoOfertasEmpresaProps {
   offers: any[];
@@ -32,7 +33,8 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
   const router = useRouter();
 
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [isModalVisibleCancelar, setIsModalVisibleCancelar] = useState(false);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+  const [offerToCancel, setOfferToCancel] = useState<number | null>(null);
 
   const promoteOfferCheckout = (ofertaId: number) => {
     setId("PATROCINAR");
@@ -41,29 +43,15 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
 
   }
 
-  // Deprecated
-  const promoteOffer = async (ofertaId: number) => {
-    try {
-      const url = `${BACKEND_URL}/ofertas/${ofertaId}/patrocinar`;
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        }
-      });
+  const handleCancelPrompt = (ofertaId: number) => {
+    setOfferToCancel(ofertaId);
+    setShowCancelConfirmation(true);
+  };
 
-      if (response.ok) {
-        setSuccessModalVisible(true);
-        fetchOffers();
-
-        setTimeout(() => {
-          setSuccessModalVisible(false);
-        }, 1000);
-      }
-
-    } catch (err) {
-      console.error("Error completo en promoteOffer:", err);
+  const confirmUnpromote = async () => {
+    setShowCancelConfirmation(false);
+    if (offerToCancel) {
+      await unpromoteOffer(offerToCancel);
     }
   };
 
@@ -72,34 +60,18 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
       const response = await axios.put(
         `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
         {},
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${userToken}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${userToken}` } }
       );
 
       if (response.status === 200) {
-        setIsModalVisibleCancelar(true);
-        fetchOffers();
-
-        setTimeout(() => {
-          setIsModalVisibleCancelar(false);
-        }, 1000);
+        setSuccessModalVisible(true);
+        await fetchOffers();
+        setTimeout(() => setSuccessModalVisible(false), 2000);
       }
-
     } catch (err) {
-      console.error("Error en unpromoteOffer:", err);
-      if (axios.isAxiosError(err) && err.response) {
-        console.error("Detalles del error:", {
-          status: err.response.status,
-          data: err.response.data,
-          headers: err.response.headers
-        });
-      }
+      console.error("Error al cancelar patrocinio:", err);
     }
-  }
+  };
 
   return (
     <>
@@ -177,12 +149,12 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
 
                         canCancelPromotedOffer && (
                           <TouchableOpacity
-                            style={[styles.actionButton, styles.unpromoteButton]}
-                            onPress={() => unpromoteOffer(item.id)}
-                          >
-                            <AntDesign name="closecircleo" size={14} color={colors.white} />
-                            <Text style={styles.actionButtonText}>Cancelar</Text>
-                          </TouchableOpacity>
+                          style={[styles.actionButton, styles.unpromoteButton]}
+                          onPress={() => handleCancelPrompt(item.id)}
+                        >
+                          <AntDesign name="closecircleo" size={14} color={colors.white} />
+                          <Text style={styles.actionButtonText}>Cancelar</Text>
+                        </TouchableOpacity>
                         )
 
                       ) : canPromoteNewOffer() ? (
@@ -216,15 +188,16 @@ const ListadoOfertasEmpresa: React.FC<ListadoOfertasEmpresaProps> = ({
           <SuccessModal
             isVisible={successModalVisible}
             onClose={() => setSuccessModalVisible(false)}
-            message="¡Oferta patrocinada con éxito!"
+            message={offerToCancel ? "¡Patrocinio cancelado con éxito!" : "¡Oferta patrocinada con éxito!"}
           />
 
-          <SuccessModal
-            isVisible={isModalVisibleCancelar}
-            onClose={() => setIsModalVisibleCancelar(false)}
-            message="¡Patrocinio cancelado con éxito!"
+          <SubscriptionModal
+            visible={showCancelConfirmation}
+            onConfirm={confirmUnpromote}
+            onCancel={() => setShowCancelConfirmation(false)}
+            title="¿Cancelar patrocinio?"
+            message="Al cancelar el patrocinio, la oferta perderá visibilidad destacada. El importe abonado no será reembolsado. ¿Deseas continuar?"
           />
-
 
         </View>
       )}

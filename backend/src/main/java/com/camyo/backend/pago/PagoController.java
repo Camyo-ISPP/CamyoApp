@@ -23,6 +23,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,12 +59,21 @@ public class PagoController {
                 Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 String secret = null;
 
+                if (pago.getCompra() == null) {
+                        return new ResponseEntity<>("No hay ningún tipo de compra seleccionada", HttpStatus.BAD_REQUEST);
+                }
+
+
                 // Start by finding an existing customer record from Stripe or creating a new
                 // one if needed
                 Usuario cliente = usuarioService.obtenerUsuarioActual();
                 Customer clienteStripe = CustomerUtil.findOrCreateCustomer(cliente.getEmail(), cliente.getNombre());
 
                 String precio_id = null;
+
+                // Integer empresaId = empresaService.obtenerEmpresaPorUsuario(cliente.getId()).get().getId();
+                // suscripcionService.obtenerSuscripcionActiva(empresaId);
+
                 switch (pago.getCompra()) {
                         case BASICO -> {
                                 precio_id="price_1R7E7wIRKHnhkuSfhBa5XZVS";
@@ -79,7 +89,7 @@ public class PagoController {
                 if (pago.getCompra()==Compra.PATROCINAR) {
                         // Create a PaymentIntent and send its client secret to the client
                         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                                .setAmount(500L)
+                                .setAmount(999L)
                                 .setCurrency("eur")
                                 .setCustomer(clienteStripe.getId())
                                 .setAutomaticPaymentMethods(
@@ -116,28 +126,30 @@ public class PagoController {
 
                         secret = subscription.getLatestInvoiceObject().getPaymentIntentObject().getClientSecret();
 
-                } else {
-                        return new ResponseEntity<>("Este tipo de compra no existe", HttpStatus.FORBIDDEN);
+                }  else if (pago.getCompra()==Compra.ELIMINAR_ANUNCIOS) {
+                        // Create a PaymentIntent and send its client secret to the client
+                        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+                                .setAmount(499L)
+                                .setCurrency("eur")
+                                .setCustomer(clienteStripe.getId())
+                                .setAutomaticPaymentMethods(
+                                        PaymentIntentCreateParams.AutomaticPaymentMethods
+                                                .builder()
+                                                .setEnabled(true)
+                                                .build())
+                                .build();
+
+                        PaymentIntent paymentIntent = PaymentIntent.create(params);
+
+                        secret = paymentIntent.getClientSecret();
+                }  else {
+                        return new ResponseEntity<>("Compra inválida", HttpStatus.BAD_REQUEST);
                 }
                 return new ResponseEntity<>(secret, HttpStatus.OK);
         }
 
-        @PostMapping("/apply_subscription")
-        public ResponseEntity<String> applySubscription(@RequestBody RequestDTO requestDto) throws StripeException {
-                Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
-
-                PaymentIntent paymentIntent = PaymentIntent.retrieve(requestDto.getIntent());
-                if (paymentIntent.getStatus().equals("succeeded")) {
-                        Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
-                suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), null);
-                        return ResponseEntity.ok("Suscripción aplicada con éxito");
-                } else {
-                        return ResponseEntity.badRequest().build();
-                }
-        }
-
         @PostMapping("/apply_compra")
-        public ResponseEntity<String> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
+        public ResponseEntity<?> applyCompra(@RequestBody RequestDTO requestDto) throws StripeException {
 
                 Stripe.apiKey = dotenv.get("STRIPE_API_KEY");
                 Usuario usuarioActual = usuarioService.obtenerUsuarioActual();
@@ -146,17 +158,23 @@ public class PagoController {
                 if (paymentIntent.getStatus().equals("succeeded") && suscripciones.contains(requestDto.getCompra())) {
 
                         suscripcionService.asignarSuscripcion(empresaService.obtenerEmpresaPorUsuario(usuarioActual.getId()).get().getId(), PlanNivel.valueOf(requestDto.getCompra().toString()), 9999);
-                        return ResponseEntity.ok("Suscripción aplicada con éxito");
+                        return ResponseEntity.ok(usuarioService.obtenerUsuarioActual());
 
                 } else if (paymentIntent.getStatus().equals("succeeded") && Compra.PATROCINAR == requestDto.getCompra() && requestDto.getOfertaId() != null){
                         // ofertaId puede ser null, por lo que la comprobación se realiza aquí
+                        System.out.println( ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual));
+                       
                         if (ofertaService.obtenerOfertaPorId(requestDto.getOfertaId()).getEmpresa().getUsuario().equals(usuarioActual)) {
                                 ofertaService.patrocinarOferta(requestDto.getOfertaId());
-                                return ResponseEntity.ok("Compra aplicada con éxito");
+                                return ResponseEntity.ok(usuarioService.obtenerUsuarioActual());
                         }
                         
+                } else if (paymentIntent.getStatus().equals("succeeded") && Compra.ELIMINAR_ANUNCIOS == requestDto.getCompra()){
+                        Integer userId = usuarioService.obtenerUsuarioActual().getId();
+                        usuarioService.eliminarAnuncios(userId);
+                        return ResponseEntity.ok(usuarioService.obtenerUsuarioActual());
                 }
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("Acción denegada");
                 
         }
 

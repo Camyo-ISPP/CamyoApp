@@ -15,12 +15,15 @@ import com.camyo.backend.camionero.Camionero;
 import com.camyo.backend.camionero.CamioneroService;
 import com.camyo.backend.empresa.Empresa;
 import com.camyo.backend.empresa.EmpresaService;
+import com.camyo.backend.exceptions.InvalidNifException;
+import com.camyo.backend.exceptions.InvalidPhoneNumberException;
 import com.camyo.backend.suscripcion.PlanNivel;
 import com.camyo.backend.suscripcion.SuscripcionService;
 import com.camyo.backend.usuario.Authorities;
 import com.camyo.backend.usuario.AuthoritiesService;
 import com.camyo.backend.usuario.Usuario;
 import com.camyo.backend.usuario.UsuarioService;
+import com.camyo.backend.util.Validators;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -46,7 +49,10 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void createCamionero(@Valid SignupRequestCamionero request) throws DataAccessException, IOException {
+	public void createCamionero(@Valid SignupRequestCamionero request) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
+		Validators.comprobarNif(request.getDni());
+		Validators.comprobarTelefono(request.getTelefono());
+
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.getUsername());
 		usuario.setPassword(request.getPassword());
@@ -79,7 +85,10 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void createEmpresa(@Valid SignupRequestEmpresa request) throws DataAccessException, IOException {
+	public void createEmpresa(@Valid SignupRequestEmpresa request) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
+		Validators.comprobarNif(request.getNif());
+		Validators.comprobarTelefono(request.getTelefono());
+		
 		Usuario usuario = new Usuario();
 		usuario.setUsername(request.getUsername());
 		usuario.setPassword(request.getPassword());
@@ -103,7 +112,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void editCamionero(@Valid EditRequestCamionero request, Usuario usuario, Camionero camionero) throws DataAccessException, IOException {
+	public void editCamionero(@Valid EditRequestCamionero request, Usuario usuario, Camionero camionero) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		usuario.setEmail(request.getEmail());
 		usuario.setLocalizacion(request.getLocalizacion());
 		usuario.setTelefono(request.getTelefono());
@@ -114,7 +123,6 @@ public class AuthService {
 		}
 		usuarioService.guardarUsuarioSinEncode(usuario);
 
-		camionero.setDni(request.getDni());
 		camionero.setLicencias(request.getLicencias());
 		camionero.setDisponibilidad(request.getDisponibilidad());
 		camionero.setTieneCAP(request.getTieneCAP());
@@ -130,7 +138,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void editEmpresa(@Valid EditRequestEmpresa request, Usuario usuario, Empresa empresa) throws DataAccessException, IOException {
+	public void editEmpresa(@Valid EditRequestEmpresa request, Usuario usuario, Empresa empresa) throws DataAccessException, IOException, InvalidNifException, InvalidPhoneNumberException {
 		usuario.setEmail(request.getEmail());
 		usuario.setLocalizacion(request.getLocalizacion());
 		usuario.setTelefono(request.getTelefono());

@@ -1,4 +1,4 @@
-import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Linking} from "react-native";
+import {Button, TextInput, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Linking, ActivityIndicator} from "react-native";
 import {useContext, useEffect, useState} from "react";
 import CartItem, {ItemData} from "../../_components/CartItem";
 import TotalFooter from "../../_components/TotalFooter";
@@ -12,6 +12,7 @@ import { Products } from "../../../utils/productDetails";
 import colors from "@/assets/styles/colors";
 import globalStyles from "@/assets/styles/globalStyles";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MapLoader from "@/app/_components/MapLoader";
 
 function IntegratedCheckout() {
     const { id, setId, ofertaId, setOfertaId } = usePayment();
@@ -57,7 +58,7 @@ function IntegratedCheckout() {
     }
 
     return <>
-        {id === 'BASICO' || id === 'PREMIUM' || id === 'PATROCINAR' ?
+        {id === 'BASICO' || id === 'PREMIUM' || id === 'PATROCINAR' || id === 'ELIMINAR_ANUNCIOS' ?
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
@@ -74,7 +75,7 @@ function IntegratedCheckout() {
                             
                             <View style={styles.planInfo}>
                                 <Text style={styles.planName}>{Products.get(id).name}</Text>
-                                <Text style={styles.planPrice}>{Products.get(id).price}€{id !== "PATROCINAR" ? "/mes" : ""}</Text>
+                                <Text style={styles.planPrice}>{Products.get(id).price}€{id !== "PATROCINAR" && id !== "ELIMINAR_ANUNCIOS" ? "/mes" : ""}</Text>
                             </View>
 
                             <View style={styles.featuresList}>
@@ -121,7 +122,7 @@ function IntegratedCheckout() {
                         <Text style={styles.legalLink} onPress={openTermsLink}>Términos y Condiciones</Text>{' '}
                         y nuestra{' '}
                         <Text style={styles.legalLink} onPress={openPrivacyLink}>Política de Privacidad</Text>.
-                        El pago se renovará automáticamente cada mes hasta que canceles tu suscripción.
+                        {id !== "PATROCINAR" && id !== "ELIMINAR_ANUNCIOS" ? "El pago se renovará automáticamente cada mes hasta que canceles tu suscripción." : ""}
                     </Text>
                 </View>
             </ScrollView>
@@ -143,7 +144,7 @@ function IntegratedCheckout() {
 
 const CheckoutForm = (transactionClientSecret: any) => {
     const stripe = useStripe();
-    const { user, userToken } = useAuth();
+    const { user, userToken, updateUser } = useAuth();
     const { setId, ofertaId } = usePayment();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
@@ -165,7 +166,6 @@ const CheckoutForm = (transactionClientSecret: any) => {
             redirect: "if_required",
         })
         if (result.error) {
-            console.log(result.error.message);
             setError(result.error.message);
             setLoading(false);
         }
@@ -185,9 +185,14 @@ const CheckoutForm = (transactionClientSecret: any) => {
             })
                 .then(res => {
                     if (res.status == 200) {
+                        res.json().then(data => {
+                            user.ads = data.ads
+                            updateUser(user)
+                        })
                         setSuccessModalVisible(true);
                         setTimeout(() => {
                                 setSuccessModalVisible(false);
+                                setId("");
                                 router.push("/");
                             }, 1000);
                     } else {
@@ -213,7 +218,7 @@ const CheckoutForm = (transactionClientSecret: any) => {
                   style={[styles.payButton, loading && styles.payButtonDisabled]}
               >
                   {loading ? (
-                      <ActivityIndicator color={colors.white} />
+                      <ActivityIndicator size="large" color={colors.primary} />
                   ) : (
                       <>
                           <Text style={styles.payButtonText}>Confirmar pago</Text>

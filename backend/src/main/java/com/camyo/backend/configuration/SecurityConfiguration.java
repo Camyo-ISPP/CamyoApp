@@ -66,7 +66,7 @@ public class SecurityConfiguration {
 
 			.requestMatchers(HttpMethod.GET, "/resenas").hasAnyAuthority("EMPRESA", "CAMIONERO")
 
-			.requestMatchers(HttpMethod.POST, "/pago/**").hasAuthority("EMPRESA")
+			.requestMatchers(HttpMethod.POST, "/pago/**").hasAnyAuthority("EMPRESA", "CAMIONERO")
 
 			.anyRequest().permitAll()
 			)
