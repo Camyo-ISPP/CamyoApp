@@ -31,7 +31,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven
 
-      - name: Ejecutar tests (excluyendo pago)
-        run: mvn clean test -Dtest=AuthControllerTests,AuthServiceTest,CamioneroControllerTests,CamioneroServiceTests,EmpresaControllerTests,EmpresaServiceTests,CargaServiceTest,OfertaControllerTests,OfertaServiceTests,TrabajoServiceTests,ResenaControllerTests,ResenaServiceTests,SuscripcionControllerTests,SuscripcionServiceTests,AuthoritiesServiceTests,UsuarioControllerTests,UsuarioEntityTests,UsuarioServiceTests,BackendApplicationTests
+      - name: Ejecutar tests excluyendo pago (manual por ruta)
+        run: |
+          find src/test/java/com/camyo/backend \
+            -name "*Test.java" \
+            ! -path "*pago*" \
+            -exec basename {} .java \; | paste -sd, - \
+          | xargs -I {} mvn test -Dtest="{}"
         working-directory: ./backend
           
