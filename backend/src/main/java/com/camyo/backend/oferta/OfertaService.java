@@ -46,6 +46,11 @@ public class OfertaService {
     }
 
     @Transactional(readOnly = true)
+    public List<OfertaConTodaInformacionPlanarDTO> obtenerOfertasConTodaInformacion() {
+        return ofertaRepository.obtenerOfertasConTodaInformacion();
+    }
+
+    @Transactional(readOnly = true)
     public Carga obtenerCarga(Integer oferta_id) {
         return ofertaRepository.encontrarCargaPorOferta(oferta_id);
     }

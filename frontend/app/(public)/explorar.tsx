@@ -4,7 +4,7 @@ import Slider from "@react-native-community/slider";
 import { Picker } from '@react-native-picker/picker';
 import colors from "frontend/assets/styles/colors";
 import axios from 'axios';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 const DefaultLogo = require('../../assets/images/defaultCompImg.png');
@@ -69,7 +69,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${BACKEND_URL}/ofertas/info`);
+            const response = await axios.get(`${BACKEND_URL}/ofertas/info/op`);
             setData(response.data);
             setFilteredData(response.data.sort((a: { promoted: any; }, b: { promoted: any; }) => (b.promoted ? 1 : 0) - (a.promoted ? 1 : 0)));
         } catch (error) {
@@ -79,13 +79,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         }
     };
 
-    if (loading) return (
-        <View style={styles.loadingContainer}>
-          <MapLoader />
-        </View>
-    );
-
-    const handleSearch = (query = searchQuery) => {
+    const handleSearch = useCallback((query = searchQuery) => {
         const normalizedQuery = query.toLowerCase();
         let filteredResults = data.filter((item) => {
             return (
@@ -99,42 +93,36 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         if (selectedOfertaType === 'cargas') {
             filteredResults = filteredResults.filter((item) => item.tipoOferta === 'CARGA');
 
-            // Origen Filter
             if (origenFilter) {
                 filteredResults = filteredResults.filter((item) =>
                     item.origen?.toLowerCase().includes(origenFilter.toLowerCase())
                 );
             }
 
-            // Destino Filter
             if (destinoFilter) {
                 filteredResults = filteredResults.filter((item) =>
                     item.destino?.toLowerCase().includes(destinoFilter.toLowerCase())
                 );
             }
 
-            // Peso Mínimo Filter
             if (minPesoFilter) {
                 filteredResults = filteredResults.filter(
                     (item) => item.peso >= parseFloat(minPesoFilter)
                 );
             }
 
-            // Peso Máximo Filter
             if (maxPesoFilter) {
                 filteredResults = filteredResults.filter(
                     (item) => item.peso <= parseFloat(maxPesoFilter)
                 );
             }
 
-            // Presupuesto Filter
             if (minSalaryFilter) {
                 filteredResults = filteredResults.filter(
                     (item) => item.sueldo >= parseFloat(minSalaryFilter)
                 );
             }
 
-            // Experience Filter (para cargas)
             if (minExperienceFilter !== "") {
                 if (parseInt(minExperienceFilter) === 5) {
                     filteredResults = filteredResults.filter((item) => item.experiencia >= 5 && item.experiencia <= 9);
@@ -163,7 +151,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         } else if (selectedOfertaType === 'trabajos') {
             filteredResults = filteredResults.filter((item) => item.tipoOferta.trim().toUpperCase() === 'TRABAJO');
 
-            // Experience Filter
             if (minExperienceFilter !== "") {
                 if (parseInt(minExperienceFilter) === 5) {
                     filteredResults = filteredResults.filter((item) => item.experiencia >= 5 && item.experiencia <= 9);
@@ -174,14 +161,12 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                 }
             }
 
-            // Salary Filter
             if (minSalaryFilter) {
                 filteredResults = filteredResults.filter(
                     (item) => item.sueldo >= parseFloat(minSalaryFilter)
                 );
             }
 
-            // Jornada Filter
             if (jornadaFilter) {
                 filteredResults = filteredResults.filter(
                     (item) => item.jornada === jornadaFilter
@@ -202,6 +187,15 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
         const newUrl = `${window.location.pathname}?query=${encodeURIComponent(query)}`;
         window.history.pushState({}, '', newUrl);
+    }, [data, searchQuery, selectedOfertaType, origenFilter, destinoFilter, minPesoFilter, maxPesoFilter, minExperienceFilter, minSalaryFilter, jornadaFilter, licenciaFilter, maxDistanceFilter]);
+
+    const toggleOfertaType = (type: 'cargas' | 'trabajos') => {
+        if (selectedOfertaType === type) {
+            setSelectedOfertaType(null);
+        } else {
+            setSelectedOfertaType(type);
+        }
+        handleSearch();
     };
 
     const toggleLicenciaFilter = (licencia: string) => {
@@ -227,6 +221,12 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         setMaxDistanceFilter('');
         setFilteredData(data);
     };
+
+    if (loading) return (
+        <View style={styles.loadingContainer}>
+          <MapLoader />
+        </View>
+    );
 
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -275,6 +275,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                     <Text style={styles.searchButtonText}>Buscar</Text>
                                 </TouchableOpacity>
                             </View>
+                            <Text style={styles.searchHintText}>* Pulsa "Buscar" para aplicar los filtros</Text>
                         </View>
     
                         {/* Filter Type Toggle */}
@@ -286,7 +287,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                         styles.ofertaTypeButton,
                                         selectedOfertaType === 'trabajos' && styles.ofertaTypeButtonActive,
                                     ]}
-                                    onPress={() => setSelectedOfertaType('trabajos')}
+                                    onPress={() => toggleOfertaType('trabajos')}
                                 >
                                     <Ionicons
                                         name="briefcase"
@@ -305,7 +306,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                         styles.ofertaTypeButton,
                                         selectedOfertaType === 'cargas' && styles.ofertaTypeButtonActive,
                                     ]}
-                                    onPress={() => setSelectedOfertaType('cargas')}
+                                    onPress={() => toggleOfertaType('cargas')}
                                 >
                                     <Ionicons
                                         name="cube"
@@ -601,6 +602,9 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
     
                     {/* Offer Cards Section */}
                     <View style={styles.offersSection}>
+                        <Text style={styles.resultsCount}>
+                            {filteredData.length} {filteredData.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}
+                        </Text>
                         <ListadoOfertasPublico offers={filteredData} showPromoted={true} />
                     </View>
                 </View>
@@ -720,6 +724,12 @@ const styles = StyleSheet.create({
         color: colors.white,
         fontWeight: 'bold',
         fontSize: 14,
+    },
+    searchHintText: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 8,
+        fontStyle: 'italic',
     },
     filterTypeSection: {
         marginBottom: 25,
@@ -1000,5 +1010,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: colors.white
     },
-   
+    resultsCount: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 15,
+        fontWeight: '600',
+    },
+    applyFiltersButton: {
+        paddingVertical: 12,
+        backgroundColor: colors.primary,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 10,
+    },
+    applyFiltersButtonText: {
+        color: colors.white,
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
 });
