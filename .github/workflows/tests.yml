@@ -1,10 +1,8 @@
-name: Java CI – Tests
+name: Java CI - Tests
 
 on:
-
   push:
     branches: [ backend/tarea_17/test_workflow ]
-
   pull_request:
     branches: [ main ]
 
@@ -13,48 +11,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
-          cache: maven            
+    - name: Cache Maven local repo
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven
 
-      - name: Generate .env files for tests
-        run: |
-          cat > .env <<'EOF'
-          # ------------ variables usadas solo en CI / profile test -------------
-          CAMYO_APP_JWT_SECRET=dummy_token_for_ci
+ 
+    - name: Generate .env file for tests
+      run: |
+        cat > .env <<'EOF'
+        # ---------- variables usadas en perfil "test" ----------
+        CAMYO_APP_JWT_SECRET=dummy_token_for_ci
 
-          # H2 in-memory database
-          SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb
-          SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-          SPRING_DATASOURCE_USERNAME=sa
-          SPRING_DATASOURCE_PASSWORD=
-          SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+        # BBDD H2 en memoria
+        SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb
+        SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+        SPRING_DATASOURCE_USERNAME=sa
+        SPRING_DATASOURCE_PASSWORD=
+        SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
 
-          # Stripe – key sintácticamente válida para evitar error "expired"
-          STRIPE_API_KEY=sk_test_1234567890abcdefghijklmnopqrstuv
-          EOF
+        # Clave Stripe sintácticamente válida (pero inerte)
+        STRIPE_API_KEY=sk_test_1234567890abcdefghijklmnopqrstuv
+        EOF
 
-          # Copiamos al módulo backend (Dotenv lo busca ahí)
-          cp .env backend/.env
-          mkdir -p backend/src/test/resources
-          cp .env backend/src/test/resources/.env
+        # Copiar al módulo backend (Dotenv lo busca ahí)
+        cp .env backend/.env
 
-          echo "::group::.env content"
-          cat .env
-          echo "::endgroup::"
+        echo "::group::.env content"
+        cat .env
+        echo "::endgroup::"
 
-      - name: Run Maven unit tests
-        working-directory: backend
-        run: |
-          mvn -B clean test \
-            -Dspring.profiles.active=test \
-            -DskipITs \
-            -Djunit.jupiter.tags='!slow' \
-            -Dsurefire.excludedTests='PagoControllerTests,AuthServiceTest,CamioneroServiceTests,EmpresaServiceTests,BackendApplicationTests'
+    - name: Run Maven unit tests
+      working-directory: backend
+      run: |
+        mvn -B clean test \
+          -Dspring.profiles.active=test \
+          -Dsurefire.excludedTests='**/PagoControllerTests.java,**/AuthServiceTest.java,**/CamioneroServiceTests.java,**/EmpresaServiceTests.java,**/BackendApplicationTests.java'
