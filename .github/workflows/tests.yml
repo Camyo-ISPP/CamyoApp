@@ -20,18 +20,16 @@ jobs:
         distribution: temurin
         java-version: 17
 
-    - name: Cache Maven local repo
+    - name: Cache Maven repo
       uses: actions/cache@v3
       with:
         path: ~/.m2
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven
 
- 
-    - name: Generate .env file for tests
+    - name: Generate .env for tests
       run: |
         cat > .env <<'EOF'
-        # ---------- variables usadas en perfil "test" ----------
         CAMYO_APP_JWT_SECRET=dummy_token_for_ci
 
         # BBDD H2 en memoria
@@ -41,11 +39,10 @@ jobs:
         SPRING_DATASOURCE_PASSWORD=
         SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
 
-        # Clave Stripe sintácticamente válida (pero inerte)
+        # Clave Stripe sólo para que pase la validación de formato
         STRIPE_API_KEY=sk_test_1234567890abcdefghijklmnopqrstuv
         EOF
 
-        # Copiar al módulo backend (Dotenv lo busca ahí)
         cp .env backend/.env
 
         echo "::group::.env content"
@@ -57,4 +54,10 @@ jobs:
       run: |
         mvn -B clean test \
           -Dspring.profiles.active=test \
-          -Dsurefire.excludedTests='**/PagoControllerTests.java,**/AuthServiceTest.java,**/CamioneroServiceTests.java,**/EmpresaServiceTests.java,**/BackendApplicationTests.java'
+          -Dsurefire.excludedTests='
+            **/PagoControllerTests,
+            **/EmpresaServiceTests,
+            **/CamioneroServiceTests,
+            **/AuthServiceTest,
+            **/BackendApplicationTests
+          '
