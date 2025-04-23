@@ -347,6 +347,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 14,
     color: '#333',
+    outlineColor:colors.mediumGray2
   },
   listContent: {
     paddingBottom: 20,

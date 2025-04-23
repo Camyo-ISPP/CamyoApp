@@ -13,7 +13,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { unifyUserData } from '@/utils/unifyData';
 import axios from 'axios';
 import { router } from 'expo-router';
-
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 interface Message {
   _id: string;
   createdAt: Date;
@@ -38,6 +40,7 @@ function ChatComponent({ chat }: ChatComponentProps) {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const [otherUser, setOtherUser] = useState<any>(null);
   const [textHeight, setTextHeight] = useState(500); // Altura inicial del TextInput
+
 
   useEffect(() => {
     if (!chat || !user) return;
@@ -244,6 +247,22 @@ function ChatComponent({ chat }: ChatComponentProps) {
     />
   );
   
+  dayjs.extend(relativeTime);
+  dayjs.extend(localizedFormat);
+  dayjs.locale('es'); // Configurar idioma español
+  
+  // Función para formatear la fecha
+  const formatDate = (date: Date): string => {
+    const today = dayjs().startOf('day');
+    const messageDate = dayjs(date).startOf('day');
+  
+    if (messageDate.isSame(today, 'day')) {
+      return 'Hoy'; // Si la fecha es hoy, mostrar "Hoy"
+    } else {
+      return dayjs(date).format('D MMM'); // Formato predeterminado para otras fechas
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView
@@ -274,6 +293,7 @@ function ChatComponent({ chat }: ChatComponentProps) {
         messages={messages}
         showAvatarForEveryMessage={false}
         onSend={messages => onSend(messages)}
+        
         user={{
           _id: user?.userId.toString(),
           name: user?.nombre,
@@ -286,10 +306,12 @@ function ChatComponent({ chat }: ChatComponentProps) {
             primaryStyle={styles.inputToolbarPrimary}
             textInputProps={{
               placeholder: 'Escribe un mensaje...',
-              placeholderTextColor: colors.gray,
-              style: [styles.messageInput, { height: Math.max(40, textHeight) }], // Ajustar altura dinámicamente
+              placeholderTextColor: colors.mediumGray2,
+              style: [styles.messageInput, { height: Math.max(40, textHeight) },], // Ajustar altura dinámicamente
               maxLength: 3000,
               multiline: true,
+              scrollEnabled: true,
+             
               onContentSizeChange: handleContentSizeChange, // Detectar cambios en el tamaño del contenido
             }}
             containerStyle={styles.inputToolbarContainer}
@@ -300,7 +322,14 @@ function ChatComponent({ chat }: ChatComponentProps) {
         renderAvatar={null}
         locale={dayes}
         timeFormat="HH:mm"
-        dateFormat="D MMM"
+        renderDay={(props) => {
+          const date = props.currentMessage?.createdAt;
+          return (
+            <View style={styles.dateContainer}>
+              <Text style={styles.dateText}>{formatDate(date)}</Text>
+            </View>
+          );
+        }}
         ref={chatRef}
         minInputToolbarHeight={76}
         bottomOffset={Platform.OS === 'ios' ? 0 : 20}
@@ -365,18 +394,21 @@ const styles = StyleSheet.create({
     borderTopColor: colors.lightGray,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    
+    
   },
   inputToolbarPrimary: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  
   },
   accessoryStyle: {
     height: 44,
   },
   messageInput: {
     fontSize: 16,
-    color: colors.dark,
+    color: 'black',
     backgroundColor: colors.lighterGray,
     borderRadius: 20,
     paddingHorizontal: 16,
@@ -387,7 +419,11 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     borderWidth: 1,
     borderColor: colors.lightGray,
+    scrollbarWidth: 'none',
+    outlineColor: colors.mediumGray2,
+  
   },
+  
   sendContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -418,6 +454,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     opacity: 0.8,
   },
+  dateContainer: {
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  dateText: {
+    backgroundColor: colors.secondary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    fontSize: 15,
+    color: colors.white,
+  },
+  
 });
 
 export default ChatComponent;
