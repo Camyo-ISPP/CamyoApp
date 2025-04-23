@@ -59,7 +59,7 @@ const PublicCamionero = ({ userId }) => {
     const fetchResenas = async () => {
         try {
             const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
-            setResenas(response.data);
+            setResenas(response.data.sort((a, b) => (b.comentador?.id === user?.userId) - (a.comentador?.id === user?.userId)));
 
             const yaExiste = response.data.some(res => res.comentador?.id === user?.userId);
             setYaEscribioResena(yaExiste);
