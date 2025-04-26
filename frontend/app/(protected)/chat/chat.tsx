@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Platform, KeyboardAvoidingView } from 'react-native';
-import { Bubble, GiftedChat, InputToolbar, Send, Time } from 'react-native-gifted-chat';
-import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc, increment } from 'firebase/firestore';
+import { Bubble, Composer, ComposerProps, GiftedChat, IMessage, InputToolbar, Send, SendProps, Time } from 'react-native-gifted-chat';
+import { collection, addDoc, query, orderBy, onSnapshot, updateDoc, doc, increment, limit } from 'firebase/firestore';
 import { database } from '../../../firebase';
 import { useAuth } from '../../../contexts/AuthContext';
 import colors from '@/assets/styles/colors';
@@ -10,6 +10,9 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import dayes from 'dayjs/locale/es'
 import defaultEmpImage from "../../../assets/images/empresa.jpg";
 import { Ionicons } from '@expo/vector-icons';
+import { unifyUserData } from '@/utils/unifyData';
+import axios from 'axios';
+import { router } from 'expo-router';
 
 interface Message {
   _id: string;
@@ -32,22 +35,23 @@ function ChatComponent({ chat }: ChatComponentProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const chatRef = useRef<any>();
+  const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  const [otherUser, setOtherUser] = useState<any>(null);
+  const [textHeight, setTextHeight] = useState(500); // Altura inicial del TextInput
+
 
   useEffect(() => {
     if (!chat || !user) return;
-    
     const chatRef = doc(database, 'chats', chat.id);
     const updates: any = {};
     updates[`unreadCounts.${user.userId}`] = 0;
-  
     updateDoc(chatRef, updates).catch(console.error);
   }, [chat, user]);
-  
+
   useEffect(() => {
     if (chat) {
       const messagesRef = collection(database, `chats/${chat.id}/messages`);
       const q = query(messagesRef, orderBy('createdAt', 'desc'));
-
       const unsubscribe = onSnapshot(q, querySnapshot => {
         const messages = querySnapshot.docs.map(doc => ({
           _id: doc.id,
@@ -60,13 +64,30 @@ function ChatComponent({ chat }: ChatComponentProps) {
     }
   }, [chat]);
 
+  useEffect(() => {
+    const fetchRecipientData = async () => {
+      try {
+        let response;
+        if (chat.recipient.authority?.authority === "CAMIONERO") {
+          response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${chat.recipient.id}`);
+        } else if (chat.recipient.authority?.authority === "EMPRESA") {
+          response = await axios.get(`${BACKEND_URL}/empresas/por_usuario/${chat.recipient.id}`);
+        }
+        const unifiedData = unifyUserData(response?.data);
+        setOtherUser(unifiedData);
+      } catch (error) {
+        console.error("Error fetching recipient data:", error);
+      }
+    };
+    fetchRecipientData();
+  }, [chat.recipient, BACKEND_URL]);
+
   const onSend = useCallback(
     async (newMessages: Message[] = []) => {
       if (!chat || !user) return;
       setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages));
       const { _id, createdAt, text, user: messageUser } = newMessages[0];
       const chatRef = doc(database, 'chats', chat.id);
-
       await updateDoc(doc(database, 'chats', chat.id), {
         lastMessage: text,
         lastUpdated: new Date(),
@@ -83,12 +104,11 @@ function ChatComponent({ chat }: ChatComponentProps) {
         lastUpdated: new Date()
       };
       chat.participants
-      .filter((p) => p !== user.userId.toString())
-      .forEach((recipientId) => {
-        updates[`unreadCounts.${recipientId}`] = increment(1);
-      });
-
-    await updateDoc(chatRef, updates);
+        .filter((p) => p !== user.userId.toString())
+        .forEach((recipientId) => {
+          updates[`unreadCounts.${recipientId}`] = increment(1);
+        });
+      await updateDoc(chatRef, updates);
     },
     [chat, user]
   );
@@ -98,7 +118,7 @@ function ChatComponent({ chat }: ChatComponentProps) {
       <Bubble
         {...props}
         wrapperStyle={{
-          left: { 
+          left: {
             backgroundColor: '#f0f0f0',
             borderBottomLeftRadius: 0,
             borderRadius: 16,
@@ -110,8 +130,9 @@ function ChatComponent({ chat }: ChatComponentProps) {
             shadowOpacity: 0.05,
             shadowRadius: 2,
             elevation: 1,
+            maxWidth: '40%',
           },
-          right: { 
+          right: {
             backgroundColor: colors.primary,
             borderBottomRightRadius: 0,
             borderRadius: 16,
@@ -123,28 +144,29 @@ function ChatComponent({ chat }: ChatComponentProps) {
             shadowOpacity: 0.1,
             shadowRadius: 2,
             elevation: 1,
+            maxWidth: '60%',
           },
         }}
         textStyle={{
-          left: { 
-            color: colors.dark, 
+          left: {
+            color: colors.dark,
             fontSize: 16,
             lineHeight: 22,
           },
-          right: { 
-            color: colors.white, 
+          right: {
+            color: colors.white,
             fontSize: 16,
             lineHeight: 22,
           },
         }}
         timeTextStyle={{
-          left: { 
-            color: colors.gray, 
+          left: {
+            color: colors.gray,
             fontSize: 12,
             marginTop: 4,
           },
-          right: { 
-            color: colors.lightGray, 
+          right: {
+            color: colors.lightGray,
             fontSize: 12,
             marginTop: 4,
           },
@@ -173,15 +195,58 @@ function ChatComponent({ chat }: ChatComponentProps) {
           styles.sendButton,
           props.text ? styles.activeSendButton : styles.inactiveSendButton
         ]}>
-          <Ionicons 
-            name="send" 
-            size={20} 
-            color={props.text ? colors.white : colors.gray} 
+          <Ionicons
+            name="send"
+            size={20}
+            color={props.text ? colors.white : colors.gray}
           />
         </View>
       </Send>
     );
   };
+
+  const navigateToProfile = () => {
+    console.log("navigateToProfile called");
+    if (otherUser?.rol === "CAMIONERO") {
+      router.push(`/camionero/${otherUser?.id}`);
+      console.log("CAMIONERO")
+    } else if (otherUser?.rol === "EMPRESA") {
+      router.push(`/empresa/${otherUser?.id}`);
+    }
+  };
+
+  const handleContentSizeChange = (event) => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    setTextHeight(contentHeight); // Actualizar la altura dinámicamente
+  };
+
+  const ChatComposer = (
+    props: ComposerProps & {
+      // GiftedChat passes its props to all of its `render*()`
+      onSend: SendProps<IMessage>['onSend'];
+      text: SendProps<IMessage>['text'];
+    },
+  ) => (
+    <Composer
+      {...props}
+      textInputProps={{
+        ...props.textInputProps,
+        // for enabling the Return key to send a message only on web
+        blurOnSubmit: Platform.OS === 'web',
+        onSubmitEditing:
+          Platform.OS === 'web'
+            ? () => {
+                if (props.text && props.onSend) {
+                  props.onSend({text: props.text.trim()}, true);
+                }
+              }
+            : undefined,
+      }}
+    />
+  );
+  
+
+
 
   return (
     <KeyboardAvoidingView
@@ -190,27 +255,29 @@ function ChatComponent({ chat }: ChatComponentProps) {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       {/* Header with recipient info */}
-      <View style={styles.header}>
-        <Image 
+      <TouchableOpacity style={styles.header} onPress={navigateToProfile}>
+        <Image
           source={
-              chat.recipient?.foto 
-                  ? { uri: `data:image/png;base64,${chat.recipient.foto}` } 
-                  : (chat.recipient?.authority?.authority === "CAMIONERO" ? defaultImage : defaultEmpImage)
+            chat.recipient?.foto
+              ? { uri: `data:image/png;base64,${chat.recipient.foto}` }
+              : (chat.recipient?.authority?.authority === "CAMIONERO" ? defaultImage : defaultEmpImage)
           }
           style={styles.avatar}
         />
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerText} numberOfLines={1}>{chat.recipient.nombre}</Text>
-          <Text style={styles.statusText} numberOfLines={1}>{chat.recipient.descripcion}</Text>
+          <Text style={styles.headerText} numberOfLines={1}>{chat.recipient?.nombre}</Text>
+          <Text style={styles.statusText} numberOfLines={1}>{chat.recipient?.descripcion}</Text>
         </View>
-      </View>
-      
+      </TouchableOpacity>
+
       {/* Chat interface */}
       <GiftedChat
+        renderComposer={ChatComposer}
         inverted={true}
         messages={messages}
         showAvatarForEveryMessage={false}
         onSend={messages => onSend(messages)}
+        
         user={{
           _id: user?.userId.toString(),
           name: user?.nombre,
@@ -218,24 +285,28 @@ function ChatComponent({ chat }: ChatComponentProps) {
         renderBubble={renderBubble}
         renderSend={renderSend}
         renderInputToolbar={(props) => (
-          <InputToolbar 
-            {...props} 
+          <InputToolbar
+            {...props}
             primaryStyle={styles.inputToolbarPrimary}
             textInputProps={{
-              placeholder: 'Escribe un mensaje...', 
-              placeholderTextColor: colors.gray,
-              style: styles.messageInput,
+              placeholder: 'Escribe un mensaje...',
+              placeholderTextColor: colors.mediumGray2,
+              style: [styles.messageInput, { height: Math.max(40, textHeight) },], // Ajustar altura dinámicamente
+              maxLength: 3000,
               multiline: true,
-              maxLength: 500,
+              scrollEnabled: true,
+             
+              onContentSizeChange: handleContentSizeChange, // Detectar cambios en el tamaño del contenido
             }}
             containerStyle={styles.inputToolbarContainer}
             accessoryStyle={styles.accessoryStyle}
           />
         )}
+        
         renderAvatar={null}
         locale={dayes}
         timeFormat="HH:mm"
-        dateFormat="D MMM"
+        renderDay={() => null}
         ref={chatRef}
         minInputToolbarHeight={76}
         bottomOffset={Platform.OS === 'ios' ? 0 : 20}
@@ -300,18 +371,21 @@ const styles = StyleSheet.create({
     borderTopColor: colors.lightGray,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    
+    
   },
   inputToolbarPrimary: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  
   },
   accessoryStyle: {
     height: 44,
   },
   messageInput: {
     fontSize: 16,
-    color: colors.dark,
+    color: 'black',
     backgroundColor: colors.lighterGray,
     borderRadius: 20,
     paddingHorizontal: 16,
@@ -322,7 +396,11 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     borderWidth: 1,
     borderColor: colors.lightGray,
+    scrollbarWidth: 'none',
+    outlineColor: colors.mediumGray2,
+  
   },
+  
   sendContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -353,6 +431,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     opacity: 0.8,
   },
+ 
+  
 });
 
 export default ChatComponent;

@@ -236,7 +236,7 @@ function ChatList() {
         <View style={styles.chatListContainer}>
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Mensajes</Text>
-            <TouchableOpacity onPress={() => setIsSearching(!isSearching)}>
+            <TouchableOpacity onPress={() => {setIsSearching(!isSearching);setSearchQuery('')}}>
               <Ionicons name={isSearching ? "close" : "search"} size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
@@ -347,6 +347,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 14,
     color: '#333',
+    outlineColor:colors.mediumGray2
   },
   listContent: {
     paddingBottom: 20,
