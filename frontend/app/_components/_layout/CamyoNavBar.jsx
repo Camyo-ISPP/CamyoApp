@@ -36,7 +36,7 @@ export default function CamyoWebNavBar({ onSearch }) {
           </TouchableOpacity>
           <View style={styles.separator} />
           <View style={styles.searchContainer}>
-          <TextInput 
+            <TextInput 
               style={styles.searchInput} 
               placeholder="Buscar ofertas..." 
               placeholderTextColor={colors.mediumGray2} 
@@ -100,23 +100,26 @@ export default function CamyoWebNavBar({ onSearch }) {
               />
             </>
           )}
-          <NavSeparator />
-          {user ? (
-            <PerfilDropdown user={user} />
-          ) : (
-            <NavButton 
-              text="Iniciar Sesión" 
-              onPress={() => router.push("/login")} 
-              isPrimary
-            />
-          )}
+          
+          {/* Contenedor del perfil con margen izquierdo automático */}
+          <View style={styles.profileWrapper}>
+            {user ? (
+              <PerfilDropdown user={user} />
+            ) : (
+              <NavButton 
+                text="Iniciar Sesión" 
+                onPress={() => router.push("/login")} 
+                isPrimary
+              />
+            )}
+          </View>
         </View>
       </View>
     </View>
   );
 };
 
-// Helper components for cleaner code
+// Componentes auxiliares
 const NavButton = ({ text, onPress, isPrimary = false }) => (
   <TouchableOpacity 
     style={[styles.button, isPrimary && styles.primaryButton]} 
@@ -157,17 +160,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width: "80%",
+    width: "90%", // Aumentado para mejor distribución
+    maxWidth: 1600, // Máximo ancho para pantallas grandes
   },
   leftSection: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
+    maxWidth: "60%", // Limita el ancho para dejar espacio a la derecha
   },
   rightSection: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
     justifyContent: "flex-end",
+    marginLeft: 20, // Espacio mínimo entre elementos
+  },
+  profileWrapper: {
+    marginLeft: 20, // Espacio entre el último elemento y el perfil
   },
   separator: {
     width: 2,
@@ -229,5 +239,5 @@ const styles = StyleSheet.create({
     width: 90,
     height: 50,
     aspectRatio: 1,
-  }
+  },
 });
