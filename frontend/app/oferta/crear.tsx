@@ -20,6 +20,7 @@ const CrearOfertaScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successModalVisibleD, setSuccessModalVisibleD] = useState(false);
   const { rules, loading: rulesLoading } = useSubscriptionRules();
   const [offers, setOffers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -618,9 +619,9 @@ const CrearOfertaScreen = () => {
       if (response.status === 201) {
         setErrorMessage("")
 
-        setSuccessModalVisible(true);
+        setSuccessModalVisibleD(true);
         setTimeout(() => {
-          setSuccessModalVisible(false);
+          setSuccessModalVisibleD(false);
           router.replace("/miperfil");
         }, 1000);
       }
@@ -862,6 +863,11 @@ const CrearOfertaScreen = () => {
             isVisible={successModalVisible}
             onClose={() => setSuccessModalVisible(false)}
             message="¡Oferta creada con éxito!"
+          />
+          <SuccessModal
+            isVisible={successModalVisibleD}
+            onClose={() => setSuccessModalVisibleD(false)}
+            message="¡Borrador creado con éxito!"
           />
         </View>
       </ScrollView>

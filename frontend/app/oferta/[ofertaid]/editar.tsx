@@ -25,6 +25,7 @@ const EditarOfertaScreen = () => {
   const [tipoOferta, setTipoOferta] = useState("TRABAJO");
   const [errorMessage, setErrorMessage] = useState("");
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successModalVisibleD, setSuccessModalVisibleD] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [offers, setOffers] = useState<any[]>([]);
   const [drafts, setDrafts] = useState<any[]>([]);
@@ -631,9 +632,9 @@ const EditarOfertaScreen = () => {
 
       if (response.status === 200) {
         setErrorMessage("");
-        setSuccessModalVisible(true);
+        setSuccessModalVisibleD(true);
         setTimeout(() => {
-          setSuccessModalVisible(false);
+          setSuccessModalVisibleD(false);
           router.replace("/miperfil");
         }, 1000);
       }
@@ -868,7 +869,12 @@ const EditarOfertaScreen = () => {
             <SuccessModal
               isVisible={successModalVisible}
               onClose={() => setSuccessModalVisible(false)}
-              message="¡Oferta actualizada con éxito!"
+              message="¡Oferta creada con éxito!"
+            />
+            <SuccessModal
+              isVisible={successModalVisibleD}
+              onClose={() => setSuccessModalVisibleD(false)}
+              message="¡Borrador actualizado con éxito!"
             />
           </View>
         </ScrollView>
