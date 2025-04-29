@@ -60,7 +60,7 @@ const MiPerfilEmpresa = () => {
       fetchResenas();
     }
   }, [user]);
-
+  
 
   const fetchResenas = async () => {
     try {
@@ -255,7 +255,7 @@ const MiPerfilEmpresa = () => {
     <ScrollView>
       <View style={styles.pageContainer}>
         {/* Left Ad */}
-        {user?.ads && (
+        {(user?.ads &&
           <View style={styles.adContainer}>
             <Image
               source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
@@ -356,10 +356,10 @@ const MiPerfilEmpresa = () => {
               </View>
 
               {/* Botón de eliminar anuncios */}
-              {user.ads &&
+              {user?.ads &&
                 <View>
                   <TouchableOpacity
-                    style={styles.mejorarPlanButton}
+                    style={styles.anunciosButton}
                     onPress={handleRemoveAds}
                   >
                     <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
@@ -588,7 +588,7 @@ const MiPerfilEmpresa = () => {
           onCreateNew={handleCreateNew}
         />
         {/* Right Ad */}
-        {user?.ads && (
+        { (user?.ads &&
           <View style={styles.adContainer}>
             <Image
               source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
@@ -733,6 +733,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  anunciosButton: {
+    backgroundColor: '#0993A8FF',
+    padding: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 60,
+    marginRight:10,
   },
   upgradeCard: {
     backgroundColor: colors.white,
@@ -1221,14 +1231,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, // Add padding on both sides
   },
   adContainer: {
-    width: "10%", // Adjust width of the ad container
-    minWidth: 100, // Ensure a minimum width for smaller screens
+    width: "20%", // Adjust width of the ad container
+    height: "100%",
     alignItems: "center",
     justifyContent: "flex-start",
   },
   adImage: {
     width: "100%",
-    height: 700, // Adjust height as needed
+    height: "100%", // Adjust height as needed
     borderRadius: 10,
   },
 });
