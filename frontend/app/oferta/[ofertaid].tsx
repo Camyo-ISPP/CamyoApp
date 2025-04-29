@@ -485,6 +485,12 @@ export default function OfertaDetalleScreen() {
 
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
+                                            <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {item.usuario.localizacion}</Text>
+                                            <Text style={styles.info}>
+                                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                {item.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                            </Text>
+                                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {item.experiencia} años</Text>                                        
                                         </View>
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                             <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
@@ -518,6 +524,12 @@ export default function OfertaDetalleScreen() {
 
                                                 <View style={{ flex: 1 }}>
                                                     <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
+                                                    <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {item.usuario.localizacion}</Text>
+                                                    <Text style={styles.info}>
+                                                        <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                        {item.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                                    </Text>
+                                                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {item.experiencia} años</Text>    
                                                 </View>
                                                 <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                                     <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
@@ -553,6 +565,12 @@ export default function OfertaDetalleScreen() {
                                     />
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.camTitle}>{offerData.camionero.usuario.nombre}</Text>
+                                        <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {offerData.camionero.usuario.localizacion}</Text>
+                                            <Text style={styles.info}>
+                                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                {offerData.camionero.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                            </Text>
+                                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {offerData.camionero.experiencia} años</Text>                                        
                                     </View>
                                     <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                         <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${offerData.camionero.id}`)}>
@@ -574,6 +592,12 @@ export default function OfertaDetalleScreen() {
 
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
+                                            <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {item.usuario.localizacion}</Text>
+                                            <Text style={styles.info}>
+                                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                {item.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                            </Text>
+                                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {item.experiencia} años</Text>                                        
                                         </View>
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                             <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
@@ -959,5 +983,10 @@ const styles = StyleSheet.create({
     },
     rejectedText: {
         color: '#dc3545'
+    },
+    info: {
+        fontSize: 16,
+        color: colors.darkGray,
+        marginVertical: 4,
     }
 });
