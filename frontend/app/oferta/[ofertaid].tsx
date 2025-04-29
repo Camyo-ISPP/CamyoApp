@@ -1,7 +1,7 @@
-import { Text, View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal, Dimensions } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Entypo, FontAwesome } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Entypo, FontAwesome, AntDesign } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,12 +11,20 @@ import BackButton from "../_components/BackButton";
 import { RouteMap } from "../_components/Maps";
 import MapLoader from "../_components/MapLoader";
 import { startChat } from "../(protected)/chat/services";
+import { LinearGradient } from "expo-linear-gradient";
+import { usePayment } from "@/contexts/PaymentContext";
+import axios from "axios";
+import SuccessModal from "../_components/SuccessModal";
+import SubscriptionModal from "../_components/SubscriptionModal";
 
+const { width } = Dimensions.get('window');
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
     return new Date(fecha).toLocaleDateString("es-ES", opciones);
 };
+
+
 
 export default function OfertaDetalleScreen() {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -30,10 +38,21 @@ export default function OfertaDetalleScreen() {
     const { user, userToken, login, logout } = useAuth();
     const [successModalVisibleCam, setSuccessModalVisibleCam] = useState(false);
     const [successModalVisibleEmp, setSuccessModalVisibleEmp] = useState(false);
+    const { setId, setOfertaId } = usePayment();
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+
+    const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+    const [offerToCancel, setOfferToCancel] = useState<number | null>(null);
 
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
     const openCageKey = process.env.EXPO_PUBLIC_OPENCAGE_API_KEY;
 
+    const canPromoteNewOffer = () => {
+        return offerData && !offerData.promoted;
+    };
+      
+    const canCancelPromotedOffer = offerData ? offerData.promoted : false;
+      
 
     useEffect(() => {
         if (ofertaid) {
@@ -86,7 +105,32 @@ export default function OfertaDetalleScreen() {
             </View>
         );
     };
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
+            const data = await response.json();
+            if (data.estado === "BORRADOR") {
+                router.push("/forbidden")
+                return;
+            }
+            setOfferData(data);
+            if (data.tipoOferta === "TRABAJO") {
+                const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
+                const trabajoData = await trabajoResponse.json();
+                setOfferTrabajoData(trabajoData);
+            } else if (data.tipoOferta === "CARGA") {
+                const cargaResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`);
+                const cargaText = await cargaResponse.text();
+                const cargaData = cargaText ? JSON.parse(cargaText) : null;
+                setOfferCargaData(cargaData);
+            }
 
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleSolicitarOferta = async () => {
 
         try {
@@ -212,6 +256,42 @@ export default function OfertaDetalleScreen() {
         }
     };
 
+    const promoteOfferCheckout = (ofertaId: number) => {
+        setId("PATROCINAR");
+        setOfertaId(ofertaId);
+        router.push("/pago/checkout");
+    };
+    
+    const handleCancelPrompt = (ofertaId: number) => {
+        setOfferToCancel(ofertaId);
+        setShowCancelConfirmation(true);
+    };
+    
+    const confirmUnpromote = async () => {
+        setShowCancelConfirmation(false);
+        if (offerToCancel) {
+            await unpromoteOffer(offerToCancel);
+        }
+    };
+    
+    const unpromoteOffer = async (ofertaId: number | null) => {
+        try {
+          const response = await axios.put(
+            `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
+            {},
+            { headers: { Authorization: `Bearer ${userToken}` } }
+          );
+    
+          if (response.status === 200) {
+            setSuccessModalVisible(true);
+            await fetchData();
+            setTimeout(() => setSuccessModalVisible(false), 2000);
+          }
+        } catch (err) {
+          console.error("Error al cancelar patrocinio:", err);
+        }
+      };
+
     const renderOfferCard = () => {
         return (
             <View style={[
@@ -254,9 +334,34 @@ export default function OfertaDetalleScreen() {
 
                     <View style={{ alignItems: "flex-end" }}>
                         {user && user.rol == "EMPRESA" && offerData.empresa.id === user.id ? (
-                            <View style={styles.ownOfferBadgeAlt}>
-                                <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
-                                <Text style={styles.ownOfferTextAlt}>Tu Oferta</Text>
+                            <View style={styles.offerActions}>
+                                {offerData.promoted ? (
+                                    canCancelPromotedOffer && (
+                                    <TouchableOpacity
+                                    style={[styles.actionButton, styles.unpromoteButton]}
+                                    onPress={() => handleCancelPrompt(offerData.id)}
+                                    >
+                                    <AntDesign name="closecircleo" size={14} color={colors.white} />
+                                    <Text style={styles.actionButtonText}>Cancelar</Text>
+                                    </TouchableOpacity>
+                                    )
+                                ) : canPromoteNewOffer() ? (
+                                    <TouchableOpacity onPress={() => promoteOfferCheckout(offerData.id)}>
+                                    <LinearGradient
+                                        colors={['#D4AF37', '#F0C674', '#B8860B', '#F0C674']}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={[styles.actionButton]}
+                                    >
+                                        <AntDesign name="star" size={14} color={colors.white} />
+                                        <Text style={styles.actionButtonText}>Patrocinar</Text>
+                                    </LinearGradient>
+                                    </TouchableOpacity>
+                                ) : null}
+                                <View style={styles.ownOfferBadgeAlt}>
+                                    <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
+                                    <Text style={styles.ownOfferTextAlt}>Tu Oferta</Text>
+                                </View>
                             </View>
                         ) : (
                             <TouchableOpacity
@@ -629,8 +734,21 @@ export default function OfertaDetalleScreen() {
                     )
                 ) : (<></>)
                 }
+            <SuccessModal
+                isVisible={successModalVisible}
+                onClose={() => setSuccessModalVisible(false)}
+                message={offerToCancel ? "¡Patrocinio cancelado con éxito!" : "¡Oferta patrocinada con éxito!"}
+            />
 
+            <SubscriptionModal
+                visible={showCancelConfirmation}
+                onConfirm={confirmUnpromote}
+                onCancel={() => setShowCancelConfirmation(false)}
+                title="¿Cancelar patrocinio?"
+                message="Al cancelar el patrocinio, la oferta perderá visibilidad destacada. El importe abonado no será reembolsado. ¿Deseas continuar?"
+            />
             </View>
+            
         );
     };
 
@@ -875,7 +993,6 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 14,
         borderRadius: 20,
-        marginRight: 30,
     },
     ownOfferTextAlt: {
         color: "white",
@@ -1028,5 +1145,35 @@ const styles = StyleSheet.create({
     chatIcon: {
         marginRight: 8,
         marginBottom: 4,
-    }
+    },
+    offerActions: {
+        flexDirection: width < 768 ? 'row' : 'column',
+        justifyContent: 'center',
+        gap: 8,
+        width: width < 768 ? '100%' : 120,
+        marginTop: width < 768 ? 10 : 0,
+      },
+      actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "center",
+        width: width < 768 ? '48%' : '100%',
+        paddingVertical: 9,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        gap: 8,
+        marginTop: 5,
+      },
+      actionButtonText: {
+        color: colors.white,
+        fontSize: width < 768 ? 12 : 14,
+        textAlign: "left",
+        fontWeight: '500',
+      },
+      promoteButton: {
+        backgroundColor: '#D4AF37',
+      },
+      unpromoteButton: {
+        backgroundColor: colors.red,
+      },
 });
