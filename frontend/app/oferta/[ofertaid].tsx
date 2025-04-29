@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Entypo, FontAwesome } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 import { RouteMap } from "../_components/Maps";
 import MapLoader from "../_components/MapLoader";
+import { startChat } from "../(protected)/chat/services";
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
@@ -32,7 +33,7 @@ export default function OfertaDetalleScreen() {
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
     const openCageKey = process.env.EXPO_PUBLIC_OPENCAGE_API_KEY;
 
-
+    
     useEffect(() => {
         if (ofertaid) {
             const fetchData = async () => {
@@ -265,6 +266,23 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.buttonText}> Ver Empresa</Text>
                             </TouchableOpacity>
                         )}
+
+                    {user && user.rol == "CAMIONERO" && (
+                            <View>
+                            <TouchableOpacity
+                                style={styles.publishButton}
+                                onPress={async () => {
+                                    const chatId = await startChat(user.userId, offerData.empresa?.usuario.id);
+                                    if (chatId) {
+                                    router.push(`/chat`);
+                                    }
+                                }}
+                                >
+                                <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
+                                <Text style={styles.publishButtonText}>Contactar</Text>
+                                </TouchableOpacity>
+                  </View>
+                )}
                     </View>
 
                 </View>
@@ -959,5 +977,28 @@ const styles = StyleSheet.create({
     },
     rejectedText: {
         color: '#dc3545'
-    }
+    },
+    publishButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.primary,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 3,
+        marginTop:10,
+      },
+      plusIcon: {
+        marginRight: 6,
+      },
+      publishButtonText: {
+        color: "#fff",
+        fontSize: 13,
+        fontWeight: "bold",
+      },
 });
