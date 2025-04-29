@@ -1,126 +1,219 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
 import { Entypo, FontAwesome, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
 import { router } from 'expo-router';
-import { useAuth } from "../../../contexts/AuthContext"
+import { useAuth } from "../../../contexts/AuthContext";
 
 const OptionsDropdown = () => {
   const { user } = useAuth();
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && 
+          !dropdownRef.current.contains(event.target) &&
+          !event.target.closest('[data-menu-button]')) {
+        setDropdownVisible(false);
+      }
+    };
+
+    if (dropdownVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownVisible]);
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: dropdownVisible ? 1 : 0,
+      duration: dropdownVisible ? 200 : 150,
+      useNativeDriver: true,
+    }).start();
+  }, [dropdownVisible, fadeAnim]);
 
   return (
     <View style={styles.container}>
-      {/* 3 lines */}
       <TouchableOpacity
         onPress={() => setDropdownVisible(!dropdownVisible)}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginRight: 5 }}
+        activeOpacity={0.8}
+        style={styles.menuButton}
+        data-menu-button="true"
       >
         <FontAwesome name="bars" size={18} color={colors.secondary} />
-        <Text style={{ color: colors.secondary, fontWeight: 'bold', fontSize: 18 }}>Menú</Text>
+        <Text style={styles.menuText}>Menú</Text>
       </TouchableOpacity>
 
-
-      {/* Dropdown */}
+      {/* Dropdown con animación */}
       {dropdownVisible && (
-        <View style={styles.dropdown}>
-          <TouchableOpacity onPress={() => setDropdownVisible(false)} style={styles.closeButton}>
+        <Animated.View 
+          ref={dropdownRef}
+          style={[
+            styles.dropdown,
+            {
+              opacity: fadeAnim,
+              transform: [
+                {
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-10, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <TouchableOpacity 
+            onPress={() => setDropdownVisible(false)} 
+            style={styles.closeButton}
+            activeOpacity={0.7}
+          >
             <Entypo name="cross" size={20} color={colors.primary} />
           </TouchableOpacity>
 
-          {user && user.rol == "ADMIN" && (
-            <TouchableOpacity onPress={() => router.push('/admin')} style={styles.dropdownButton}>
-              <FontAwesome5 name="wrench" size={18} style={[styles.dropdownButtonIcon, {marginRight: 6}]} />
-              <Text style={styles.dropdownButtonText}>Admin</Text>
-            </TouchableOpacity>
+          {user && user.rol === "ADMIN" && (
+            <DropdownButton 
+              icon={<FontAwesome5 name="wrench" size={18} color={colors.secondary} />}
+              text="Admin"
+              onPress={() => {
+                setDropdownVisible(false);
+                router.push('/admin');
+              }}
+            />
           )}
 
-          <TouchableOpacity onPress={() => router.push('/empresas')} style={styles.dropdownButton}>
-            <MaterialIcons name="domain" size={20} style={styles.dropdownButtonIcon} />
-            <Text style={styles.dropdownButtonText}>Empresas</Text>
-          </TouchableOpacity>
+          <DropdownButton 
+            icon={<MaterialIcons name="domain" size={20} color={colors.secondary} />}
+            text="Empresas"
+            onPress={() => {
+              setDropdownVisible(false);
+              router.push('/empresas');
+            }}
+          />
 
-          <TouchableOpacity onPress={() => router.push('/explorar')} style={styles.dropdownButton}>
-            <MaterialIcons name="search" size={20} style={styles.dropdownButtonIcon} />
-            <Text style={styles.dropdownButtonText}>Ofertas</Text>
-          </TouchableOpacity>
+          <DropdownButton 
+            icon={<MaterialIcons name="search" size={20} color={colors.secondary} />}
+            text="Ofertas"
+            onPress={() => {
+              setDropdownVisible(false);
+              router.push('/explorar');
+            }}
+          />
 
           {user && user.rol !== "ADMIN" && (
-            <TouchableOpacity onPress={() => router.push('/misofertas')} style={styles.dropdownButton}>
-              <MaterialIcons name="work" size={20} style={styles.dropdownButtonIcon} />
-              <Text style={styles.dropdownButtonText}>Mis ofertas</Text>
-            </TouchableOpacity>
+            <DropdownButton 
+              icon={<MaterialIcons name="work" size={20} color={colors.secondary} />}
+              text="Mis ofertas"
+              onPress={() => {
+                setDropdownVisible(false);
+                router.push('/misofertas');
+              }}
+            />
           )}
 
           {user && user.rol !== "ADMIN" && (
-            <TouchableOpacity onPress={() => router.push('/chat')} style={styles.dropdownButton}>
-              <MaterialIcons name="sms" size={20} style={styles.dropdownButtonIcon} />
-              <Text style={styles.dropdownButtonText}>Mis mensajes</Text>
-            </TouchableOpacity>
+            <DropdownButton 
+              icon={<MaterialIcons name="sms" size={20} color={colors.secondary} />}
+              text="Mis mensajes"
+              onPress={() => {
+                setDropdownVisible(false);
+                router.push('/chat');
+              }}
+            />
           )}
 
           {user?.rol === "EMPRESA" && (
-            <TouchableOpacity onPress={() => router.push('/suscripcion')} style={styles.dropdownButton}>
-              <MaterialIcons name="sell" size={20} style={styles.dropdownButtonIcon} />
-              <Text style={styles.dropdownButtonText}>Suscripción</Text>
-            </TouchableOpacity>
+            <DropdownButton 
+              icon={<MaterialIcons name="sell" size={20} color={colors.secondary} />}
+              text="Suscripción"
+              onPress={() => {
+                setDropdownVisible(false);
+                router.push('/suscripcion');
+              }}
+            />
           )}
-
-        </View>
+        </Animated.View>
       )}
-    </View >
+    </View>
   );
 };
+
+const DropdownButton = ({ icon, text, onPress }) => (
+  <TouchableOpacity 
+    onPress={onPress} 
+    style={styles.dropdownButton}
+    activeOpacity={0.7}
+  >
+    <View style={styles.iconContainer}>
+      {icon}
+    </View>
+    <Text style={styles.dropdownButtonText}>{text}</Text>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
     alignItems: 'center',
+    zIndex: 1000,
+  },
+  menuButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  menuText: {
+    color: colors.secondary,
+    fontWeight: 'bold',
+    fontSize: 18,
   },
   dropdown: {
     position: 'absolute',
-    top: 40,
+    top: 70,
     right: 0,
     backgroundColor: 'white',
-    paddingVertical: 15,
-    paddingHorizontal: 5,
-    borderRadius: 8,
+    padding: 20,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
-    elevation: 5,
+    borderColor: '#e0e0e0',
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 3 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    minWidth: 190,
-    marginTop: 15,
+    shadowRadius: 8,
+    width: 220,
+    elevation: 5,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 5,
   },
   dropdownButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 4,
-    marginTop: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginVertical: 4,
+  },
+  iconContainer: {
+    width: 30,
+    alignItems: 'center',
+    marginRight: 12,
   },
   dropdownButtonText: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: colors.secondary,
-    paddingHorizontal: 4,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.darkGray,
   },
-  dropdownButtonIcon: {
-    width: 24,
-    color: colors.secondary,
-  },
-  dropdownButtonIcon: {
-    width: 24,
-    color: colors.secondary,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-  }
 });
 
 export default OptionsDropdown;

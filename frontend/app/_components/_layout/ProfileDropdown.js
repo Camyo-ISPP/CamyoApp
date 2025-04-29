@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, TouchableWithoutFeedback, Animated, Dimensions, Platform } from 'react-native';
 import { useAuth } from "../../../contexts/AuthContext";
 import { Entypo } from '@expo/vector-icons';
 import colors from "frontend/assets/styles/colors";
@@ -10,63 +10,144 @@ import defaultImageCamionero from "../../../assets/images/camionero.png";
 
 const ProfileDropdown = ({ user }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false); // Estado para el modal de pregunta de confirmación
-  const [successModalVisible, setSuccessModalVisible] = useState(false); // Estado para el modal de éxito de cierre de sesión
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const dropdownRef = useRef(null);
   const router = useRouter();
   const { logout } = useAuth();
 
   const defaultImage = user.rol === 'EMPRESA' ? defaultImageEmpresa : defaultImageCamionero;
 
+  // Cerrar dropdown al hacer clic fuera (solo para web)
+  useEffect(() => {
+    if (dropdownVisible) {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setDropdownVisible(false);
+        }
+      };
+
+      if (Platform.OS === 'web') {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        if (Platform.OS === 'web') {
+          document.removeEventListener('mousedown', handleClickOutside);
+        }
+      };
+    }
+  }, [dropdownVisible]);
+
+  // Animación de entrada/salida
+  useEffect(() => {
+    if (dropdownVisible) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [dropdownVisible, fadeAnim]);
+
   const handleLogout = () => {
     setModalVisible(false);
-
-    logout();
+    setSuccessModalVisible(true);
+    setTimeout(() => {
+      logout();
+    }, 1500);
   };
 
   return (
     <View style={styles.container}>
-      {/* Foto de perfil */}
-      <TouchableOpacity onPress={() => setDropdownVisible(!dropdownVisible)}>
+      <TouchableOpacity 
+        onPress={() => setDropdownVisible(!dropdownVisible)}
+        activeOpacity={0.8}
+      >
         <Image
           source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
           style={styles.avatar}
         />
       </TouchableOpacity>
 
-      {/* Dropdown */}
+      {/* Dropdown con animación */}
       {dropdownVisible && (
-        <View style={styles.dropdown}>
-          <Entypo
-            name="cross"
-            size={20}
-            color={colors.primary}
-            style={styles.crossIcon}
+        <Animated.View 
+          ref={dropdownRef}
+          style={[
+            styles.dropdown,
+            {
+              opacity: fadeAnim,
+              transform: [
+                {
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-10, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <TouchableOpacity 
+            style={styles.closeButton}
             onPress={() => setDropdownVisible(false)}
-          />
-          <Image
-            source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
-            style={styles.avatarDropdown}
-          />
+            activeOpacity={0.7}
+          >
+            <Entypo name="cross" size={20} color={colors.primary} />
+          </TouchableOpacity>
 
-          <Text style={styles.dropdownRole}>{user.rol}</Text>
+          <View style={styles.profileInfo}>
+            <Image
+              source={user.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
+              style={styles.avatarDropdown}
+            />
+            <View style={styles.badge}>
+              <Text style={styles.dropdownRole}>{user.rol}</Text>
+            </View>
+          </View>
+
           <Text style={styles.dropdownHeader}>¡Hola, {user.nombre}!</Text>
           <Text style={styles.dropdownEmail}>{user.email}</Text>
 
-          {user.rol !== 'ADMIN' && (
-            <TouchableOpacity style={styles.dropdownButton} onPress={() => router.push("/miperfil")} >
-              <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
-            </TouchableOpacity>
-          )}
+          <View style={styles.buttonsContainer}>
+            {user.rol !== 'ADMIN' && (
+              <TouchableOpacity 
+                style={[styles.dropdownButton, styles.profileButton]}
+                onPress={() => {
+                  setDropdownVisible(false);
+                  router.push("/miperfil");
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.dropdownButtonText}>Ver Perfil</Text>
+              </TouchableOpacity>
+            )}
 
-          <TouchableOpacity style={styles.dropdownButton} onPress={() => setModalVisible(true)}>
-            <Text style={styles.dropdownButtonText2}>Cerrar sesión</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity 
+              style={[styles.dropdownButton, styles.logoutButton]}
+              onPress={() => {
+                setModalVisible(true);
+                setDropdownVisible(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.dropdownButtonText}>Cerrar sesión</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
       )}
 
       {/* Modal de confirmación */}
-      <Modal
+    {/* Modal de confirmación */}
+    <Modal
         animationType="fade"
         transparent={true}
         visible={modalVisible}
@@ -101,23 +182,26 @@ const ProfileDropdown = ({ user }) => {
   );
 };
 
+
+
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
     alignItems: 'center',
+    zIndex: 1000,
+
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 2,
     borderColor: colors.secondary,
   },
   avatarDropdown: {
-    width: 100,
-    height: 100,
-    borderRadius: 60,
-    marginBottom: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     borderWidth: 2,
     borderColor: colors.secondary,
   },
@@ -127,68 +211,78 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: 'white',
     padding: 20,
-    borderRadius: 8,
-    justifyContent: "center",
+    marginTop: 10,
+    marginLeft: 15,
+    borderRadius: 12,
     alignItems: "center",
-    display: 'flex',
     borderWidth: 1,
-    borderColor: '#ccc',
-    elevation: 5,
+    borderColor: '#e0e0e0',
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 3 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    width: 220,
+    shadowRadius: 8,
+    width: 250,
+    elevation: 5,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 5,
+  },
+  profileInfo: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  badge: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 15,
+    marginTop: 8,
   },
   dropdownHeader: {
-    fontSize: 18,
-    fontWeight: '500',
+    fontSize: 20,
+    fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 2,
+    marginBottom: 4,
+    color: '#333',
   },
   dropdownEmail: {
-    fontSize: 12,
-    color: '#5f6368',
+    fontSize: 15,
+    color: '#666',
     textAlign: 'center',
-    marginBottom: 5,
+    marginBottom: 15,
   },
   dropdownRole: {
-    fontWeight: 'bold',
+    fontWeight: '600',
     textTransform: 'uppercase',
-    marginBottom: 5,
     fontSize: 12,
     color: colors.gray,
-    textAlign: 'center',
-    borderRadius: 15,
+    letterSpacing: 0.5,
+  },
+  buttonsContainer: {
+    width: '100%',
+    marginTop: 10,
   },
   dropdownButton: {
-    paddingVertical: 8,
+    paddingVertical: 10,
+    borderRadius: 6,
+    marginBottom: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileButton: {
+    backgroundColor: colors.secondary,
+  },
+  logoutButton: {
+    backgroundColor: colors.primary,
   },
   dropdownButtonText: {
     fontSize: 14,
-    backgroundColor: colors.secondary,
-    color: colors.white,
-    minWidth: 150,
-    padding: 4,
+    color: 'white',
     fontWeight: '500',
-    textAlign: 'center',
-    borderRadius: 40,
   },
-  dropdownButtonText2: {
-    fontSize: 14,
-    backgroundColor: colors.primary,
-    color: colors.white,
-    minWidth: 150,
-    padding: 4,
-    fontWeight: '500',
-    textAlign: 'center',
-    borderRadius: 40,
-  },
-  crossIcon: {
-    alignSelf: 'flex-end',
-    marginRight: 4,
-  },
-
   // Estilos del Modal
   modalBackground: {
     flex: 1,
