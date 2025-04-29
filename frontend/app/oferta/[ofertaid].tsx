@@ -577,6 +577,19 @@ export default function OfertaDetalleScreen() {
                                             <MaterialCommunityIcons name="eye" size={15} color="white" />
                                             <Text style={styles.buttonText}> Ver Detalles</Text>
                                         </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                                              style={styles.publishButton}
+                                                              onPress={async () => {
+                                                                const chatId = await startChat(user.userId, offerData.camionero.usuario.id);
+                                                                if (chatId) {
+                                                                  router.push(`/chat`);
+                                                                }
+                                                              }}
+                                                            >
+                                                              <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
+                                                              <Text style={styles.publishButtonText}>Contactar</Text>
+                                                            </TouchableOpacity>
                                     </View>
                                 </View>
                             </View>
