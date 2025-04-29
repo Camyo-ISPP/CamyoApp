@@ -177,6 +177,7 @@ const PublicCamionero = ({ userId }) => {
                             {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
                             {user2?.curriculum &&
                                 <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
+                                    <MaterialIcons name="download" size={20} color={colors.white} />
                                     <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
                                 </TouchableOpacity>
                             }
@@ -566,6 +567,8 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 12,
         alignItems: "center",
+        flexDirection: 'row',
+        justifyContent: 'center',
         marginTop: 10,
     },
     pdfButtonText: {

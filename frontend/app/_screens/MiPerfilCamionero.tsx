@@ -13,13 +13,14 @@ import ResenaModal from "../_components/ResenaModal";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
+import * as DocumentPicker from 'expo-document-picker';
 
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
     const { setId } = usePayment();
-    const { user, userToken, logout } = useAuth();
+    const { user, updateUser, userToken, logout } = useAuth();
     const router = useRouter();
 
     const [resenas, setResenas] = useState([]);
@@ -149,6 +150,8 @@ const MiPerfilCamionero = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
+    const [uploadModalVisible, setUploadModalVisible] = useState(false);
+    const [removeModalVisible, setRemoveModalVisible] = useState(false);
     
     useEffect(() => {
         if (user?.userId) {
@@ -200,6 +203,92 @@ const MiPerfilCamionero = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const subirPDF = async () => {
+        let userData = {
+            nombre: user.nombre,
+            telefono: user.telefono,
+            email: user.email,
+            localizacion: user.localizacion,
+            descripcion: user.descripcion,
+            foto: user.foto,
+            curriculum: user.curriculum,
+            licencias: user.licencias,
+            disponibilidad: user.disponibilidad,
+            experiencia: user.experiencia,
+            tieneCAP: user.tieneCAP,
+            expiracionCAP: user.expiracionCAP,
+            tarjetasAutonomo: user.tarjetas
+        }
+        try {
+            const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+            if (!result.canceled && result.assets[0].uri.split(',')[0] === "data:application/pdf;base64") {
+                const base64PDF = result.assets[0].uri.split(',')[1];
+                if (base64PDF) {
+                    userData.curriculum = base64PDF
+                    try {
+                        const response = await axios.put(`${BACKEND_URL}/auth/edit/camionero`, userData, {
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${userToken}`
+                          },
+                        });
+                  
+                        if (response.status === 200) {
+                          updateUser(userData);
+                          
+                          setUploadModalVisible(true);
+                          setTimeout(() => {
+                            setUploadModalVisible(false);
+                          }, 1000);
+                        }
+                    } catch (error) {
+                        console.error('Error en la solicitud', error);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error picking the document', error);
+        }
+
+    };
+
+    const eliminarPDF = async () => {
+        const userData = {
+            nombre: user.nombre,
+            telefono: user.telefono,
+            email: user.email,
+            localizacion: user.localizacion,
+            descripcion: user.descripcion,
+            foto: user.foto,
+            curriculum: null,
+            licencias: user.licencias,
+            disponibilidad: user.disponibilidad,
+            experiencia: user.experiencia,
+            tieneCAP: user.tieneCAP,
+            expiracionCAP: user.expiracionCAP,
+            tarjetasAutonomo: user.tarjetas
+        }
+        try {
+            const response = await axios.put(`${BACKEND_URL}/auth/edit/camionero`, userData, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`
+              },
+            });
+      
+            if (response.status === 200) {
+              updateUser(userData);
+              
+              setRemoveModalVisible(true);
+              setTimeout(() => {
+                setRemoveModalVisible(false);
+              }, 1000);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud', error);
+        }
     };
 
     useEffect(() => {
@@ -299,10 +388,23 @@ const MiPerfilCamionero = () => {
                         <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
                         {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
                         {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
-                        {user.curriculum &&
-                            <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
-                                <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
-                            </TouchableOpacity>
+                        {user.curriculum ? (
+                                <View style={styles.buttonRow}>
+                                    <TouchableOpacity style={styles.pdfDButton} onPress={descargarPDF}>
+                                        <MaterialIcons name="download" size={20} color={colors.white} />
+                                        <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.pdfRButton} onPress={eliminarPDF}>
+                                        <MaterialIcons name="delete" size={20} color={colors.white} />
+                                        <Text style={styles.pdfButtonText}>{"Borrar Curriculum"}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ): (
+                                <TouchableOpacity style={styles.pdfDButton} onPress={subirPDF}>
+                                    <MaterialIcons name="upload" size={20} color={colors.white} />
+                                    <Text style={styles.pdfButtonText}>{"Subir Curriculum"}</Text>
+                                </TouchableOpacity>
+                            )
                         }
                     </View>
 
@@ -486,6 +588,17 @@ const MiPerfilCamionero = () => {
                 onCancel={() => setShowDeleteModal(false)}
                 message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
             />
+
+            <SuccessModal
+                isVisible={uploadModalVisible}
+                onClose={() => setUploadModalVisible(false)}
+                message="¡Curriculum subido!"
+            />
+            <SuccessModal
+                isVisible={removeModalVisible}
+                onClose={() => setRemoveModalVisible(false)}
+                message="¡Curriculum borrado!"
+            />
     
             <ErrorModal
                 isVisible={errorModalVisible}
@@ -647,16 +760,33 @@ const styles = StyleSheet.create({
         color: colors.darkGray,
         marginBottom: 8,
     },
-    pdfButton: {
+    pdfDButton: {
         backgroundColor: colors.primary,
         padding: 10,
         borderRadius: 12,
         alignItems: "center",
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10,
+    },
+    pdfRButton: {
+        backgroundColor: colors.red,
+        padding: 10,
+        borderRadius: 12,
+        alignItems: "center",
+        flexDirection: 'row',
+        justifyContent: 'center',
         marginTop: 10,
     },
     pdfButtonText: {
         color: colors.white,
         fontWeight: "bold",
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 10,
     },
     plusIcon: {
         marginRight: 6,

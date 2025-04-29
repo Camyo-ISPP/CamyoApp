@@ -361,7 +361,7 @@ const EditarPerfilCamionero = () => {
       </View>
     </View>
   );
-  console.log(user)
+
   return (
     <ImageBackground
       source={require('../../assets/images/auth-bg.png')}

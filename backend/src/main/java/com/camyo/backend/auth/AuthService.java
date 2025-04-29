@@ -131,7 +131,7 @@ public class AuthService {
 		if (request.getExpiracionCAP() != null) {
 			camionero.setExpiracionCAP(request.getExpiracionCAP());
 		}
-		camioneroService.guardarCamionero(camionero);
+		camioneroService.guardarCamioneroYaEncryptado(camionero);
 		if (request.getTarjetasAutonomo() != null) {
 			camionero.setTarjetasAutonomo(request.getTarjetasAutonomo());
 		}

@@ -68,6 +68,11 @@ public class CamioneroService {
     }
 
     @Transactional
+    public Camionero guardarCamioneroYaEncryptado(Camionero camionero){
+        return camioneroRepository.save(camionero);
+    }
+
+    @Transactional
     public void eliminarCamionero(Integer id) {
         Camionero camionero = obtenerCamioneroPorId(id);
         camioneroRepository.delete(camionero);
