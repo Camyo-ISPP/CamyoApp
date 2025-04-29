@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Entypo } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Entypo, FontAwesome } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -10,6 +10,8 @@ import defaultCamImage from "../../assets/images/camionero.png";
 import BackButton from "../_components/BackButton";
 import { RouteMap } from "../_components/Maps";
 import MapLoader from "../_components/MapLoader";
+import { startChat } from "../(protected)/chat/services";
+
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
@@ -577,6 +579,21 @@ export default function OfertaDetalleScreen() {
                                             <MaterialCommunityIcons name="eye" size={15} color="white" />
                                             <Text style={styles.buttonText}> Ver Detalles</Text>
                                         </TouchableOpacity>
+                                        {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
+                                        {user && user.rol == "EMPRESA" && (
+                                            <TouchableOpacity
+                                                style={styles.chatButton}
+                                                onPress={async () => {
+                                                    const chatId = await startChat(user.userId, offerData.camionero.id);
+                                                    if (chatId) {
+                                                        router.push(`/chat`);
+                                                    }
+                                                }}
+                                            >
+                                                <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                                                <Text style={styles.chatButtonText}>Contactar</Text>
+                                            </TouchableOpacity>
+                                        )}
                                     </View>
                                 </View>
                             </View>
@@ -988,5 +1005,28 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: colors.darkGray,
         marginVertical: 4,
+    },
+    chatButtonText: {
+        color: colors.white,
+        fontWeight: "bold",
+    },
+    chatButton: {
+        backgroundColor: '#0993A8FF',
+        color: colors.white,
+        paddingLeft: 5,
+        paddingRight: 5,
+        marginLeft: "2%",
+        marginTop: 5,
+        flexDirection: "row",
+        flexWrap: "nowrap",
+        height: 40,
+        width: 150,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    chatIcon: {
+        marginRight: 8,
+        marginBottom: 4,
     }
 });
