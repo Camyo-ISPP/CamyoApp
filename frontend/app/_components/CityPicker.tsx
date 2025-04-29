@@ -27,6 +27,9 @@ const CityPicker = ({ label, field, icon, formData, handleInputChange }) => {
             format: 'json',
             addressdetails: 1,
             limit: 10,
+          },
+          headers: {
+            'Accept-Language': 'es',
           }
         }
       );
