@@ -16,6 +16,7 @@ import { usePayment } from "@/contexts/PaymentContext";
 import axios from "axios";
 import SuccessModal from "../_components/SuccessModal";
 import SubscriptionModal from "../_components/SubscriptionModal";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
 
 const { width } = Dimensions.get('window');
 
@@ -29,10 +30,13 @@ const formatDate = (fecha: string) => {
 export default function OfertaDetalleScreen() {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+    const { rules, loading: subscriptionLoading } = useSubscriptionRules();
     const [offerData, setOfferData] = useState<any>(null);
     const [offerTrabajoData, setOfferTrabajoData] = useState<any>(null);
     const [offerCargaData, setOfferCargaData] = useState<any>(null);
+    const [offers, setOffers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loading2, setLoading2] = useState(true);
     const { ofertaid } = useLocalSearchParams();
     const router = useRouter(); // Para navegar entre pantallas
     const { user, userToken, login, logout } = useAuth();
@@ -48,7 +52,8 @@ export default function OfertaDetalleScreen() {
     const openCageKey = process.env.EXPO_PUBLIC_OPENCAGE_API_KEY;
 
     const canPromoteNewOffer = () => {
-        return offerData && !offerData.promoted;
+        const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
+        return offerData && !offerData.promoted && activeOffersCount < rules.maxSponsoredOffers;
     };
       
     const canCancelPromotedOffer = offerData ? offerData.promoted : false;
@@ -86,16 +91,35 @@ export default function OfertaDetalleScreen() {
                 }
             };
 
-            fetchData();
+            fetchData();            
         }
     }, [ofertaid]);
 
+    useEffect(() => {
+        const fetchMyOffersData = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+                setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                setLoading2(false);
+            }
+        };
+        if(user && user.rol == "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA"){
+            fetchMyOffersData();
+        }
+    }, [offerTrabajoData, offerCargaData]);
+
     if (loading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <MapLoader />
-            </View>
-        );
+        if ((user && user.rol == "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA") && loading2) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <MapLoader />
+                </View>
+            );
+        }
     };
 
     if (!offerData) {
@@ -335,7 +359,7 @@ export default function OfertaDetalleScreen() {
                     <View style={{ alignItems: "flex-end" }}>
                         {user && user.rol == "EMPRESA" && offerData.empresa.id === user.id ? (
                             <View style={styles.offerActions}>
-                                {offerData.promoted ? (
+                                {offerData.estado === "ABIERTA" && offerData.promoted ? (
                                     canCancelPromotedOffer && (
                                     <TouchableOpacity
                                     style={[styles.actionButton, styles.unpromoteButton]}
@@ -345,7 +369,7 @@ export default function OfertaDetalleScreen() {
                                     <Text style={styles.actionButtonText}>Cancelar</Text>
                                     </TouchableOpacity>
                                     )
-                                ) : canPromoteNewOffer() ? (
+                                ) : offerData.estado === "ABIERTA" && canPromoteNewOffer() ? (
                                     <TouchableOpacity onPress={() => promoteOfferCheckout(offerData.id)}>
                                     <LinearGradient
                                         colors={['#D4AF37', '#F0C674', '#B8860B', '#F0C674']}
