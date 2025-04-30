@@ -13,13 +13,14 @@ import ResenaModal from "../_components/ResenaModal";
 import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
-
+import * as DocumentPicker from 'expo-document-picker';
+import MapLoader from "@/app/_components/MapLoader";
 
 const MiPerfilCamionero = () => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
     const { setId } = usePayment();
-    const { user, userToken, logout } = useAuth();
+    const { user, updateUser, userToken, logout } = useAuth();
     const router = useRouter();
 
     const [resenas, setResenas] = useState([]);
@@ -33,6 +34,11 @@ const MiPerfilCamionero = () => {
     const [resenados, setResenados] = useState([]);
     const [selectedRating, setSelectedRating] = useState(0);
 
+    const [loadingCamionero, setLoadingCamionero] = useState(true);
+    const [loadingResenas, setLoadingResenas] = useState(true);
+    const [loadingOfertas, setLoadingOfertas] = useState(true);
+    const [loadingEmpresas, setLoadingEmpresas] = useState(true);
+
     useFocusEffect(
         useCallback(() => {
             fetchCamionero();
@@ -40,8 +46,10 @@ const MiPerfilCamionero = () => {
             fetchEmpresasResenados();
         }, [])
     );
+
     const fetchCamionero = async () => {
         try {
+            setLoadingCamionero(true);
             const response = await axios.get(`${BACKEND_URL}/camioneros/por_usuario/${user.userId}`);
 
             if (response.data) {
@@ -49,11 +57,14 @@ const MiPerfilCamionero = () => {
             }
         } catch (error) {
             console.error("Error al cargar el camionero:", error);
+        } finally {
+            setLoadingCamionero(false);
         }
     };
 
     const fetchOfertasCamionero = async () => {
         try {
+            setLoadingOfertas(true);
             const response = await axios.get(`${BACKEND_URL}/ofertas/camionero/${camionero.id}`);
             setOfertasCamionero(response.data[2]);
 
@@ -80,22 +91,29 @@ const MiPerfilCamionero = () => {
             } else {
                 console.error("Error desconocido:", error);
             }
+        } finally {
+            setLoadingOfertas(false);
         }
     };
 
     const fetchEmpresasResenados = async () => {
         try {
+            setLoadingEmpresas(true)
             const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
             const ids = response.data.map(empresa => empresa.id);
             setResenados(ids)
         } catch (error) {
             console.error("Error al obtener los camioneros reseñados:", error);
             return [];
+        } finally {
+            setLoadingEmpresas(false);
         }
     }
 
     const fetchResenas = async () => {
         try {
+            setLoadingResenas(true);
+            
             if (!user?.userId) return;
 
             const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
@@ -105,6 +123,8 @@ const MiPerfilCamionero = () => {
             setValoracionMedia(mediaResponse.data);
         } catch (error) {
             console.error("Error al cargar reseñas:", error);
+        } finally {
+            setLoadingResenas(false);
         }
     };
 
@@ -149,7 +169,9 @@ const MiPerfilCamionero = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const [successModalVisible, setSuccessModalVisible] = useState(false);
-    
+    const [uploadModalVisible, setUploadModalVisible] = useState(false);
+    const [removeModalVisible, setRemoveModalVisible] = useState(false);
+
     useEffect(() => {
         if (user?.userId) {
             fetchCamionero();
@@ -202,6 +224,92 @@ const MiPerfilCamionero = () => {
         document.body.removeChild(link);
     };
 
+    const subirPDF = async () => {
+        let userData = {
+            nombre: user.nombre,
+            telefono: user.telefono,
+            email: user.email,
+            localizacion: user.localizacion,
+            descripcion: user.descripcion,
+            foto: user.foto,
+            curriculum: user.curriculum,
+            licencias: user.licencias,
+            disponibilidad: user.disponibilidad,
+            experiencia: user.experiencia,
+            tieneCAP: user.tieneCAP,
+            expiracionCAP: user.expiracionCAP,
+            tarjetasAutonomo: user.tarjetas
+        }
+        try {
+            const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
+            if (!result.canceled && result.assets[0].uri.split(',')[0] === "data:application/pdf;base64") {
+                const base64PDF = result.assets[0].uri.split(',')[1];
+                if (base64PDF) {
+                    userData.curriculum = base64PDF
+                    try {
+                        const response = await axios.put(`${BACKEND_URL}/auth/edit/camionero`, userData, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${userToken}`
+                            },
+                        });
+
+                        if (response.status === 200) {
+                            updateUser(userData);
+
+                            setUploadModalVisible(true);
+                            setTimeout(() => {
+                                setUploadModalVisible(false);
+                            }, 1000);
+                        }
+                    } catch (error) {
+                        console.error('Error en la solicitud', error);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error picking the document', error);
+        }
+
+    };
+
+    const eliminarPDF = async () => {
+        const userData = {
+            nombre: user.nombre,
+            telefono: user.telefono,
+            email: user.email,
+            localizacion: user.localizacion,
+            descripcion: user.descripcion,
+            foto: user.foto,
+            curriculum: null,
+            licencias: user.licencias,
+            disponibilidad: user.disponibilidad,
+            experiencia: user.experiencia,
+            tieneCAP: user.tieneCAP,
+            expiracionCAP: user.expiracionCAP,
+            tarjetasAutonomo: user.tarjetas
+        }
+        try {
+            const response = await axios.put(`${BACKEND_URL}/auth/edit/camionero`, userData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userToken}`
+                },
+            });
+
+            if (response.status === 200) {
+                updateUser(userData);
+
+                setRemoveModalVisible(true);
+                setTimeout(() => {
+                    setRemoveModalVisible(false);
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Error en la solicitud', error);
+        }
+    };
+
     useEffect(() => {
         if (camionero?.id) {
             fetchOfertasCamionero();
@@ -223,292 +331,322 @@ const MiPerfilCamionero = () => {
     const handleRemoveAds = () => {
         setId("ELIMINAR_ANUNCIOS");
         router.push("/pago/checkout");
-      }
+    }
 
 
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={styles.pageContainer}>
-        {/* Left Ad */}
-        {user?.ads && (
-            <View style={styles.adContainer}>
-                <Image
-                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your left ad image path
-                    style={styles.adImage}
-                    resizeMode="cover"
-                />
+        loadingCamionero || loadingResenas || loadingOfertas || loadingEmpresas ? (
+            <View style={styles.loadingContainer}>
+                <MapLoader />
             </View>
-        )}
-            <View style={styles.container}>
-                <View style={styles.card}>
-                    <View style={styles.rowContainer}>
-                        <BackButton />
+        ) : (
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                <View style={styles.pageContainer}>
+                    {/* Left Ad */}
+                    {user?.ads && (
+                        <View style={styles.adContainer}>
+                            <Image
+                                source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your left ad image path
+                                style={styles.adImage}
+                                resizeMode="cover"
+                            />
+                        </View>
+                    )}
+                    <View style={styles.container}>
+                        <View style={styles.card}>
+                            <View style={styles.rowContainer}>
+                                <BackButton />
 
-                        <View>
-                            <View style={styles.profileContainer}>
-                                <Image
-                                    source={user?.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
-                                    style={styles.profileImage}
-                                />
-                                <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
-                                    <Feather name="edit-3" size={22} color={colors.white} />
-                                </TouchableOpacity>
+                                <View>
+                                    <View style={styles.profileContainer}>
+                                        <Image
+                                            source={user?.foto ? { uri: `data:image/png;base64,${user.foto}` } : defaultImage}
+                                            style={styles.profileImage}
+                                        />
+                                        <TouchableOpacity style={styles.editIcon} onPress={() => router.push("/miperfil/editar")}>
+                                            <Feather name="edit-3" size={22} color={colors.white} />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    {/* Botón de eliminar cuenta */}
+                                    <TouchableOpacity
+                                        style={styles.deleteAccountButton}
+                                        onPress={() => setShowDeleteModal(true)}
+                                    >
+                                        <MaterialIcons name="delete" size={20} color={colors.white} />
+                                        <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View style={styles.infoContainer}>
+                                    <Text style={styles.name}>{user.nombre}</Text>
+                                    <Text style={styles.username}>@{user.username}</Text>
+                                    <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
+                                    <Text style={styles.description}>{user.descripcion}</Text>
+                                </View>
+
+                            </View>
+                            {/* Botón de eliminar anuncios */}
+                            {user.ads ?
+                                <View>
+                                    <View style={styles.separator} />
+                                    <View>
+                                        <TouchableOpacity
+                                            style={styles.mejorarPlanButton}
+                                            onPress={handleRemoveAds}
+                                        >
+                                            <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
+                                            <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                : <></>}
+                            <View style={styles.separator} />
+
+                            <View style={styles.downContainer}>
+                                <Text style={styles.sectionTitle}>Información Profesional</Text>
+                                <Text style={styles.info}>
+                                    <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                    {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                </Text>
+                                <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
+                                {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
+                                {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
+                                {user.curriculum ? (
+                                    <View style={styles.buttonRow}>
+                                        <TouchableOpacity style={styles.pdfDButton} onPress={descargarPDF}>
+                                            <MaterialIcons name="download" size={20} color={colors.white} />
+                                            <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={styles.pdfRButton} onPress={eliminarPDF}>
+                                            <MaterialIcons name="delete" size={20} color={colors.white} />
+                                            <Text style={styles.pdfButtonText}>{"Borrar Curriculum"}</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                ) : (
+                                    <TouchableOpacity style={styles.pdfDButton} onPress={subirPDF}>
+                                        <MaterialIcons name="upload" size={20} color={colors.white} />
+                                        <Text style={styles.pdfButtonText}>{"Subir Curriculum"}</Text>
+                                    </TouchableOpacity>
+                                )
+                                }
                             </View>
 
-                            {/* Botón de eliminar cuenta */}
-                            <TouchableOpacity
-                                style={styles.deleteAccountButton}
-                                onPress={() => setShowDeleteModal(true)}
-                            >
-                                <MaterialIcons name="delete" size={20} color={colors.white} />
-                                <Text style={styles.deleteAccountButtonText}>Eliminar Cuenta</Text>
-                            </TouchableOpacity>
-                        </View>
+                            <View style={styles.separator} />
 
-                        <View style={styles.infoContainer}>
-                            <Text style={styles.name}>{user.nombre}</Text>
-                            <Text style={styles.username}>@{user.username}</Text>
-                            <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user.localizacion}</Text>
-                            <Text style={styles.description}>{user.descripcion}</Text>
-                        </View>
-                        
-                    </View>
-                     {/* Botón de eliminar anuncios */}
-                     {user.ads ?
-                         <View>
-                             <View style={styles.separator} />
-                             <View>
-                                 <TouchableOpacity
-                                     style={styles.mejorarPlanButton}
-                                     onPress={handleRemoveAds}
-                                 >
-                                     <FontAwesome5 name="ban" size={16} color="white" style={styles.plusIcon} />
-                                     <Text style={styles.publishButtonText}>Eliminar anuncios</Text>
-                                 </TouchableOpacity>
-                             </View>
-                         </View>
-                         : <></>}
-                    <View style={styles.separator} />
+                            <View style={styles.empresasSection}>
+                                <Text style={styles.sectionTitle}>Empresas Recientes</Text>
 
-                    <View style={styles.downContainer}>
-                        <Text style={styles.sectionTitle}>Información Profesional</Text>
-                        <Text style={styles.info}>
-                            <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
-                            {user.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
-                        </Text>
-                        <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user.experiencia} años</Text>
-                        {user.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user.expiracionCAP}</Text>}
-                        {user.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user.tarjetas.join(", ")}</Text>}
-                        {user.curriculum &&
-                            <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
-                                <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
-                            </TouchableOpacity>
-                        }
-                    </View>
-
-                    <View style={styles.separator} />
-
-                    <View style={styles.empresasSection}>
-                        <Text style={styles.sectionTitle}>Empresas Recientes</Text>
-
-                        {empresasRecientes.filter(empresa => !(resenados.includes(empresa.userId))).length === 0 ? (
-                            <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
-                        ) : (
-                            empresasRecientes
-                                .filter(empresa => !(resenados.includes(empresa.userId)))
-                                .map(empresa => (
-                                    < View key={`empresa-${empresa.id}`} style={styles.empresaCard}>
-                                        {/* Header con imagen y nombre */}
-                                        <View style={styles.empresaHeader}>
-                                            {empresa.usuario?.foto ? (
-                                                <Image
-                                                    source={{ uri: `data:image/png;base64,${empresa.usuario.foto}` }}
-                                                    style={styles.empresaAvatar}
-                                                />
-                                            ) : (
-                                                <View style={styles.empresaAvatarPlaceholder}>
-                                                    <FontAwesome5 name="building" size={20} color={colors.white} />
-                                                </View>
-                                            )}
-                                            <View style={styles.empresaInfo}>
-                                                <Text style={styles.empresaNombre}>{empresa.usuario?.nombre}</Text>
-                                                <Text style={styles.empresaUbicacion}>
-                                                    <MaterialIcons name="location-on" size={14} color={colors.secondary} />
-                                                    {empresa.usuario?.localizacion || 'Ubicación no disponible'}
-                                                </Text>
-                                            </View>
-                                        </View>
-
-                                        {/* Sección de valoración */}
-                                        <View style={styles.valoracionSection}>
-                                            <View style={styles.starsContainer}>
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <TouchableOpacity
-                                                        key={`star-${star}`}
-                                                        onPress={() => {
-                                                            setSelectedRating(star);
-                                                            setEmpresaAResenar(empresa);
-                                                            setShowResenaModal(true);
-                                                        }}
-                                                        onPressIn={() => setHoverRating(star)}
-                                                        onPressOut={() => setHoverRating(0)}
-                                                        activeOpacity={1}
-                                                    >
-                                                        <FontAwesome
-                                                            name={star <= (hoverRating || selectedRating) ? "star" : "star-o"}
-                                                            size={27}
-                                                            color={star <= (hoverRating || selectedRating) ? colors.primary : colors.primaryLight}
-                                                            style={styles.starIcon}
+                                {empresasRecientes.filter(empresa => !(resenados.includes(empresa.userId))).length === 0 ? (
+                                    <Text style={styles.emptyMessage}>No has trabajado con empresas recientemente</Text>
+                                ) : (
+                                    empresasRecientes
+                                        .filter(empresa => !(resenados.includes(empresa.userId)))
+                                        .map(empresa => (
+                                            < View key={`empresa-${empresa.id}`} style={styles.empresaCard}>
+                                                {/* Header con imagen y nombre */}
+                                                <View style={styles.empresaHeader}>
+                                                    {empresa.usuario?.foto ? (
+                                                        <Image
+                                                            source={{ uri: `data:image/png;base64,${empresa.usuario.foto}` }}
+                                                            style={styles.empresaAvatar}
                                                         />
+                                                    ) : (
+                                                        <View style={styles.empresaAvatarPlaceholder}>
+                                                            <FontAwesome5 name="building" size={20} color={colors.white} />
+                                                        </View>
+                                                    )}
+                                                    <View style={styles.empresaInfo}>
+                                                        <Text style={styles.empresaNombre}>{empresa.usuario?.nombre}</Text>
+                                                        <Text style={styles.empresaUbicacion}>
+                                                            <MaterialIcons name="location-on" size={14} color={colors.secondary} />
+                                                            {empresa.usuario?.localizacion || 'Ubicación no disponible'}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+
+                                                {/* Sección de valoración */}
+                                                <View style={styles.valoracionSection}>
+                                                    <View style={styles.starsContainer}>
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <TouchableOpacity
+                                                                key={`star-${star}`}
+                                                                onPress={() => {
+                                                                    setSelectedRating(star);
+                                                                    setEmpresaAResenar(empresa);
+                                                                    setShowResenaModal(true);
+                                                                }}
+                                                                onPressIn={() => setHoverRating(star)}
+                                                                onPressOut={() => setHoverRating(0)}
+                                                                activeOpacity={1}
+                                                            >
+                                                                <FontAwesome
+                                                                    name={star <= (hoverRating || selectedRating) ? "star" : "star-o"}
+                                                                    size={27}
+                                                                    color={star <= (hoverRating || selectedRating) ? colors.primary : colors.primaryLight}
+                                                                    style={styles.starIcon}
+                                                                />
+                                                            </TouchableOpacity>
+                                                        ))}
+                                                    </View>
+                                                </View>
+
+                                                {/* Botones de acción */}
+                                                <View style={styles.actionsContainer}>
+                                                    <TouchableOpacity
+                                                        style={styles.fullWidthButton}
+                                                        onPress={() => router.push(`/empresa/${empresa.id}`)}
+                                                    >
+                                                        <FontAwesome5 name="building" size={14} color={colors.white} />
+                                                        <Text style={styles.actionButtonText}>Ver empresa</Text>
                                                     </TouchableOpacity>
-                                                ))}
+                                                </View>
                                             </View>
-                                        </View>
-
-                                        {/* Botones de acción */}
-                                        <View style={styles.actionsContainer}>
-                                            <TouchableOpacity
-                                                style={styles.fullWidthButton}
-                                                onPress={() => router.push(`/empresa/${empresa.id}`)}
-                                            >
-                                                <FontAwesome5 name="building" size={14} color={colors.white} />
-                                                <Text style={styles.actionButtonText}>Ver empresa</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                ))
-                        )}
-                    </View>
-                    <View style={styles.reviewsContainer}>
-                        <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
-
-                        {/* Valoración media con estrellas */}
-                        <View style={styles.ratingSummary}>
-                            <View style={styles.starsContainer}>
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <FontAwesome
-                                        key={star}
-                                        name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
-                                        size={24}
-                                        color={colors.primary}
-                                        style={styles.starIcon}
-                                    />
-                                ))}
-                            </View>
-                            <Text style={styles.averageRatingText}>
-                                {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
-                                {resenas.length > 0 && (
-                                    <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                                        ))
                                 )}
-                            </Text>
+                            </View>
+                            <View style={styles.reviewsContainer}>
+                                <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
+
+                                {/* Valoración media con estrellas */}
+                                <View style={styles.ratingSummary}>
+                                    <View style={styles.starsContainer}>
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <FontAwesome
+                                                key={star}
+                                                name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
+                                                size={24}
+                                                color={colors.primary}
+                                                style={styles.starIcon}
+                                            />
+                                        ))}
+                                    </View>
+                                    <Text style={styles.averageRatingText}>
+                                        {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
+                                        {resenas.length > 0 && (
+                                            <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                                        )}
+                                    </Text>
+                                </View>
+
+                                {/* Lista de reseñas */}
+                                {resenas.length === 0 ? (
+                                    <View style={styles.emptyReviews}>
+                                        <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
+                                        <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
+                                    </View>
+                                ) : (
+                                    <>
+                                        {resenas.map((resena) => (
+                                            <View key={resena.id} style={styles.reviewCard}>
+                                                {/* Encabezado con avatar y nombre */}
+                                                <View style={styles.reviewHeader}>
+                                                    {resena.comentador?.foto ? (
+                                                        <Image
+                                                            source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
+                                                            style={styles.reviewAvatar}
+                                                        />
+                                                    ) : (
+                                                        <View style={styles.avatarPlaceholder}>
+                                                            <FontAwesome5 name="user" size={20} color="white" />
+                                                        </View>
+                                                    )}
+                                                    <View>
+                                                        <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
+                                                        <Text style={styles.reviewDate}>
+                                                            {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+
+                                                {/* Valoración con estrellas */}
+                                                <View style={styles.reviewStars}>
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <FontAwesome
+                                                            key={star}
+                                                            name={star <= resena.valoracion ? "star" : "star-o"}
+                                                            size={16}
+                                                            color={colors.primary}
+                                                        />
+                                                    ))}
+                                                </View>
+
+                                                {/* Comentario */}
+                                                <Text style={styles.reviewComment}>{resena.comentarios}</Text>
+
+                                                {/* Divider */}
+                                                <View style={styles.reviewDivider} />
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
+                            </View>
+
                         </View>
 
-                        {/* Lista de reseñas */}
-                        {resenas.length === 0 ? (
-                            <View style={styles.emptyReviews}>
-                                <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
-                                <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
-                            </View>
-                        ) : (
-                            <>
-                                {resenas.map((resena) => (
-                                    <View key={resena.id} style={styles.reviewCard}>
-                                        {/* Encabezado con avatar y nombre */}
-                                        <View style={styles.reviewHeader}>
-                                            {resena.comentador?.foto ? (
-                                                <Image
-                                                    source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
-                                                    style={styles.reviewAvatar}
-                                                />
-                                            ) : (
-                                                <View style={styles.avatarPlaceholder}>
-                                                    <FontAwesome5 name="user" size={20} color="white" />
-                                                </View>
-                                            )}
-                                            <View>
-                                                <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
-                                                <Text style={styles.reviewDate}>
-                                                    {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric'
-                                                    })}
-                                                </Text>
-                                            </View>
-                                        </View>
-
-                                        {/* Valoración con estrellas */}
-                                        <View style={styles.reviewStars}>
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <FontAwesome
-                                                    key={star}
-                                                    name={star <= resena.valoracion ? "star" : "star-o"}
-                                                    size={16}
-                                                    color={colors.primary}
-                                                />
-                                            ))}
-                                        </View>
-
-                                        {/* Comentario */}
-                                        <Text style={styles.reviewComment}>{resena.comentarios}</Text>
-
-                                        {/* Divider */}
-                                        <View style={styles.reviewDivider} />
-                                    </View>
-                                ))}
-                            </>
-                        )}
                     </View>
 
+
+                    {/* Modal para añadir reseñas */}
+                    <ResenaModal
+                        visible={showResenaModal}
+                        onClose={() => {
+                            setShowResenaModal(false);
+                            setEmpresaAResenar(null);
+                            setSelectedRating(false);
+                        }}
+                        initialRating={selectedRating}
+                        onSubmit={handleSubmitResenaWrapper}
+                        comentadorId={user?.userId}
+                        comentadoId={empresaAResenar?.usuario?.id}
+                        isEditing={false}
+                    />
+
+                    <ConfirmDeleteModal
+                        isVisible={showDeleteModal}
+                        onConfirm={handleDeleteAccount}
+                        onCancel={() => setShowDeleteModal(false)}
+                        message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
+                    />
+
+                    <SuccessModal
+                        isVisible={uploadModalVisible}
+                        onClose={() => setUploadModalVisible(false)}
+                        message="¡Curriculum subido!"
+                    />
+                    <SuccessModal
+                        isVisible={removeModalVisible}
+                        onClose={() => setRemoveModalVisible(false)}
+                        message="¡Curriculum borrado!"
+                    />
+
+                    <ErrorModal
+                        isVisible={errorModalVisible}
+                        message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
+                    />
+
+                    <SuccessModal
+                        isVisible={successModalVisible}
+                        onClose={() => setSuccessModalVisible(false)}
+                        message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
+                    />
+                    {/* Right Ad */}
+                    {user?.ads && (
+                        <View style={styles.adContainer}>
+                            <Image
+                                source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your right ad image path
+                                style={styles.adImage}
+                                resizeMode="cover"
+                            />
+                        </View>
+                    )}
                 </View>
-
-            </View>
-    
-
-            {/* Modal para añadir reseñas */}
-            <ResenaModal
-                visible={showResenaModal}
-                onClose={() => {
-                    setShowResenaModal(false);
-                    setEmpresaAResenar(null);
-                    setSelectedRating(false);
-                }}
-                initialRating={selectedRating}
-                onSubmit={handleSubmitResenaWrapper}
-                comentadorId={user?.userId}
-                comentadoId={empresaAResenar?.usuario?.id}
-                isEditing={false}
-            />
-
-            <ConfirmDeleteModal
-                isVisible={showDeleteModal}
-                onConfirm={handleDeleteAccount}
-                onCancel={() => setShowDeleteModal(false)}
-                message="Esta acción eliminará permanentemente tu cuenta y todos tus datos asociados. ¿Deseas continuar?"
-            />
-    
-            <ErrorModal
-                isVisible={errorModalVisible}
-                message="No se pudo eliminar la cuenta. Por favor, inténtalo de nuevo más tarde."
-            />
-    
-            <SuccessModal
-                isVisible={successModalVisible}
-                onClose={() => setSuccessModalVisible(false)}
-                message="¡Tu cuenta se ha eliminado correctamente, te echaremos de menos!"
-            />
-            {/* Right Ad */}
-        {user?.ads && (
-            <View style={styles.adContainer}>
-                <Image
-                    source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your right ad image path
-                    style={styles.adImage}
-                    resizeMode="cover"
-                />
-            </View>
-        )}
-    </View>
-        </ScrollView >
+            </ScrollView >
+        )
     );
 };
 
@@ -519,6 +657,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         paddingVertical: 20,
         backgroundColor: colors.white,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white,
+        // height: '100%',
     },
     card: {
         backgroundColor: colors.white,
@@ -647,21 +792,38 @@ const styles = StyleSheet.create({
         color: colors.darkGray,
         marginBottom: 8,
     },
-    pdfButton: {
+    pdfDButton: {
         backgroundColor: colors.primary,
         padding: 10,
         borderRadius: 12,
         alignItems: "center",
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10,
+    },
+    pdfRButton: {
+        backgroundColor: colors.red,
+        padding: 10,
+        borderRadius: 12,
+        alignItems: "center",
+        flexDirection: 'row',
+        justifyContent: 'center',
         marginTop: 10,
     },
     pdfButtonText: {
         color: colors.white,
         fontWeight: "bold",
     },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 10,
+    },
     plusIcon: {
         marginRight: 6,
     },
-        publishButtonText: {
+    publishButtonText: {
         color: "#fff",
         fontSize: 18,
         fontWeight: "bold",
@@ -978,10 +1140,10 @@ const styles = StyleSheet.create({
         backgroundColor: colors.lightGray,
         alignItems: "center",
         justifyContent: "center",
-        
+
     },
     adImage: {
-        flex: 1, 
+        flex: 1,
         width: "100%",
         height: "200%",
         resizeMode: "cover",

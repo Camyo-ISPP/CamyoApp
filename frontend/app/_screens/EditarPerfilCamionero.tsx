@@ -171,6 +171,20 @@ const EditarPerfilCamionero = () => {
       setErrorMessage("El número de teléfono debe tener 9 dígitos.");
       return;
     }
+    const telefono = formData.telefono;
+    const tresPrimeros = parseInt(telefono.substring(0, 3), 10);
+    const excepciones = [800, 803, 806, 807, 900, 901, 902];
+    if (
+      !(
+        (tresPrimeros >= 600 && tresPrimeros <= 749) ||
+        (tresPrimeros >= 810 && tresPrimeros <= 889) ||
+        (tresPrimeros >= 910 && tresPrimeros <= 989) ||
+        excepciones.includes(tresPrimeros)
+      )
+    ) {
+      setErrorMessage("El número de teléfono no pertenece a un rango válido.");
+      return;
+    }
 
     // Validación de la localización
     if (!formData.localizacion) {
@@ -361,7 +375,7 @@ const EditarPerfilCamionero = () => {
       </View>
     </View>
   );
-  console.log(user)
+
   return (
     <ImageBackground
       source={require('../../assets/images/auth-bg.png')}

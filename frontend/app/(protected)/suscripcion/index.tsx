@@ -68,7 +68,7 @@ const SubscriptionPlans = () => {
 
     }, [id])
 
-    if (!isAuthLoaded) {
+    if (!isAuthLoaded || loadingPlan) {
         return (
             <View style={styles.loadingContainer}>
                 <MapLoader />

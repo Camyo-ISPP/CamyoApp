@@ -8,7 +8,7 @@ import { es } from "date-fns/locale";
 import { FontAwesome5 } from "@expo/vector-icons";
 import colors from "../../assets/styles/colors";
 
-const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
+const DatePicker = ({ value, onChange, iconName = "calendar-alt" }) => {
   const [showPicker, setShowPicker] = useState(false);
 
   const openDatePicker = () => {
@@ -42,7 +42,6 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <FontAwesome5 name={iconName} size={20} style={styles.icon} />
 
@@ -72,18 +71,8 @@ const DatePicker = ({ label, value, onChange, iconName = "calendar-alt" }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: "90%",
+    width: "100%",
     marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    color: colors.secondary,
-    marginLeft: 8,
-    marginBottom: -6,
-    backgroundColor: colors.white,
-    alignSelf: "flex-start",
-    paddingHorizontal: 5,
-    zIndex: 1,
   },
   inputContainer: {
     flexDirection: "row",

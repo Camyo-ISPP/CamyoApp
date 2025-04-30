@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Activi
 import axios from 'axios';
 import colors from '@/assets/styles/colors';
 
-const CityPicker = ({ label, field, icon, formData, handleInputChange }) => {
+const CityPicker = ({ field, icon, formData, handleInputChange }) => {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -27,6 +27,9 @@ const CityPicker = ({ label, field, icon, formData, handleInputChange }) => {
             format: 'json',
             addressdetails: 1,
             limit: 10,
+          },
+          headers: {
+            'Accept-Language': 'es',
           }
         }
       );
@@ -65,20 +68,7 @@ const CityPicker = ({ label, field, icon, formData, handleInputChange }) => {
   }, [searchText]);
 
   return (
-    <View style={{ width: '90%', marginBottom: 15 }}>
-      <Text style={{
-        fontSize: 16,
-        color: colors.secondary,
-        marginLeft: 8,
-        marginBottom: -6,
-        backgroundColor: colors.white,
-        alignSelf: 'flex-start',
-        paddingHorizontal: 5,
-        zIndex: 1,
-        outline: 'none',
-      }}>
-        {label}
-      </Text>
+    <View style={{ width: '100%', marginBottom: 15 }}>
       
       <View style={styles.inputContainerStyle}>
         {React.cloneElement(icon, { color: colors.primary })}
