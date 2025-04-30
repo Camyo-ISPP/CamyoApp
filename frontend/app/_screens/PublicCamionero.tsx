@@ -11,6 +11,8 @@ import BackButton from "../_components/BackButton";
 import { startChat } from "../(protected)/chat/services";
 import SuccessModal from "../_components/SuccessModal";
 import ResenaModal from "../_components/ResenaModal";
+import MapLoader from "@/app/_components/MapLoader";
+import { set } from "date-fns";
 
 const PublicCamionero = ({ userId }) => {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -30,6 +32,9 @@ const PublicCamionero = ({ userId }) => {
     const [successModalVisible, setSuccessModalVisible] = useState(false);
     const [valoracionMedia, setValoracionMedia] = useState<number | null>(null);
 
+    const [loadingUser, setLoadingUser] = useState(true);
+    const [loadingResenas, setLoadingResenas] = useState(true);
+    const [loadingOf, setLoadingOf] = useState(true);
 
     // user2 es el usuario que se está visualizando
     const [user2, setUser2] = useState(null);
@@ -44,11 +49,14 @@ const PublicCamionero = ({ userId }) => {
 
         const fetchUser = async () => {
             try {
+                setLoadingUser(true);
                 const response = await axios.get(`${BACKEND_URL}/camioneros/${userId}`);
                 const unifiedData = unifyUserData(response.data)
                 setUser2(unifiedData);
             } catch (error) {
                 console.error("Error al cargar los datos de la empresa:", error);
+            } finally {
+                setLoadingUser(false);
             }
         };
 
@@ -58,6 +66,7 @@ const PublicCamionero = ({ userId }) => {
 
     const fetchResenas = async () => {
         try {
+            setLoadingResenas(true);
             const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user2?.userId}`);
             setResenas(response.data.sort((a, b) => (b.comentador?.id === user?.userId) - (a.comentador?.id === user?.userId)));
 
@@ -68,12 +77,22 @@ const PublicCamionero = ({ userId }) => {
             setValoracionMedia(mediaResponse.data);
         } catch (error) {
             console.error("Error al cargar las reseñas:", error);
+        } finally {
+            setLoadingResenas(false);
         }
     };
 
     const fetchMisOfertasEmpresa = async () => {
-        const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-        setFueAsignado(response.data.filter((offer: any) => offer.estado === "CERRADA").some((offer: any) => offer.camionero.id === parseInt(userId)));
+        try {
+            setLoadingOf(true);
+            const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.userId}`);
+            setFueAsignado(response.data.filter((offer: any) => offer.estado === "CERRADA").some((offer: any) => offer.camionero.id === parseInt(userId)));
+        }
+        catch (error) {
+            console.error("Error al cargar las ofertas de la empresa:", error);
+        } finally {
+            setLoadingOf(false);
+        }
     }
 
     useEffect(() => {
@@ -109,7 +128,7 @@ const PublicCamionero = ({ userId }) => {
             const res = await axios.delete(`${BACKEND_URL}/resenas/${resenaAEliminar}`, {
                 headers: { Authorization: `Bearer ${userToken}` },
             });
-            
+
             if (res.status === 200 || res.status === 204) {
                 fetchResenas();
                 setConfirmDeleteModalVisible(false);
@@ -124,277 +143,283 @@ const PublicCamionero = ({ userId }) => {
     };
 
     return (
-        <>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <View style={styles.container}>
-                    <View style={styles.card}>
-                        <View style={styles.rowContainer}>
-                            <BackButton />
-                            {/* Imagen de perfil */}
-                            <View style={styles.profileContainer}>
-                                <Image
-                                    source={user2?.foto ? { uri: `data:image/png;base64,${user2.foto}` } : defaultImage}
-                                    style={styles.profileImage}
-                                />
-                            </View>
-                            {/* Información del usuario */}
-                            <View style={styles.infoContainer}>
-                                <Text style={styles.name}>{user2?.nombre}</Text>
-                                <Text style={styles.username}>@{user2?.username}</Text>
-                                <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
-                                <Text style={styles.description}>{user2?.descripcion}</Text>
-
-                                {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
-                                {user && user.rol == "EMPRESA" && (
-                                    <TouchableOpacity
-                                        style={styles.chatButton}
-                                        onPress={async () => {
-                                            const chatId = await startChat(user.userId, user2.userId);
-                                            if (chatId) {
-                                                router.push(`/chat`);
-                                            }
-                                        }}
-                                    >
-                                        <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
-                                        <Text style={styles.chatButtonText}>Contactar</Text>
-                                    </TouchableOpacity>
-                                )}
-
-                            </View>
-                        </View>
-                        {/* Separador */}
-                        <View style={styles.separator} />
-
-                        <View style={styles.downContainer}>
-                            {/* Información profesional */}
-                            <Text style={styles.sectionTitle}>Información Profesional</Text>
-                            <Text style={styles.info}>
-                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
-                                {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
-                            </Text>
-                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
-                            {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
-                            {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
-                            {user2?.curriculum &&
-                                <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
-                                    <MaterialIcons name="download" size={20} color={colors.white} />
-                                    <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
-                                </TouchableOpacity>
-                            }
-                        </View>
-                        <View style={styles.separator} />
-
-                        <View style={styles.reviewsContainer}>
-                            <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
-
-                            {/* Valoración media con estrellas */}
-                            <View style={styles.ratingSummary}>
-                                <View style={styles.starsContainer}>
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <FontAwesome
-                                            key={star}
-                                            name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
-                                            size={24}
-                                            color={colors.primary}
-                                            style={styles.starIcon}
-                                        />
-                                    ))}
+        loadingUser || loadingResenas || loadingOf ? (
+            <View style={styles.loadingContainer}>
+                <MapLoader />
+            </View>
+        ) : (
+            <>
+                <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                    <View style={styles.container}>
+                        <View style={styles.card}>
+                            <View style={styles.rowContainer}>
+                                <BackButton />
+                                {/* Imagen de perfil */}
+                                <View style={styles.profileContainer}>
+                                    <Image
+                                        source={user2?.foto ? { uri: `data:image/png;base64,${user2.foto}` } : defaultImage}
+                                        style={styles.profileImage}
+                                    />
                                 </View>
-                                <Text style={styles.averageRatingText}>
-                                    {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
-                                    {resenas.length > 0 && (
-                                        <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                                {/* Información del usuario */}
+                                <View style={styles.infoContainer}>
+                                    <Text style={styles.name}>{user2?.nombre}</Text>
+                                    <Text style={styles.username}>@{user2?.username}</Text>
+                                    <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {user2?.localizacion}</Text>
+                                    <Text style={styles.description}>{user2?.descripcion}</Text>
+
+                                    {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
+                                    {user && user.rol == "EMPRESA" && (
+                                        <TouchableOpacity
+                                            style={styles.chatButton}
+                                            onPress={async () => {
+                                                const chatId = await startChat(user.userId, user2.userId);
+                                                if (chatId) {
+                                                    router.push(`/chat`);
+                                                }
+                                            }}
+                                        >
+                                            <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                                            <Text style={styles.chatButtonText}>Contactar</Text>
+                                        </TouchableOpacity>
                                     )}
-                                </Text>
-                            </View>
 
-                            {/* Lista de reseñas */}
-                            {resenas.length === 0 ? (
-                                <View style={styles.emptyReviews}>
-                                    <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
-                                    <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
                                 </View>
-                            ) : (
-                                <>
-                                    {resenas.map((resena) => (
-                                        <View key={resena.id} style={styles.reviewCard}>
-                                            {/* Encabezado con avatar y nombre */}
-                                            <View style={styles.reviewHeader}>
-                                                {resena.comentador?.foto ? (
-                                                    <Image
-                                                        source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
-                                                        style={styles.reviewAvatar}
-                                                    />
-                                                ) : (
-                                                    <View style={styles.avatarPlaceholder}>
-                                                        <FontAwesome5 name="user" size={20} color="white" />
+                            </View>
+                            {/* Separador */}
+                            <View style={styles.separator} />
+
+                            <View style={styles.downContainer}>
+                                {/* Información profesional */}
+                                <Text style={styles.sectionTitle}>Información Profesional</Text>
+                                <Text style={styles.info}>
+                                    <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                    {user2?.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                </Text>
+                                <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {user2?.experiencia} años</Text>
+                                {user2?.tieneCAP && <Text style={styles.info}><FontAwesome5 name="certificate" size={18} color={colors.primary} />  CAP hasta: {user2.expiracionCAP}</Text>}
+                                {user2?.isAutonomo && <Text style={styles.info}><FontAwesome5 name="id-badge" size={18} color={colors.primary} />   Tarjetas: {user2.tarjetas.join(", ")}</Text>}
+                                {user2?.curriculum &&
+                                    <TouchableOpacity style={styles.pdfButton} onPress={descargarPDF}>
+                                        <MaterialIcons name="download" size={20} color={colors.white} />
+                                        <Text style={styles.pdfButtonText}>{"Descargar Curriculum"}</Text>
+                                    </TouchableOpacity>
+                                }
+                            </View>
+                            <View style={styles.separator} />
+
+                            <View style={styles.reviewsContainer}>
+                                <Text style={styles.sectionTitle}>Reseñas Recibidas</Text>
+
+                                {/* Valoración media con estrellas */}
+                                <View style={styles.ratingSummary}>
+                                    <View style={styles.starsContainer}>
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <FontAwesome
+                                                key={star}
+                                                name={valoracionMedia && star <= Math.round(valoracionMedia) ? "star" : "star-o"}
+                                                size={24}
+                                                color={colors.primary}
+                                                style={styles.starIcon}
+                                            />
+                                        ))}
+                                    </View>
+                                    <Text style={styles.averageRatingText}>
+                                        {valoracionMedia ? valoracionMedia.toFixed(1) : '0.0'} / 5.0
+                                        {resenas.length > 0 && (
+                                            <Text style={styles.reviewCount}> • {resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'}</Text>
+                                        )}
+                                    </Text>
+                                </View>
+
+                                {/* Lista de reseñas */}
+                                {resenas.length === 0 ? (
+                                    <View style={styles.emptyReviews}>
+                                        <FontAwesome5 name="comment-slash" size={40} color={colors.lightGray} />
+                                        <Text style={styles.emptyText}>Aún no tienes reseñas</Text>
+                                    </View>
+                                ) : (
+                                    <>
+                                        {resenas.map((resena) => (
+                                            <View key={resena.id} style={styles.reviewCard}>
+                                                {/* Encabezado con avatar y nombre */}
+                                                <View style={styles.reviewHeader}>
+                                                    {resena.comentador?.foto ? (
+                                                        <Image
+                                                            source={{ uri: `data:image/png;base64,${resena.comentador.foto}` }}
+                                                            style={styles.reviewAvatar}
+                                                        />
+                                                    ) : (
+                                                        <View style={styles.avatarPlaceholder}>
+                                                            <FontAwesome5 name="user" size={20} color="white" />
+                                                        </View>
+                                                    )}
+                                                    <View>
+                                                        <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
+                                                        <Text style={styles.reviewDate}>
+                                                            {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
+                                                                year: 'numeric',
+                                                                month: 'long',
+                                                                day: 'numeric'
+                                                            })}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+
+                                                {/* Valoración con estrellas */}
+                                                <View style={styles.reviewStars}>
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <FontAwesome
+                                                            key={star}
+                                                            name={star <= resena.valoracion ? "star" : "star-o"}
+                                                            size={16}
+                                                            color={colors.primary}
+                                                        />
+                                                    ))}
+                                                </View>
+
+                                                {/* Comentario */}
+                                                <Text style={styles.reviewComment}>{resena.comentarios}</Text>
+                                                {user?.userId === resena.comentador?.id && (
+                                                    <View style={{ flexDirection: "row", justifyContent: "center", gap: 10, marginTop: 8 }}>
+
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                setEditResenaId(resena.id);
+                                                                setShowResenaModal(true);
+                                                            }}
+                                                            style={[styles.button, { marginTop: 8, alignSelf: 'flex-end' }]}
+                                                        >
+                                                            <Text style={styles.buttonText}>Editar reseña</Text>
+                                                        </TouchableOpacity>
+
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                setResenaAEliminar(resena.id);
+                                                                setConfirmDeleteModalVisible(true);
+                                                            }}
+                                                            style={[
+                                                                styles.button,
+                                                                {
+                                                                    marginTop: 8,
+                                                                    alignSelf: 'flex-end',
+                                                                    backgroundColor: '#D14F45',
+                                                                },
+                                                            ]}
+                                                        >
+                                                            <Text style={styles.buttonText}>Eliminar reseña</Text>
+                                                        </TouchableOpacity>
                                                     </View>
                                                 )}
-                                                <View>
-                                                    <Text style={styles.reviewAuthor}>{resena.comentador?.nombre}</Text>
-                                                    <Text style={styles.reviewDate}>
-                                                        {new Date(resena.fechaCreacion || Date.now()).toLocaleDateString('es-ES', {
-                                                            year: 'numeric',
-                                                            month: 'long',
-                                                            day: 'numeric'
-                                                        })}
-                                                    </Text>
-                                                </View>
-                                            </View>
+                                                <ResenaModal
+                                                    visible={showResenaModal}
+                                                    onClose={() => {
+                                                        setShowResenaModal(false);
+                                                        setEditResenaId(null);
+                                                    }}
+                                                    onSubmit={async (data) => {
+                                                        try {
+                                                            const headers = {
+                                                                Authorization: `Bearer ${userToken}`,
+                                                                "Content-Type": "application/json",
+                                                            };
 
-                                            {/* Valoración con estrellas */}
-                                            <View style={styles.reviewStars}>
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <FontAwesome
-                                                        key={star}
-                                                        name={star <= resena.valoracion ? "star" : "star-o"}
-                                                        size={16}
-                                                        color={colors.primary}
-                                                    />
-                                                ))}
-                                            </View>
-
-                                            {/* Comentario */}
-                                            <Text style={styles.reviewComment}>{resena.comentarios}</Text>
-                                            {user?.userId === resena.comentador?.id && (
-                                                <View style={{ flexDirection: "row", justifyContent: "center", gap: 10, marginTop: 8 }}>
-
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            setEditResenaId(resena.id);
-                                                            setShowResenaModal(true);
-                                                        }}
-                                                        style={[styles.button, { marginTop: 8, alignSelf: 'flex-end' }]}
-                                                    >
-                                                        <Text style={styles.buttonText}>Editar reseña</Text>
-                                                    </TouchableOpacity>
-
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            setResenaAEliminar(resena.id);
-                                                            setConfirmDeleteModalVisible(true);
-                                                        }}
-                                                        style={[
-                                                            styles.button,
-                                                            {
-                                                                marginTop: 8,
-                                                                alignSelf: 'flex-end',
-                                                                backgroundColor: '#D14F45',
-                                                            },
-                                                        ]}
-                                                    >
-                                                        <Text style={styles.buttonText}>Eliminar reseña</Text>
-                                                    </TouchableOpacity>
-                                                </View>
-                                            )}
-                                            <ResenaModal
-                                                visible={showResenaModal}
-                                                onClose={() => {
-                                                    setShowResenaModal(false);
-                                                    setEditResenaId(null);
-                                                }}
-                                                onSubmit={async (data) => {
-                                                    try {
-                                                        const headers = {
-                                                            Authorization: `Bearer ${userToken}`,
-                                                            "Content-Type": "application/json",
-                                                        };
-
-                                                        if (editResenaId) {
-                                                            const res = await axios.put(`${BACKEND_URL}/resenas/${editResenaId}`, data, { headers });
-                                                            if (res.status === 200) {
-                                                                setSuccessModalVisible(true);
-                                                                setTimeout(() => setSuccessModalVisible(false), 1000);
-                                                                setEditResenaId(null);
-                                                                setShowResenaModal(false);
-                                                                fetchResenas();
+                                                            if (editResenaId) {
+                                                                const res = await axios.put(`${BACKEND_URL}/resenas/${editResenaId}`, data, { headers });
+                                                                if (res.status === 200) {
+                                                                    setSuccessModalVisible(true);
+                                                                    setTimeout(() => setSuccessModalVisible(false), 1000);
+                                                                    setEditResenaId(null);
+                                                                    setShowResenaModal(false);
+                                                                    fetchResenas();
+                                                                }
+                                                            } else {
+                                                                const res = await axios.post(`${BACKEND_URL}/resenas`, data, { headers });
+                                                                if (res.status === 201) {
+                                                                    setSuccessModalVisible(true);
+                                                                    setTimeout(() => setSuccessModalVisible(false), 1000);
+                                                                    setShowResenaModal(false);
+                                                                    fetchResenas();
+                                                                }
                                                             }
-                                                        } else {
-                                                            const res = await axios.post(`${BACKEND_URL}/resenas`, data, { headers });
-                                                            if (res.status === 201) {
-                                                                setSuccessModalVisible(true);
-                                                                setTimeout(() => setSuccessModalVisible(false), 1000);
-                                                                setShowResenaModal(false);
-                                                                fetchResenas();
-                                                            }
+                                                        } catch (error) {
+                                                            console.error("Error al enviar reseña:", error);
+                                                            alert("No se pudo enviar la reseña.");
                                                         }
-                                                    } catch (error) {
-                                                        console.error("Error al enviar reseña:", error);
-                                                        alert("No se pudo enviar la reseña.");
-                                                    }
-                                                }}
-                                                comentadorId={user?.userId}
-                                                comentadoId={user2?.userId}
-                                                initialRating={editResenaId ? resena.valoracion : 5}
-                                                initialComment={editResenaId ? resena.comentarios : ""}
-                                                isEditing={true}
-                                            />
+                                                    }}
+                                                    comentadorId={user?.userId}
+                                                    comentadoId={user2?.userId}
+                                                    initialRating={editResenaId ? resena.valoracion : 5}
+                                                    initialComment={editResenaId ? resena.comentarios : ""}
+                                                    isEditing={true}
+                                                />
 
-                                            {/* Divider */}
-                                            <View style={styles.reviewDivider} />
-                                        </View>
-                                    ))}
-                                </>
-                            )}
+                                                {/* Divider */}
+                                                <View style={styles.reviewDivider} />
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
+                            </View>
                         </View>
-                    </View>
-                    {/* Modal de éxito */}
-                    <SuccessModal
-                        isVisible={successModalVisible}
-                        onClose={() => setSuccessModalVisible(false)}
-                        message="¡Reseña creada con exito!"
-                    />
-                    <Modal 
-                        visible={confirmDeleteModalVisible} 
-                        transparent 
-                        animationType="fade"
-                        onRequestClose={() => setConfirmDeleteModalVisible(false)}
-                    >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.modalContent}>
-                                    <MaterialIcons 
-                                        name="warning" 
-                                        size={32} 
-                                        color={colors.red} 
-                                        style={styles.warningIcon}
-                                    />
-                                    
-                                    <Text style={styles.modalTitle}>
-                                        Confirmar eliminación
-                                    </Text>
-                                    
-                                    <Text style={styles.modalText}>
-                                        ¿Estás seguro de que deseas eliminar esta reseña? Esta acción no se puede deshacer.
-                                    </Text>
+                        {/* Modal de éxito */}
+                        <SuccessModal
+                            isVisible={successModalVisible}
+                            onClose={() => setSuccessModalVisible(false)}
+                            message="¡Reseña creada con exito!"
+                        />
+                        <Modal
+                            visible={confirmDeleteModalVisible}
+                            transparent
+                            animationType="fade"
+                            onRequestClose={() => setConfirmDeleteModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContainer}>
+                                    <View style={styles.modalContent}>
+                                        <MaterialIcons
+                                            name="warning"
+                                            size={32}
+                                            color={colors.red}
+                                            style={styles.warningIcon}
+                                        />
 
-                                    <View style={styles.buttonContainer}>
-                                        <TouchableOpacity
-                                            onPress={() => setConfirmDeleteModalVisible(false)}
-                                            style={[styles.buttonModal, styles.cancelButton]}
-                                            activeOpacity={0.8}
-                                        >
-                                            <Text style={styles.cancelButtonText}>Cancelar</Text>
-                                        </TouchableOpacity>
+                                        <Text style={styles.modalTitle}>
+                                            Confirmar eliminación
+                                        </Text>
 
-                                        <TouchableOpacity
-                                            onPress={handleDeleteReview}
-                                            style={[styles.buttonModal, styles.deleteButton]}
-                                            activeOpacity={0.8}
-                                        >
-                                            <Text style={styles.deleteButtonText}>Eliminar</Text>
-                                        </TouchableOpacity>
+                                        <Text style={styles.modalText}>
+                                            ¿Estás seguro de que deseas eliminar esta reseña? Esta acción no se puede deshacer.
+                                        </Text>
+
+                                        <View style={styles.buttonContainer}>
+                                            <TouchableOpacity
+                                                onPress={() => setConfirmDeleteModalVisible(false)}
+                                                style={[styles.buttonModal, styles.cancelButton]}
+                                                activeOpacity={0.8}
+                                            >
+                                                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                                            </TouchableOpacity>
+
+                                            <TouchableOpacity
+                                                onPress={handleDeleteReview}
+                                                style={[styles.buttonModal, styles.deleteButton]}
+                                                activeOpacity={0.8}
+                                            >
+                                                <Text style={styles.deleteButtonText}>Eliminar</Text>
+                                            </TouchableOpacity>
+                                        </View>
                                     </View>
                                 </View>
                             </View>
-                        </View>
-                    </Modal>
+                        </Modal>
 
-                </View>
-            </ScrollView >
+                    </View>
+                </ScrollView >
 
-        </>
+            </>
 
+        )
     );
 };
 
@@ -404,6 +429,13 @@ const styles = StyleSheet.create({
         paddingVertical: 60,
         backgroundColor: colors.white,
         minHeight: "100%",
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white,
+        // height: '100%',
     },
     card: {
         backgroundColor: colors.white,

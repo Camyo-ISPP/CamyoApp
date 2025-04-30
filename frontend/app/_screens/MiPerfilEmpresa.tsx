@@ -16,6 +16,8 @@ import ConfirmDeleteModal from "../_components/ConfirmDeleteModal";
 import ErrorModal from "../_components/ErrorModal";
 import SuccessModal from "../_components/SuccessModal";
 import DraftModal from "../_components/DraftModal";
+import MapLoader from "@/app/_components/MapLoader";
+import { set } from "date-fns";
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -27,7 +29,6 @@ const MiPerfilEmpresa = () => {
   const router = useRouter();
 
   const [offers, setOffers] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const { rules, loading: subscriptionLoading } = useSubscriptionRules();
   const [camioneros, setCamioneros] = useState([]);
   const [showResenaModal, setShowResenaModal] = useState(false);
@@ -47,6 +48,10 @@ const MiPerfilEmpresa = () => {
   const [successDeleteAccModalVisible, setSuccessDeleteAccModalVisible] = useState(false);
   const [showDraftsChoiceModal, setShowDraftsChoiceModal] = useState(false);
 
+  const [loadingResenas, setLoadingResenas] = useState(false);
+  const [loadingOffers, setLoadingOffers] = useState<boolean>(false);
+  const [loadingCamionerosResenados, setLoadingCamionerosResenados] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
       refreshSubscriptionLevel();
@@ -64,6 +69,7 @@ const MiPerfilEmpresa = () => {
 
   const fetchResenas = async () => {
     try {
+      setLoadingResenas(true);
       const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${user.userId}`);
       setResenas(response.data);
       const resenasFiltradas = response.data.filter(resena =>
@@ -74,6 +80,8 @@ const MiPerfilEmpresa = () => {
       setValoracionMedia(mediaResponse.data);
     } catch (error) {
       console.error("Error al cargar las reseñas o valoración:", error);
+    } finally {
+      setLoadingResenas(false);
     }
   };
 
@@ -114,24 +122,24 @@ const MiPerfilEmpresa = () => {
   };
   const fetchCamionerosResenados = async () => {
     try {
+      setLoadingCamionerosResenados(true);
       const response = await axios.get(`${BACKEND_URL}/resenas/resenados/${user.userId}`);
       const ids = response.data.map(camionero => camionero.id);
       setResenados(ids)
     } catch (error) {
       console.error("Error al obtener los camioneros reseñados:", error);
       return [];
+    } finally {
+      setLoadingCamionerosResenados(false);
     }
   }
 
   const fetchOffers = async () => {
     try {
+      setLoadingOffers(true);
       const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
-
-
       const ofertasCerradas = response.data.filter((offer: any) => offer.estado === "CERRADA");
-
       setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
-
 
       const camionerosUnicos = ofertasCerradas.reduce((acc, oferta) => {
         if (oferta.camionero && !acc.some(c => c.id === oferta.camionero.id)) {
@@ -150,7 +158,7 @@ const MiPerfilEmpresa = () => {
     } catch (error) {
       console.error("Error al cargar las ofertas:", error);
     } finally {
-      setLoading(false);
+      setLoadingOffers(false);
     }
   };
   useEffect(() => {
@@ -252,6 +260,11 @@ const MiPerfilEmpresa = () => {
   const upgradeMessage = getUpgradeMessage();
 
   return (
+    loadingResenas || loadingOffers || loadingCamionerosResenados ? (
+      <View style={styles.loadingContainer}>
+        <MapLoader />
+      </View>
+    ) : (
     <ScrollView>
       <View style={styles.pageContainer}>
         {/* Left Ad */}
@@ -599,12 +612,20 @@ const MiPerfilEmpresa = () => {
         )}
       </View>
     </ScrollView >
-  );
+  )
+);
 };
 
 const styles = StyleSheet.create({
   offersContainer: {
     width: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    minHeight: "100%",
   },
   sectionTitle: {
     fontSize: 22,

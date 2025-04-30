@@ -29,6 +29,7 @@ const EditarOfertaScreen = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [offers, setOffers] = useState<any[]>([]);
   const [drafts, setDrafts] = useState<any[]>([]);
+  const [loadingOffers, setLoadingOffers] = useState(true);
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -97,6 +98,7 @@ const EditarOfertaScreen = () => {
   useEffect(() => {
     const fetchOffer = async () => {
       try {
+        setLoadingOffers(true);
         const response = await axios.get(`${BACKEND_URL}/ofertas/${ofertaid}`, {
           headers: {
             "Content-Type": "application/json",
@@ -154,6 +156,8 @@ const EditarOfertaScreen = () => {
         setTipoOferta(data.tipoOferta || "TRABAJO");
       } catch (error) {
         console.error("Error al cargar la oferta:", error);
+      } finally {
+        setLoadingOffers(false);
       }
     };
 
@@ -677,471 +681,478 @@ const EditarOfertaScreen = () => {
     </View>
   );
 
-  if (loading) {
+  /*
+  if (loading || loadingOffers) {
     return (
       <View style={styles.fullScreenLoading}>
         <MapLoader />
       </View>
     );
-  }
+  }*/
 
   return (
-    <EmpresaRoute>
-      <ImageBackground
-        source={require('../../../assets/images/auth-bg.png')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.formContainer}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="arrow-back" size={24} color={colors.secondary} />
-            </TouchableOpacity>
+    loading || loadingOffers ? (
+      <View style={styles.fullScreenLoading}>
+        <MapLoader />
+      </View>
+    ) : (
+      <EmpresaRoute>
+        <ImageBackground
+          source={require('../../../assets/images/auth-bg.png')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        >
+          <ScrollView contentContainerStyle={styles.container}>
+            <View style={styles.formContainer}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.back()}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="arrow-back" size={24} color={colors.secondary} />
+              </TouchableOpacity>
 
-            <View style={styles.header}>
-              <View style={styles.iconCircle}>
-                <FontAwesome5 name="file-alt" size={32} color={colors.secondary} />
+              <View style={styles.header}>
+                <View style={styles.iconCircle}>
+                  <FontAwesome5 name="file-alt" size={32} color={colors.secondary} />
+                </View>
+                <Text style={styles.title}>Editar Oferta</Text>
               </View>
-              <Text style={styles.title}>Editar Oferta</Text>
-            </View>
 
-            {/* Campos generales */}
-            {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} />)}
-            {renderInput("Experiencia (años)", "experiencia", <FontAwesome5 name="briefcase" size={20} />, "numeric")}
-            
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Licencia requerida:</Text>
-              <View style={styles.licenciaContainer}>
-                {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
-                  const storedValue = licencia.replace(/\+/g, "_");
-                  const isSelected = formData.licencia === storedValue;
-                  return (
-                    <TouchableOpacity
-                      key={licencia}
-                      style={[
-                        styles.licenciaButton,
-                        isSelected && styles.licenciaButtonSelected
-                      ]}
-                      onPress={() => handleInputChange("licencia", storedValue)}
-                    >
-                      <Text style={[
-                        styles.licenciaText,
-                        isSelected && styles.licenciaTextSelected
-                      ]}>
-                        {licencia}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
+              {/* Campos generales */}
+              {renderInput("Título", "titulo", <FontAwesome5 name="tag" size={20} />)}
+              {renderInput("Experiencia (años)", "experiencia", <FontAwesome5 name="briefcase" size={20} />, "numeric")}
 
-            {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} />, "default", false, true)}
-            {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} />, "numeric")}
-            
-            <Text style={styles.inputLabel}>{"Localización"}</Text>
-            <CityPicker
-              field="localizacion"
-              icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
-              formData={formData}
-              handleInputChange={handleInputChange}
-            />
-
-            {/* Mostrar el tipo de oferta */}
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Tipo de oferta: {tipoOferta}</Text>
-            </View>
-
-            {/* Campos dinámicos según el tipo de oferta */}
-            {tipoOferta === "TRABAJO" ? (
-              <>
-                <Text style={styles.inputLabel}>{"Fecha de incorporación"}</Text>
-                <DatePicker
-                  value={formData.fechaIncorporacion}
-                  onChange={(date) => handleInputChange("fechaIncorporacion", date)}
-                  icon={<FontAwesome5 name="calendar-check" size={20} color={colors.primary} />}
-                />
-                <View style={styles.sectionContainer}>
-                  <Text style={styles.sectionTitle}>Jornada:</Text>
-                  <View style={styles.jornadaContainer}>
-                    {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
+              <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Licencia requerida:</Text>
+                <View style={styles.licenciaContainer}>
+                  {["AM", "A1", "A2", "A", "B", "C1", "C", "C1+E", "C+E", "D1", "D+E", "E", "D"].map((licencia) => {
+                    const storedValue = licencia.replace(/\+/g, "_");
+                    const isSelected = formData.licencia === storedValue;
+                    return (
                       <TouchableOpacity
-                        key={jornada}
+                        key={licencia}
                         style={[
-                          styles.jornadaButton,
-                          formData.jornada === jornada && styles.jornadaButtonSelected
+                          styles.licenciaButton,
+                          isSelected && styles.licenciaButtonSelected
                         ]}
-                        onPress={() => handleInputChange("jornada", jornada)}
+                        onPress={() => handleInputChange("licencia", storedValue)}
                       >
                         <Text style={[
-                          styles.jornadaText,
-                          formData.jornada === jornada && styles.jornadaTextSelected
+                          styles.licenciaText,
+                          isSelected && styles.licenciaTextSelected
                         ]}>
-                          {jornada}
+                          {licencia}
                         </Text>
                       </TouchableOpacity>
-                    ))}
-                  </View>
+                    );
+                  })}
                 </View>
-              </>
-            ) : (
-              <>
-                {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} />)}
-                {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} />, "numeric")}
-                <Text style={styles.inputLabel}>{"Origen"}</Text>
-                <CityPicker
-                  field="origen"
-                  icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                />
-                <Text style={styles.inputLabel}>{"Destino"}</Text>
-                <CityPicker
-                  field="destino"
-                  icon={<FontAwesome5 name="map-marker" size={20} color={colors.primary} />}
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                />
-                {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} />, "numeric")}
-
-                <Text style={styles.inputLabel}>{"Fecha de salida"}</Text>
-                <DatePicker
-                  value={formData.inicio}
-                  onChange={(date) => handleInputChange("inicio", date)}
-                  icon={<FontAwesome5 name="stopwatch" size={20} color={colors.primary} />}
-                />
-                <Text style={styles.inputLabel}>{"Fecha de entrega mínima"}</Text>
-                <DatePicker
-                  value={formData.finMinimo}
-                  onChange={(date) => handleInputChange("finMinimo", date)}
-                  icon={<FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />}
-                />
-                <Text style={styles.inputLabel}>{"Fecha de entrega máxima"}</Text>
-                <DatePicker
-                  value={formData.finMaximo}
-                  onChange={(date) => handleInputChange("finMaximo", date)}
-                  icon={<FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />}
-                />
-              </>
-            )}
-
-            {errorMessage && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{errorMessage}</Text>
               </View>
-            )}
 
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.draftButton}
-                onPress={handleDraft}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.buttonText}>Guardar borrador</Text>
-              </TouchableOpacity>
+              {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} />, "default", false, true)}
+              {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} />, "numeric")}
 
-              <TouchableOpacity
-                style={[
-                  styles.publishButton,
-                  !canCreateNewOffer() && styles.disabledButton
-                ]}
-                onPress={handlePublish}
-                disabled={!canCreateNewOffer()}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.buttonText}>
-                  {canCreateNewOffer() ? 'Publicar oferta' : 'Límite alcanzado'}
-                </Text>
-              </TouchableOpacity>
+              <Text style={styles.inputLabel}>{"Localización"}</Text>
+              <CityPicker
+                field="localizacion"
+                icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
+                formData={formData}
+                handleInputChange={handleInputChange}
+              />
 
-              <TouchableOpacity 
-                style={[styles.deleteButton]}
-                onPress={() => setShowDeleteModal(true)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.buttonText}>Eliminar</Text>
-              </TouchableOpacity>
+              {/* Mostrar el tipo de oferta */}
+              <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Tipo de oferta: {tipoOferta}</Text>
+              </View>
+
+              {/* Campos dinámicos según el tipo de oferta */}
+              {tipoOferta === "TRABAJO" ? (
+                <>
+                  <Text style={styles.inputLabel}>{"Fecha de incorporación"}</Text>
+                  <DatePicker
+                    value={formData.fechaIncorporacion}
+                    onChange={(date) => handleInputChange("fechaIncorporacion", date)}
+                    icon={<FontAwesome5 name="calendar-check" size={20} color={colors.primary} />}
+                  />
+                  <View style={styles.sectionContainer}>
+                    <Text style={styles.sectionTitle}>Jornada:</Text>
+                    <View style={styles.jornadaContainer}>
+                      {["REGULAR", "FLEXIBLE", "COMPLETA", "NOCTURNA", "RELEVOS", "MIXTA"].map((jornada) => (
+                        <TouchableOpacity
+                          key={jornada}
+                          style={[
+                            styles.jornadaButton,
+                            formData.jornada === jornada && styles.jornadaButtonSelected
+                          ]}
+                          onPress={() => handleInputChange("jornada", jornada)}
+                        >
+                          <Text style={[
+                            styles.jornadaText,
+                            formData.jornada === jornada && styles.jornadaTextSelected
+                          ]}>
+                            {jornada}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <>
+                  {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} />)}
+                  {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} />, "numeric")}
+                  <Text style={styles.inputLabel}>{"Origen"}</Text>
+                  <CityPicker
+                    field="origen"
+                    icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                  <Text style={styles.inputLabel}>{"Destino"}</Text>
+                  <CityPicker
+                    field="destino"
+                    icon={<FontAwesome5 name="map-marker" size={20} color={colors.primary} />}
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                  />
+                  {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} />, "numeric")}
+
+                  <Text style={styles.inputLabel}>{"Fecha de salida"}</Text>
+                  <DatePicker
+                    value={formData.inicio}
+                    onChange={(date) => handleInputChange("inicio", date)}
+                    icon={<FontAwesome5 name="stopwatch" size={20} color={colors.primary} />}
+                  />
+                  <Text style={styles.inputLabel}>{"Fecha de entrega mínima"}</Text>
+                  <DatePicker
+                    value={formData.finMinimo}
+                    onChange={(date) => handleInputChange("finMinimo", date)}
+                    icon={<FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />}
+                  />
+                  <Text style={styles.inputLabel}>{"Fecha de entrega máxima"}</Text>
+                  <DatePicker
+                    value={formData.finMaximo}
+                    onChange={(date) => handleInputChange("finMaximo", date)}
+                    icon={<FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />}
+                  />
+                </>
+              )}
+
+              {errorMessage && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              )}
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.draftButton}
+                  onPress={handleDraft}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.buttonText}>Guardar borrador</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.publishButton,
+                    !canCreateNewOffer() && styles.disabledButton
+                  ]}
+                  onPress={handlePublish}
+                  disabled={!canCreateNewOffer()}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.buttonText}>
+                    {canCreateNewOffer() ? 'Publicar oferta' : 'Límite alcanzado'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.deleteButton]}
+                  onPress={() => setShowDeleteModal(true)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.buttonText}>Eliminar</Text>
+                </TouchableOpacity>
+              </View>
+
+              <SuccessModal
+                isVisible={successModalVisible}
+                onClose={() => setSuccessModalVisible(false)}
+                message="¡Oferta creada con éxito!"
+              />
+              <SuccessModal
+                isVisible={successModalVisibleD}
+                onClose={() => setSuccessModalVisibleD(false)}
+                message="¡Borrador actualizado con éxito!"
+              />
             </View>
+          </ScrollView>
+        </ImageBackground>
 
-            <SuccessModal
-              isVisible={successModalVisible}
-              onClose={() => setSuccessModalVisible(false)}
-              message="¡Oferta creada con éxito!"
-            />
-            <SuccessModal
-              isVisible={successModalVisibleD}
-              onClose={() => setSuccessModalVisibleD(false)}
-              message="¡Borrador actualizado con éxito!"
-            />
-          </View>
-        </ScrollView>
-      </ImageBackground>
-
-      <ConfirmDeleteModal
-        isVisible={showDeleteModal}
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteModal(false)}
-        message="Esta acción eliminará permanentemente tu borrador. ¿Deseas continuar?"
-      />
-    </EmpresaRoute>
+        <ConfirmDeleteModal
+          isVisible={showDeleteModal}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteModal(false)}
+          message="Esta acción eliminará permanentemente tu borrador. ¿Deseas continuar?"
+        />
+      </EmpresaRoute>
+    )
   );
 };
 
 
 const styles = StyleSheet.create({
-    backgroundImage: {
-      flex: 1,
-      width: '100%',
-      height: '100%',
-    },
-    container: {
-      flexGrow: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 16,
-      minHeight: '100%',
-    },
-    formContainer: {
-      width: "90%",
-      maxWidth: 500,
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderRadius: 16,
-      padding: 30,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.1,
-      shadowRadius: 16,
-      elevation: 8,
-      marginVertical: 20,
-    },
-    backButton: {
-      position: 'absolute',
-      top: 20,
-      left: 20,
-      zIndex: 1,
-    },
-    header: {
-      alignItems: "center",
-      marginBottom: 24,
-    },
-    iconCircle: {
-      backgroundColor: 'transparent',
-      borderWidth: 2,
-      borderColor: colors.secondary,
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: colors.secondary,
-      marginBottom: 8,
-      textAlign: "center",
-    },
-    inputContainer: {
-      width: "100%",
-      marginBottom: 16,
-    },
-    inputLabel: {
-      fontSize: 14,
-      color: colors.secondary,
-      marginBottom: 8,
-      fontWeight: "600",
-    },
-    inputWrapper: {
-      flexDirection: "row",
-      alignItems: "center",
-      borderWidth: 1,
-      borderColor: colors.lightGray,
-      borderRadius: 10,
-      paddingHorizontal: 14,
-      backgroundColor: colors.white,
-      height: 48,
-    },
-    inputWrapperFocused: {
-      borderColor: colors.primary,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
-      elevation: 2,
-    },
-    inputField: {
-      flex: 1,
-      height: "100%",
-      paddingLeft: 10,
-      color: colors.darkGray,
-      fontSize: 16,
-    },
-    disabledInputContainer: {
-      borderColor: colors.lightGray,
-      backgroundColor: colors.lightestGray,
-    },
-    upgradeMessage: {
-      color: colors.primary,
-      fontSize: 14,
-      marginTop: 5,
-      textAlign: "center",
-      textDecorationLine: "underline",
-    },
-    sectionContainer: {
-      width: "100%",
-      marginBottom: 20,
-      backgroundColor: colors.white,
-      borderRadius: 10,
-      padding: 16,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 3,
-      elevation: 2,
-    },
-    sectionTitle: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: colors.secondary,
-      marginBottom: 12,
-    },
-    buttonContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      width: "100%",
-      gap: 10,
-    },
-    typeButton: {
-      flex: 1,
-      paddingVertical: 12,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.primary,
-      backgroundColor: colors.white,
-    },
-    typeButtonSelected: {
-      backgroundColor: colors.primary,
-    },
-    typeButtonText: {
-      textAlign: "center",
-      color: colors.primary,
-      fontWeight: "600",
-    },
-    typeButtonTextSelected: {
-      color: colors.white,
-    },
-    licenciaContainer: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "center",
-      gap: 10,
-      width: "100%",
-    },
-    licenciaButton: {
-      width: "30%",
-      paddingVertical: 10,
-      alignItems: "center",
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.secondary,
-      backgroundColor: "transparent",
-    },
-    licenciaButtonSelected: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    licenciaText: {
-      color: colors.secondary,
-      fontSize: 16,
-    },
-    licenciaTextSelected: {
-      color: colors.white,
-    },
-    jornadaContainer: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "center",
-      gap: 10,
-      width: "100%",
-    },
-    jornadaButton: {
-      width: "30%",
-      paddingVertical: 10,
-      alignItems: "center",
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.secondary,
-      backgroundColor: "transparent",
-    },
-    jornadaButtonSelected: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    jornadaText: {
-      color: colors.secondary,
-      fontSize: 16,
-      textAlign: "center",
-    },
-    jornadaTextSelected: {
-      color: colors.white,
-    },
-    draftButton: {
-      backgroundColor: colors.primary,
-      borderRadius: 10,
-      paddingVertical: 15,
-      alignItems: "center",
-      flex: 1,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.2,
-      shadowRadius: 5,
-      elevation: 4,
-    },
-    publishButton: {
-      backgroundColor: colors.secondary,
-      borderRadius: 10,
-      paddingVertical: 15,
-      alignItems: "center",
-      flex: 1,
-      shadowColor: colors.secondary,
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.2,
-      shadowRadius: 5,
-      elevation: 4,
-    },
-    buttonText: {
-      color: colors.white,
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    errorContainer: {
-      backgroundColor: "#FEE2E2",
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 16,
-    },
-    errorText: {
-      color: "#DC2626",
-      fontSize: 14,
-      textAlign: "center",
-      fontWeight: '500',
-    },
-    fullScreenLoading: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.white,
-    },
-    loadingText: {
-      marginTop: 20,
-      color: colors.secondary,
-      fontSize: 16,
-    },
-  });
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+    minHeight: '100%',
+  },
+  formContainer: {
+    width: "90%",
+    maxWidth: 500,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
+    padding: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 8,
+    marginVertical: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 1,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  iconCircle: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: colors.secondary,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.secondary,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  inputContainer: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: colors.secondary,
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    backgroundColor: colors.white,
+    height: 48,
+  },
+  inputWrapperFocused: {
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputField: {
+    flex: 1,
+    height: "100%",
+    paddingLeft: 10,
+    color: colors.darkGray,
+    fontSize: 16,
+  },
+  disabledInputContainer: {
+    borderColor: colors.lightGray,
+    backgroundColor: colors.lightestGray,
+  },
+  upgradeMessage: {
+    color: colors.primary,
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: "center",
+    textDecorationLine: "underline",
+  },
+  sectionContainer: {
+    width: "100%",
+    marginBottom: 20,
+    backgroundColor: colors.white,
+    borderRadius: 10,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.secondary,
+    marginBottom: 12,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 10,
+  },
+  typeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.white,
+  },
+  typeButtonSelected: {
+    backgroundColor: colors.primary,
+  },
+  typeButtonText: {
+    textAlign: "center",
+    color: colors.primary,
+    fontWeight: "600",
+  },
+  typeButtonTextSelected: {
+    color: colors.white,
+  },
+  licenciaContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+  },
+  licenciaButton: {
+    width: "30%",
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+    backgroundColor: "transparent",
+  },
+  licenciaButtonSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  licenciaText: {
+    color: colors.secondary,
+    fontSize: 16,
+  },
+  licenciaTextSelected: {
+    color: colors.white,
+  },
+  jornadaContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+  },
+  jornadaButton: {
+    width: "30%",
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+    backgroundColor: "transparent",
+  },
+  jornadaButtonSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  jornadaText: {
+    color: colors.secondary,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  jornadaTextSelected: {
+    color: colors.white,
+  },
+  draftButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: "center",
+    flex: 1,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  publishButton: {
+    backgroundColor: colors.secondary,
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: "center",
+    flex: 1,
+    shadowColor: colors.secondary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  buttonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  errorContainer: {
+    backgroundColor: "#FEE2E2",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: "#DC2626",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: '500',
+  },
+  fullScreenLoading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+  },
+  loadingText: {
+    marginTop: 20,
+    color: colors.secondary,
+    fontSize: 16,
+  },
+});
 
-  export default withNavigationGuard(EditarOfertaScreen);
+export default withNavigationGuard(EditarOfertaScreen);
