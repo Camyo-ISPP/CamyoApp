@@ -236,7 +236,15 @@ public class DataInitializer {
                                         + "(203,'No volvería a contratar', 1, 202, 224),"
                                         + "(204,'Horrible, no cumplió los plazos establecidos en ninguna de nuestras ofertas que le asignamos', 1, 201, 225),"
                                         + "(205,'Mal', 2, 224, 202),"
-                                        + "(206,'Bien', 4, 250, 201)");
+                                        + "(206,'Mal', 2, 201, 222),"
+                                        + "(207,'Mal', 2, 222, 201),"
+                                        + "(208,'Mal', 2, 202, 223),"
+                                        + "(209,'Mal', 2, 223, 202),"
+                                        + "(210,'Mal', 2, 203, 224),"
+                                        + "(211,'Mal', 2, 224, 203),"
+                                        + "(212,'Mal', 2, 204, 225),"
+                                        + "(213,'Mal', 2, 225, 204),"
+                                        + "(214,'Bien', 4, 250, 201)");
 
                                 // Insert Ofertas
                                 statement.addBatch(
@@ -279,7 +287,11 @@ public class DataInitializer {
                                         + "(236, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 208, 220, 'BADAJOZ', false, 'TRABAJO'),"
                                         + "(237, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 209, 220, 'BADAJOZ', false, 'TRABAJO'),"
                                         + "(238, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 210, 220, 'BADAJOZ', false, 'TRABAJO'),"
-                                        + "(239, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 225, 220, 'BADAJOZ', false, 'TRABAJO')"
+                                        + "(239, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 225, 220, 'BADAJOZ', false, 'TRABAJO'),"
+                                        + "(240, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 201, 201, 'BADAJOZ', false, 'TRABAJO'),"
+                                        + "(231, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 202, 202, 'BADAJOZ', false, 'TRABAJO'),"
+                                        + "(242, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 203, 203, 'BADAJOZ', false, 'TRABAJO'),"
+                                        + "(243, 'Transportista en Badajoz', 3, 'C', 'Viajes limitados por Badajoz', 'CERRADA', '2025-05-03 10:45', 2500.00, 204, 204, 'BADAJOZ', false, 'TRABAJO')"
                                         );
 
                                 // Insert Trabajos
