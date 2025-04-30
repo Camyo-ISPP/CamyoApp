@@ -68,7 +68,7 @@ const CityPicker = ({ field, icon, formData, handleInputChange }) => {
   }, [searchText]);
 
   return (
-    <View style={{ width: '90%', marginBottom: 15 }}>
+    <View style={{ width: '100%', marginBottom: 15 }}>
       
       <View style={styles.inputContainerStyle}>
         {React.cloneElement(icon, { color: colors.primary })}

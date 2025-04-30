@@ -71,7 +71,7 @@ const DatePicker = ({ value, onChange, iconName = "calendar-alt" }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: "90%",
+    width: "100%",
     marginBottom: 15,
   },
   inputContainer: {
