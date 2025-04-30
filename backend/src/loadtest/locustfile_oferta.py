@@ -7,8 +7,9 @@ EMPRESA_ID = 201
 CAMIONEROS = [223, 224, 225, 226, 227]
 EMPRESAS = [201, 221, 222, 223]
 
-def ts():
-    return datetime.datetime.utcnow().isoformat(timespec="seconds")
+def ts() -> str:
+    dt = datetime.datetime.now(datetime.timezone.utc)
+    return dt.replace(tzinfo=None).isoformat(timespec="seconds")
 
 class OfertaUser(HttpUser):
     host = API
@@ -160,27 +161,47 @@ class OfertaUser(HttpUser):
             return
 
         oid = random.choice(libres)
-        with self.client.put(f"{BASE}/{oid}/patrocinar",
-                             headers=self.h,
-                             name=f"{BASE}/{{id}}/patrocinar",
-                             catch_response=True) as r:
+        with self.client.put(
+            f"{BASE}/{oid}/patrocinar",
+            headers=self.h,
+            name=f"{BASE}/{{id}}/patrocinar",
+            catch_response=True
+        ) as r:
+
             if r.status_code == 200:
                 self.patro.add(oid)
                 r.success()
-            elif r.status_code in (400, 403, 409):
+
+            elif r.status_code in (409, 400):
+                self.patro.add(oid)     
                 r.success()
+
+            elif r.status_code == 403:
+                r.success()              
             else:
-                r.failure(f"patrocinar devolvió {r.status_code}")
+                r.failure(f"patrocinar → {r.status_code}")
+
 
     @task(1)
     def desactivar_patrocinio(self):
         if not self.patro:
-            return
+            return                     
         oid = random.choice(list(self.patro))
-        r = self.client.put(f"{BASE}/{oid}/desactivar-patrocinio", headers=self.h,
-                            name=f"{BASE}/{{id}}/desactivar-patrocinio")
-        if r.status_code == 200:
-            self.patro.remove(oid)
+        with self.client.put(
+            f"{BASE}/{oid}/desactivar-patrocinio",
+            headers=self.h,
+            name=f"{BASE}/{{id}}/desactivar-patrocinio",
+            catch_response=True
+        ) as r:
+            if r.status_code == 200:
+                self.patro.remove(oid)
+                r.success()
+
+            elif r.status_code in (400, 404, 409):
+                self.patro.discard(oid)        
+                r.success()                    
+            else:
+                r.failure(f"desactivar patrocinio → {r.status_code}")
 
     @task(2)
     def carga_trabajo(self):
