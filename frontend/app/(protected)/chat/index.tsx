@@ -10,6 +10,7 @@ import ProtectedRoute from '@/security/ProtectedRoute';
 import defaultImage from "../../../assets/images/camionero.png";
 import defaultEmpImage from "../../../assets/images/empresa.jpg";
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from "expo-router";
 
 interface Chat {
   id: string;
@@ -40,7 +41,9 @@ function ChatList() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(15)).current;
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+  const { chatId } = useLocalSearchParams();
 
+  console.log("chatId", chatId?.toString())
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -132,15 +135,28 @@ function ChatList() {
     });
   };
 
+  useEffect(() => {
+    if (chatId && chats.length > 0) {
+      const selectedChat = chats.find(chat => chat.id === chatId);
+      if (selectedChat) {
+        console.log("chat" + selectedChat)
+        handleChatClick(selectedChat); // Selecciona el chat automáticamente
+      }
+    }
+  }, [chatId, chats]);
+
+  console.log(currentChat?.id)
+  console.log(currentChat)
   const handleChatClick = (chat: Chat) => {
     const otherUserId = chat.participants.find(participant => participant !== user?.userId.toString());
-    if (otherUserId && userDetails[otherUserId]) {
+    if (otherUserId && userDetails[otherUserId]||chatId) {
       setCurrentChat({
         ...chat,
         recipient: userDetails[otherUserId]
       });
     } else {
       setCurrentChat(chat);
+      
     }
   };
 

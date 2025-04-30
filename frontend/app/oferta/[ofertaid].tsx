@@ -274,7 +274,7 @@ export default function OfertaDetalleScreen() {
                                 onPress={async () => {
                                     const chatId = await startChat(user.userId, offerData.empresa?.usuario.id);
                                     if (chatId) {
-                                    router.push(`/chat`);
+                                        router.push(`/chat?chatId=${chatId}`)
                                     }
                                 }}
                                 >
@@ -583,7 +583,7 @@ export default function OfertaDetalleScreen() {
                                                               onPress={async () => {
                                                                 const chatId = await startChat(user.userId, offerData.camionero.usuario.id);
                                                                 if (chatId) {
-                                                                  router.push(`/chat`);
+                                                                    router.push(`/chat?chatId=${chatId}`)
                                                                 }
                                                               }}
                                                             >

@@ -152,7 +152,7 @@ const EmpresasLista = () => {
                   style={styles.contactButton}
                   onPress={async () => {
                     const chatId = await startChat(user.userId, empresa.usuario.id);
-                    if (chatId) router.push(`/chat`);
+                    if (chatId) router.push(`/chat?chatId=${chatId}`)
                   }}
                 >
                   <MaterialCommunityIcons name="message-text-outline" size={16} color="white" />

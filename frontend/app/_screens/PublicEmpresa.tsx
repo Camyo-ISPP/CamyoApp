@@ -150,7 +150,7 @@ const PublicEmpresa = ({ userId }) => {
                       onPress={async () => {
                         const chatId = await startChat(user.userId, empresa?.userId);
                         if (chatId) {
-                          router.push(`/chat`);
+                          router.push(`/chat?chatId=${chatId}`);
                         }
                       }}
                     >

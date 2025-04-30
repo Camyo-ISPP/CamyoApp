@@ -151,7 +151,7 @@ const PublicCamionero = ({ userId }) => {
                                         onPress={async () => {
                                             const chatId = await startChat(user.userId, user2.userId);
                                             if (chatId) {
-                                                router.push(`/chat`);
+                                                router.push(`/chat?chatId=${chatId}`)
                                             }
                                         }}
                                     >
