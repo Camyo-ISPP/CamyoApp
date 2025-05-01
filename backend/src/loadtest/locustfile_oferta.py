@@ -154,35 +154,6 @@ class OfertaUser(HttpUser):
                         name=f"{BASE}/{{id}}/rechazar")
 
     @task(1)
-    def patrocinar(self):
-        libres = [oid for oid in self.creadas
-                  if oid not in self.patro and self.creadas[oid].get("estado") == "ABIERTA"]
-        if not libres:
-            return
-
-        oid = random.choice(libres)
-        with self.client.put(
-            f"{BASE}/{oid}/patrocinar",
-            headers=self.h,
-            name=f"{BASE}/{{id}}/patrocinar",
-            catch_response=True
-        ) as r:
-
-            if r.status_code == 200:
-                self.patro.add(oid)
-                r.success()
-
-            elif r.status_code in (409, 400):
-                self.patro.add(oid)     
-                r.success()
-
-            elif r.status_code == 403:
-                r.success()              
-            else:
-                r.failure(f"patrocinar → {r.status_code}")
-
-
-    @task(1)
     def desactivar_patrocinio(self):
         if not self.patro:
             return                     

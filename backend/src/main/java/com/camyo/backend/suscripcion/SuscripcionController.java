@@ -43,30 +43,6 @@ public class SuscripcionController {
     }
 
     /**
-     * POST /suscripciones/{empresaId}?nivel=PREMIUM&duracion=30
-     */
-    @Operation(summary = "Asignar o cambiar suscripción de una empresa",
-               description = "Establece el plan (GRATIS, BASICO, PREMIUM) y la duración (días). Por defecto 30 si es BASICO/PREMIUM y no se pasa.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Suscripción asignada o modificada con éxito"),
-        @ApiResponse(responseCode = "404", description = "Empresa no encontrada")
-    })
-    @PostMapping("/{empresaId}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Suscripcion> asignarSuscripcion(
-            @PathVariable Integer empresaId,
-            @RequestParam("nivel") PlanNivel nivel,
-            @RequestParam(value = "duracion", required = false) Integer duracionDias) {
-
-        try {
-            Suscripcion suscripcionNueva = suscripcionService.asignarSuscripcion(empresaId, nivel, duracionDias);
-            return new ResponseEntity<>(suscripcionNueva, HttpStatus.CREATED);
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    /**
      * GET /suscripciones/nivel/{empresaId}
      */
     @Operation(summary = "Consultar nivel de suscripción de una empresa",
