@@ -34,7 +34,7 @@ export default function OfertaDetalleScreen() {
     const [offerData, setOfferData] = useState<any>(null);
     const [offerTrabajoData, setOfferTrabajoData] = useState<any>(null);
     const [offerCargaData, setOfferCargaData] = useState<any>(null);
-    const [offers, setOffers] = useState<any[]>([]);
+    const [offers, setOffers] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [loading2, setLoading2] = useState(true);
     const { ofertaid } = useLocalSearchParams();
@@ -50,13 +50,17 @@ export default function OfertaDetalleScreen() {
 
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
     const openCageKey = process.env.EXPO_PUBLIC_OPENCAGE_API_KEY;
-
-    const canPromoteNewOffer = () => {
-        const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
-        return !loading2 && activeOffersCount < rules.maxSponsoredOffers;
-    };
       
     const canCancelPromotedOffer = offerData ? offerData.promoted : false;
+    const canPromoteNewOffer = () => {
+        if (!offers) {
+            return false
+        }
+        else {
+            const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
+            return !loading2 && activeOffersCount < rules.maxSponsoredOffers;
+        }
+    };
 
     useEffect(() => {
         if (ofertaid) {
@@ -113,7 +117,8 @@ export default function OfertaDetalleScreen() {
         }
     }, [offerTrabajoData, offerCargaData]);
 
-    if (loading || loading2) {
+    
+    if (loading || loading2 ) {
         return (
             <View style={styles.loadingContainer}>
                 <MapLoader />
