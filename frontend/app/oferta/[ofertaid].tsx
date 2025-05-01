@@ -125,7 +125,7 @@ export default function OfertaDetalleScreen() {
     if (!offerData) {
         return (
             <View style={styles.container}>
-                <Text>No data available for this offer</Text>
+                <Text>No disponible.</Text>
             </View>
         );
     };
