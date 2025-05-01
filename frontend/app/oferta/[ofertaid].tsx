@@ -112,15 +112,13 @@ export default function OfertaDetalleScreen() {
         }
     }, [offerTrabajoData, offerCargaData]);
 
-    if (loading) {
-        if ((user && user.rol == "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA") && loading2) {
-            return (
-                <View style={styles.loadingContainer}>
-                    <MapLoader />
-                </View>
-            );
-        }
-    };
+    if (loading || !user || (user.rol === "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA" && loading2)) {
+        return (
+            <View style={styles.loadingContainer}>
+                <MapLoader />
+            </View>
+        );
+    }    
 
     if (!offerData) {
         return (
