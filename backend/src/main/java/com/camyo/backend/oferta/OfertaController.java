@@ -358,17 +358,6 @@ public class OfertaController {
         }
     }
     
-    
-    @PutMapping("/{ofertaId}/patrocinar")
-    public ResponseEntity<?> patrocinarOferta(@PathVariable Integer ofertaId) {
-        try {
-            ofertaService.patrocinarOferta(ofertaId);
-            return ResponseEntity.ok("Patrocinio activado correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    
     @PutMapping("/{ofertaId}/desactivar-patrocinio")
     public ResponseEntity<?> desactivarPatrocinio(@PathVariable Integer ofertaId) {
         try {
