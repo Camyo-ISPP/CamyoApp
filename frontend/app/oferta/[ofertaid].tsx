@@ -404,7 +404,7 @@ export default function OfertaDetalleScreen() {
                         <View style={styles.detailRow}>
                             <FontAwesome5 name="box" size={18} color="#0b4f6c" />
                             <Text style={styles.detalles}>
-                                <Text style={styles.detallesLabel}>Mercancía:</Text> {offerCargaData.mercancia} kg
+                                <Text style={styles.detallesLabel}>Mercancía:</Text> {offerCargaData.mercancia}
                             </Text>
                         </View>
 
