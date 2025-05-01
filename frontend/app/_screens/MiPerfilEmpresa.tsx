@@ -354,7 +354,7 @@ const MiPerfilEmpresa = () => {
                       </View>
                     </View>
                   )}
-
+                <View style={styles.upgradeButtonContainer}>
                   <TouchableOpacity
                     style={styles.mejorarPlanButton}
                     onPress={() => router.push(`/suscripcion`)}
@@ -363,8 +363,8 @@ const MiPerfilEmpresa = () => {
                     <Text style={styles.upgradeButtonText}>
                       {!canCreateNewOffer() || !canPromoteNewOffer() ? "Mejora tu plan aquí" : "Gestiona tu plan aquí"}
                     </Text>
-
                   </TouchableOpacity>
+                </View>
                 </View>
               </View>
 
@@ -747,6 +747,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  upgradeButtonContainer: {
+    width: 250,
+    minWidth: 250,
+  },
   mejorarPlanButton: {
     backgroundColor: '#0993A8FF',
     padding: 10,
@@ -754,6 +758,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   anunciosButton: {
     backgroundColor: '#0993A8FF',
@@ -797,6 +802,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     fontWeight: 'bold',
+    flexShrink: 1,
   },
   separator: {
     width: "100%",
