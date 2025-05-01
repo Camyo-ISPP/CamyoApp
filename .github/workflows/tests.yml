@@ -48,5 +48,5 @@ jobs:
           
       
        - name: Ejecutar tests
-         run:  mvn "-Dtest=!PagoControllerTests,!CamioneroServiceTests,!AuthServiceTest" test
+         run:  mvn "-Dtest=!PagoControllerTests,!CamioneroServiceTests,!AuthServiceTest" test         ## Excluded tests that need external keys, they are not included for security reasons
          working-directory: ./backend
