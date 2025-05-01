@@ -13,6 +13,7 @@ import { startChat } from "../(protected)/chat/services";
 import SuccessModal from "../_components/SuccessModal";
 import ListadoOfertasPublico from "../_components/ListadoOfertasPublico";
 import ResenaModal from "../_components/ResenaModal";
+import MapLoader from "@/app/_components/MapLoader";
 
 const PublicEmpresa = ({ userId }) => {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -21,7 +22,9 @@ const PublicEmpresa = ({ userId }) => {
 
   const [empresa, setEmpresa] = useState(null);
   const [offers, setOffers] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loadingUser, setLoadingUser] = useState<boolean>(true);
+  const [loadingResenas, setLoadingResenas] = useState<boolean>(true);
+  const [loadingOpenOffers, setLoadingOpenOffer] = useState<boolean>(false);
 
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [confirmDeleteModalVisible, setConfirmDeleteModalVisible] = useState(false);
@@ -49,6 +52,7 @@ const PublicEmpresa = ({ userId }) => {
 
     const fetchOpenOffers = async () => {
       try {
+        setLoadingOpenOffer(true);
         const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${userId}`);
         setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
         if (user && user.rol === 'CAMIONERO') {
@@ -57,17 +61,20 @@ const PublicEmpresa = ({ userId }) => {
       } catch (error) {
         console.error("Error al cargar las ofertas:", error);
       } finally {
-        setLoading(false);
+        setLoadingOpenOffer(false);
       }
     };
 
     const fetchUser = async () => {
       try {
+        setLoadingUser(true);
         const response = await axios.get(`${BACKEND_URL}/empresas/${userId}`);
         const unifiedData = unifyUserData(response.data)
         setEmpresa(unifiedData);
       } catch (error) {
         console.error("Error al cargar los datos de la empresa:", error);
+      } finally {
+        setLoadingUser(false);
       }
     };
 
@@ -77,6 +84,7 @@ const PublicEmpresa = ({ userId }) => {
 
   const fetchResenas = async () => {
     try {
+      setLoadingResenas(true);
       const response = await axios.get(`${BACKEND_URL}/resenas/comentado/${empresa?.userId}`);
       setResenas(response.data.sort((a, b) => (b.comentador?.id === user?.userId) - (a.comentador?.id === user?.userId)));
 
@@ -87,6 +95,8 @@ const PublicEmpresa = ({ userId }) => {
       setValoracionMedia(mediaResponse.data);
     } catch (error) {
       console.error("Error al cargar las reseñas:", error);
+    } finally {
+      setLoadingResenas(false);
     }
   };
 
@@ -115,6 +125,11 @@ const PublicEmpresa = ({ userId }) => {
     }
   }, [empresa]);
 
+  if (loadingUser || loadingOpenOffers || loadingResenas) return (
+    <View style={styles.loadingContainer}>
+      <MapLoader />
+    </View>
+  );
 
   return (
     <>
@@ -406,6 +421,13 @@ const styles = StyleSheet.create({
     paddingTop: 70,
     minHeight: "90%",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    // height: '100%',
+  },  
   card: {
     backgroundColor: colors.white,
     padding: 30,

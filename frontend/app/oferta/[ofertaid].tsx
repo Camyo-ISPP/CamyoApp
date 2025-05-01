@@ -436,21 +436,23 @@ export default function OfertaDetalleScreen() {
                         <View style={styles.detailRow}>
                             <FontAwesome5 name="clock" size={20} color="#0b4f6c" />
                             <Text style={styles.detalles}>
-                                <Text style={styles.detallesLabel}>Inicio:</Text> {formatDate(offerCargaData.inicio)}
+                                <Text style={styles.detallesLabel}>Fecha de salida:</Text> {formatDate(offerCargaData.inicio)}
                             </Text>
                         </View>
 
                         <View style={styles.detailRow}>
                             <FontAwesome5 name="calendar-minus" size={20} color="#0b4f6c" />
                             <Text style={styles.detalles}>
-                                <Text style={styles.detallesLabel}>Fin mínimo:</Text> {formatDate(offerCargaData.finMinimo)}
-                            </Text>
-                        </View>
-
-                        <View style={styles.detailRow}>
-                            <FontAwesome5 name="calendar-plus" size={20} color="#0b4f6c" />
-                            <Text style={styles.detalles}>
-                                <Text style={styles.detallesLabel}>Fin máximo:</Text> {formatDate(offerCargaData.finMaximo)}
+                                { offerCargaData.finMinimo === offerCargaData.finMaximo ? (
+                                    <>
+                                        <Text style={styles.detallesLabel}>Fecha de entrega:</Text> {formatDate(offerCargaData.finMinimo)}
+                                    </>
+                                    ) : (
+                                    <>
+                                        <Text style={styles.detallesLabel}>Fecha de entrega:</Text> Entre el {formatDate(offerCargaData.finMinimo)} y el {formatDate(offerCargaData.finMaximo)}
+                                    </>
+                                    )
+                                }
                             </Text>
                         </View>
 

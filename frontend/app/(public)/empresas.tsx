@@ -33,6 +33,24 @@ const EmpresasLista = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  const dynamicStyles = StyleSheet.create({
+    listContainer: {
+      width: (!user || user.ads) ? '70%' : '100%',
+      maxWidth: 1200,
+      alignSelf: 'center',
+      flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      justifyContent: 'space-around' as const,
+      paddingVertical: 20,
+    },
+    adsAndListContainer: {
+      flexDirection: 'row' as const,
+      width: '100%',
+      paddingHorizontal: 20,
+      justifyContent: (!user || user.ads) ? 'space-between' as const : 'center' as const,
+    },
+  });
+
   useEffect(() => {
     const fetchEmpresasData = async () => {
       try {
@@ -78,101 +96,101 @@ const EmpresasLista = () => {
           <Text style={styles.heroSubtitle}>Conoce a las empresas líderes en el sector</Text>
         </LinearGradient>
       </ImageBackground>
-      <View style={styles.adsAndListContainer}>
-    {/* Left Ad */}
-    {(!user || user.ads) && (
-      <View style={styles.adContainer}>
-        <Image
-          source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
-          style={styles.adImage}
-          resizeMode="cover"
-        />
-      </View>
-    )}
-      {/* Empresas List */}
-      <View style={styles.listContainer}>
-        {empresas.map((empresa) => (
-          <View key={empresa.id} style={styles.card}>
-            {/* Company Header */}
-            <View style={styles.cardHeader}>
-              <Image
-                source={empresa.usuario.foto ? { uri: `data:image/png;base64,${empresa.usuario.foto}` } : defaultImage}
-                style={styles.profileImage}
-              />
+      <View style={dynamicStyles.adsAndListContainer}>
+        {/* Left Ad */}
+        {(!user || user.ads) && (
+          <View style={styles.adContainer}>
+            <Image
+              source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
+              style={styles.adImage}
+              resizeMode="cover"
+            />
+          </View>
+        )}
+        {/* Empresas List */}
+        <View style={dynamicStyles.listContainer}>
+          {empresas.map((empresa) => (
+            <View key={empresa.id} style={styles.card}>
+              {/* Company Header */}
+              <View style={styles.cardHeader}>
+                <Image
+                  source={empresa.usuario.foto ? { uri: `data:image/png;base64,${empresa.usuario.foto}` } : defaultImage}
+                  style={styles.profileImage}
+                />
 
-              <View style={styles.headerTextContainer}>
-                <Text style={styles.companyName}>{empresa.usuario.nombre}</Text>
+                <View style={styles.headerTextContainer}>
+                  <Text style={styles.companyName}>{empresa.usuario.nombre}</Text>
 
-                <View style={styles.locationContainer}>
-                  <MaterialIcons name="location-on" size={16} color={colors.secondary} />
-                  <Text style={styles.locationText}>{empresa.usuario.localizacion}</Text>
-                </View>
-
-                {user && user.rol === "EMPRESA" && empresa.id === user.id && (
-                  <View style={styles.ownCompanyBadge}>
-                    <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
-                    <Text style={styles.ownCompanyText}>Tu empresa</Text>
+                  <View style={styles.locationContainer}>
+                    <MaterialIcons name="location-on" size={16} color={colors.secondary} />
+                    <Text style={styles.locationText}>{empresa.usuario.localizacion}</Text>
                   </View>
+
+                  {user && user.rol === "EMPRESA" && empresa.id === user.id && (
+                    <View style={styles.ownCompanyBadge}>
+                      <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
+                      <Text style={styles.ownCompanyText}>Tu empresa</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {/* Company Details */}
+              <View style={styles.detailsContainer}>
+                <DetailItem
+                  icon="globe"
+                  text={empresa.web}
+                  link
+                  label="Web"
+                />
+                <DetailItem
+                  icon="id-card"
+                  text={empresa.nif}
+                  label="NIF"
+                />
+                <DetailItem
+                  icon="phone"
+                  text={empresa.usuario.telefono}
+                  label="Teléfono"
+                />
+              </View>
+
+              {/* Actions */}
+              <View style={styles.actionsContainer}>
+                <TouchableOpacity
+                  style={styles.detailsButton}
+                  onPress={() => router.push(`/empresa/${empresa.id}`)}
+                >
+                  <MaterialCommunityIcons name="eye-outline" size={16} color="white" />
+                  <Text style={styles.buttonText}>Ver detalles</Text>
+                </TouchableOpacity>
+
+                {user && user.rol === "CAMIONERO" && (
+                  <TouchableOpacity
+                    style={styles.contactButton}
+                    onPress={async () => {
+                      const chatId = await startChat(user.userId, empresa.usuario.id);
+                      if (chatId) router.push(`/chat?chatId=${chatId}`);
+                    }}
+                  >
+                    <MaterialCommunityIcons name="message-text-outline" size={16} color="white" />
+                    <Text style={styles.buttonText}>Contactar</Text>
+                  </TouchableOpacity>
                 )}
               </View>
             </View>
-
-            {/* Company Details */}
-            <View style={styles.detailsContainer}>
-              <DetailItem
-                icon="globe"
-                text={empresa.web}
-                link
-                label="Web"
-              />
-              <DetailItem
-                icon="id-card"
-                text={empresa.nif}
-                label="NIF"
-              />
-              <DetailItem
-                icon="phone"
-                text={empresa.usuario.telefono}
-                label="Teléfono"
-              />
-            </View>
-
-            {/* Actions */}
-            <View style={styles.actionsContainer}>
-              <TouchableOpacity
-                style={styles.detailsButton}
-                onPress={() => router.push(`/empresa/${empresa.id}`)}
-              >
-                <MaterialCommunityIcons name="eye-outline" size={16} color="white" />
-                <Text style={styles.buttonText}>Ver detalles</Text>
-              </TouchableOpacity>
-
-              {user && user.rol === "CAMIONERO" && (
-                <TouchableOpacity
-                  style={styles.contactButton}
-                  onPress={async () => {
-                    const chatId = await startChat(user.userId, empresa.usuario.id);
-                    if (chatId) router.push(`/chat?chatId=${chatId}`)
-                  }}
-                >
-                  <MaterialCommunityIcons name="message-text-outline" size={16} color="white" />
-                  <Text style={styles.buttonText}>Contactar</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+          ))}
+        </View>
+        {(!user || user.ads) && (
+          <View style={styles.adContainer}>
+            <Image
+              source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
+              style={styles.adImage}
+              resizeMode="cover"
+            />
           </View>
-        ))}
+        )}
       </View>
-      {(!user || user.ads) && (
-      <View style={styles.adContainer}>
-        <Image
-          source={require('@/assets/images/truck_mockup_ad.jpg')} // Replace with your left ad image path
-          style={styles.adImage}
-          resizeMode="cover"
-        />
-      </View>
-    )}
-</View>
 
       <WebFooter />
     </ScrollView>
@@ -224,7 +242,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.white
-},
+  },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -268,14 +286,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
-  },
-  listContainer: {
-    width: '70%',
-    alignSelf: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
   },
   card: {
     backgroundColor: 'white',
@@ -422,23 +432,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
   },
-  adsAndListContainer: {
-    flexDirection: 'row', // Arrange ads and list in a row
-    width: '100%',
-    paddingHorizontal: 20,
-},
-adContainer: {
-  marginTop: 20,
+  adContainer: {
+    marginTop: 20,
     width: '15%', // Adjust width of the ad container
     height: "95%",
 
-},
-adImage: {
-  width: '100%', // Adjust width as needed
-  height: '95%', // Adjust height as needed
+  },
+  adImage: {
+    width: '100%', // Adjust width as needed
+    height: '95%', // Adjust height as needed
 
 
-},
+  },
 });
 
 export default EmpresasLista;

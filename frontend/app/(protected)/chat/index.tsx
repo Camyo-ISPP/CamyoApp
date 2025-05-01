@@ -43,7 +43,7 @@ function ChatList() {
   const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
   const { chatId } = useLocalSearchParams();
 
-  console.log("chatId", chatId?.toString())
+  
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -145,8 +145,7 @@ function ChatList() {
     }
   }, [chatId, chats]);
 
-  console.log(currentChat?.id)
-  console.log(currentChat)
+  
   const handleChatClick = (chat: Chat) => {
     const otherUserId = chat.participants.find(participant => participant !== user?.userId.toString());
     if (otherUserId && userDetails[otherUserId]||chatId) {

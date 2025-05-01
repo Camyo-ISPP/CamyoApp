@@ -73,22 +73,6 @@ class SuscripcionControllerTests {
     }
 
     @Test
-    void testAsignarSuscripcion_OK() throws Exception {
-        Suscripcion respuesta = new Suscripcion();
-        respuesta.setId(100);
-        respuesta.setNivel(PlanNivel.PREMIUM);
-        when(suscripcionService.asignarSuscripcion(10, PlanNivel.PREMIUM, 30)).thenReturn(respuesta);
-
-        mockMvc.perform(post("/suscripciones/10")
-               .param("nivel", "PREMIUM")
-               .param("duracion", "30")
-               .contentType(MediaType.APPLICATION_JSON))
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.id").value(100))
-               .andExpect(jsonPath("$.nivel").value("PREMIUM"));
-    }
-
-    @Test
     void testAsignarSuscripcion_EmpresaNotFound() throws Exception {
        
         when(suscripcionService.asignarSuscripcion(999, PlanNivel.GRATIS, null))

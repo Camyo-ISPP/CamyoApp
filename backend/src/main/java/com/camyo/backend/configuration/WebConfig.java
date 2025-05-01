@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 
         registry.addMapping("/**")
-                .allowedOrigins("https://ispp-2425-g5.web.app", "https://ispp-2425-g5-s2-fafe6.web.app", "https://camyo-s3-9fe1b.web.app", "http://localhost:8081")
+                .allowedOrigins("https://ispp-2425-g5.web.app", "https://ispp-2425-g5-s2-fafe6.web.app", "https://camyo-s3-9fe1b.web.app", "https://camyo-app-ppl.web.app", "http://localhost:8081")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);
