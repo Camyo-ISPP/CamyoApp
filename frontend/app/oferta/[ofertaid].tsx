@@ -1,7 +1,7 @@
-import { Text, View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Image, ScrollView, Alert, Modal, Dimensions } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { FontAwesome5, MaterialIcons, Entypo, FontAwesome } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons, Entypo, FontAwesome, AntDesign } from "@expo/vector-icons";
 import colors from "frontend/assets/styles/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,29 +11,53 @@ import BackButton from "../_components/BackButton";
 import { RouteMap } from "../_components/Maps";
 import MapLoader from "../_components/MapLoader";
 import { startChat } from "../(protected)/chat/services";
+import { LinearGradient } from "expo-linear-gradient";
+import { usePayment } from "@/contexts/PaymentContext";
+import axios from "axios";
+import SuccessModal from "../_components/SuccessModal";
+import SubscriptionModal from "../_components/SubscriptionModal";
+import { useSubscriptionRules } from '../../utils/useSubscriptionRules';
+
+const { width } = Dimensions.get('window');
 
 const formatDate = (fecha: string) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" } as const;
     return new Date(fecha).toLocaleDateString("es-ES", opciones);
 };
 
+
+
 export default function OfertaDetalleScreen() {
     const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+    const { rules, loading: subscriptionLoading } = useSubscriptionRules();
     const [offerData, setOfferData] = useState<any>(null);
     const [offerTrabajoData, setOfferTrabajoData] = useState<any>(null);
     const [offerCargaData, setOfferCargaData] = useState<any>(null);
+    const [offers, setOffers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loading2, setLoading2] = useState(true);
     const { ofertaid } = useLocalSearchParams();
     const router = useRouter(); // Para navegar entre pantallas
     const { user, userToken, login, logout } = useAuth();
     const [successModalVisibleCam, setSuccessModalVisibleCam] = useState(false);
     const [successModalVisibleEmp, setSuccessModalVisibleEmp] = useState(false);
+    const { setId, setOfertaId } = usePayment();
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
+
+    const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
+    const [offerToCancel, setOfferToCancel] = useState<number | null>(null);
 
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
     const openCageKey = process.env.EXPO_PUBLIC_OPENCAGE_API_KEY;
 
-    
+    const canPromoteNewOffer = () => {
+        const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
+        return offerData && !offerData.promoted && activeOffersCount < rules.maxSponsoredOffers;
+    };
+      
+    const canCancelPromotedOffer = offerData ? offerData.promoted : false;
+
     useEffect(() => {
         if (ofertaid) {
             const fetchData = async () => {
@@ -66,26 +90,68 @@ export default function OfertaDetalleScreen() {
                 }
             };
 
-            fetchData();
+            fetchData();            
         }
     }, [ofertaid]);
 
-    if (loading) {
+    useEffect(() => {
+        const fetchMyOffersData = async () => {
+            try {
+                const response = await axios.get(`${BACKEND_URL}/ofertas/empresa/${user.id}`);
+                setOffers(response.data.filter((offer: any) => offer.estado === "ABIERTA"));
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                setLoading2(false);
+            }
+        };
+        if(user && user.rol == "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA"){
+            fetchMyOffersData();
+        }
+    }, [offerTrabajoData, offerCargaData]);
+
+    if (loading || !user || (user.rol === "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA" && loading2)) {
         return (
             <View style={styles.loadingContainer}>
                 <MapLoader />
             </View>
         );
-    };
+    }    
 
     if (!offerData) {
         return (
             <View style={styles.container}>
-                <Text>No data available for this offer</Text>
+                <Text>No disponible.</Text>
             </View>
         );
     };
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}`);
+            const data = await response.json();
+            if (data.estado === "BORRADOR") {
+                router.push("/forbidden")
+                return;
+            }
+            setOfferData(data);
+            if (data.tipoOferta === "TRABAJO") {
+                const trabajoResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/trabajo`);
+                const trabajoData = await trabajoResponse.json();
+                setOfferTrabajoData(trabajoData);
+            } else if (data.tipoOferta === "CARGA") {
+                const cargaResponse = await fetch(`${BACKEND_URL}/ofertas/${ofertaid}/carga`);
+                const cargaText = await cargaResponse.text();
+                const cargaData = cargaText ? JSON.parse(cargaText) : null;
+                setOfferCargaData(cargaData);
+            }
 
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleSolicitarOferta = async () => {
 
         try {
@@ -211,6 +277,42 @@ export default function OfertaDetalleScreen() {
         }
     };
 
+    const promoteOfferCheckout = (ofertaId: number) => {
+        setId("PATROCINAR");
+        setOfertaId(ofertaId);
+        router.push("/pago/checkout");
+    };
+    
+    const handleCancelPrompt = (ofertaId: number) => {
+        setOfferToCancel(ofertaId);
+        setShowCancelConfirmation(true);
+    };
+    
+    const confirmUnpromote = async () => {
+        setShowCancelConfirmation(false);
+        if (offerToCancel) {
+            await unpromoteOffer(offerToCancel);
+        }
+    };
+    
+    const unpromoteOffer = async (ofertaId: number | null) => {
+        try {
+          const response = await axios.put(
+            `${BACKEND_URL}/ofertas/${ofertaId}/desactivar-patrocinio`,
+            {},
+            { headers: { Authorization: `Bearer ${userToken}` } }
+          );
+    
+          if (response.status === 200) {
+            setSuccessModalVisible(true);
+            await fetchData();
+            setTimeout(() => setSuccessModalVisible(false), 2000);
+          }
+        } catch (err) {
+          console.error("Error al cancelar patrocinio:", err);
+        }
+      };
+
     const renderOfferCard = () => {
         return (
             <View style={[
@@ -253,9 +355,34 @@ export default function OfertaDetalleScreen() {
 
                     <View style={{ alignItems: "flex-end" }}>
                         {user && user.rol == "EMPRESA" && offerData.empresa.id === user.id ? (
-                            <View style={styles.ownOfferBadgeAlt}>
-                                <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
-                                <Text style={styles.ownOfferTextAlt}>Tu Oferta</Text>
+                            <View style={styles.offerActions}>
+                                {offerData.estado === "ABIERTA" && offerData.promoted ? (
+                                    canCancelPromotedOffer && (
+                                    <TouchableOpacity
+                                    style={[styles.actionButton, styles.unpromoteButton]}
+                                    onPress={() => handleCancelPrompt(offerData.id)}
+                                    >
+                                    <AntDesign name="closecircleo" size={14} color={colors.white} />
+                                    <Text style={styles.actionButtonText}>Cancelar</Text>
+                                    </TouchableOpacity>
+                                    )
+                                ) : offerData.estado === "ABIERTA" && canPromoteNewOffer() ? (
+                                    <TouchableOpacity onPress={() => promoteOfferCheckout(offerData.id)}>
+                                    <LinearGradient
+                                        colors={['#D4AF37', '#F0C674', '#B8860B', '#F0C674']}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={[styles.actionButton]}
+                                    >
+                                        <AntDesign name="star" size={14} color={colors.white} />
+                                        <Text style={styles.actionButtonText}>Patrocinar</Text>
+                                    </LinearGradient>
+                                    </TouchableOpacity>
+                                ) : null}
+                                <View style={styles.ownOfferBadgeAlt}>
+                                    <MaterialCommunityIcons name="check-decagram" size={16} color="white" />
+                                    <Text style={styles.ownOfferTextAlt}>Tu Oferta</Text>
+                                </View>
                             </View>
                         ) : (
                             <TouchableOpacity
@@ -505,6 +632,12 @@ export default function OfertaDetalleScreen() {
 
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
+                                            <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {item.usuario.localizacion}</Text>
+                                            <Text style={styles.info}>
+                                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                {item.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                            </Text>
+                                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {item.experiencia} años</Text>                                        
                                         </View>
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                             <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
@@ -538,6 +671,12 @@ export default function OfertaDetalleScreen() {
 
                                                 <View style={{ flex: 1 }}>
                                                     <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
+                                                    <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {item.usuario.localizacion}</Text>
+                                                    <Text style={styles.info}>
+                                                        <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                        {item.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                                    </Text>
+                                                    <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {item.experiencia} años</Text>    
                                                 </View>
                                                 <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                                     <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
@@ -573,25 +712,33 @@ export default function OfertaDetalleScreen() {
                                     />
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.camTitle}>{offerData.camionero.usuario.nombre}</Text>
+                                        <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {offerData.camionero.usuario.localizacion}</Text>
+                                            <Text style={styles.info}>
+                                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                {offerData.camionero.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                            </Text>
+                                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {offerData.camionero.experiencia} años</Text>                                        
                                     </View>
                                     <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                         <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${offerData.camionero.id}`)}>
                                             <MaterialCommunityIcons name="eye" size={15} color="white" />
                                             <Text style={styles.buttonText}> Ver Detalles</Text>
                                         </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                                              style={styles.publishButton}
-                                                              onPress={async () => {
-                                                                const chatId = await startChat(user.userId, offerData.camionero.usuario.id);
-                                                                if (chatId) {
-                                                                    router.push(`/chat?chatId=${chatId}`)
-                                                                }
-                                                              }}
-                                                            >
-                                                              <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
-                                                              <Text style={styles.publishButtonText}>Contactar</Text>
-                                                            </TouchableOpacity>
+                                        {/* Botón "Iniciar chat" solo si el usuario tiene rol "empresa" */}
+                                        {user && user.rol == "EMPRESA" && (
+                                            <TouchableOpacity
+                                                style={styles.chatButton}
+                                                onPress={async () => {
+                                                    const chatId = await startChat(user.userId, offerData.camionero.id);
+                                                    if (chatId) {
+                                                        router.push(`/chat`);
+                                                    }
+                                                }}
+                                            >
+                                                <FontAwesome name="comments" size={16} color="white" style={styles.chatIcon} />
+                                                <Text style={styles.chatButtonText}>Contactar</Text>
+                                            </TouchableOpacity>
+                                        )}
                                     </View>
                                 </View>
                             </View>
@@ -607,6 +754,12 @@ export default function OfertaDetalleScreen() {
 
                                         <View style={{ flex: 1 }}>
                                             <Text style={styles.camTitle}>{item.usuario.nombre}</Text>
+                                            <Text style={styles.info}><MaterialIcons name="location-pin" size={18} color={colors.primary} /> {item.usuario.localizacion}</Text>
+                                            <Text style={styles.info}>
+                                                <FontAwesome5 name="truck" size={18} color={colors.primary} /> Licencias:{" "}
+                                                {item.licencias.map(licencia => licencia.replace("_", "+")).join(", ")}
+                                            </Text>
+                                            <Text style={styles.info}><FontAwesome5 name="briefcase" size={18} color={colors.primary} />  Experiencia: {item.experiencia} años</Text>                                        
                                         </View>
                                         <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
                                             <TouchableOpacity style={styles.button} onPress={() => router.push(`/camionero/${item.id}`)}>
@@ -621,8 +774,21 @@ export default function OfertaDetalleScreen() {
                     )
                 ) : (<></>)
                 }
+            <SuccessModal
+                isVisible={successModalVisible}
+                onClose={() => setSuccessModalVisible(false)}
+                message={offerToCancel ? "¡Patrocinio cancelado con éxito!" : "¡Oferta patrocinada con éxito!"}
+            />
 
+            <SubscriptionModal
+                visible={showCancelConfirmation}
+                onConfirm={confirmUnpromote}
+                onCancel={() => setShowCancelConfirmation(false)}
+                title="¿Cancelar patrocinio?"
+                message="Al cancelar el patrocinio, la oferta perderá visibilidad destacada. El importe abonado no será reembolsado. ¿Deseas continuar?"
+            />
             </View>
+            
         );
     };
 
@@ -867,7 +1033,6 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 14,
         borderRadius: 20,
-        marginRight: 30,
     },
     ownOfferTextAlt: {
         color: "white",
@@ -1007,13 +1172,71 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
         elevation: 3,
         marginTop:10,
-      },
-      plusIcon: {
+    },
+    plusIcon: {
         marginRight: 6,
-      },
-      publishButtonText: {
+    },
+    publishButtonText: {
         color: "#fff",
         fontSize: 13,
         fontWeight: "bold",
-      },
+    },
+    info: {
+        fontSize: 16,
+        color: colors.darkGray,
+        marginVertical: 4,
+    },
+    chatButtonText: {
+        color: colors.white,
+        fontWeight: "bold",
+    },
+    chatButton: {
+        backgroundColor: '#0993A8FF',
+        color: colors.white,
+        paddingLeft: 5,
+        paddingRight: 5,
+        marginLeft: "2%",
+        marginTop: 5,
+        flexDirection: "row",
+        flexWrap: "nowrap",
+        height: 40,
+        width: 150,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    chatIcon: {
+        marginRight: 8,
+        marginBottom: 4,
+    },
+    offerActions: {
+        flexDirection: width < 768 ? 'row' : 'column',
+        justifyContent: 'center',
+        gap: 8,
+        width: width < 768 ? '100%' : 120,
+        marginTop: width < 768 ? 10 : 0,
+    },
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "center",
+        width: width < 768 ? '48%' : '100%',
+        paddingVertical: 9,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        gap: 8,
+        marginTop: 5,
+    },
+    actionButtonText: {
+        color: colors.white,
+        fontSize: width < 768 ? 12 : 14,
+        textAlign: "left",
+        fontWeight: '500',
+    },
+    promoteButton: {
+        backgroundColor: '#D4AF37',
+    },
+    unpromoteButton: {
+        backgroundColor: colors.red,
+    },
 });

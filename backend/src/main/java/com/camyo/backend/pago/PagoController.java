@@ -86,7 +86,7 @@ public class PagoController {
                         }
                 };
 
-                if (pago.getCompra()==Compra.PATROCINAR) {
+                if (pago.getCompra()==Compra.PATROCINAR && cliente.getAuthority().getAuthority().equals("EMPRESA")) {
                         // Create a PaymentIntent and send its client secret to the client
                         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                                 .setAmount(999L)
@@ -103,7 +103,7 @@ public class PagoController {
 
                         secret = paymentIntent.getClientSecret();
 
-                } else if (suscripciones.contains(pago.getCompra())){
+                } else if (suscripciones.contains(pago.getCompra()) && cliente.getAuthority().getAuthority().equals("EMPRESA")){
 
                         SubscriptionCreateParams.PaymentSettings paymentSettings = SubscriptionCreateParams.PaymentSettings
                                 .builder()
