@@ -202,7 +202,7 @@ public class PagoControllerTests {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
- /* 
+
     @Test
     void debeModificarAnunciosIntegrada() throws Exception {
         Compra compra = Compra.ELIMINAR_ANUNCIOS;
@@ -245,7 +245,7 @@ public class PagoControllerTests {
                     .andExpect(status().isOk())
                     .andExpect(content().string("mock-stripe-api-key"));
         }
-    }*/
+    }
 
 
     //Testing para crear subscripciones
@@ -403,7 +403,7 @@ public class PagoControllerTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(requestDto)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Patrocinio aplicado con éxito"));
+                    .andExpect(content().json(objectMapper.writeValueAsString(u1)));
         }
     }
 
@@ -430,10 +430,10 @@ public class PagoControllerTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(requestDto)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Suscripción aplicada con éxito"));
+                    .andExpect(content().json(objectMapper.writeValueAsString(u1)));
         }
     }
-/*
+
     @Test
     void debeAplicaEliminarAnunciosMock() throws Exception { 
         RequestDTO requestDto = new RequestDTO();
@@ -456,9 +456,9 @@ public class PagoControllerTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(requestDto)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("Anuncios eliminados correctamente"));
+                    .andExpect(content().json(objectMapper.writeValueAsString(u1)));
         }
-    } */
+    } 
 
     @Test
     void debeFallarAplicarCompraPorIntent() throws Exception { 
@@ -485,7 +485,7 @@ public class PagoControllerTests {
     }
 
     @Test
-    void debeFallarAplicarCompraPorPermiso() throws Exception { 
+    void debeFallarAplicarCompraPorFaltaDeInformación() throws Exception { 
         RequestDTO requestDto = new RequestDTO();
         requestDto.setIntent("client_secret");
         requestDto.setCompra(Compra.PATROCINAR);
@@ -493,7 +493,7 @@ public class PagoControllerTests {
         PaymentIntent mockPaymentIntent = Mockito.mock(PaymentIntent.class);
 
         when(this.usuarioService.obtenerUsuarioActual()).thenReturn(u1);
-        when(mockPaymentIntent.getStatus()).thenReturn("succeeded");//real state of a intent
+        when(mockPaymentIntent.getStatus()).thenReturn("succeeded"); //real state of a intent
 
         try (
             MockedStatic<PaymentIntent> paymentIntentStatic = mockStatic(PaymentIntent.class);
