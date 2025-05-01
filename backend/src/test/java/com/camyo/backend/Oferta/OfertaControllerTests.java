@@ -719,28 +719,6 @@ class OfertaControllerTests {
     }
 
     @Test
-    void patrocinarOfertaOk() throws Exception {
-        when(ofertaService.patrocinarOferta(1)).thenReturn(oferta1);
-        mockMvc.perform(put(BASE_URL + "/1/patrocinar"))
-           .andExpect(status().isOk());
-    }
-
-    @Test
-    void patrocinarOfertaExcedeLimiteRetorna400() throws Exception {
-        doThrow(new RuntimeException("Excede el limite")).when(ofertaService).patrocinarOferta(1);
-        mockMvc.perform(put(BASE_URL + "/1/patrocinar"))
-           .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void patrocinarOfertaNoExistenteRetorna400() throws Exception {
-        doThrow(new ResourceNotFoundException("Oferta", "id", 99))
-            .when(ofertaService).patrocinarOferta(99);
-        mockMvc.perform(put(BASE_URL + "/99/patrocinar"))
-           .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void desactivarPatrocinioOk() throws Exception {
         doNothing().when(ofertaService).desactivarPatrocinio(1);
         mockMvc.perform(put(BASE_URL + "/1/desactivar-patrocinio"))

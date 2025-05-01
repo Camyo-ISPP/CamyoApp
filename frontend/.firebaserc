@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "camyo-s3-9fe1b",
+    "default": "camyo-app-ppl",
     "camyo-s3": "camyo-s3-9fe1b"
   },
   "targets": {},

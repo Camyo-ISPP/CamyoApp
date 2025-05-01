@@ -195,7 +195,6 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
         } else {
             setSelectedOfertaType(type);
         }
-        handleSearch();
     };
 
     const toggleLicenciaFilter = (licencia: string) => {

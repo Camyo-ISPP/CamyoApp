@@ -20,6 +20,7 @@ const CrearOfertaScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [successModalVisibleD, setSuccessModalVisibleD] = useState(false);
   const { rules, loading: rulesLoading } = useSubscriptionRules();
   const [offers, setOffers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -618,9 +619,9 @@ const CrearOfertaScreen = () => {
       if (response.status === 201) {
         setErrorMessage("")
 
-        setSuccessModalVisible(true);
+        setSuccessModalVisibleD(true);
         setTimeout(() => {
-          setSuccessModalVisible(false);
+          setSuccessModalVisibleD(false);
           router.replace("/miperfil");
         }, 1000);
       }
@@ -723,8 +724,8 @@ const CrearOfertaScreen = () => {
           {renderInput("Descripción", "notas", <FontAwesome5 name="align-left" size={20} />, "default", false, true)}
           {renderInput("Sueldo (€)", "sueldo", <FontAwesome5 name="money-bill-wave" size={20} />, "numeric")}
           
+          <Text style={styles.inputLabel}>{"Localización"}</Text>
           <CityPicker
-            label="Localización"
             field="localizacion"
             icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
             formData={formData}
@@ -758,8 +759,8 @@ const CrearOfertaScreen = () => {
           {/* Campos dinámicos según el tipo de oferta */}
           {tipoOferta === "TRABAJO" ? (
             <>
+              <Text style={styles.inputLabel}>{"Fecha de incorporación"}</Text>
               <DatePicker
-                label="Fecha de incorporación"
                 value={formData.fechaIncorporacion}
                 onChange={(date) => handleInputChange("fechaIncorporacion", date)}
                 icon={<FontAwesome5 name="calendar-check" size={20} color={colors.primary} />}
@@ -793,16 +794,16 @@ const CrearOfertaScreen = () => {
               {renderInput("Mercancía", "mercancia", <FontAwesome5 name="box" size={20} />)}
               {renderInput("Peso (kg)", "peso", <FontAwesome5 name="weight" size={20} />, "numeric")}
 
+              <Text style={styles.inputLabel}>{"Origen"}</Text>
               <CityPicker
-                label="Origen"
                 field="origen"
                 icon={<FontAwesome5 name="map-marker-alt" size={20} color={colors.primary} />}
                 formData={formData}
                 handleInputChange={handleInputChange}
               />
               
+              <Text style={styles.inputLabel}>{"Destino"}</Text>
               <CityPicker
-                label="Destino"
                 field="destino"
                 icon={<FontAwesome5 name="map-marker" size={20} color={colors.primary} />}
                 formData={formData}
@@ -811,22 +812,22 @@ const CrearOfertaScreen = () => {
               
               {renderInput("Distancia (km)", "distancia", <FontAwesome5 name="road" size={20} />, "numeric")}
 
+              <Text style={styles.inputLabel}>{"Fecha de salida"}</Text>
               <DatePicker
-                label="Fecha de inicio"
                 value={formData.inicio}
                 onChange={(date) => handleInputChange("inicio", date)}
                 icon={<FontAwesome5 name="stopwatch" size={20} color={colors.primary} />}
               />
               
+              <Text style={styles.inputLabel}>{"Fecha de entrega mínima"}</Text>
               <DatePicker
-                label="Fin mínimo"
                 value={formData.finMinimo}
                 onChange={(date) => handleInputChange("finMinimo", date)}
                 icon={<FontAwesome5 name="calendar-minus" size={20} color={colors.primary} />}
               />
-              
+
+              <Text style={styles.inputLabel}>{"Fecha de entrega máxima"}</Text>
               <DatePicker
-                label="Fin máximo"
                 value={formData.finMaximo}
                 onChange={(date) => handleInputChange("finMaximo", date)}
                 icon={<FontAwesome5 name="calendar-plus" size={20} color={colors.primary} />}
@@ -862,6 +863,11 @@ const CrearOfertaScreen = () => {
             isVisible={successModalVisible}
             onClose={() => setSuccessModalVisible(false)}
             message="¡Oferta creada con éxito!"
+          />
+          <SuccessModal
+            isVisible={successModalVisibleD}
+            onClose={() => setSuccessModalVisibleD(false)}
+            message="¡Borrador creado con éxito!"
           />
         </View>
       </ScrollView>

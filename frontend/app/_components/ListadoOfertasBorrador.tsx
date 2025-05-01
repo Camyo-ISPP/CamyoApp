@@ -38,10 +38,7 @@ const ListadoOfertasBorrador = ({ data }: { data: any[] }) => {
                   </View>
 
                   <View style={styles.detailRow}>
-                    <View style={[
-                      styles.offerDetailsTagBase,
-                      item.tipoOferta.toLowerCase() === 'trabajo' ? styles.offerDetailsTagWork : styles.offerDetailsTagLoad
-                    ]}>
+                    <View style={styles.offerDetailsTagBase}>
                       <MaterialIcons name="work-outline" size={12} color={colors.white} />
                       <Text style={styles.detailText}>{item.tipoOferta}</Text>
                     </View>
@@ -206,20 +203,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   offerDetailsTagBase: {
+    backgroundColor: colors.secondary,
     flexDirection: "row",
     borderRadius: 12,
     paddingVertical: 5,
     paddingHorizontal: 8,
     alignItems: "center",
   },
-  offerDetailsTagWork: {
-    backgroundColor: '#6C9BCF',
-  },
-  offerDetailsTagLoad: {
-    backgroundColor: '#D7B373',
-  },
   offerDetailsTagLicense: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.secondary,
     flexDirection: "row",
     borderRadius: 12,
     paddingVertical: 5,
@@ -227,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   offerDetailsTagExperience: {
-    backgroundColor: colors.green,
+    backgroundColor: colors.secondary,
     flexDirection: "row",
     borderRadius: 12,
     paddingVertical: 5,
@@ -281,7 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.red,
   },
   detailsButton: {
-    backgroundColor: colors.green,
+    backgroundColor: colors.primary,
   },
   modalBackground: {
     flex: 1,

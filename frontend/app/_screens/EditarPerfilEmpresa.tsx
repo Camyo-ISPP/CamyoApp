@@ -115,6 +115,20 @@ const EditarPerfilEmpresa = () => {
       setErrorMessage("El número de teléfono debe tener 9 dígitos.");
       return;
     }
+    const telefono = formData.telefono;
+    const tresPrimeros = parseInt(telefono.substring(0, 3), 10);
+    const excepciones = [800, 803, 806, 807, 900, 901, 902];
+    if (
+      !(
+        (tresPrimeros >= 600 && tresPrimeros <= 749) ||
+        (tresPrimeros >= 810 && tresPrimeros <= 889) ||
+        (tresPrimeros >= 910 && tresPrimeros <= 989) ||
+        excepciones.includes(tresPrimeros)
+      )
+    ) {
+      setErrorMessage("El número de teléfono no pertenece a un rango válido.");
+      return;
+    }
 
     // Validación de la localización
     if (!formData.localizacion) {
@@ -158,6 +172,53 @@ const EditarPerfilEmpresa = () => {
     if (!/^[A-HJNPQRSUVW]\d{7}\d$/.test(formData.nif.toUpperCase())) {
       setErrorMessage("El formato del NIF de empresa no es válido.");
       return;
+    }
+    const primera = formData.nif.charAt(0);
+    if (
+      (primera >= '0' && primera <= '9') ||
+      (primera >= 'K' && primera <= 'M') ||
+      (primera === 'X' || primera === 'Y' || primera === 'Z')
+    ) {
+      let numero = formData.nif.slice(0, 8).replace("X", "0").replace("Y", "1").replace("Z", "2");
+      const letra = formData.nif.charAt(8);
+      const letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+      if (!/^\d+$/.test(numero)) {
+        setErrorMessage("El número del NIF no es válido.");
+        return;
+      }
+      const index = parseInt(numero, 10) % 23;
+      if (letra !== letras.charAt(index)) {
+        setErrorMessage("La letra del NIF no es válida.");
+        return;
+      }
+    } else {
+      const letrasControl = "JABCDEFGHI";
+      const cuerpo = formData.nif.substring(1, 8);
+      if (!/^\d{7}$/.test(cuerpo)) {
+        setErrorMessage("El formato del NIF de empresa no es válido.");
+        return;
+      }
+      let sumaPares = 0;
+      for (let i = 1; i < cuerpo.length; i += 2) {
+        sumaPares += parseInt(cuerpo.charAt(i), 10);
+      }
+      let sumaImpares = 0;
+      for (let i = 0; i < cuerpo.length; i += 2) {
+        const doble = (parseInt(cuerpo.charAt(i), 10) * 2).toString();
+        for (let j = 0; j < doble.length; j++) {
+          sumaImpares += parseInt(doble.charAt(j), 10);
+        }
+      }
+      const total = sumaPares + sumaImpares;
+      const numeroControl = (10 - (total % 10)) % 10;
+      const controlChar = formData.nif.charAt(8);
+      if (
+        parseInt(controlChar, 10) !== numeroControl &&
+        controlChar !== letrasControl.charAt(numeroControl)
+      ) {
+        setErrorMessage("El código de control del NIF no es válido.");
+        return;
+      }
     }
 
     // Datos del usuario

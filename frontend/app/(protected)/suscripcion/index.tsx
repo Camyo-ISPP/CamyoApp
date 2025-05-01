@@ -21,6 +21,7 @@ const SubscriptionPlans = () => {
     const [isAuthLoaded, setIsAuthLoaded] = useState(false);
     const [isUserLoading, setIsUserLoading] = useState(true);
     const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+    const [activeSubscriptionId, setActiveSubscriptionId] = useState<number | null>(null);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [loadingPlan, setLoadingPlan] = useState<boolean>(true);
@@ -43,12 +44,19 @@ const SubscriptionPlans = () => {
             if (!user?.id || !userToken) return;
 
             try {
-                const response = await axios.get(`${BACKEND_URL}/suscripciones/nivel/${user.id}`, {
+                const responseLevel = await axios.get(`${BACKEND_URL}/suscripciones/nivel/${user.id}`, {
                     headers: {
                         Authorization: `Bearer ${userToken}`,
                     },
                 });
-                setCurrentPlan(response.data);
+                setCurrentPlan(responseLevel.data);
+
+                const responseSubscription = await axios.get(`${BACKEND_URL}/suscripciones/activa/${user.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                    },
+                });
+                setActiveSubscriptionId(responseSubscription.data.id);
             } catch (error) {
                 console.error("Error al obtener el plan de suscripción:", error);
                 setCurrentPlan("GRATIS");
@@ -68,7 +76,7 @@ const SubscriptionPlans = () => {
 
     }, [id])
 
-    if (!isAuthLoaded) {
+    if (!isAuthLoaded || loadingPlan) {
         return (
             <View style={styles.loadingContainer}>
                 <MapLoader />
@@ -91,8 +99,8 @@ const SubscriptionPlans = () => {
       const processPlanChange = async (planLevel: string) => {
         try {
           setLoadingPlan(true);
-          const response = await axios.post(
-            `${BACKEND_URL}/suscripciones/${user.id}?nivel=${planLevel}&duracion=30`,
+          const response = await axios.put(
+            `${BACKEND_URL}/suscripciones/desactivar/${activeSubscriptionId}`,
             {},
             {
               headers: {
@@ -101,7 +109,7 @@ const SubscriptionPlans = () => {
             }
           );
       
-          if (response.status === 201) {
+          if (response.status === 200) {
             setCurrentPlan(planLevel);
             setSuccessModalVisible(true);
             setTimeout(() => {

@@ -69,10 +69,7 @@ const ListadoOfertasPublico = ({
                                         </View>
 
                                         <View style={styles.detailRow}>
-                                            <View style={[
-                                                styles.offerDetailsTagBase,
-                                                item.tipoOferta.toLowerCase() === 'trabajo' ? styles.offerDetailsTagWork : styles.offerDetailsTagLoad
-                                            ]}>
+                                            <View style={styles.offerDetailsTagBase}>
                                                 <Ionicons
                                                     name={item.tipoOferta === "CARGA" ? "cube-outline" : "briefcase-outline"}
                                                     size={14}
@@ -236,20 +233,15 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     offerDetailsTagBase: {
+        backgroundColor: colors.secondary,
         flexDirection: "row",
         borderRadius: 12,
         paddingVertical: 5,
         paddingHorizontal: 8,
         alignItems: "center",
     },
-    offerDetailsTagWork: {
-        backgroundColor: '#6C9BCF',
-    },
-    offerDetailsTagLoad: {
-        backgroundColor: '#D7B373',
-    },
     offerDetailsTagLicense: {
-        backgroundColor: colors.primary,
+        backgroundColor: colors.secondary,
         flexDirection: "row",
         borderRadius: 12,
         paddingVertical: 5,
@@ -257,7 +249,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     offerDetailsTagExperience: {
-        backgroundColor: colors.green,
+        backgroundColor: colors.secondary,
         flexDirection: "row",
         borderRadius: 12,
         paddingVertical: 5,
