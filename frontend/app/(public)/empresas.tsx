@@ -35,7 +35,7 @@ const EmpresasLista = () => {
 
   const dynamicStyles = StyleSheet.create({
     listContainer: {
-      width: (!user || user.ads) ? '70%' : '100%',
+      width: (!user || user.ads) ? '72%' : '100%',
       maxWidth: 1200,
       alignSelf: 'center',
       flexDirection: 'row' as const,
@@ -46,7 +46,7 @@ const EmpresasLista = () => {
     adsAndListContainer: {
       flexDirection: 'row' as const,
       width: '100%',
-      paddingHorizontal: 20,
+      paddingHorizontal: 10,
       justifyContent: (!user || user.ads) ? 'space-between' as const : 'center' as const,
     },
   });
@@ -433,16 +433,16 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   adContainer: {
-    marginTop: 20,
-    width: '15%', // Adjust width of the ad container
-    height: "95%",
-
+    width: '22%', 
+    minWidth: 150, 
+    maxWidth: 220, 
+    marginHorizontal: 5, 
+    flexShrink: 1,
   },
   adImage: {
-    width: '100%', // Adjust width as needed
-    height: '95%', // Adjust height as needed
-
-
+    width: '100%',
+    height: undefined,
+    resizeMode: 'contain',
   },
 });
 
