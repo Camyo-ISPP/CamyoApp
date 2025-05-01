@@ -148,6 +148,7 @@ const PublicCamionero = ({ userId }) => {
                 <MapLoader />
             </View>
         ) : (
+        
             <>
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                     <View style={styles.container}>
@@ -175,7 +176,7 @@ const PublicCamionero = ({ userId }) => {
                                             onPress={async () => {
                                                 const chatId = await startChat(user.userId, user2.userId);
                                                 if (chatId) {
-                                                    router.push(`/chat`);
+                                                    router.push(`/chat?chatId=${chatId}`);
                                                 }
                                             }}
                                         >

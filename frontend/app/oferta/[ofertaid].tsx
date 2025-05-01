@@ -57,7 +57,6 @@ export default function OfertaDetalleScreen() {
     };
       
     const canCancelPromotedOffer = offerData ? offerData.promoted : false;
-      
 
     useEffect(() => {
         if (ofertaid) {
@@ -394,6 +393,23 @@ export default function OfertaDetalleScreen() {
                                 <Text style={styles.buttonText}> Ver Empresa</Text>
                             </TouchableOpacity>
                         )}
+
+                    {user && user.rol == "CAMIONERO" && (
+                            <View>
+                            <TouchableOpacity
+                                style={styles.publishButton}
+                                onPress={async () => {
+                                    const chatId = await startChat(user.userId, offerData.empresa?.usuario.id);
+                                    if (chatId) {
+                                        router.push(`/chat?chatId=${chatId}`)
+                                    }
+                                }}
+                                >
+                                <FontAwesome name="comments" size={16} color="white" style={styles.plusIcon} />
+                                <Text style={styles.publishButtonText}>Contactar</Text>
+                                </TouchableOpacity>
+                  </View>
+                )}
                     </View>
 
                 </View>
@@ -1142,6 +1158,29 @@ const styles = StyleSheet.create({
     rejectedText: {
         color: '#dc3545'
     },
+    publishButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.primary,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 3,
+        marginTop:10,
+    },
+    plusIcon: {
+        marginRight: 6,
+    },
+    publishButtonText: {
+        color: "#fff",
+        fontSize: 13,
+        fontWeight: "bold",
+    },
     info: {
         fontSize: 16,
         color: colors.darkGray,
@@ -1176,8 +1215,8 @@ const styles = StyleSheet.create({
         gap: 8,
         width: width < 768 ? '100%' : 120,
         marginTop: width < 768 ? 10 : 0,
-      },
-      actionButton: {
+    },
+    actionButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: "center",
@@ -1187,17 +1226,17 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         gap: 8,
         marginTop: 5,
-      },
-      actionButtonText: {
+    },
+    actionButtonText: {
         color: colors.white,
         fontSize: width < 768 ? 12 : 14,
         textAlign: "left",
         fontWeight: '500',
-      },
-      promoteButton: {
+    },
+    promoteButton: {
         backgroundColor: '#D4AF37',
-      },
-      unpromoteButton: {
+    },
+    unpromoteButton: {
         backgroundColor: colors.red,
-      },
+    },
 });
