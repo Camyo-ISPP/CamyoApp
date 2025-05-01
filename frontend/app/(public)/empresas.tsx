@@ -33,6 +33,24 @@ const EmpresasLista = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  const dynamicStyles = StyleSheet.create({
+    listContainer: {
+      width: (!user || user.ads) ? '70%' : '100%',
+      maxWidth: 1200,
+      alignSelf: 'center',
+      flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      justifyContent: 'space-around' as const,
+      paddingVertical: 20,
+    },
+    adsAndListContainer: {
+      flexDirection: 'row' as const,
+      width: '100%',
+      paddingHorizontal: 20,
+      justifyContent: (!user || user.ads) ? 'space-between' as const : 'center' as const,
+    },
+  });
+
   useEffect(() => {
     const fetchEmpresasData = async () => {
       try {
@@ -78,7 +96,7 @@ const EmpresasLista = () => {
           <Text style={styles.heroSubtitle}>Conoce a las empresas líderes en el sector</Text>
         </LinearGradient>
       </ImageBackground>
-      <View style={styles.adsAndListContainer}>
+      <View style={dynamicStyles.adsAndListContainer}>
         {/* Left Ad */}
         {(!user || user.ads) && (
           <View style={styles.adContainer}>
@@ -90,7 +108,7 @@ const EmpresasLista = () => {
           </View>
         )}
         {/* Empresas List */}
-        <View style={styles.listContainer}>
+        <View style={dynamicStyles.listContainer}>
           {empresas.map((empresa) => (
             <View key={empresa.id} style={styles.card}>
               {/* Company Header */}
@@ -269,14 +287,6 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  listContainer: {
-    width: '70%',
-    alignSelf: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
-  },
   card: {
     backgroundColor: 'white',
     borderRadius: 18,
@@ -421,11 +431,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     marginLeft: 8,
-  },
-  adsAndListContainer: {
-    flexDirection: 'row', // Arrange ads and list in a row
-    width: '100%',
-    paddingHorizontal: 20,
   },
   adContainer: {
     marginTop: 20,
