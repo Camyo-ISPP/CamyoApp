@@ -53,7 +53,7 @@ export default function OfertaDetalleScreen() {
 
     const canPromoteNewOffer = () => {
         const activeOffersCount = offers.filter((offer) => offer.estado === 'ABIERTA' && offer.promoted === true).length;
-        return offerData && !offerData.promoted && activeOffersCount < rules.maxSponsoredOffers;
+        return !loading2 && activeOffersCount < rules.maxSponsoredOffers;
     };
       
     const canCancelPromotedOffer = offerData ? offerData.promoted : false;
@@ -108,10 +108,12 @@ export default function OfertaDetalleScreen() {
         };
         if(user && user.rol == "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA"){
             fetchMyOffersData();
+        }else{
+            setLoading2(false);
         }
     }, [offerTrabajoData, offerCargaData]);
 
-    if (loading || !user || (user.rol === "EMPRESA" && offerData && offerData.empresa.id === user.id && offerData.estado === "ABIERTA" && loading2)) {
+    if (loading || loading2) {
         return (
             <View style={styles.loadingContainer}>
                 <MapLoader />
