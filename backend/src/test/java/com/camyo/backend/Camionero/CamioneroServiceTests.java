@@ -96,6 +96,7 @@ class CamioneroServiceTests {
         u1.setPassword("12");
         u1.setEmail("manolongo@gmail.com");
         u1.setAuthority(authCam);
+        u1.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u1));
 
         Usuario u2 = new Usuario();
@@ -105,6 +106,7 @@ class CamioneroServiceTests {
         u2.setPassword("12");
         u2.setEmail("pacome@gmail.com");
         u2.setAuthority(authCam);
+        u2.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u2));
 
         Usuario u3 = new Usuario();
@@ -114,6 +116,7 @@ class CamioneroServiceTests {
         u3.setPassword("12");
         u3.setEmail("pa23@gmail.com");
         u3.setAuthority(authEmp);
+        u3.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u3));
 
         Usuario u4 = new Usuario();
@@ -123,6 +126,7 @@ class CamioneroServiceTests {
         u4.setPassword("12");
         u4.setEmail("caralingo@gmail.com");
         u4.setAuthority(authEmp);
+        u4.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u4));
 
          /*
@@ -247,6 +251,7 @@ class CamioneroServiceTests {
         u1.setPassword("12");
         u1.setEmail("joselingo@gmail.com");
         u1.setAuthority(authCam);
+        u1.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u1));
         
         Camionero c1 = new Camionero();

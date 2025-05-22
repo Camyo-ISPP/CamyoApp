@@ -80,6 +80,7 @@ class EmpresaServiceTests {
         u1.setPassword("12");
         u1.setEmail("robertongo@gmail.com");
         u1.setAuthority(authEmp);
+        u1.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u1));
 
         Usuario u2 = new Usuario();
@@ -89,6 +90,7 @@ class EmpresaServiceTests {
         u2.setPassword("12");
         u2.setEmail("pacolongo@gmail.com");
         u2.setAuthority(authEmp);
+        u2.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u2));
 
         /*
@@ -215,6 +217,7 @@ class EmpresaServiceTests {
         u3.setPassword("12");
         u3.setEmail("joselingo@gmail.com");
         u3.setAuthority(authEmp);
+        u3.setAds(true);
         assertDoesNotThrow(() -> usuarioService.guardarUsuario(u3));
 
         Empresa e3 = new Empresa();
