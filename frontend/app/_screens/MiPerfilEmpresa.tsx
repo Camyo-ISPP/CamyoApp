@@ -271,7 +271,7 @@ const MiPerfilEmpresa = () => {
         {(user?.ads &&
           <View style={styles.adContainer}>
             <Image
-              source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+              source={require("../../assets/images/anuncios/AnuncioEmpresa.png")} // Replace with your ad image path
               style={styles.adImage}
               resizeMode="cover"
             />
@@ -604,7 +604,7 @@ const MiPerfilEmpresa = () => {
         { (user?.ads &&
           <View style={styles.adContainer}>
             <Image
-              source={require("../../assets/images/truck_mockup_ad.jpg")} // Replace with your ad image path
+              source={require("../../assets/images/anuncios/AnuncioEmpresa.png")} // Replace with your ad image path
               style={styles.adImage}
               resizeMode="cover"
             />

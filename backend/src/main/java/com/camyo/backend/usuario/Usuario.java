@@ -56,7 +56,7 @@ public class Usuario {
     private String password;
 
     @Column(nullable = false)
-    private Boolean ads = true;
+    private Boolean ads;
 
 	@NotNull
 	@ManyToOne(optional = false)

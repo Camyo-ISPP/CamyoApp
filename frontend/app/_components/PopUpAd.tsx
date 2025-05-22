@@ -40,7 +40,7 @@ export const PopupAdProvider = ({ children, user }: { children: React.ReactNode;
 
                             {/* Ad Image */}
                             <Image
-                                source={require("../../assets/images/AnuncioPopUp.png")} // Replace with your ad image path
+                                source={require("../../assets/images/anuncios/AnuncioPopUp.png")} // Replace with your ad image path
                                 style={styles.adImage}
                                 resizeMode="cover"
                             />
