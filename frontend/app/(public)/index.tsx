@@ -733,16 +733,11 @@ const styles = StyleSheet.create({
   },
   adContainer: {
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: -20,
     alignItems: "center",
     justifyContent: "center",
-    outlineColor: "black",
-    outlineStyle: "solid",
-  },
-  adImage: {
-    width: "100%", // Adjust width as needed
-    outlineColor: "black",
-    outlineStyle: "solid",
+    width: "100%",
+    backgroundColor: colors.secondary,
   },
 
 });

@@ -1137,16 +1137,11 @@ const styles = StyleSheet.create({
     adContainer: {
         width: "25%",
         minWidth: 100,
-        backgroundColor: colors.lightGray,
+        backgroundColor: colors.secondary,
         alignItems: "center",
         justifyContent: "center",
-
     },
     adImage: {
-        flex: 1,
-        width: "100%",
-        height: "200%",
-        resizeMode: "cover",
     },
 });
 

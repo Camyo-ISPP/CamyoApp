@@ -101,7 +101,7 @@ const EmpresasLista = () => {
         {(!user || user.ads) && (
           <View style={styles.adContainer}>
             <Image
-              source={require('../../assets/images/anuncios/AnuncioBannerBuscarOfertas.png')} // Replace with your left ad image path
+              source={require('../../assets/images/anuncios/AnuncioExplorarOfertas.png')} // Replace with your left ad image path
               style={styles.adImage}
               resizeMode="cover"
             />
@@ -184,7 +184,7 @@ const EmpresasLista = () => {
         {(!user || user.ads) && (
           <View style={styles.adContainer}>
             <Image
-              source={require('../../assets/images/anuncios/AnuncioBannerBuscarOfertas.png')} // Replace with your left ad image path
+              source={require('../../assets/images/anuncios/AnuncioExplorarOfertas.png')} // Replace with your left ad image path
               style={styles.adImage}
               resizeMode="cover"
             />
@@ -433,16 +433,12 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   adContainer: {
-    width: '22%', 
-    minWidth: 150, 
-    maxWidth: 220, 
-    marginHorizontal: 5, 
+    width: '22%',
+    height: '100%',
+    backgroundColor: colors.secondary,
+    alignItems: 'center',
+    minWidth: 150,
     flexShrink: 1,
-  },
-  adImage: {
-    width: '100%',
-    height: undefined,
-    resizeMode: 'contain',
   },
 });
 

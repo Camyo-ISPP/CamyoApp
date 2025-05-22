@@ -223,7 +223,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
 
     if (loading) return (
         <View style={styles.loadingContainer}>
-          <MapLoader />
+            <MapLoader />
         </View>
     );
 
@@ -236,18 +236,15 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                     <Text style={styles.headerSubtitle}>Filtra y encuentra el trabajo perfecto para ti</Text>
                 </View>
                 {(!user || user?.ads) && (
-                        <View style={styles.adsContainer}>
-                            {/* First Ad */}
-                            <View style={styles.adContainer}>
-                                <Image
-                                    source={require("../../assets/images/anuncios/AnuncioBannerBuscarOfertas.png")} // Replace with your ad image path
-                                    style={styles.adImage}
-                                    resizeMode="cover"
-                                />
-                            </View>
-                        </View>
-                    )}
-    
+                    <View style={styles.adContainer}>
+                        <Image
+                            source={require("../../assets/images/anuncios/AnuncioBannerBuscarOfertas.png")} // Replace with your ad image path
+                            style={styles.adImage}
+                            resizeMode="cover"
+                        />
+                    </View>
+                )}
+
                 <View style={styles.mainContent}>
 
                     {/* Filters and Search Bar Card */}
@@ -276,7 +273,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                             </View>
                             <Text style={styles.searchHintText}>* Pulsa "Buscar" para aplicar los filtros</Text>
                         </View>
-    
+
                         {/* Filter Type Toggle */}
                         <View style={styles.filterTypeSection}>
                             <Text style={styles.sectionTitle}>Tipo de Oferta</Text>
@@ -321,8 +318,8 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        
-    
+
+
                         {/* Placeholder cuando no hay tipo seleccionado */}
                         {!selectedOfertaType && (
                             <View style={styles.emptyFilterState}>
@@ -337,7 +334,7 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                 </Text>
                             </View>
                         )}
-    
+
                         {/* Filters Section - Solo se muestra cuando hay tipo seleccionado */}
                         {selectedOfertaType && (
                             <View style={styles.filtersSection}>
@@ -584,21 +581,21 @@ export default function BuscarOfertas({ searchQuery: externalSearchQuery = '' }:
                                                 ))}
                                             </View>
                                         </View>
-                                        
+
                                     </View>
-                                    
+
                                 )}
                             </View>
-                            
+
                         )}
                         {/* Ad Section - Debajo de los filtros */}
-                    
-                       
+
+
                     </View>
-                   
-    
-                    
-    
+
+
+
+
                     {/* Offer Cards Section */}
                     <View style={styles.offersSection}>
                         <Text style={styles.resultsCount}>
@@ -988,20 +985,15 @@ const styles = StyleSheet.create({
         lineHeight: 24,
     },
     contenedorOfertas: { width: '100%' },
-    adsContainer: {
-
-        marginBottom: 10,
-        width: "100%",
-        outlineColor: "black",
-        outlineStyle: "solid",
-    },
     adContainer: {
+        marginTop: -20,
         width: "100%", // Adjust width as needed
-   
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: colors.secondary,
+        marginBottom: 20,
     },
     adImage: {
-        width: "100%", // Adjust width as needed
-
     },
     loadingContainer: {
         flex: 1,

@@ -1258,7 +1258,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, // Add padding on both sides
   },
   adContainer: {
-    width: "10%", // Adjust width of the ad container
+    width: "15%", // Adjust width of the ad container
     height: "100%",
     alignItems: "center",
     justifyContent: "flex-start",
@@ -1266,7 +1266,6 @@ const styles = StyleSheet.create({
   adImage: {
     width: "100%",
     height: "100%", // Adjust height as needed
-    borderRadius: 10,
   },
 });
 
